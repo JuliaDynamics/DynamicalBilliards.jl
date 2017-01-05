@@ -49,7 +49,7 @@ Two-dimensional particle in a billiard table with perpendicular magnetic field.
 * `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
 * `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
 (Used only in periodic billiards)
-* `ω::T` : Angular velocity of rotational motion. Radius of rotation is `r=1/ω`
+* `ω::T` : Angular velocity of rotational motion. Radius of rotation is `r=1/ω`.
 """
 type MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
   pos::SVector{2,T}
@@ -75,7 +75,11 @@ function MagneticParticle{T<:AbstractFloat}(ic::Vector{T}, ω::T)
 end
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
-function Particle{T<:AbstractFloat}(p::MagneticParticle{T}; use_cell = true)
+"""
+    magnetic2standard(p::MagneticParticle; use_cell = true)
+Create a standard particle from a MagneticParticle.
+"""
+function magnetic2standard{T<:AbstractFloat}(p::MagneticParticle{T}; use_cell = true)
   pos = p.pos
   cell = ifelse(use_cell, p.current_cell, SVector{T,2}(0,0))
   Particle(pos, p.vel, cell)
@@ -112,10 +116,22 @@ end
 ## Obstacles
 ####################################################
 """
-Abstract Type, only to serve as a node in Type graph.
+Obstacle supertype.
 """
 abstract Obstacle{T<:AbstractFloat}
+"""
+Circular obstacle supertype.
+"""
 abstract Circular{T<:AbstractFloat} <: Obstacle{T}
+
+"""
+    Disk{T<:AbstractFloat} <: Circular{T}
+Disk-like obstacle with propagation allowed outside of the circle.
+# Fields:
+* `c::SVector{2,T}` : Center.
+* `r::T` : Radius.
+* `name::String` : Some name given for user convenience.
+"""
 immutable Disk{T<:AbstractFloat} <: Circular{T}
     c::SVector{2,T}
     r::T
@@ -128,6 +144,15 @@ end
 function Disk{T<:AbstractFloat}(center::Vector{T}, radius::T, name::String)
   Disk{T}(SVector{2, T}(center), radius, name)
 end
+
+"""
+    Circle{T<:AbstractFloat} <: Circular{T}
+Disk-like obstacle with propagation allowed inside of the circle.
+# Fields:
+* `c::SVector{2,T}` : Center.
+* `r::T` : Radius.
+* `name::String` : Some name given for user convenience.
+"""
 immutable Circle{T<:AbstractFloat} <: Circular{T}
     c::SVector{2,T}
     r::T
@@ -141,6 +166,17 @@ function Circle{T<:AbstractFloat}(center::Vector{T}, radius::T, name::String)
   Circle{T}(SVector{2, T}(center), radius, name)
 end
 
+"""
+    Antidot{T<:AbstractFloat} <: Circular{T}
+Disk-like obstacle that allows propagation both inside and outside of the Circle.
+Useful in ray-splitting billiards.
+# Fields:
+* `c::SVector{2,T}` : Center.
+* `r::T` : Radius.
+* `inside::Bool` : Flag that keeps track whether the particle is inside or outside
+of the disk.
+* `name::String` : Name of the obstacle given for user convenience.
+"""
 type Antidot{T<:AbstractFloat} <: Circular{T}
     c::SVector{2,T}
     r::T
@@ -159,16 +195,17 @@ function Antidot{T<:AbstractFloat}(center::Vector{T}, radius::T, name::String)
 end
 
 abstract Wall{T<:AbstractFloat} <: Obstacle{T}
+
 """
     FiniteWall{T<:AbstractFloat} <: Wall{T}
-A wall imposing specular reflection during collision.
+Wall obstacle imposing specular reflection during collision.
 # Fields
 * `sp::SVector{2,T}` : Starting point of the Wall (non-negative).
 * `ep::SVector{2,T}` : Ending point of the Wall (non-negative).
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
-come from* (to the inside the billiard table). The size of the vector is irrelevant, but
+come from* (to the inside the billiard table). The size of the vector is irrelevant, but it
 must be normal to the wall.
-* `name::String` : The name of the object, e.g. "left wall".
+* `name::String` : Name of the obstacle, e.g. "left wall", given for user convenience.
 """
 immutable FiniteWall{T<:AbstractFloat} <: Wall{T}
   sp::SVector{2,T}
@@ -204,15 +241,16 @@ show{T}(io::IO, w::FiniteWall{T}) =
 
 """
     PeriodicWall{T<:AbstractFloat} <: Wall{T}
-This type of Wall imposes periodic boundary conditions during collision.
+Wall obstacle that imposes periodic boundary conditions during collision.
 # Fields
 * `sp::SVector{2,T}` : Starting point of the Wall (non-negative).
 * `ep::SVector{2,T}` : Ending point of the Wall (non-negative).
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
 come from* (to the inside the billiard table). The size of the vector is **important**.
 This vector is added to a particle's `pos` during collision. Therefore the size of the
-normal vector must be correctly associated with the size of the cell (field `cellsize`) of
-the `PeriodicParticle` instance.
+normal vector must be correctly associated with the size of the cell. Also, the partners
+(see field `partner`) must have same size in their normal vectors.
+* `name::String` : Name of the obstacle, e.g. "left boundary", given for user convenience.
 * `partner::PeriodicWall{T}` : Associated periodic partner of a PeriodicWall. This field is
 undefined during instantiation. It must be defined during the construction of the Billiard
 Table.
@@ -234,6 +272,7 @@ type PeriodicWall{T<:AbstractFloat} <: Wall{T}
     new(sp, ep, normal, name) # The `partner` field is uninitialized.
   end
 end
+
 """
     PeriodicWall{T<:AbstractFloat}(sp::Vector{T}, ep::Vector{T}, n::Vector{T})
 Constructor accepting 3 `Vector{T}` arguments.
@@ -250,6 +289,11 @@ show{T}(io::IO, w::PeriodicWall{T}) =
     "periodic partner: $(w.partner.name)")
 
 #normalvec will be only called internally
+"""
+    normalvec(obst::Obstacle{T}, pos::SVector{2,T})
+Return the vector normal to the obstacle from the current particle position (which is
+assumed to be on top of the obstacle's boundary).
+"""
 normalvec{T<:AbstractFloat}(disk::Circular{T}, pos::SVector{2,T}) = normalize(pos - disk.c)
 normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.normal)
 
@@ -257,11 +301,27 @@ normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.n
 ## Resolve Collisions
 ####################################################
 #All these functions will become dependend on velocity angle for ray-splitting billiards.
+"""
+    specular!(p::AbstractParticle{T}, o::Obstacle{T})
+Perform specular reflection, i.e. set `p.vel = p.vel - 2*dot(n, p.vel)*n` with `n` the
+normal vector from the obstacle's boundary.
+"""
 function specular!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T})
   n = normalvec(o, p.pos)
   p.vel = p.vel - 2*dot(n, p.vel)*n
 end
 
+"""
+    resolvecollision!(p::AbstractParticle{T}, o::Obstacle{T})
+Resolve the collision between particle `p` and obstacle `o`. If the obstacle is not a
+periodic wall, the function performs specular reflection. If it is a periodic wall, it
+performs the periodicity condition.
+
+`resolvecollision!()` takes special care that the particle is always inside the correct
+side of the billiard table. Specifically, it calculates the distance from particle and
+obstacle and, depending on the obstacle type, makes necessary adjustments by propagating
+the particle forwards or backwards in time using **linear** motion.
+"""
 function resolvecollision!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T},
   printstuff = false)
 
@@ -269,13 +329,13 @@ function resolvecollision!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle
   #id = randstring(4)
 
   dist = distance(p, o)
-  if abs(dist) > 1e-4
-    println("In resolve with $(o.name), dist = $dist")
-    error("Distance unreasonably big")
-  end
-  dt = 0.0
+  dt = zero(T)
   #printstuff = false
   if dist < 0.0
+    # if abs(dist) > 1e-8
+    #   println("In resolve with $(o.name), dist = $dist")
+    #   error("Distance unreasonably big")
+    # end
     if printstuff
       println("In resolve with $(o.name), dist = $dist")
     end
@@ -324,14 +384,15 @@ function resolvecollision!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Periodic
     #println("Resolving collision with $(o.name)")
     #id = randstring(4)
     dist = distance(p, o)
-    if abs(dist) > 1e-4
-      println("In resolve with $(o.name), dist = $dist")
-      error("Distance unreasonably big")
-    end
-    t = 0.0
+
+    t = zero(T)
     #printstuff = false
 
     if dist > 0.0
+      # if abs(dist) > 1e-8
+      #   println("In resolve with $(o.name), dist = $dist")
+      #   error("Distance unreasonably big")
+      # end
       if printstuff
 
         println("In resolve with $(o.name), dist = $dist")
@@ -375,7 +436,7 @@ end
 ####################################################
 """
     distance(p::AbstractParticle{T}, o::Obstacle{T})
-Return the **signed** distance between Particle and Obstacle, based on `p.pos`.
+Return the **signed** distance between particle `p` and obstacle `o`, based on `p.pos`.
 Positive distance corresponds to the particle being inside the *allowed* region
 of the Billiard Table/Obstacle.
     distance(p::AbstractParticle{T}, bt::Vector{Obstacle{T}})
@@ -450,6 +511,12 @@ function cellsize{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
   return xmin, ymin, xmax, ymax
 end
 
+
+"""
+    randominside(bt::Vector{Obstacle{T}})
+Return a particle with correct (allowed) initial conditions inside the given billiard
+table defined by the vector `bt`.
+"""
 function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
 
   xmin, ymin, xmax, ymax = cellsize(bt)
@@ -481,7 +548,11 @@ end
 ####################################################
 ## Famous/Standard Billiards
 ####################################################
-function billiard_rectangle{T<:AbstractFloat}(x::T, y::T)
+"""
+    billiard_rectangle{T<:AbstractFloat}(x::T=1.0, y::T=1.0)
+Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`).
+"""
+function billiard_rectangle{T<:AbstractFloat}(x::T=1.0, y::T=1.0)
 
   bt = Obstacle{T}[]
   o = zero(T)
@@ -495,8 +566,12 @@ function billiard_rectangle{T<:AbstractFloat}(x::T, y::T)
   botw = FiniteWall(sp, ep, n, "Bottom wall")
   push!(bt, leftw, rightw, topw, botw)
 end
-billiard_rectangle() = billiard_rectangle(1.0,1.0)
 
+"""
+    billiard_sinai{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
+Return a vector of obstacles that defines a closed Sinai billiard of size (`x`, `y`) with
+a disk in its center, of radius `r`.
+"""
 function billiard_sinai{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
   bt = billiard_rectangle(x,y)
   c = [x/2, y/2]
@@ -504,6 +579,11 @@ function billiard_sinai{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
   push!(bt, centerdisk)
 end
 
+"""
+    billiard_sinai{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
+Return a vector of obstacles that defines a closed Sinai billiard (aka Lorentz Gas)
+of size (`x`, `y`) with a disk in its center, of radius `r`.
+"""
 function billiard_sinai_periodic{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
   bt = Obstacle{T}[]
   o = zero(T)
