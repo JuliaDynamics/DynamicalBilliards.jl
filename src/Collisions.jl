@@ -9,6 +9,7 @@ import Base.show
 ## Particles
 ####################################################
 """
+    AbstractParticle{T<:AbstractFloat}
 Particle supertype.
 """
 abstract AbstractParticle{T<:AbstractFloat}
@@ -49,29 +50,30 @@ Two-dimensional particle in a billiard table with perpendicular magnetic field.
 * `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
 * `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
 (Used only in periodic billiards)
-* `ω::T` : Angular velocity of rotational motion. Radius of rotation is `r=1/ω`.
+* `omega::T` : Angular velocity (cyclic frequency) of rotational motion.
+Radius of rotation is `r=1/omega`.
 """
 type MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
   pos::SVector{2,T}
   vel::SVector{2,T}
   current_cell::SVector{2,T}
-  ω::T
+  omega::T
   function MagneticParticle(pos::SVector{2,T}, vel::SVector{2,T},
-                            current_cell::SVector{2,T}, ω::T)
-    if ω==0
+                            current_cell::SVector{2,T}, omega::T)
+    if omega==0
       error("Angular frequency cannot be 0.")
     end
-    new(pos, vel, current_cell, ω)
+    new(pos, vel, current_cell, omega)
   end
 end
 """
-    MagneticParticle{T}(ic::Vector{T}, ω)
+    MagneticParticle{T}(ic::Vector{T}, omega)
 Constructor accepting initial conditions `[x0, y0, φ0]`.
 """
-function MagneticParticle{T<:AbstractFloat}(ic::Vector{T}, ω::T)
+function MagneticParticle{T<:AbstractFloat}(ic::Vector{T}, omega::T)
   φ0 = ic[3]
   pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-  MagneticParticle(pos, vel, SVector{2,T}(zero(T), zero(T)), ω)
+  MagneticParticle(pos, vel, SVector{2,T}(zero(T), zero(T)), omega)
 end
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
@@ -89,7 +91,7 @@ end
 
 
 """
-    cyclotron{T<:AbstractFloat}(p::AbstractParticle{T}, ω::T)
+    cyclotron{T<:AbstractFloat}(omega::T, p::AbstractParticle{T})
 Return center and radius of circular motion performed by the particle based on
 `p.pos` and `p.vel`.
 """
@@ -105,7 +107,7 @@ Return center and radius of circular motion performed by the particle based on
 `p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
 """
 function cyclotron{T<:AbstractFloat}(p::MagneticParticle{T}, use_cell = false)
-  ω = p.ω
+  ω = p.omega
   pos = ifelse(use_cell, p.pos + p.current_cell, p.pos)
   c::SVector{2, T} = pos - (1/ω)*[p.vel[2], -p.vel[1]]
   r = abs(1/ω)

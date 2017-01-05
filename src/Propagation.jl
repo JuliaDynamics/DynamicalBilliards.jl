@@ -190,7 +190,7 @@ end
 
 function propagate!{T<:AbstractFloat}(p::MagneticParticle{T}, t::T)
   # "Initial" conditions
-  ω  = p.ω
+  ω  = p.omega
   vx0= p.vel[1]
   vy0= p.vel[2]
   φ0 = atan2(vy0, vx0)
