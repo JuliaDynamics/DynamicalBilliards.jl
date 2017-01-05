@@ -1,12 +1,23 @@
 # Collisions.jl must be loaded BEFORE this
 
+function acos1mx(x)
+  sqrt(2x) + sqrt(x)^3/(6sqrt(2))
+end
+
+
 ####################################################
 ## Linearized collision times
 ####################################################
+"""
+    lct(p::AbstractParticle, o::Obstacle, distance::T)
+Return the Linearized Collision Time (`-dist/dot(p.vel, normal)`) between particle
+and obstacle, given the calculated distance between them.
+"""
 function lct{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T}, dist::T)
   n = normalvec(o, p.pos)
   t = -dist/dot(p.vel, n)
 end
+
 
 function lct{T<:AbstractFloat}(p::AbstractParticle{T}, w::Circle{T}, dist::T)
   n = normalvec(w, p.pos)
@@ -16,6 +27,8 @@ end
 ####################################################
 ## Straight Propagation
 ####################################################
+
+
 function collisiontime{T<:AbstractFloat}(p::AbstractParticle{T}, w::Wall{T})
   n = normalize(w.normal)
   denom = dot(p.vel, n)
@@ -32,7 +45,7 @@ function collisiontime{T<:AbstractFloat}(p::AbstractParticle{T}, d::Circular{T})
   C = dot(dc, dc) - d.r^2  #being outside of circle: C > 0
   Δ = B^2 - C
 
-  Δ <= zero(T) && return infT
+  Δ <= 0 && return infT
   sqrtD = sqrt(Δ)
 
   # Case of being slightly outside and looking outside:
@@ -48,16 +61,6 @@ function collisiontime{T<:AbstractFloat}(p::AbstractParticle{T}, d::Circular{T})
   elseif t < 0.0 && C < 0.0
     t = -B + sqrtD
   end
-
-  # # Case where sqrt(D)==B but C!=0
-  # if sqrtD == B && C != 0.0
-  #   #case of C=0 is covered by the above
-  #   if C<0
-  #     t = (B>0 ? 1e-15 : 2B)
-  #   else
-  #     t = (B>0 ? infT : 1e-15)
-  #   end
-  # end
 
   # BOU HOU HOU WHY DO I HAVE TO DO THIS...
   t <= 1e-14*one(T) ? infT : t
@@ -121,7 +124,7 @@ function evolve!{T<:AbstractFloat}(p::AbstractParticle{T},
       error("Collision time infinite; Impossible error in evolve!")
     end
 
-    tmin -= 1e-15
+    # tmin -= 1e-15
     propagate!(p, tmin)
     prev_obst = (typeof(colobst) <: PeriodicWall ? colobst.partner : colobst)
     dt = resolvecollision!(p, colobst)
@@ -163,6 +166,7 @@ function construct{T<:AbstractFloat}(t::Vector{T},
   # CREATE CORRECT T! ! !
   return xt, yt, vxt, vyt, t
 end
+
 ####################################################
 ## Magnetic Propagation
 ####################################################
@@ -184,67 +188,17 @@ function ωpropagate!{T<:AbstractFloat}(ω::T, p::Particle{T}, t::T)
   p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
 end
 
-
-function ωcollisiontime_OLS{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wall{T})
-  pc, pr = cyclotron(ω, p)
-  P0 = p.pos
-  P2P1 = w.ep - w.sp
-  P1P3 = w.sp - pc
-  # Solve quadratic:
-  a::T = dot(P2P1, P2P1)
-  b::T = 2*dot(P2P1, P1P3)
-  c::T = dot(P1P3, P1P3) - pr^2
-  Δ = b^2 -4*a*c
-  # Check if line is completely outside the circle:
-  # (at equal it is tangent)
-  Δ <= zero(T) && return convert(T, Inf)
-  # Intersection coefficients:
-  u1 = (-b - sqrt(Δ))/2a
-  u2 = (-b + sqrt(Δ))/2a
-  cond1 = (zero(T) <= u1 <= one(T))
-  cond2 = (zero(T) <= u2 <= one(T))
-  # Check if the line is completely inside the circle:
-  !cond1 && !cond2 && return convert(T, Inf)
-  # Calculate intersection points:
-  intersections = SVector{2, T}[]
-  cond1 && push!(intersections, w.sp + u1*(w.ep - w.sp))
-  cond2 && push!(intersections, w.sp + u2*(w.ep - w.sp))
-
-  ### Calculate real time until intersection:
-  Pa = pc - P0
-  Pa3 = SVector{3, T}(Pa..., 0)
-  P03 = SVector{3, T}(P0..., 0)
-  θ = convert(T, Inf)
-  for i in intersections
-    d2 = dot(i-P0,i-P0)
-    # If i and P0 are identical, skip this point completely
-    #d2 == 0 && continue
-    #d2 <=1e-22 && continue #at 1e-22 all tests pass
-    d2r = (d2/(2pr^2))
-    # The number at the following comparison is crucial for resolving corners
-    d2r < 1e-22 && continue
-    #θprime = (d2r < 1e-14) ? 1e-14 : acos(1 - d2r)
-    θprime = acos(1 - d2r)
-    # Get "side" of i:
-    I3 = SVector{3, T}(i..., 0)
-    side = cross((I3-P03), Pa3)[3]*ω
-    # Get "side" of i:
-    #side = -( (pc[1] - P0[1])*(i[2] - P0[2]) -   (pc[2] - P0[1])*(i[1] - P0[1]) )*ω
-    # Get angle until i (positive number between 0 and π)
-    side < 0 && (θprime = abs(2π-θprime))
-    # Set minimum angle (first collision)
-    # notice that 0.1*1e-15 is 1e-16 which is the minimum precision
-    # TRY REMOVING SECOND CONDITION
-    if θprime < θ && θprime != 0
-      θ = θprime
-    end
-  end
-  # Collision time, equiv. to arc-length until collision point:
-  return θ*pr
+function propagate!{T<:AbstractFloat}(p::MagneticParticle{T}, t::T)
+  # "Initial" conditions
+  ω  = p.ω
+  vx0= p.vel[1]
+  vy0= p.vel[2]
+  φ0 = atan2(vy0, vx0)
+  p.pos += SVector{2, T}( sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω )
+  p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
 end
 
-#MY IMPLEMENTATION OF CROSS:
-function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wall{T})
+function ωcollisiontime_OLD{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wall{T})
   pc, pr = cyclotron(ω, p)
   P0 = p.pos
   P2P1 = w.ep - w.sp
@@ -277,7 +231,7 @@ function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wal
     # If i and P0 are identical, skip this point completely
     #d2 == 0 && continue
     # IS THIS LINE REALLY NECESSARY ???
-    d2 <= 1e-22 && continue #at 1e-22 all tests pass
+    #d2 <= 1e-22 && continue #at 1e-22 all tests pass
     d2r = (d2/(2pr^2))
     # The number at the following comparison is crucial for resolving corners
     d2r < 1e-16 && continue
@@ -286,14 +240,12 @@ function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wal
     # Get "side" of i:
     PI = i - P0
     side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
-    # Get "side" of i:
-    #side = -( (pc[1] - P0[1])*(i[2] - P0[2]) -   (pc[2] - P0[1])*(i[1] - P0[1]) )*ω
     # Get angle until i (positive number between 0 and π)
     side < 0 && (θprime = abs(2π-θprime))
     # Set minimum angle (first collision)
     # notice that 0.1*1e-15 is 1e-16 which is the minimum precision
     # TRY REMOVING SECOND CONDITION
-    if θprime < θ && θprime != 0
+    if θprime < θ && θprime > 1e-8
       θ = θprime
     end
   end
@@ -301,9 +253,104 @@ function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wal
   return θ*pr
 end
 
+function realangle{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T},
+  intersections::Vector{SVector{2, T}}, ω::T, pc::SVector{2, T}, pr::T)
+
+  P0 = p.pos
+  PC = pc - P0
+  θ = convert(T, Inf)
+  for i in intersections
+    d2 = dot(i-P0,i-P0)
+
+    # Check dot product for close points:
+    # MAYBE 1e-10 is too small???? and in the corners it will lead to problems?
+    if d2 <= 1e-10
+      dotp = dot(p.vel, normalvec(o,  p.pos))
+      # Case where velocity points away from obstacle:
+      dotp > 0 && continue
+    end
+
+    d2r = (d2/(2pr^2))
+    θprime = d2r < 1e-16 ? acos1mx(d2r) : acos(1-d2r)
+
+    # Get "side" of i:
+    PI = i - P0
+    side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
+    # Get angle until i (positive number between 0 and π)
+    side < 0 && (θprime = abs(2π-θprime))
+    # Set minimum angle (first collision)
+    if θprime < θ
+      θ = θprime
+    end
+  end
+  return θ
+end
 
 
-function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, d::Circular{T})
+# IMPLEMENT CHECKING Dot of velocity with normal:
+function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, w::Wall{T})
+  pc, pr = cyclotron(ω, p)
+  P0 = p.pos
+  P2P1 = w.ep - w.sp
+  P1P3 = w.sp - pc
+  # Solve quadratic:
+  a::T = dot(P2P1, P2P1)
+  b::T = 2*dot(P2P1, P1P3)
+  c::T = dot(P1P3, P1P3) - pr^2
+  Δ = b^2 -4*a*c
+  # Check if line is completely outside the circle:
+  # (at equal it is tangent)
+  Δ <= zero(T) && return convert(T, Inf)
+  # Intersection coefficients:
+  u1 = (-b - sqrt(Δ))/2a
+  u2 = (-b + sqrt(Δ))/2a
+  cond1 = (zero(T) <= u1 <= one(T))
+  cond2 = (zero(T) <= u2 <= one(T))
+  # Check if the line is completely inside the circle:
+  !cond1 && !cond2 && return convert(T, Inf)
+  # Calculate intersection points:
+  intersections = SVector{2, T}[]
+  cond1 && push!(intersections, w.sp + u1*(w.ep - w.sp))
+  cond2 && push!(intersections, w.sp + u2*(w.ep - w.sp))
+
+  ### Calculate real time until intersection:
+#  PC = pc - P0
+#  θ = convert(T, Inf)
+  θ = realangle(p, w, intersections, ω, pc, pr)
+  # for i in intersections
+  #   d2 = dot(i-P0,i-P0)
+  #
+  #   # Check dot product for close points:
+  #   # MAYBE 1e-10 is too small???? and in the corners it will lead to problems?
+  #   if d2 <= 1e-10
+  #     dotp = dot(p.vel, normalvec(w,  p.pos))
+  #     # Case where velocity points away from obstacle:
+  #     dotp > 0 && continue
+  #   end
+  #
+  #   d2r = (d2/(2pr^2))
+  #   if d2r < 1e-16
+  #     θprime = acos1mx(d2r)
+  #   else
+  #     θprime = acos(1-d2r)
+  #   end
+  #
+  #   # Get "side" of i:
+  #   PI = i - P0
+  #   side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
+  #   # Get angle until i (positive number between 0 and π)
+  #   side < 0 && (θprime = abs(2π-θprime))
+  #   # Set minimum angle (first collision)
+  #   if θprime < θ
+  #     θ = θprime
+  #   end
+  # end
+  # Collision time, equiv. to arc-length until collision point:
+  return θ*pr
+end
+
+
+function ωcollisiontime_OLD{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, d::Circular{T})
   pc, rc = cyclotron(ω, p)
   p1 = d.c
   r1 = d.r
@@ -322,28 +369,53 @@ function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, d::Cir
   pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
   pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
   ### Calculate real time until intersection:
-  Pa = pc - p.pos # Vector from particle to cyclotron center
+  PC = pc - p.pos
   P0 = p.pos
-  Pa3 = SVector{3, T}(Pa..., 0)
-  P03 = SVector{3, T}(P0..., 0)
   θ = convert(T, Inf)
-  for I in (I1, I2)
-    d2 = dot(I-P0,I-P0)
+  for i in (I1, I2)
+    d2 = dot(i-P0,i-P0)
     #If I and P0 are identical, skip this point completely (Inf time)
-    d2 <= 1e-14 && continue
+    #d2 <= 1e-14 && continue
+    d2r = (d2/(2rc^2))
+    # The number at the following comparison is crucial for resolving corners
+    d2r < 1e-16 && continue
     # Get angle until I (positive number between 0 and π)
-    θprime = acos(1 - (d2/(2rc^2)))
+    θprime = acos(1 - d2r)
     # Get real angle until I:
-    I3 = SVector{3, T}(I..., 0)
-    side = cross((I3-P03), Pa3)[3]*ω
+    PI = i - P0
+    side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
     side < 0 && (θprime = 2π-θprime)
     # Set minimum angle (first collision), excluding 0 angles
     # notice that 0.1*1e-15 is 1e-16 which is the minimum precision
     # TRY REMOVING SECOND CONDITION
-    if θprime < θ && θprime > 1e-15
+    if θprime < θ && θprime > 1e-8
       θ = θprime
     end
   end
+  # Collision time, equiv. to arc-length until collision point:
+  return θ*rc
+end
+
+function ωcollisiontime{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, o::Circular{T})
+  pc, rc = cyclotron(ω, p)
+  p1 = o.c
+  r1 = o.r
+  d = norm(p1-pc)
+  if (d >= rc + r1) || (d <= abs(rc-r1))
+    return convert(T, Inf)
+  end
+  # Solve quadratic:
+  a = (rc^2 - r1^2 + d^2)/2d
+  h = sqrt(rc^2 - a^2)
+  # Collision points:
+  I1 = SVector{2, T}(
+  pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+  pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+  I2 = SVector{2, T}(
+  pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+  pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+  ### Calculate real time until intersection:
+  θ = realangle(p, o, [I1, I2], ω, pc, rc)
   # Collision time, equiv. to arc-length until collision point:
   return θ*rc
 end
@@ -394,7 +466,7 @@ function ωevolve!{T<:AbstractFloat}(ω::T, p::AbstractParticle{T},
 
     # Makin gthe colision time a bit shorter reduces many computations
     # Because makes almost all distances "good"
-    tmin -= 1e-15
+    # tmin -= 1e-15
     ωpropagate!(ω, p, tmin)
     dt = resolvecollision!(p, colobst)
     t_to_write += tmin + dt
