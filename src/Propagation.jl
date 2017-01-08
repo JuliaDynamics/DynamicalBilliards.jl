@@ -1,4 +1,8 @@
-# Collisions.jl must be loaded BEFORE this
+# ParticlesObstacles.jl must be loaded BEFORE this
+
+####################################################
+## Mathetical Functions
+####################################################
 
 function acos1mx(x)
   sqrt(2x) + sqrt(x)^3/(6sqrt(2))
@@ -178,17 +182,21 @@ velocity of the magnetic particle.
 function collisiontime{T<:AbstractFloat}(p::Particle{T}, w::Wall{T})
   n = normalize(w.normal)
   denom = dot(p.vel, n)
-  denom == 0 && return convert(T, Inf)
+  if denom >= 0; return convert(T, Inf); end
   t = dot(w.sp-p.pos, n)/denom
   t <= zero(T) ? convert(T, Inf) : t
 end
 
-function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Circular{T})
+function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Disk{T})
 
   infT = convert(T, Inf)
+  dotp = dot(p.vel, normalvec(d, p.pos))
+  # Gotta rethink thins for ray spliting
+  dotp >=0 && return infT
+
   dc = p.pos - d.c
-  B = dot(p.vel, dc)       #pointing towards circle: B < 0
-  C = dot(dc, dc) - d.r^2  #being outside of circle: C > 0
+  B = dot(p.vel, dc)         #pointing towards circle: B < 0
+  C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
   Δ = B^2 - C
 
   Δ <= 0 && return infT
@@ -198,6 +206,7 @@ function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Circular{T})
   # if B > 0.0 && C > 0.0
   #   return infT
   # end
+
   # Closest point:
   t = -B - sqrtD
   # Case of being on top of looking inside:
@@ -208,9 +217,39 @@ function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Circular{T})
     t = -B + sqrtD
   end
 
-  # BOU HOU HOU WHY DO I HAVE TO DO THIS...
-  t <= 1e-14*one(T) ? infT : t
+  t <=0 ? convert(T, Inf) : t
 end
+
+
+function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Circle{T})
+
+  infT = convert(T, Inf)
+  dc = p.pos - d.c
+  B = dot(p.vel, dc)         #pointing towards circle: B < 0
+  C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+  Δ = B^2 - C
+
+  Δ <= 0 && return infT
+  sqrtD = sqrt(Δ)
+
+  # Case of being slightly outside and looking outside:
+  # if B > 0.0 && C > 0.0
+  #   return infT
+  # end
+
+  # Closest point:
+  t = -B - sqrtD
+  # Case of being on top of looking inside:
+  if t==0.0 && B < 0.0
+    t=-2B
+  # Case of being inside but closest point is in negative time
+  elseif t < 0.0 && C < 0.0
+    t = -B + sqrtD
+  end
+
+  t <=0 ? convert(T, Inf) : t
+end
+
 
 """
     propagate!(p::AbstractParticle, t)
@@ -297,7 +336,7 @@ function evolve!{T<:AbstractFloat}(p::AbstractParticle{T},
       obst === prev_obst && typeof(prev_obst) <: Wall &&  continue
 
       tcol = collisiontime(p, obst)
-      if tcol < 1e-10
+      if tcol < 1e-4 && typeof(obst) <: Circular
         println("Collision time with $(obst.name):")
         println(" -> tcol = $tcol")
       end
