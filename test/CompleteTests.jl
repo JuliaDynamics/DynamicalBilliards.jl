@@ -1,6 +1,7 @@
 if !isdefined(:collisiontime)
-  include("Collisions.jl")
+  include("ParticlesObstacles.jl")
   include("Propagation.jl")
+  include("StandardBilliards.jl")
   include("PlotBilliards.jl")
 end
 
@@ -8,11 +9,11 @@ print("Tests started at: ")
 print(Dates.format(now(), "HH:MM:s"), "\n")
 
 
-check_circle = false
-check_straight_sinai = false
+check_circle = true
+check_straight_sinai = true
 check_magnetic_sinai = true
-check_straight_sinai_periodic = false
-check_magnetic_sinai_periodic = false
+check_straight_sinai_periodic = true
+check_magnetic_sinai_periodic = true
 check_magnetic_pinned = true
 
 if check_circle
@@ -105,11 +106,12 @@ if check_magnetic_sinai
       tt=1000.0
       partnum = 1000
       for i in 1:partnum
-        p = randominside(bt)
+        p = randominside(bt, ω)
 
-        t, poss, vels = ωevolve!(ω, p, bt, tt)
+        t, poss, vels = evolve!(p, bt, tt)
         if t[end] == Inf
-          println("Inf. collision time as a result of leakage...?")
+          println("Inf. collision time as a result of leakage or corner.")
+          println("p.pos = $(p.pos)")
           error("Pinned particle in closed sinai billiard... (inf col. time)")
         end
 
@@ -131,8 +133,8 @@ if check_magnetic_sinai
 
         # TWO ERROR CHECKS. One with pos and level = 0.0
         # one with xt and error level 15
-        xt, yt, vxt, vyt, ts = ωconstruct(ω, t, poss, vels)
-        error_level = 1e-15 #this cannot be less than 1e15
+        xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels)
+        error_level = 1e-15 #this cannot be less than 1e15 due to resolvecoolision()
         dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
         mind = minimum(dist)
         if mind - d.r < -error_level
@@ -210,7 +212,7 @@ if check_magnetic_sinai_periodic
   println("-ωevolve!() works and `pos` is always out of Disk")
   println("-minimum collision time is always >= 1-2r")
   # Be sure to choose ω where pinned cannot exist
-  for (r, x, y) in [(0.3, 1.5, 1.0), (0.5, 1.4, 2.2)]
+  for (r, x, y) in [(0.4, 1.5, 1.0), (0.5, 1.4, 2.2)]
     for ω in [0.1, 0.5]
       println("...for (ω,r,x,y) = ", (ω, r, x, y))
       bt = billiard_sinai_periodic(r, x, y)
@@ -223,14 +225,14 @@ if check_magnetic_sinai_periodic
       minddist = min(x, y)
 
       for i in 1:partnum
-        p = randominside(bt)
-        ts, poss, vels = ωevolve!(ω, p, bt, tt)
+        p = randominside(bt, ω)
+        ts, poss, vels = evolve!(p, bt, tt)
         if ts[end] == Inf
           continue
         end
 
 
-        error_level = 1e-12 #this huge error comes from the modulo operation
+        error_level = 1e-10 #this huge error comes from the modulo operation
         xt = [mod(pos[1], xmax) for pos in poss]
         yt = [mod(pos[2], ymax) for pos in poss]
 
@@ -256,24 +258,18 @@ if check_magnetic_pinned
   # Be sure to choose ω where pinned cannot exist
   for (r, x, y) in [(0.4, 1.0, 1.0)]
     for ω in [0.02, 0.04]
-      println("...for ω = ", ω)
+      println("...for (ω,r,x,y) = ", (ω, r, x, y))
       bt = billiard_sinai_periodic(r, x, y)
       tt=10000.0
-      partnum = 1000
-      pinnednum = 0
+      partnum = 2000
 
       for i in 1:partnum
-        p = randominside(bt)
-        ts, poss, vels = ωevolve!(ω, p, bt, tt)
+        p = randominside(bt, ω)
+        ts, poss, vels = evolve!(p, bt, tt)
         if ts[end] == Inf
-          pinnednum += 1
-          #error("Pinned particle!")
+          error("Pinned particle for ω=$ω ")
         end
       end#particle loop
-      if pinnednum > 1
-        error("too many pinned particles")
-      end
-
     end#omega loop
   end#x,y loop
 end
