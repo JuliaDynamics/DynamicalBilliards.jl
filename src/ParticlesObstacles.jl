@@ -68,8 +68,10 @@ Constructor accepting initial conditions `[x0, y0, φ0]`.
 function MagneticParticle{T<:AbstractFloat}(ic::Vector{T}, ω::T)
   φ0 = ic[3]
   pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-  MagneticParticle(pos, vel, SVector{2,T}(zero(T), zero(T)), ω)
+  return MagneticParticle{T}(pos, vel, SVector{2,T}(zero(T), zero(T)), ω)
 end
+MagneticParticle{T<:AbstractFloat}(x0::T, y0::T, φ0::T, ω::T) =
+MagneticParticle([x0, y0, φ0], ω)
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
 """
@@ -214,8 +216,8 @@ Wall obstacle imposing specular reflection during collision.
 * `sp::SVector{2,T}` : Starting point of the Wall (non-negative).
 * `ep::SVector{2,T}` : Ending point of the Wall (non-negative).
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
-come from* (to the inside the billiard table). The size of the vector is irrelevant, but it
-must be normal to the wall.
+come from before a collision* (pointing towards the inside the billiard table).
+The size of the vector is irrelevant.
 * `name::String` : Name of the obstacle, e.g. "left wall", given for user convenience.
 """
 immutable FiniteWall{T<:AbstractFloat} <: Wall{T}
@@ -301,7 +303,7 @@ show{T}(io::IO, w::PeriodicWall{T}) =
 
 #normalvec will be only called internally
 """
-    normalvec(obst::Obstacle{T}, pos::SVector{2,T})
+    normalvec(obst::Obstacle{T}, position::SVector{2,T})
 Return the vector normal to the obstacle from the current particle position (which is
 assumed to be on top of the obstacle's boundary).
 """
@@ -312,11 +314,12 @@ normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.n
 ####################################################
 ## Distances
 ####################################################
+# This should not be exported
 """
-    distance(p::AbstractParticle{T}, o::Obstacle{T})
+    distance(p::AbstractParticle, o::Obstacle)
 Return the **signed** distance between particle `p` and obstacle `o`, based on `p.pos`.
 Positive distance corresponds to the particle being inside the *allowed* region
-of the Billiard Table/Obstacle.
+of the Obstacle.
     distance(p::AbstractParticle{T}, bt::Vector{Obstacle{T}})
 Return minimum `distance(p, obst)` for all `obst` in `bt`.
 """
@@ -391,9 +394,12 @@ end
 
 
 """
-    randominside(bt::Vector{Obstacle{T}})
+    randominside(bt::Vector{Obstacle})
+    randominside(bt::Vector{Obstacle}, omega)
 Return a particle with correct (allowed) initial conditions inside the given billiard
-table defined by the vector `bt`.
+table defined by the vector `bt`. If supplied with a second argument the type of
+the returned particle is `MagneticParticle`, with angular velocity `omega`.
+Else, it is `Particle`.
 """
 function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
 
@@ -406,7 +412,7 @@ function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
 
   xp = rand()*(xmax-xmin) + xmin
   yp = rand()*(ymax-ymin) + ymin
-  p = Particle(xp, yp, φ0)
+  p = Particle([xp, yp, φ0])
 
   dist = distance(p, bt)
   while dist <= 0.0
@@ -417,5 +423,30 @@ function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
     dist = distance(p, bt)
   end
 
-  p = Particle(xp, yp, φ0)
+  return p
+end
+
+function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}}, ω::T)
+
+  xmin, ymin, xmax, ymax = cellsize(bt)
+  f = convert(T, rand())
+  while f == 0 || f==1/4 || f==1/2 || f == 3/4
+    f = convert(T, rand())
+  end
+  φ0 = f*2π
+
+  xp = rand()*(xmax-xmin) + xmin
+  yp = rand()*(ymax-ymin) + ymin
+  p = MagneticParticle([xp, yp, φ0], ω)
+
+  dist = distance(p, bt)
+  while dist <= 0.0
+
+    xp = rand()*(xmax-xmin) + xmin
+    yp = rand()*(ymax-ymin) + ymin
+    p.pos = [xp, yp]
+    dist = distance(p, bt)
+  end
+
+  return p
 end
