@@ -18,7 +18,7 @@ Documentation: link.
 ## Basic Usage
 The simplest usage of this package revolves around a single function: 
 ```
-evolve!(p::AbstractParticle, bt::Vector{Obstacle}, total_time)
+evolve!(p::Particle, bt::Vector{Obstacle}, total_time)
 ```
 The function evolves a particle `p` inside a billiard table `bt` for a given amount of time `total_time`, while taking care of all the details internally. 
 
@@ -55,6 +55,22 @@ or, if you want to use the fancy ellipsis operator, you can do:
 xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0)...)
 ```
 
+## Magnetic Propagation
+The are only two differences between magnetic and straight propagation. Firstly, the particle type is not `Particle` anymore, but `MagneticParticle`. The latter has an extra field called `omega` which is the cyclic frequency of rotation (equivalently, the angular velocity). In order to create a `MagneticParticle` (without using the constructors), you simply provide this extra argument to the `randominside()` function:
+```
+ω = 0.5
+p = randominside(bt, ω)
+typeof(p) # MagneticParticle
+p.omega   # 0.5
+```
+To propagate the particle you use the same functions
+```
+t, poss, vels = evolve!(p, bt, 1000.0)
+xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels)
+# or equivalently: 
+xt, yt, vxt, vyt, ts = construct(ω, evolve!(p, bt, 1000.0)...)
+```
+As you can see, the second difference is that the additional argument of the angular velocity must also be provided to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions.
+
 ## Visualizing
 
-## Magnetic Propagation
