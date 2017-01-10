@@ -59,7 +59,7 @@ xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0)...)
 The are only two differences between magnetic and straight propagation. Firstly, the particle type is not `Particle` anymore, but `MagneticParticle`. The latter has an extra field called `omega` which is the cyclic frequency of rotation (equivalently, the angular velocity). In order to create a `MagneticParticle` (without using the constructors), you simply provide this extra argument to the `randominside()` function:
 ```
 ω = 0.5
-p = randominside(bt, ω)
+p = randominside(ω, bt)
 typeof(p) # MagneticParticle
 p.omega   # 0.5
 ```
@@ -70,7 +70,7 @@ xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels)
 # or equivalently: 
 xt, yt, vxt, vyt, ts = construct(ω, evolve!(p, bt, 1000.0)...)
 ```
-As you can see, the second difference is that the additional argument of the angular velocity must also be provided to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions.
+As you can see, the second difference is that the additional argument of the angular velocity must also be provided to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions. (Note: the `ω` argument can be given either first or last to all functions)
 
 ## Visualizing
 
