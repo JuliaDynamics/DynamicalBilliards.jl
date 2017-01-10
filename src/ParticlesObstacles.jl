@@ -426,7 +426,7 @@ function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
   return p
 end
 
-function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}}, ω::T)
+function randominside{T<:AbstractFloat}( ω::T, bt::Vector{Obstacle{T}})
 
   xmin, ymin, xmax, ymax = cellsize(bt)
   f = convert(T, rand())
