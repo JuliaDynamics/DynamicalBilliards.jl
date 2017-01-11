@@ -12,7 +12,8 @@ include("PlotBilliards.jl")
 export Particle, MagneticParticle, cyclotron, Disk, Circle, Antidot, FiniteWall, Obstacle,
        NullWall, PeriodicWall, resolvecollision!, randominside,
        billiard_rectangle, billiard_sinai, billiard_sinai_periodic,
-       collisiontime, propagate!, evolve!, construct
+       collisiontime, propagate!, evolve!, construct, plot_particle, plot_billiard, 
+       plot_evolution, plot_obstacle, plot_cyclotron, 
 
 end
 
