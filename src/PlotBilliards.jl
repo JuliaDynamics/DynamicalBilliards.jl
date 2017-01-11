@@ -1,7 +1,7 @@
 using PyPlot
 
 ####################################################
-## Plot Particle Evolution
+## Plot Billiards
 ####################################################
 function plot_obstacle(d::Disk; color = "green")
   circle1 = PyPlot.plt[:Circle](d.c, d.r, alpha=0.3, color=color, lw=0.0)
@@ -34,11 +34,11 @@ function plot_billiard{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
 end
 
 
-
 ####################################################
 ## Plot Particle Evolution
 ####################################################
-function plot_cyclotron(ω::AbstractFloat, p::AbstractParticle; use_cell=true)
+function plot_cyclotron(p::MagneticParticle; use_cell=true)
+  ω = p.omega
   pos = use_cell ? p.pos + p.current_cell : p.pos
   c = pos - (1/ω)*[p.vel[2], -p.vel[1]]
   r = abs(1/ω)
@@ -56,21 +56,97 @@ function plot_particle(p::AbstractParticle; color = (0.0, 0.0, 0.0), use_cell=tr
 end
 
 
-#REDO
-# function plot_evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::AbstractFloat,
-#   dt::AbstractFloat = 0.1; which_figure = PyPlot.figure(figsize=(10,10)))
-#
-#   fig = PyPlot.figure(which_figure[:number])
-#   PyPlot.cla()
-#   index_t0 = length(p.t) #plot from index_t0 to end
-#   evolve!(p, bt, ttotal, dt)
-#
-#   #first plot billiard
-#   for obst in bt
-#     plot_obstacle(obst)
-#   end
-#   #plot particle:
-#   plot(p.xoft[index_t0:end], p.yoft[index_t0:end], color="blue")
-#   scatter(p.pos..., color="blue")
-#   quiver(p.pos..., p.vel..., color="blue")
-# end
+function plot_evolution(p::MagneticParticle, bt, colnumber = 50;
+  sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
+
+  ω = p.omega
+  ε = eps()
+  i=0
+  xdata = Vector{Float64}[]
+  ydata = Vector{Float64}[]
+
+  while i < colnumber
+
+    t, poss, vels = evolve!(p, bt, ε)
+    xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels)
+
+    if i < col_to_plot
+      push!(xdata, xt)
+      push!(ydata, yt)
+    else
+      shift!(xdata); shift!(ydata)
+      push!(xdata, xt); push!(ydata, yt)
+    end
+
+    xpd = Float64[]
+    for el in xdata; append!(xpd, el); end
+
+    ypd = Float64[]
+    for el in ydata; append!(ypd, el); end
+
+    if i == 0
+      line, = plot(xpd, ypd, color = color)
+    end
+    line[:set_xdata](xpd)
+    line[:set_ydata](ypd)
+    point, quiv = plot_particle(p)
+    if savefigs
+      s = savename*"_$(i+1).png"
+      savefig(s, dpi = 60, bbox_inches="tight")
+    end
+
+
+    sleep(sleeptime)
+
+    point[:remove]()
+    quiv[:remove]()
+    i+=1
+  end
+end
+
+function plot_evolution(p::Particle, bt, colnumber = 50;
+  sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
+
+  ε = eps()
+  i=0
+  xdata = Vector{Float64}[]
+  ydata = Vector{Float64}[]
+
+  while i < colnumber
+
+    t, poss, vels = evolve!(p, bt, ε)
+    xt, yt, vxt, vyt, ts = construct(t, poss, vels)
+    
+    if i < col_to_plot
+      push!(xdata, xt)
+      push!(ydata, yt)
+    else
+      shift!(xdata); shift!(ydata)
+      push!(xdata, xt); push!(ydata, yt)
+    end
+
+    xpd = Float64[]
+    for el in xdata; append!(xpd, el); end
+
+    ypd = Float64[]
+    for el in ydata; append!(ypd, el); end
+
+    if i == 0
+      line, = plot(xpd, ypd, color = color)
+    end
+    line[:set_xdata](xpd)
+    line[:set_ydata](ypd)
+    point, quiv = plot_particle(p)
+    if savefigs
+      s = savename*"_$(i+1).png"
+      savefig(s, dpi = 60, bbox_inches="tight")
+    end
+
+
+    sleep(sleeptime)
+
+    point[:remove]()
+    quiv[:remove]()
+    i+=1
+  end
+end

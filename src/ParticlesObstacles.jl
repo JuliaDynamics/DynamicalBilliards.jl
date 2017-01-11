@@ -213,8 +213,8 @@ abstract Wall{T<:AbstractFloat} <: Obstacle{T}
     FiniteWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle imposing specular reflection during collision.
 # Fields
-* `sp::SVector{2,T}` : Starting point of the Wall (non-negative).
-* `ep::SVector{2,T}` : Ending point of the Wall (non-negative).
+* `sp::SVector{2,T}` : Starting point of the Wall.
+* `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
 come from before a collision* (pointing towards the inside the billiard table).
 The size of the vector is irrelevant.
@@ -256,8 +256,8 @@ show{T}(io::IO, w::FiniteWall{T}) =
     PeriodicWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle that imposes periodic boundary conditions during collision.
 # Fields
-* `sp::SVector{2,T}` : Starting point of the Wall (non-negative).
-* `ep::SVector{2,T}` : Ending point of the Wall (non-negative).
+* `sp::SVector{2,T}` : Starting point of the Wall.
+* `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
 come from* (to the inside the billiard table). The size of the vector is **important**.
 This vector is added to a particle's `pos` during collision. Therefore the size of the
@@ -426,7 +426,7 @@ function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
   return p
 end
 
-function randominside{T<:AbstractFloat}( ω::T, bt::Vector{Obstacle{T}})
+function randominside{T<:AbstractFloat}(ω::T, bt::Vector{Obstacle{T}})
 
   xmin, ymin, xmax, ymax = cellsize(bt)
   f = convert(T, rand())

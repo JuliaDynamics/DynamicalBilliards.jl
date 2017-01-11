@@ -290,13 +290,13 @@ for magnetic propagation, with `omega = p.omega` the angular velocity of the par
     (t::Vector, poss::Vector{SVector{2}}, vels:: Vector{SVector{2}})
 As noted by the "!" at the end of the function, it changes its argument `p` (particle).
 Most importantly however, this function also returns the main output expected by a billiard
-system. This output is a typle of three vectors:
+system. This output is a tuple of three vectors:
 * `t::Vector` : Collision times.
 * `poss::Vector{SVector{2}}` : Positions during collisions.
 * `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions.
 
 The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
-state `poss[i-1], vels[i-1]`. That is why `t[0]` is always 0 since `poss[0], vels[0]` are
+state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[0], vels[0]` are
 the initial conditions.
 
 Notice that at any point, the velocity vector `vels[i]` is the one obtained **after**
