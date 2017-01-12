@@ -59,6 +59,7 @@ end
 function plot_evolution(p::MagneticParticle, bt, colnumber = 50;
   sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
 
+  sleeptime == 0 && (sleeptime = 1e-6)
   ω = p.omega
   ε = eps()
   i=0
@@ -107,6 +108,7 @@ end
 function plot_evolution(p::Particle, bt, colnumber = 50;
   sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
 
+  sleeptime == 0 && (sleeptime = 1e-6)
   ε = eps()
   i=0
   xdata = Vector{Float64}[]
@@ -116,7 +118,7 @@ function plot_evolution(p::Particle, bt, colnumber = 50;
 
     t, poss, vels = evolve!(p, bt, ε)
     xt, yt, vxt, vyt, ts = construct(t, poss, vels)
-    
+
     if i < col_to_plot
       push!(xdata, xt)
       push!(ydata, yt)

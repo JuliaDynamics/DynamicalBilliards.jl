@@ -1,6 +1,7 @@
 using StaticArrays
 import Base.show
-
+tofloats(args...) = (convert(Float64, x) for x in args) #this is a generator
+# Also possible is Float64.([arg1, arg2, ...])
 ####################################################
 ## Particles
 ####################################################
@@ -17,7 +18,7 @@ Two-dimensional particle in a billiard table.
 * `pos::SVector{2,T}` : Current position vector.
 * `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
 * `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
-(Used only in periodic billiards)
+ (Used only in periodic billiards)
 """
 type Particle{T<:AbstractFloat} <: AbstractParticle{T}
   pos::SVector{2,T}
@@ -25,7 +26,9 @@ type Particle{T<:AbstractFloat} <: AbstractParticle{T}
   current_cell::SVector{2,T}
 end
 """
-    Particle{T}(ic::Vector{T})
+```julia
+Particle{T}(ic::Vector{T})
+```
 Constructor accepting initial conditions `[x0, y0, φ0]`.
 """
 function Particle{T<:AbstractFloat}(ic::Vector{T})
@@ -56,7 +59,7 @@ type MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
   function MagneticParticle(pos::SVector{2,T}, vel::SVector{2,T},
                             current_cell::SVector{2,T}, omega::T)
     if omega==0
-      error("Angular frequency cannot be 0.")
+      error("Angular velocity cannot be 0.")
     end
     new(pos, vel, current_cell, omega)
   end
@@ -75,7 +78,9 @@ MagneticParticle([x0, y0, φ0], ω)
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
 """
-    magnetic2standard(p::MagneticParticle; use_cell = true)
+```julia
+magnetic2standard(p::MagneticParticle; use_cell = true)
+```
 Create a standard particle from a `MagneticParticle`.
 """
 function magnetic2standard{T<:AbstractFloat}(p::MagneticParticle{T}; use_cell = true)
@@ -85,7 +90,9 @@ function magnetic2standard{T<:AbstractFloat}(p::MagneticParticle{T}; use_cell = 
 end
 
 """
-    magnetic2standard(p::Particle, omega; use_cell = true)
+```julia
+magnetic2standard(p::Particle, omega; use_cell = true)
+```
 Create a magnetic particle from a `Particle`.
 """
 function standard2magnetic{T<:AbstractFloat}(p::Particle{T}, ω::T; use_cell = true)
@@ -96,18 +103,23 @@ end
 
 
 """
-    cyclotron(omega, p::AbstractParticle)
+```julia
+cyclotron(omega, p::AbstractParticle)
+```
 Return center and radius of circular motion performed by the particle based on
 `p.pos` and `p.vel`.
 """
-function cyclotron{T<:AbstractFloat}(ω::T, p::AbstractParticle{T})
+function cyclotron{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, use_cell = false)
+  pos = ifelse(use_cell, p.pos + p.current_cell, p.pos)
   c::SVector{2, T} = p.pos - (1/ω)*[p.vel[2], -p.vel[1]]
   r = abs(1/ω)
   return c, r
 end
 
 """
-    cyclotron(p::MagneticParticle, use_cell = false)
+```julia
+cyclotron(p::MagneticParticle, use_cell = false)
+```
 Return center and radius of circular motion performed by the particle based on
 `p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
 """
@@ -301,13 +313,17 @@ show{T}(io::IO, w::PeriodicWall{T}) =
     "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)\n",
     "periodic partner: $(w.partner.name)")
 
-#normalvec will be only called internally
+
 """
-    normalvec(obst::Obstacle{T}, position::SVector{2,T})
+```julia
+normalvec(obst::Obstacle{T}, position::SVector{2,T})
+```
 Return the vector normal to the obstacle from the current particle position (which is
-assumed to be on top of the obstacle's boundary).
+assumed to be very close to the obstacle's boundary). The normal must be looking towards
+the direction the particle is expected to come from.
 """
 normalvec{T<:AbstractFloat}(disk::Circular{T}, pos::SVector{2,T}) = normalize(pos - disk.c)
+normalvec{T<:AbstractFloat}(disk::Circle{T}, pos::SVector{2,T}) = -normalize(pos - disk.c)
 normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.normal)
 
 
@@ -316,12 +332,14 @@ normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.n
 ####################################################
 # This should not be exported
 """
-    distance(p::AbstractParticle, o::Obstacle)
+```julia
+  distance(p::AbstractParticle, o::Obstacle)
+  ```
 Return the **signed** distance between particle `p` and obstacle `o`, based on `p.pos`.
 Positive distance corresponds to the particle being inside the *allowed* region
 of the Obstacle.
     distance(p::AbstractParticle{T}, bt::Vector{Obstacle{T}})
-Return minimum `distance(p, obst)` for all `obst` in `bt`.
+Return minimum `distance(p, obst)` for all `obst` in `bt`, which can be negative.
 """
 function distance{T<:AbstractFloat}(p::AbstractParticle{T}, bt::Vector{Obstacle{T}})
   mindist = convert(T, Inf)
@@ -350,8 +368,8 @@ end
 ####################################################
 """
     cellsize{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
-Return the delimiters `xmin, ymin, xmax, ymax` of the "cell" that is defined by
-the given billiard table. Used in `randominside()` and error checking.
+Return the delimiters `xmin, ymin, xmax, ymax` of the given billiard table.
+Used in `randominside()` and error checking.
 """
 function cellsize{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
 
@@ -394,8 +412,10 @@ end
 
 
 """
-    randominside(bt::Vector{Obstacle})
-    randominside(bt::Vector{Obstacle}, omega)
+```julia
+randominside(bt::Vector{Obstacle})
+randominside(bt::Vector{Obstacle}, omega::Real)
+```
 Return a particle with correct (allowed) initial conditions inside the given billiard
 table defined by the vector `bt`. If supplied with a second argument the type of
 the returned particle is `MagneticParticle`, with angular velocity `omega`.
