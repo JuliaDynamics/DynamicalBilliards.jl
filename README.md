@@ -11,14 +11,15 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 * **Standard billiards** : A library of pre-constructed billiard systems that have already been used in Physics/Mathematics (e.g. Sinai, periodic Sinai, Buminovich etc.)
 * **Visualization** : functions for plotting and visualizing aspects of a billiard system, such as obstacles, orbits and more. Also includes animation related content.
 
-NOTICE: This package does not support collision between particles. All particles are considered point particles for all simulations offered by `DynamicalBilliards.jl`.
+NOTICE: This package does not support collision between particles. All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
 
-Documentation: link.
+Documentation: coming soon.
 
 *(all exported names of DynamicalBilliards.jl have detailed docstrings. Use `?` when in doubt)*
 
 ---
-
+### Installation
+This package is not yet registered. Use `Pkg.clone("https://github.com/Datseris/DynamicalBilliards.jl")` in order to install it.
 ## Basic Usage
 The simplest usage of this package revolves around a single function: 
 ```julia
@@ -77,7 +78,7 @@ xt, yt, vxt, vyt, ts = construct(ω, evolve!(p, bt, 1000.0)...)
 As you can see, the second difference is that the additional argument of the angular velocity must also be provided to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions. (Note: the `ω` argument is always given as the first argument, for consistency)
 
 ## Visualizing
-*(all plotting in* `DynamicalBilliards` *is done through the* `PyPlot` *package)*
+*(all plotting in* `DynamicalBilliards` *is currently done through the* `PyPlot` *package. In a future update a switch will happen towards* `Plots.jl` *)*
 
 The functions `plot_obstacle(o::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle}; kwargs...)` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. In order to animate the evolution of a particle in a billiard table, use the function:
 ```julia
@@ -93,6 +94,7 @@ Be sure to first call `plot_billiard` before calling `plot_evolution`.
 The example .gif shown in the beginning of this README, was generated simply with the code:
 ```julia
 using DynamicalBilliards
+using PyPlot
 
 bt = billiard_rectangle(1.5, 1.0)
 d1 = Disk([0.45, 0.6], 0.3, "Upper-left Disk")
@@ -115,4 +117,4 @@ sleeptime = 0.1, col_to_plot = 4, savefigs = true, savename = sname)
 ```
 Afterwards the outputed .png files where merged into a single .gif externally.
 
-A full overview of all plotting procedures offered by this package is available here.
+A full overview of all plotting procedures offered by this package is coming soon.
