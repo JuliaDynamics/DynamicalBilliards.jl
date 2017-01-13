@@ -16,7 +16,7 @@ specular!(p::AbstractParticle, o::Obstacle)
 Perform specular reflection, i.e. set `p.vel = p.vel - 2*dot(n, p.vel)*n` with `n` the
 normal vector from the obstacle's boundary.
 """
-function specular!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T})
+function specular!(p::AbstractParticle, o::Obstacle)
   n = normalvec(o, p.pos)
   p.vel = p.vel - 2*dot(n, p.vel)*n
 end
@@ -33,10 +33,10 @@ Specifically, it calculates the distance from particle and obstacle and,
 depending on the obstacle type, makes necessary adjustments by propagating
 the particle forwards or backwards in time using **linear** motion.
 """
-function resolvecollision!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T})
+function resolvecollision!(p::AbstractParticle, o::Obstacle)
 
   dist = distance(p, o)
-  dt = zero(T)
+  dt = 0.0
 
   if dist < 0.0
     dt = 10lct(p, o, dist) #linearized collision time, should be negative
@@ -59,10 +59,10 @@ function resolvecollision!{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle
   return dt
 end
 
-function resolvecollision!{T<:AbstractFloat}(p::AbstractParticle{T}, o::PeriodicWall{T})
+function resolvecollision!(p::AbstractParticle, o::PeriodicWall)
 
     dist = distance(p, o)
-    dt = zero(T)
+    dt = 0.0
 
     if dist > 0.0
       dt = 10lct(p, o, dist) #linearized collision time, should be positive
@@ -96,7 +96,7 @@ lct(p::AbstractParticle, o::Obstacle, distance)
 Return the Linearized Collision Time (`-dist/dot(p.vel, normal)`) between particle
 and obstacle, given the calculated distance between them.
 """
-function lct{T<:AbstractFloat}(p::AbstractParticle{T}, o::Obstacle{T}, dist::T)
+function lct(p::AbstractParticle, o::Obstacle, dist::Float64)
   n = normalvec(o, p.pos)
   t = -dist/dot(p.vel, n)
 end
@@ -120,32 +120,31 @@ In the case of magnetic propagation, there are always two possible collisions. T
 internally decides which of the two will occur first, based on the sign of the angular
 velocity of the magnetic particle.
 """
-function collisiontime{T<:AbstractFloat}(p::Particle{T}, w::Wall{T})
+function collisiontime(p::Particle, w::Wall)
   n = normalize(w.normal)
   denom = dot(p.vel, n)
-  if denom >= 0; return convert(T, Inf); end
+  if denom >= 0; return Inf; end
   t = dot(w.sp-p.pos, n)/denom
-  t <= zero(T) ? convert(T, Inf) : t
+  t <= 0.0 ? Inf : t
 end
 
-function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Disk{T})
+function collisiontime(p::Particle, d::Disk)
 
-  infT = convert(T, Inf)
   dotp = dot(p.vel, normalvec(d, p.pos))
   # Gotta rethink thins for ray spliting
-  dotp >=0 && return infT
+  dotp >=0 && return Inf
 
   dc = p.pos - d.c
   B = dot(p.vel, dc)         #pointing towards circle center: B < 0
   C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
   Δ = B^2 - C
 
-  Δ <= 0 && return infT
+  Δ <= 0 && return Inf
   sqrtD = sqrt(Δ)
 
   # Closest point:
   t = -B - sqrtD
-  # Case of being on top of looking inside:
+  # Case of being on top of circle and looking inside:
   if t==0.0 && B < 0.0
     t=-2B
   # Case of being inside but closest point is in negative time
@@ -153,19 +152,18 @@ function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Disk{T})
     t = -B + sqrtD
   end
 
-  t <=0 ? convert(T, Inf) : t
+  t <=0 ? Inf : t
 end
 
 
-function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Circle{T})
+function collisiontime(p::Particle, d::Circle)
 
-  infT = convert(T, Inf)
   dc = p.pos - d.c
   B = dot(p.vel, dc)         #pointing towards circle: B < 0
   C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
   Δ = B^2 - C
 
-  Δ <= 0 && return infT
+  Δ <= 0 && return Inf
   sqrtD = sqrt(Δ)
 
   # Closest point:
@@ -178,7 +176,7 @@ function collisiontime{T<:AbstractFloat}(p::Particle{T}, d::Circle{T})
     t = -B + sqrtD
   end
 
-  t <=0 ? convert(T, Inf) : t
+  t <=0 ? Inf : t
 end
 
 
@@ -194,7 +192,7 @@ For a `Particle` the propagation is a straight line (i.e. velocity vector is con
 For a `MagneticParticle` the propagation is circular motion with cyclic frequency `p.omega`
 and radius `1/p.omega`.
 """
-function propagate!{T<:AbstractFloat}(p::Particle{T}, t::T)
+function propagate!(p::Particle, t::Real)
   # Set initial conditions
   vx0=p.vel[1]
   vy0=p.vel[2]
@@ -245,28 +243,22 @@ propagated for this amount of time and then the collision between the particle a
 appropriate object is resolved. The loop then begins anew, until the given `ttotal` is
 *reached or exceeded* (since only the time between collisions is measured).
 """
-function evolve!{T<:AbstractFloat}(p::AbstractParticle{T},
-  bt::Vector{Obstacle{T}}, ttotal::T)
+function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
 
-  rt = T[]
-  rpos = SVector{2,T}[]
-  rvel = SVector{2,T}[]
+  rt = Float64[]
+  rpos = SVector{2,Float64}[]
+  rvel = SVector{2,Float64}[]
   push!(rpos, p.pos)
   push!(rvel, p.vel)
-  push!(rt, zero(T)) #using 0.0 instead works perfectly fine
+  push!(rt, 0.0)
+  tcount = 0.0
+  colobst = bt[end]
+  t_to_write = 0.0
 
-  infT = convert(T, Inf)
-  prev_obst = NullWall(T)
-  colobst = NullWall(T)
-  tcount = zero(T)
-  t_to_write = zero(T)
-
-  while tcount <= ttotal
-    tmin = infT
+  while tcount < ttotal
+    tmin = Inf
 
     for obst in bt
-      # Always skip collision with previous obstacle if it's a wall
-      obst === prev_obst && typeof(prev_obst) <: Wall &&  continue
       tcol = collisiontime(p, obst)
       # Set minimum time:
       if tcol < tmin
@@ -287,18 +279,23 @@ function evolve!{T<:AbstractFloat}(p::AbstractParticle{T},
       push!(rvel, p.vel)
       push!(rt, t_to_write)
       tcount += t_to_write
-      t_to_write = zero(T)
+      t_to_write = 0.0
     end
   end#time loop
   return (rt, rpos, rvel)
 end
+function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real)
+  if ttotal <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+  else
+    evolve!(p, bt, Float64(ttotal))
+  end
+end
 
 """
 ```julia
-construct{T<:AbstractFloat}(t::Vector{T},
-          poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}})
-
-construct(omega, t, poss, vels, dt=0.01*one(T))
+construct(t::Vector, poss::Vector{SVector{2}}, vels::Vector{SVector{2}})
+construct(omega, t, poss, vels, dt=0.01)
 ```
 Given the main output of this package (see `evolve!()` function) construct the timeseries
 of the position and velocity, as well as the time vector.
@@ -313,28 +310,26 @@ for straight and for magnetic propagation respectively.
 (`ω = p.omega` the angular velocity of the particle)
 
 The optional argument `dt` settles the frequency points will be written in the output
-vectors, which is why its default value depends on whether you have a magnetic or standard
-billiard.
+vectors.
 
 # Ray-splitting billiards
 
 # Returns
 A tuple of the following:
-* xt::Vector{T} : x position time-series
-* yt::Vector{T} : y position time-series
-* vxt::Vector{T} : x velocity time-series
-* vyt::Vector{T} : y velocity time-series
-* ts::Vector{T} : Continuous time vector
+* xt::Vector{Float64} : x position time-series
+* yt::Vector{Float64} : y position time-series
+* vxt::Vector{Float64} : x velocity time-series
+* vyt::Vector{Float64} : y velocity time-series
+* ts::Vector{Float64} : Continuous time vector
 """
-function construct{T<:AbstractFloat}(t::Vector{T},
-  poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}, dt=0.5*one(T))
+function construct(t::Vector{Float64},
+  poss::Vector{SVector{2,Float64}}, vels::Vector{SVector{2,Float64}})
 
   xt = [pos[1] for pos in poss]
   yt = [pos[2] for pos in poss]
   vxt = [vel[1] for vel in vels]
   vyt = [vel[2] for vel in vels]
   ct = cumsum(t)
-
   return xt, yt, vxt, vyt, ct
 end
 
@@ -342,21 +337,21 @@ end
 ## Magnetic Propagation
 ####################################################
 
-function propagate!{T<:AbstractFloat}(p::MagneticParticle{T}, t::T)
+function propagate!(p::MagneticParticle, t::Float64)
   # "Initial" conditions
   ω  = p.omega
   vx0= p.vel[1]
   vy0= p.vel[2]
   φ0 = atan2(vy0, vx0)
   # Propagate:
-  p.pos += SVector{2, T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
-  p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
+  p.pos += SVector{2, Float64}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
+  p.vel = SVector{2, Float64}(cos(ω*t + φ0), sin(ω*t + φ0))
 end
+propagate!(p::MagneticParticle, t::Real) = propagate!(p, Float64(t))
 
 """
 ```julia
-realangle(p::MagneticParticle, o::Obstacle,
-          inter::Vector{SVector{2}}, pc::SVector{2}, pr)
+realangle(p::MagneticParticle, o::Obstacle, inter::Vector{SVector}, pc, pr)
 ```
 Given the intersections `inter` of the trajectory of a magnetic particle `p` with some
 obstacle `o`, find which of the two is the "real" one, i.e. occurs first.
@@ -368,13 +363,13 @@ the obstacle's boundaries, due to Floating-point precision.
 (the cyclotron center `pc` and radius `pr` are suplimented for efficiency, since they
 have been calculated already)
 """
-function realangle{T<:AbstractFloat}(p::MagneticParticle{T}, o::Obstacle{T},
-  intersections::Vector{SVector{2, T}}, pc::SVector{2, T}, pr::T)
+function realangle(p::MagneticParticle, o::Obstacle,
+  intersections::Vector{SVector{2, Float64}}, pc::SVector{2, Float64}, pr::Float64)
 
   ω = p.omega
   P0 = p.pos
   PC = pc - P0
-  θ = convert(T, Inf)
+  θ = Inf
   for i in intersections
     d2 = dot(i-P0,i-P0)
     # Check dot product for close points:
@@ -401,54 +396,53 @@ function realangle{T<:AbstractFloat}(p::MagneticParticle{T}, o::Obstacle{T},
   return θ
 end
 
-function collisiontime{T<:AbstractFloat}(p::MagneticParticle{T}, w::Wall{T})
+function collisiontime(p::MagneticParticle, w::Wall)
   ω = p.omega
   pc, pr = cyclotron(p)
   P0 = p.pos
   P2P1 = w.ep - w.sp
   P1P3 = w.sp - pc
   # Solve quadratic:
-  a::T = dot(P2P1, P2P1)
-  b::T = 2*dot(P2P1, P1P3)
-  c::T = dot(P1P3, P1P3) - pr^2
+  a = dot(P2P1, P2P1)
+  b = 2*dot(P2P1, P1P3)
+  c = dot(P1P3, P1P3) - pr^2
   Δ = b^2 -4*a*c
   # Check if line is completely outside (or tangent) of the circle:
-  Δ <= zero(T) && return convert(T, Inf)
+  Δ <= 0.0 && return Inf
   # Intersection coefficients:
   u1 = (-b - sqrt(Δ))/2a
   u2 = (-b + sqrt(Δ))/2a
-  cond1 = (zero(T) <= u1 <= one(T))
-  cond2 = (zero(T) <= u2 <= one(T))
+  cond1 = (0.0 <= u1 <= 1.0)
+  cond2 = (0.0 <= u2 <= 1.0)
   # Check if the line is completely inside the circle:
-  !cond1 && !cond2 && return convert(T, Inf)
+  !cond1 && !cond2 && return Inf
   # Calculate intersection points:
-  intersections = SVector{2, T}[]
+  intersections = SVector{2, Float64}[]
   cond1 && push!(intersections, w.sp + u1*(w.ep - w.sp))
   cond2 && push!(intersections, w.sp + u2*(w.ep - w.sp))
-
   # Calculate real time until intersection:
   θ = realangle(p, w, intersections, pc, pr)
   # Collision time, equiv. to arc-length until collision point:
   return θ*pr
 end
 
-function collisiontime{T<:AbstractFloat}(p::MagneticParticle{T}, o::Circular{T})
+function collisiontime(p::MagneticParticle, o::Circular)
   ω = p.omega
-  pc, rc = cyclotron(ω, p)
+  pc, rc = cyclotron(p)
   p1 = o.c
   r1 = o.r
   d = norm(p1-pc)
   if (d >= rc + r1) || (d <= abs(rc-r1))
-    return convert(T, Inf)
+    return Inf
   end
   # Solve quadratic:
   a = (rc^2 - r1^2 + d^2)/2d
   h = sqrt(rc^2 - a^2)
   # Collision points (always 2):
-  I1 = SVector{2, T}(
+  I1 = SVector{2, Float64}(
   pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
   pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
-  I2 = SVector{2, T}(
+  I2 = SVector{2, Float64}(
   pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
   pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
   # Calculate real time until intersection:
@@ -458,24 +452,23 @@ function collisiontime{T<:AbstractFloat}(p::MagneticParticle{T}, o::Circular{T})
 end
 
 
-function evolve!{T<:AbstractFloat}(p::MagneticParticle{T},
-                bt::Vector{Obstacle{T}}, ttotal::T, dt::T=0.05*one(T))
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
+                 ttotal::Float64, dt::Float64=0.05)
 
   ω = p.omega
-  rt = T[]
-  rpos = SVector{2,T}[]
-  rvel = SVector{2,T}[]
+  rt = Float64[]
+  rpos = SVector{2,Float64}[]
+  rvel = SVector{2,Float64}[]
   push!(rpos, p.pos)
   push!(rvel, p.vel)
-  push!(rt, zero(T))
+  push!(rt, zero(Float64))
 
-  infT = convert(T, Inf)
-  colobst = NullWall(T)
-  tcount = zero(T)
-  t_to_write = zero(T)
+  tcount = 0.0
+  t_to_write = 0.0
+  colobst = bt[1]
 
-  while tcount <= ttotal
-    tmin = infT
+  while tcount < ttotal
+    tmin = Inf
 
     for obst in bt
       tcol = collisiontime(p, obst)
@@ -486,11 +479,11 @@ function evolve!{T<:AbstractFloat}(p::MagneticParticle{T},
       end
     end#obstacle loop
 
-    if tmin == infT
+    if tmin == Inf
       println("pinned particle! (Inf col t)")
       push!(rpos, rpos[end])
       push!(rvel, rvel[end])
-      push!(rt, convert(T, Inf))
+      push!(rt, Inf)
       return (rt, rpos, rvel)
     end
 
@@ -504,7 +497,7 @@ function evolve!{T<:AbstractFloat}(p::MagneticParticle{T},
         println("pinned particle! (completed circle)")
         push!(rpos, rpos[end])
         push!(rvel, rvel[end])
-        push!(rt, convert(T, Inf))
+        push!(rt, Inf)
         return (rt, rpos, rvel)
       end
       #If not pinned, continue (do not write for PeriodicWall)
@@ -514,14 +507,14 @@ function evolve!{T<:AbstractFloat}(p::MagneticParticle{T},
       push!(rvel, p.vel)
       push!(rt, t_to_write)
       tcount += t_to_write
-      t_to_write = zero(T)
+      t_to_write = 0.0
     end
   end#time loop
   return (rt, rpos, rvel)
 end
 
-function construct{T<:AbstractFloat}(ω::T, t::Vector{T},
-  poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}, dt=0.01*one(T))
+function construct(ω::Real, t::Vector{Float64},
+  poss::Vector{SVector{2,Float64}}, vels::Vector{SVector{2,Float64}}, dt=0.01)
 
   xt = [poss[1][1]]
   yt = [poss[1][2]]

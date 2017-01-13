@@ -1,120 +1,110 @@
 using StaticArrays
 import Base.show
 tofloats(args...) = (convert(Float64, x) for x in args) #this is a generator
-# Also possible is Float64.([arg1, arg2, ...])
+# in version 0.6 use tofloats(args...) = Float64.(args...)
 ####################################################
 ## Particles
 ####################################################
 """
-    AbstractParticle{T<:AbstractFloat}
+    AbstractParticle
 Particle supertype.
 """
-abstract AbstractParticle{T<:AbstractFloat}
+abstract AbstractParticle
 
 """
-    Particle{T<:AbstractFloat} <: AbstractParticle{T}
+    Particle <: AbstractParticle
 Two-dimensional particle in a billiard table.
-# Fields:
-* `pos::SVector{2,T}` : Current position vector.
-* `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
-* `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
- (Used only in periodic billiards)
-"""
-type Particle{T<:AbstractFloat} <: AbstractParticle{T}
-  pos::SVector{2,T}
-  vel::SVector{2,T}
-  current_cell::SVector{2,T}
-end
-"""
+## Fields:
+* `pos::SVector{2,Float64}` : Current position vector.
+* `vel::SVector{2,Float64}` : Current velocity vector (always of measure 1).
+* `current_cell::SVector{2,Float64}` : Current "cell" the particle is located at.
+  (Used only in periodic billiards)
+## Additional constructors:
 ```julia
-Particle{T}(ic::Vector{T})
+Particle{T<:Real}(ic::Vector{T}) #where ic = [x0, y0, φ0]
+Particle(x::Real, y::Real, φ::Real)
+Particle() = Particle(rand(), rand(), rand()*2π)
 ```
-Constructor accepting initial conditions `[x0, y0, φ0]`.
 """
-function Particle{T<:AbstractFloat}(ic::Vector{T})
-  φ0 = ic[3]
-  pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-  Particle(pos, vel, SVector{2,T}(zero(T), zero(T)))
+type Particle <: AbstractParticle
+  pos::SVector{2,Float64}
+  vel::SVector{2,Float64}
+  current_cell::SVector{2,Float64}
 end
-Particle{T<:AbstractFloat}(x0::T, y0::T, φ0::T) = Particle([x0, y0, φ0])
+
+function Particle{T<:Real}(icr::Vector{T})
+  ic = Float64.(icr)
+  φ0 = ic[3]
+  pos = SVector{2,Float64}(ic[1:2]); vel = SVector{2,Float64}(cos(φ0), sin(φ0))
+  return Particle(pos, vel, SVector{2,Float64}(0,0))
+end
+Particle(x0::Real, y0::Real, φ0::Real) = Particle([x0, y0, φ0])
 Particle() = Particle(rand(), rand(), rand()*2π)
 
 
 """
-    MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
+    MagneticParticle <: AbstractParticle
 Two-dimensional particle in a billiard table with perpendicular magnetic field.
-# Fields:
-* `pos::SVector{2,T}` : Current position vector.
-* `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
-* `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
-(Used only in periodic billiards)
-* `omega::T` : Angular velocity (cyclic frequency) of rotational motion.
-Radius of rotation is `r=1/omega`.
+## Fields:
+* `pos::SVector{2,Float64}` : Current position vector.
+* `vel::SVector{2,Float64}` : Current velocity vector (always of measure 1).
+* `current_cell::SVector{2,Float64}` : Current "cell" the particle is located at.
+  (Used only in periodic billiards)
+* `omega::Float64` : Angular velocity (cyclic frequency) of rotational motion.
+  Radius of rotation is `r=1/omega`.
+## Additional constructors:
+```julia
+MagneticParticle{T<:Real}(ic::Vector{T}, ω::Real) #where ic = [x0, y0, φ0]
+MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
+MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
+```
 """
-type MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
-  pos::SVector{2,T}
-  vel::SVector{2,T}
-  current_cell::SVector{2,T}
-  omega::T
-  function MagneticParticle(pos::SVector{2,T}, vel::SVector{2,T},
-                            current_cell::SVector{2,T}, omega::T)
+type MagneticParticle <: AbstractParticle
+  pos::SVector{2,Float64}
+  vel::SVector{2,Float64}
+  current_cell::SVector{2,Float64}
+  omega::Float64
+  function MagneticParticle(pos::SVector{2,Float64}, vel::SVector{2,Float64},
+                            current_cell::SVector{2,Float64}, omega::Float64)
     if omega==0
       error("Angular velocity cannot be 0.")
     end
     new(pos, vel, current_cell, omega)
   end
 end
-"""
-    MagneticParticle{T<:AbstractFloat}(ic::Vector{T}, omega::T)
-Constructor accepting initial conditions `[x0, y0, φ0]`.
-"""
-function MagneticParticle{T<:AbstractFloat}(ic::Vector{T}, ω::T)
+
+function MagneticParticle{T<:Real}(ic::Vector{T}, ω::Real)
   φ0 = ic[3]
-  pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-  return MagneticParticle{T}(pos, vel, SVector{2,T}(zero(T), zero(T)), ω)
+  pos = SVector{2,Float64}(ic[1:2]); vel = SVector{2,Float64}(cos(φ0), sin(φ0))
+  return MagneticParticle(pos, vel, SVector{2,Float64}(0,0), ω)
 end
-MagneticParticle{T<:AbstractFloat}(x0::T, y0::T, φ0::T, ω::T) =
-MagneticParticle([x0, y0, φ0], ω)
+MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real) = MagneticParticle([x0, y0, φ0], ω)
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
 """
 ```julia
-magnetic2standard(p::MagneticParticle; use_cell = true)
+magnetic2standard(p::MagneticParticle, use_cell = true)
 ```
 Create a standard particle from a `MagneticParticle`.
 """
-function magnetic2standard{T<:AbstractFloat}(p::MagneticParticle{T}; use_cell = true)
+function magnetic2standard(p::MagneticParticle, use_cell = true)
   pos = p.pos
-  cell = ifelse(use_cell, p.current_cell, SVector{T,2}(0,0))
-  Particle(pos, p.vel, cell)
+  cell = use_cell ? current_cell : SVector{Float64,2}(0,0)
+  return Particle(pos, p.vel, cell)
 end
 
 """
 ```julia
-magnetic2standard(p::Particle, omega; use_cell = true)
+magnetic2standard(omega, p::Particle, use_cell = true)
 ```
 Create a magnetic particle from a `Particle`.
 """
-function standard2magnetic{T<:AbstractFloat}(p::Particle{T}, ω::T; use_cell = true)
+function standard2magnetic(ω::Real, p::Particle, use_cell = true)
   pos = p.pos
-  cell = ifelse(use_cell, p.current_cell, SVector{T,2}(0,0))
-  MagneticParticle(pos, p.vel, cell, ω)
+  cell = use_cell ? current_cell : SVector{Float64,2}(0,0)
+  return MagneticParticle(pos, p.vel, cell, ω)
 end
 
-
-"""
-```julia
-cyclotron(omega, p::AbstractParticle)
-```
-Return center and radius of circular motion performed by the particle based on
-`p.pos` and `p.vel`.
-"""
-function cyclotron{T<:AbstractFloat}(ω::T, p::AbstractParticle{T}, use_cell = false)
-  pos = ifelse(use_cell, p.pos + p.current_cell, p.pos)
-  c::SVector{2, T} = p.pos - (1/ω)*[p.vel[2], -p.vel[1]]
-  r = abs(1/ω)
-  return c, r
-end
 
 """
 ```julia
@@ -123,10 +113,10 @@ cyclotron(p::MagneticParticle, use_cell = false)
 Return center and radius of circular motion performed by the particle based on
 `p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
 """
-function cyclotron{T<:AbstractFloat}(p::MagneticParticle{T}, use_cell = false)
+function cyclotron(p::MagneticParticle, use_cell = false)
   ω = p.omega
   pos = ifelse(use_cell, p.pos + p.current_cell, p.pos)
-  c::SVector{2, T} = pos - (1/ω)*[p.vel[2], -p.vel[1]]
+  c::SVector{2, Float64} = pos - (1/ω)*[p.vel[2], -p.vel[1]]
   r = abs(1/ω)
   return c, r
 end
@@ -135,196 +125,181 @@ end
 ## Obstacles
 ####################################################
 """
-    Obstacle{T<:AbstractFloat}
+    Obstacle
 Obstacle supertype.
 """
-abstract Obstacle{T<:AbstractFloat}
+abstract Obstacle
 """
-    Circular{T<:AbstractFloat} <: Obstacle{T}
+    Circular <: Obstacle
 Circular obstacle supertype.
 """
-abstract Circular{T<:AbstractFloat} <: Obstacle{T}
+abstract Circular <: Obstacle
 
 """
-    Disk{T<:AbstractFloat} <: Circular{T}
+    Disk <: Circular
 Disk-like obstacle with propagation allowed outside of the circle.
-# Fields:
-* `c::SVector{2,T}` : Center.
-* `r::T` : Radius.
+## Fields:
+* `c::SVector{2,Float64}` : Center.
+* `r::Float64` : Radius.
 * `name::String` : Some name given for user convenience.
+Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable Disk{T<:AbstractFloat} <: Circular{T}
-    c::SVector{2,T}
-    r::T
+immutable Disk <: Circular
+    c::SVector{2,Float64}
+    r::Float64
     name::String
-    #Inner constructor, do not add {T} after name!
-    function Disk(c::SVector{2,T}, r::T, name::String)
-      new(c, abs(r), name)
+    function Disk(c, r::Real, name::String = "disk")
+      new(SVector{2,Float64}(c), abs(r), name)
     end
-end
-function Disk{T<:AbstractFloat}(center::Vector{T}, radius::T, name::String)
-  Disk{T}(SVector{2, T}(center), radius, name)
 end
 
 """
-    Circle{T<:AbstractFloat} <: Circular{T}
-Disk-like obstacle with propagation allowed inside of the circle.
-# Fields:
-* `c::SVector{2,T}` : Center.
-* `r::T` : Radius.
+    Circle <: Circular
+Disk-like obstacle where the propagation allowed inside of the circle instead of outside
+like `Disk`.
+## Fields:
+* `c::SVector{2,Float64}` : Center.
+* `r::Float64` : Radius.
 * `name::String` : Some name given for user convenience.
+Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable Circle{T<:AbstractFloat} <: Circular{T}
-    c::SVector{2,T}
-    r::T
+immutable Circle <: Circular
+    c::SVector{2,Float64}
+    r::Float64
     name::String
-    #Inner constructor, do not add {T} after name!
-    function Circle(c::SVector{2,T}, r::T, name::String)
-      new(c, abs(r), name)
+    function Circle(c, r::Real, name::String = "circle")
+      new(SVector{2,Float64}(c), abs(r), name)
     end
-end
-function Circle{T<:AbstractFloat}(center::Vector{T}, radius::T, name::String)
-  Circle{T}(SVector{2, T}(center), radius, name)
 end
 
 """
-    Antidot{T<:AbstractFloat} <: Circular{T}
-Disk-like obstacle that allows propagation both inside and outside of the Circle.
+    Antidot <: Circular
+Disk-like obstacle that allows propagation both inside and outside of the disk.
 Used in ray-splitting billiards.
-# Fields:
-* `c::SVector{2,T}` : Center.
-* `r::T` : Radius.
+## Fields:
+* `c::SVector{2,Float64}` : Center.
+* `r::Float64` : Radius.
 * `inside::Bool` : Flag that keeps track whether the particle is inside or outside
 of the disk.
 * `name::String` : Name of the obstacle given for user convenience.
+Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-type Antidot{T<:AbstractFloat} <: Circular{T}
-    c::SVector{2,T}
-    r::T
+type Antidot <: Circular
+    c::SVector{2,Float64}
+    r::Float64
     inside::Bool
     name::String
-    #Inner constructor, do not add {T} after name!
-    function Antidot(c::SVector{2,T}, r::T, inside::Bool, name::String)
-      new(c, abs(r), inside, name)
+    function Antidot(c, r::Real, name::String = "antidot", inside::Bool = false)
+      new(SVector{2,Float64}(c), abs(r), name, inside)
     end
 end
-function Antidot{T<:AbstractFloat}(center::Vector{T}, radius::T, inside::Bool, name::String)
-  Antidot{T}(SVector{2, T}(center), radius, inside, name)
-end
-function Antidot{T<:AbstractFloat}(center::Vector{T}, radius::T, name::String)
-  Antidot{T}(SVector{2, T}(center), radius, false, name)
-end
+
+show(io::IO, w::Circular) =
+    print(io, "$(w.name)\n",
+    "center: $(w.c)\nradius: $(w.ep)")
+
 
 """
-    Wall{T<:AbstractFloat} <: Obstacle{T}
+    Wall <: Obstacle
 Wall obstacle supertype.
 """
-abstract Wall{T<:AbstractFloat} <: Obstacle{T}
+abstract Wall <: Obstacle
 
 """
-    FiniteWall{T<:AbstractFloat} <: Wall{T}
+    FiniteWall{Float64<:AbstractFloat} <: Wall{Float64}
 Wall obstacle imposing specular reflection during collision.
-# Fields
-* `sp::SVector{2,T}` : Starting point of the Wall.
-* `ep::SVector{2,T}` : Ending point of the Wall.
-* `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
-come from before a collision* (pointing towards the inside the billiard table).
-The size of the vector is irrelevant.
+## Fields:
+* `sp::SVector{2,Float64}` : Starting point of the Wall.
+* `ep::SVector{2,Float64}` : Ending point of the Wall.
+* `normal::SVector{2,Float64}` : Normal vector to the wall, pointing to where the particle
+  *will come from before a collision* (pointing towards the inside the billiard table).
+  The size of the vector is irrelevant.
 * `name::String` : Name of the obstacle, e.g. "left wall", given for user convenience.
+Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable FiniteWall{T<:AbstractFloat} <: Wall{T}
-  sp::SVector{2,T}
-  ep::SVector{2,T}
-  normal::SVector{2,T}
+immutable FiniteWall <: Wall
+  sp::SVector{2,Float64}
+  ep::SVector{2,Float64}
+  normal::SVector{2,Float64}
   name::String
-  #Inner constructor, do not add {T} after name
-  function FiniteWall(sp::SVector{2,T}, ep::SVector{2,T},
-                      normal::SVector{2,T}, name::String)
+  #Inner constructor, do not add {Float64} after name
+  function FiniteWall(sp::SVector{2,Float64}, ep::SVector{2,Float64},
+                      normal::SVector{2,Float64}, name::String)
     d = dot(normal, ep-sp)
-    if d != zero(T)
+    if d != 0.0
       error("Normal vector is not actually normal to the wall")
     end
     new(sp, ep, normal, name)
   end
 end
-function FiniteWall{T<:AbstractFloat}(sp::Vector{T}, ep::Vector{T},
-  n::Vector{T}, name::String)
-  # Be sure you have {T} after the name of the Constructor call because the type is called.
-  FiniteWall{T}(SVector{2, T}(sp), SVector{2, T}(ep), SVector{2, T}(n), name)
-end
-function NullWall{T<:AbstractFloat}(::Type{T})
-  a = 1000.0*one(T)
-  b = one(T)
-  o = zero(T)
-  FiniteWall([a, o], [a, b],  [-b, o], "Null wall")
+function FiniteWall(sp, ep, n, name::String = "finite wall")
+  FiniteWall(SVector{2, Float64}(sp), SVector{2, Float64}(ep), SVector{2, Float64}(n), name)
 end
 
 #pretty print
-show{T}(io::IO, w::FiniteWall{T}) =
-    print(io, "$(w.name) {$T}\n",
+show(io::IO, w::FiniteWall) =
+    print(io, "$(w.name)\n",
     "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
-    PeriodicWall{T<:AbstractFloat} <: Wall{T}
-Wall obstacle that imposes periodic boundary conditions during collision.
-# Fields
-* `sp::SVector{2,T}` : Starting point of the Wall.
-* `ep::SVector{2,T}` : Ending point of the Wall.
-* `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the particle *will
-come from* (to the inside the billiard table). The size of the vector is **important**.
-This vector is added to a particle's `pos` during collision. Therefore the size of the
-normal vector must be correctly associated with the size of the cell. Also, the partners
-(see field `partner`) must have same size in their normal vectors.
+    PeriodicWall <: Wall
+Wall obstacle that imposes periodic boundary conditions upon collision.
+## Fields:
+* `sp::SVector{2,Float64}` : Starting point of the Wall.
+* `ep::SVector{2,Float64}` : Ending point of the Wall.
+* `normal::SVector{2,Float64}` : Normal vector to the wall, pointing to where the particle
+  *will come from* (to the inside the billiard table).
+  The size of the vector is **important**.
+  This vector is added to a particle's `pos` during collision. Therefore the size of the
+  normal vector must be correctly associated with the size of the cell. Also, the partners
+  (see field `partner`) must have same size in their normal vectors.
 * `name::String` : Name of the obstacle, e.g. "left boundary", given for user convenience.
-* `partner::PeriodicWall{T}` : Associated periodic partner of a PeriodicWall. This field is
-undefined during instantiation. It must be defined during the construction of the Billiard
-Table.
+* `partner::PeriodicWall` : Associated periodic partner of a PeriodicWall. This field is
+  undefined during instantiation. It must be defined during the construction of the
+  Billiard Table.
+Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-type PeriodicWall{T<:AbstractFloat} <: Wall{T}
-  sp::SVector{2,T}
-  ep::SVector{2,T}
-  normal::SVector{2,T}
+type PeriodicWall <: Wall
+  sp::SVector{2,Float64}
+  ep::SVector{2,Float64}
+  normal::SVector{2,Float64}
   name::String
-  partner::PeriodicWall{T}
-  function PeriodicWall(sp, ep, normal, name)
-    for el in vcat(sp, ep)
-      el < 0 && error("Negative values are not allowed for periodic wall objects.")
-    end
-    d = abs(dot(normal, ep-sp))
-    if d != zero(T)
+  partner::PeriodicWall
+  function PeriodicWall(sp::SVector{2,Float64}, ep::SVector{2,Float64},
+                        normal::SVector{2,Float64}, name::String)
+    d = dot(normal, ep-sp)
+    if d != 0.0
       error("Normal vector is not actually normal to the wall")
     end
     new(sp, ep, normal, name) # The `partner` field is uninitialized.
   end
 end
 
-"""
-    PeriodicWall{T<:AbstractFloat}(sp::Vector{T}, ep::Vector{T}, n::Vector{T})
-Constructor accepting 3 `Vector{T}` arguments.
-"""
-function PeriodicWall{T<:AbstractFloat}(sp::Vector{T}, ep::Vector{T},
-  n::Vector{T}, name::String)
-  # I have to call the TYPE here. That is why I NEED TO PUT {T}! For functions, I MUST NOT
-  # put {T}!
-  PeriodicWall{T}(SVector{2, T}(sp), SVector{2, T}(ep), SVector{2, T}(n), name)
+function PeriodicWall(sp, ep, n, name::String = "periodic wall")
+  return PeriodicWall(SVector{2, Float64}(sp), SVector{2, Float64}(ep),
+  SVector{2, Float64}(n), name)
 end
-show{T}(io::IO, w::PeriodicWall{T}) =
-    print(io, "$(w.name) {$T}\n",
+
+show(io::IO, w::PeriodicWall) =
+    print(io, "$(w.name)\n",
     "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)\n",
     "periodic partner: $(w.partner.name)")
 
-
 """
 ```julia
-normalvec(obst::Obstacle{T}, position::SVector{2,T})
+normalvec(obst::Obstacle, position::SVector{2,Float64})
 ```
 Return the vector normal to the obstacle from the current particle position (which is
 assumed to be very close to the obstacle's boundary). The normal must be looking towards
 the direction the particle is expected to come from.
 """
-normalvec{T<:AbstractFloat}(disk::Circular{T}, pos::SVector{2,T}) = normalize(pos - disk.c)
-normalvec{T<:AbstractFloat}(disk::Circle{T}, pos::SVector{2,T}) = -normalize(pos - disk.c)
-normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.normal)
+normalvec(disk::Circular, pos::SVector{2,Float64}) = normalize(pos - disk.c)
+normalvec(disk::Circle, pos::SVector{2,Float64}) = -normalize(pos - disk.c)
+normalvec(wall::Wall, pos::SVector{2,Float64}) = normalize(wall.normal)
+function normalvec(a::Antidot, pos::SVector{2,Float64})
+  flag = a.inside ? -1.0 : 1.0
+  flag*normalize(pos - disk.c)
+end
 
 
 ####################################################
@@ -338,11 +313,11 @@ normalvec{T<:AbstractFloat}(wall::Wall{T}, pos::SVector{2,T}) = normalize(wall.n
 Return the **signed** distance between particle `p` and obstacle `o`, based on `p.pos`.
 Positive distance corresponds to the particle being inside the *allowed* region
 of the Obstacle.
-    distance(p::AbstractParticle{T}, bt::Vector{Obstacle{T}})
+    distance(p::AbstractParticle{Float64}, bt::Vector{Obstacle{Float64}})
 Return minimum `distance(p, obst)` for all `obst` in `bt`, which can be negative.
 """
-function distance{T<:AbstractFloat}(p::AbstractParticle{T}, bt::Vector{Obstacle{T}})
-  mindist = convert(T, Inf)
+function distance(p::AbstractParticle, bt::Vector{Obstacle})
+  mindist = Inf
   for obst in bt
     dist = distance(p, obst)
     if dist <= mindist; mindist = dist; end
@@ -350,16 +325,16 @@ function distance{T<:AbstractFloat}(p::AbstractParticle{T}, bt::Vector{Obstacle{
   return mindist
 end
 
-function distance{T<:AbstractFloat}(p::AbstractParticle{T}, w::Wall{T})
+function distance(p::AbstractParticle, w::Wall)
   v1 = p.pos - w.sp
   dot(v1, w.normal)
 end
 
-function distance{T<:AbstractFloat}(p::AbstractParticle{T}, d::Disk{T})
+function distance(p::AbstractParticle, d::Disk)
   norm(p.pos - d.c) - d.r
 end
 
-function distance{T<:AbstractFloat}(p::AbstractParticle{T}, d::Circle{T})
+function distance(p::AbstractParticle, d::Circle)
   d.r - norm(p.pos - d.c)
 end
 
@@ -367,14 +342,14 @@ end
 ## Initial Conditions
 ####################################################
 """
-    cellsize{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
+    cellsize(bt::Vector{Obstacle})
 Return the delimiters `xmin, ymin, xmax, ymax` of the given billiard table.
 Used in `randominside()` and error checking.
 """
-function cellsize{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
+function cellsize(bt::Vector{Obstacle})
 
-  xmin = ymin = T(Inf)
-  xmax = ymax = T(-Inf)
+  xmin = ymin = Inf
+  xmax = ymax = -Inf
   #test if there is Circle in bt:
   if any(x -> isa(x, Circle), bt)
     i = find(x -> isa(x, Circle), bt)
@@ -404,6 +379,7 @@ function cellsize{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
       ymax = max(ymax, ymax2)
     end
     if any(x -> isa(x, PeriodicWall), bt) && [xmin, ymin] != [0,0]
+      #Is the following still valid??? no, right?
       error("Periodic billiard tables must have (0,0) as the bottom left corner.")
     end
   end
@@ -421,12 +397,12 @@ table defined by the vector `bt`. If supplied with a second argument the type of
 the returned particle is `MagneticParticle`, with angular velocity `omega`.
 Else, it is `Particle`.
 """
-function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
+function randominside(bt::Vector{Obstacle})
 
   xmin, ymin, xmax, ymax = cellsize(bt)
-  f = convert(T, rand())
+  f = rand()
   while f == 0 || f==1/4 || f==1/2 || f == 3/4
-    f = convert(T, rand())
+    f = rand()
   end
   φ0 = f*2π
 
@@ -446,12 +422,12 @@ function randominside{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
   return p
 end
 
-function randominside{T<:AbstractFloat}(ω::T, bt::Vector{Obstacle{T}})
+function randominside(ω::Real, bt::Vector{Obstacle})
 
   xmin, ymin, xmax, ymax = cellsize(bt)
-  f = convert(T, rand())
+  f = rand()
   while f == 0 || f==1/4 || f==1/2 || f == 3/4
-    f = convert(T, rand())
+    f = rand()
   end
   φ0 = f*2π
 
@@ -470,3 +446,4 @@ function randominside{T<:AbstractFloat}(ω::T, bt::Vector{Obstacle{T}})
 
   return p
 end
+randominside(bt::Vector{Obstacle}, ω::Real) = randominside(ω, bt)

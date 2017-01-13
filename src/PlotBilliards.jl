@@ -26,7 +26,7 @@ function plot_obstacle(w::PeriodicWall; color = "purple")
   PyPlot.show()
 end
 
-function plot_billiard{T<:AbstractFloat}(bt::Vector{Obstacle{T}})
+function plot_billiard(bt::Vector{Obstacle})
   for obst in bt
     plot_obstacle(obst)
   end

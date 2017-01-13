@@ -5,10 +5,10 @@
     billiard_rectangle(x=1.0, y=1.0)
 Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`).
 """
-function billiard_rectangle{T<:AbstractFloat}(x::T=1.0, y::T=1.0)
+function billiard_rectangle(x=1.0, y=1.0)
 
-  bt = Obstacle{T}[]
-  o = zero(T)
+  bt = Obstacle[]
+  o = 0.0
   sp = [o,o]; ep = [o, y]; n = [x,o]
   leftw = FiniteWall(sp, ep, n, "Left wall")
   sp = [x,o]; ep = [x, y]; n = [-x,o]
@@ -25,7 +25,7 @@ end
 Return a vector of obstacles that defines a closed Sinai billiard of size (`x`, `y`) with
 a disk in its center, of radius `r`.
 """
-function billiard_sinai{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
+function billiard_sinai(r, x=1.0, y=1.0)
   bt = billiard_rectangle(x,y)
   c = [x/2, y/2]
   centerdisk = Disk(c, r, "Disk")
@@ -37,9 +37,9 @@ end
 Return a vector of obstacles that defines a periodic Sinai billiard (aka Lorentz Gas)
 of size (`x`, `y`) with a disk in its center, of radius `r`.
 """
-function billiard_sinai_periodic{T<:AbstractFloat}(r::T, x::T=one(T), y::T=one(T))
-  bt = Obstacle{T}[]
-  o = zero(T)
+function billiard_sinai_periodic(r, x=1.0, y=1.0)
+  bt = Obstacle[]
+  o = 0.0
 
   if r>=x/2 || r>=y/2
     error("Disk radius too big for a periodic Sinai billiard.")
