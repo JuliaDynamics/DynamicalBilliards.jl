@@ -26,7 +26,7 @@ if check_circle
   println("-the particle is always inside the Circle")
   for r in [0.4, 1.5]
     println("...for r = ", r)
-    bt = Obstacle{Float64}[Circle([0.5,0.5], r, "Circle")]
+    bt = Obstacle[Circle([0.5,0.5], r, "Circle")]
     d = bt[1]
     c = d.c
     tt=10000.0
@@ -106,7 +106,7 @@ if check_magnetic_sinai
       tt=1000.0
       partnum = 1000
       for i in 1:partnum
-        p = randominside(bt, ω)
+        p = randominside(ω, bt)
 
         t, poss, vels = evolve!(p, bt, tt)
         if t[end] == Inf
@@ -225,7 +225,7 @@ if check_magnetic_sinai_periodic
       minddist = min(x, y)
 
       for i in 1:partnum
-        p = randominside(bt, ω)
+        p = randominside(ω, bt)
         ts, poss, vels = evolve!(p, bt, tt)
         if ts[end] == Inf
           continue
@@ -264,7 +264,7 @@ if check_magnetic_pinned
       partnum = 2000
 
       for i in 1:partnum
-        p = randominside(bt, ω)
+        p = randominside(ω, bt)
         ts, poss, vels = evolve!(p, bt, tt)
         if ts[end] == Inf
           error("Pinned particle for ω=$ω ")
