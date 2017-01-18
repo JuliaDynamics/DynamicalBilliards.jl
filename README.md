@@ -39,21 +39,21 @@ p = randominside(bt)
 ```
 Now you are ready to evolve this particle:
 ```julia
-t, poss, vels = evolve!(p, bt, 1000.0)
+ct, poss, vels = evolve!(p, bt, 1000.0)
 ```
 The return values of the `evolve!()` function need some brief explaining: As noted by the "!" at the end of the function, it changes its argument `p` (specifically, it updates almost all the fields of `p`).
 Most importantly however, this function also returns the main output expected by a billiard
 system. This output is a tuple of three vectors:
-* `t::Vector` : Collision times.
+* `ct::Vector` : Collision times.
 * `poss::Vector{SVector{2}}` : Positions during collisions.
-* `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions.
+* `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions (i.e. reflections).
 The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
 state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[0], vels[0]` are
 the initial conditions.
 
 If this output is not convenient for you, the function `construct(t, poss, vels, dt=0.1*one(T))` is provided, which constructs the (continuous) timeseries of the position and velocity, as well as the time-vector, when given the main output of `evolve!()`:
 ```julia
-xt, yt, vxt, vyt, ts = construct(t, poss, vels)
+xt, yt, vxt, vyt, ts = construct(ct, poss, vels)
 ```
 or, if you want to use the fancy ellipsis operator, you can do:
 ```julia
@@ -70,12 +70,14 @@ p.omega   # 0.5
 ```
 To propagate the particle you use the same functions
 ```
-t, poss, vels = evolve!(p, bt, 1000.0)
-xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels)
+ct, poss, vels, ω = evolve!(p, bt, 1000.0)  #evolve for magnetic also returns ω
+xt, yt, vxt, vyt, ts = construct(ct, poss, vels, ω, dt)
 # or equivalently: 
-xt, yt, vxt, vyt, ts = construct(ω, evolve!(p, bt, 1000.0)...)
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0)..., dt)
 ```
-As you can see, the second difference is that the additional argument of the angular velocity must also be provided to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions. (Note: the `ω` argument is always given as the first argument, for consistency)
+As you can see, the second difference is that the additional argument of the angular velocity must also be provided to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions. (Note: `evolve!()` returns 4 arguments for magnetic propagation, making the ellipsis syntax extremely useful!).
+
+The final optional argument `dt` is the time-step at which the timeseries are constructed (since they are made up of sines and cosines).
 
 ## Visualizing
 *(all plotting in* `DynamicalBilliards` *is currently done through the* `PyPlot` *package. In a future update a switch will happen towards* `Plots.jl` *)*
@@ -103,7 +105,7 @@ d3 = Disk([1.2, 0.8], 0.1, "Small Disk")
 w1 = FiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
 push!(bt, d1, d2, d3, w1)
 ω = 2.0
-p = randominside(ω, bt)
+p = randominside(bt, ω)
 
 plot_billiard(bt)
 axis("off")
