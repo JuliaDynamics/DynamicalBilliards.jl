@@ -88,7 +88,7 @@ It is a map of the Obstacle index within the billiard table to the
 ray-splitting functions: (φ is the angle of incidence)
 * T(φ, where, ω) : Transmission probability.
 * θ(φ, where, ω) : Transmission (aka diffraction) angle.
-* new_ω(old_ω, where) : Angular velocity after transmission.
+* new_ω(ω, where) : Angular velocity after transmission.
 
 An example implementation of Ray-Splitting is shown in the Visualizing section.
 
