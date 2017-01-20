@@ -1,14 +1,65 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
-
+export resolvecollision!, collisiontime, propagate!, evolve!, construct
 ####################################################
 ## Mathetical/Convenience Functions
 ####################################################
+"""
+    acos1mx(x)
+Approximate arccos(1 - x) for x very close to 0.
+"""
 acos1mx(x) = sqrt(2x) + sqrt(x)^3/(6sqrt(2))
+"""
+```julia
+cross2D(a, b) = a[1]*b[2]-a[2]*b[1]
+```
+Return the 3rd element of the cross product of `a` and `b`, assuming their
+extention from 2D to 3D arrays simply pushes a 0 at their ends.
+
+Equivalent to the determinant of the matrix [a b].
+"""
+cross2D{T<:Real, P<:Real}(a::SVector{2,T}, b::SVector{2,P}) = a[1]*b[2]-a[2]*b[1]
+cross2D(a::AbstractArray, b::AbstractArray) = a[1]*b[2]-a[2]*b[1]
+
 
 ####################################################
 ## Resolve Collisions
 ####################################################
-#All these functions will become dependend on velocity angle for ray-splitting billiards.
+"""
+```julia
+lct(p::AbstractParticle, o::Obstacle, distance)
+```
+Return the Linearized Collision Time (`-dist/dot(p.vel, normal)`) between particle
+and obstacle, given the calculated distance between them.
+"""
+function lct(p::AbstractParticle, o::Obstacle, dist::Real)
+  n = normalvec(o, p.pos)
+  t = -dist/dot(p.vel, n)
+end
+
+"""
+```julia
+relocate!(p::AbstractParticle, o::Obstacle, distance)
+```
+Relocate the particle `p` with respect to the obstacle `o` by a total amount of
+of `10lct(p, o, distance)`.
+"""
+function relocate!(p::AbstractParticle, o::Obstacle, dist)
+  dt = 10lct(p, o, dist) #linearized collision time
+  # Check the orders of magnitude:
+  vxt=p.vel[1]*dt; vyt= p.vel[2]*dt
+  #exponent of velocity*time
+  ve = exponent(min(abs(vxt), abs(vyt)))*0.3010299956639812
+  #exponent of position
+  pe = exponent(max(abs(p.pos[1]), abs(p.pos[2])))*0.3010299956639812
+  # Ensure that the position will be changed
+  if pe - ve > 16.0
+    dt *= 10^(pe - ve - 16.0)
+  end
+  # Propagate backwards:
+  p.pos += [p.vel[1]*dt, p.vel[2]*dt]
+  return dt
+end
+
 """
 ```julia
 specular!(p::AbstractParticle, o::Obstacle)
@@ -22,6 +73,20 @@ function specular!(p::AbstractParticle, o::Obstacle)
 end
 
 """
+```julia
+periodicity!(p::AbstractParticle, w::PeriodicWall)
+```
+Perform periodicity conditions of `w` on `p`, i.e. set `p.pos += w.normal` and
+`p.current_cell -= w.normal`.
+"""
+function periodicity!(p::AbstractParticle, w::PeriodicWall)
+  p.pos += w.normal
+  p.current_cell -= w.normal
+end
+
+# resolvecollision!() will depend on velocity angle for ray-splitting billiards.
+
+"""
     resolvecollision!(p::AbstractParticle, o::Obstacle)
 Resolve the collision between particle `p` and obstacle `o`. If the obstacle is not a
 periodic wall, the function performs specular reflection. If it is a periodic wall, it
@@ -32,73 +97,35 @@ side of the billiard table, in order to avoid particle leakage.
 Specifically, it calculates the distance from particle and obstacle and,
 depending on the obstacle type, makes necessary adjustments by propagating
 the particle forwards or backwards in time using **linear** motion.
+
+    resolvecollision!(p, o, T::Function, θ::Function, new_ω::Function)
+This is the ray-splitting implementation. The three functions given are drawn from the
+ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
+incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
+(See the section "Ray-Splitting" of the official documentation for more info.)
 """
 function resolvecollision!(p::AbstractParticle, o::Obstacle)
-
   dist = distance(p, o)
   dt = 0.0
 
   if dist < 0.0
-    dt = 10lct(p, o, dist) #linearized collision time, should be negative
-    # Check the orders of magnitude:
-    vxt=p.vel[1]*dt; vyt= p.vel[2]*dt
-    #exponent of velocity*time
-    ve = exponent(min(abs(vxt), abs(vyt)))*0.3010299956639812
-    #exponent of position
-    pe = exponent(max(abs(p.pos[1]), abs(p.pos[2])))*0.3010299956639812
-    # Ensure that the position will be changed
-    if pe - ve > 16.0
-      dt *= 10^(pe - ve - 16.0)
-    end
-    # Propagate backwards:
-    p.pos += [p.vel[1]*dt, p.vel[2]*dt]
+    dt = relocate!(p, o, dist)
   end
   # Perform specular reflection:
-  n = normalvec(o, p.pos)
-  p.vel = p.vel - 2*dot(n, p.vel)*n
+  specular!(p, o)
   return dt
 end
 
 function resolvecollision!(p::AbstractParticle, o::PeriodicWall)
+  dist = distance(p, o)
+  dt = 0.0
 
-    dist = distance(p, o)
-    dt = 0.0
-
-    if dist > 0.0
-      dt = 10lct(p, o, dist) #linearized collision time, should be positive
-      # Check the orders of magnitude:
-      vxt=p.vel[1]*dt; vyt= p.vel[2]*dt
-      #exponent of velocity*timeL
-      ve = exponent(min(abs(vxt), abs(vyt)))*0.3010299956639812
-      #exponent of position
-      pe = exponent(max(abs(p.pos[1]), abs(p.pos[2])))*0.3010299956639812
-      # Ensure that the position will be changed
-      if pe - ve > 16
-        dt *= 10^(pe - ve - 16)
-      end
-      # Propagate forwards:
-      p.pos += [p.vel[1]*dt, p.vel[2]*dt]
-    end
+  if dist > 0.0
+    dt = relocate!(p, o, dist)
+  end
   #perform periodicity
-  p.pos += o.normal
-  p.current_cell -= o.normal
+  periodicity!(p, o)
   return dt
-end
-
-
-####################################################
-## Linearized collision times
-####################################################
-"""
-```julia
-lct(p::AbstractParticle, o::Obstacle, distance)
-```
-Return the Linearized Collision Time (`-dist/dot(p.vel, normal)`) between particle
-and obstacle, given the calculated distance between them.
-"""
-function lct(p::AbstractParticle, o::Obstacle, dist::Float64)
-  n = normalvec(o, p.pos)
-  t = -dist/dot(p.vel, n)
 end
 
 ####################################################
@@ -155,6 +182,60 @@ function collisiontime(p::Particle, d::Disk)
   t <=0 ? Inf : t
 end
 
+function collisiontime(p::Particle, d::Antidot)
+
+  dotp = dot(p.vel, normalvec(d, p.pos))
+  if d.where == true
+    # Gotta rethink thins for ray spliting
+    dotp >=0 && return Inf
+  end
+
+  dc = p.pos - d.c
+  B = dot(p.vel, dc)         #velocity towards circle center: B < 0
+  C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+  Δ = B^2 - C
+
+  Δ <= 0 && return Inf
+  sqrtD = sqrt(Δ)
+
+  # Closest point (may be in negative time):
+  if dotp < 0
+    t = -B - sqrtD
+    #this makes the phi error come back:
+    # if t <= 1e-12
+    #   t = -B + sqrtD
+    # end
+  else
+    t = -B + sqrtD
+  end
+
+
+  # If collision time is negative, return Inf:
+  t <= 0.0 ? Inf : t
+end
+
+function collisiontime_NEW(p::Particle, d::Antidot)
+
+  dist = sqrt(dot(p.pos, d.c)) - d.r
+
+  dc = p.pos - d.c
+  B = dot(p.vel, dc)         #velocity towards circle center: B < 0
+  C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+  Δ = B^2 - C
+
+  Δ <= 0 && return Inf
+  sqrtD = sqrt(Δ)
+
+  # Closest point (may be in negative time):
+  if dist <= 0
+    t = -B + sqrtD
+  else
+    t = -B - sqrtD
+  end
+
+  # If collision time is negative, return Inf:
+  t <= 0.0 ? Inf : t
+end
 
 function collisiontime(p::Particle, d::Circle)
 
@@ -202,46 +283,63 @@ end
 
 """
     evolve!(p::AbstractParticle, bt::Vector{Obstacle}, ttotal)
-Evolve the given particle `p` inside the billiard table `bt` for a total amount of time
-`ttotal`. Return the states of the particle between collisions.
+Evolve the given particle `p` inside the billiard table `bt`
+for a total amount of time `ttotal`.
+Return the states of the particle between collisions.
 
-# Calling
+The evolution takes into account the particle's Type.
+E.g. if `typeof(p) == MagneticParticle` then magnetic evolution will take place.
+
+## Calling
 Call the function like:
-`t, poss, vels = evolve!(p, bt, ttotal)`
+```julia
+t, poss, vels, (ω)* = evolve!(p, bt, ttotal)
+```
 (see "Returns" section for more)
 
 To get the position, velocity and time timeseries from the above output,
 use the function `construct`:
-`xt, yt, vxt, vyt, ts = construct(t, poss, vels)`
-for straight propagation, and:
-`xt, yt, vxt, vyt, ts = construct(omega, t, poss, vels)`
-for magnetic propagation, with `omega = p.omega` the angular velocity of the particle.
+`xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ttotal)...)`
 
-# Returns
-    (t::Vector, poss::Vector{SVector{2}}, vels::Vector{SVector{2}})
+## Returns
 As noted by the "!" at the end of the function, it changes its argument `p` (particle).
 Most importantly however, this function also returns the main output expected by a billiard
-system. This output is a tuple of three vectors:
-* `t::Vector` : Collision times.
+system. This output is a tuple of 3 (or 4) vectors:
+* `ct::Vector{Float64}` : Collision times.
 * `poss::Vector{SVector{2}}` : Positions during collisions.
 * `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions.
+* `ω`, either `Float64` or `Vector{Float64}` : Angular velocity(/ies).
+In the case of straight propagation, only the first 3 are returned.
 
-The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
-state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[0], vels[0]` are
-the initial conditions.
+In the case of magnetic propagation, the 4th value is returned as well. This is either the
+angular velocity of the particle (`Float64`), or in the case of ray-splitting it is
+a vector of the angular velocities at each time step (`Vector`).
+
+The time `ct[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
+state `poss[i-1], vels[i-1]`. That is why `ct[1]` is always 0 since `poss[0], vels[0]` are
+the initial conditions. The angular velocity ω[i] is the one the particle has while
+propagating from state `poss[i], vels[i]` to `i+1`.
 
 Notice that at any point, the velocity vector `vels[i]` is the one obtained **after**
 the specular reflection of the (i-1)th collision.
 The function `construct` takes that into account.
 
-# Ray-splitting billiards
+## Ray-splitting billiards
+No matter how complex ray-splitting processes you want, and irrespectively of
+how many obstacles in the billiard table can perform ray-splitting, there is only
+a single difference on the main function call:
+The `evolve!()` function is supplemented with a fourth argument,
+    ray_splitter::Dict{Int, Vector{Function}}
+This dictionary object handles all ray-splitting processes in the billiard system.
+It is a map of the Obstacle index within the billiard table to the
+ray-splitting functions: (φ is the angle of incidence)
+* T(φ, where, ω) : Transmission probability.
+* θ(φ, where, ω) : Transmission (aka diffraction) angle.
+* new_ω(old_ω, where) : Angular velocity after transmission.
 
-# Implementation
-The function propagates the particle from obstacle to obstacle. At each step the collision
-time between all obtacles is calculated and the minimum one is chosen. The particle is
-propagated for this amount of time and then the collision between the particle and the
-appropriate object is resolved. The loop then begins anew, until the given `ttotal` is
-*reached or exceeded* (since only the time between collisions is measured).
+For more information and instructions on defining these functions, please
+visit the sections "Implementation" and/or "Ray-Splitting"
+at the official documentation.
 """
 function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
 
@@ -268,7 +366,6 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
     end#obstacle loop
 
     propagate!(p, tmin)
-    prev_obst = (typeof(colobst) <: PeriodicWall ? colobst.partner : colobst)
     dt = resolvecollision!(p, colobst)
     t_to_write += tmin + dt
 
@@ -294,27 +391,32 @@ end
 
 """
 ```julia
-construct(t::Vector, poss::Vector{SVector{2}}, vels::Vector{SVector{2}})
-construct(omega, t, poss, vels, dt=0.01)
+construct(ct, poss, vels[, ω][, dt=0.01])
 ```
 Given the main output of this package (see `evolve!()` function) construct the timeseries
 of the position and velocity, as well as the time vector.
 
-# Calling
+In case of not given ω (or ω == 0), straight construction takes place.
+In case of ω != 0 or in case of ω::Vector{Real} magnetic construction takes place.
+
+The additional optional argument of `dt` (only valid for Magnetic construction)
+is the timestep with which the timeseries are constructed.
+
+## Calling
 Call this function like:
 ```julia
-xt, yt, vxt, vyt, ts = construct(t, poss, vels)
-xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels, dt)
+# Straight propagation:
+xt, yt, vxt, vyt, ts = construct(ct, poss, vels)
+# Magnetic propagation:
+xt, yt, vxt, vyt, ts = construct(ct, poss, vels, ω, dt)
+# Any-kind-of propagation (skip dt for straight):
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ttotal[, ray_splitter])..., dt)
 ```
-for straight and for magnetic propagation respectively.
-(`ω = p.omega` the angular velocity of the particle)
+There is no difference in the `construct` call for Ray-Splitting billiards if one
+uses the awesome ellipsis operator of Julia. The reason for that is that `evolve!()`
+also returns the vector of angular velocities when necessary.
 
-The optional argument `dt` settles the frequency points will be written in the output
-vectors.
-
-# Ray-splitting billiards
-
-# Returns
+## Returns
 A tuple of the following:
 * xt::Vector{Float64} : x position time-series
 * yt::Vector{Float64} : y position time-series
@@ -386,7 +488,7 @@ function realangle(p::MagneticParticle, o::Obstacle,
     # Get "side" of i:
     PI = i - P0
     side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
-    # Get angle until i (positive number between 0 and π)
+    # Get angle until i (positive number between 0 and 2π)
     side < 0 && (θprime = abs(2π-θprime))
     # Set minimum angle (first collision)
     if θprime < θ
@@ -452,8 +554,7 @@ function collisiontime(p::MagneticParticle, o::Circular)
 end
 
 
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
-                 ttotal::Float64, dt::Float64=0.05)
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
 
   ω = p.omega
   rt = Float64[]
@@ -510,12 +611,16 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       t_to_write = 0.0
     end
   end#time loop
-  return (rt, rpos, rvel)
+  return (rt, rpos, rvel, ω)
 end
 
-function construct(ω::Real, t::Vector{Float64},
-  poss::Vector{SVector{2,Float64}}, vels::Vector{SVector{2,Float64}}, dt=0.01)
+function construct(t::Vector{Float64},  poss::Vector{SVector{2,Float64}},
+  vels::Vector{SVector{2,Float64}}, ω::Real, dt=0.01)
 
+
+  if ω == 0
+    return construct(t, poss, vels)
+  end
   xt = [poss[1][1]]
   yt = [poss[1][2]]
   vxt= [vels[1][1]]

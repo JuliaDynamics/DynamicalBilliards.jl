@@ -1,7 +1,9 @@
 using StaticArrays
 import Base.show
-tofloats(args...) = (convert(Float64, x) for x in args) #this is a generator
-# in version 0.6 use tofloats(args...) = Float64.(args...)
+export AbstractParticle, Particle, MagneticParticle, magnetic2standard, standard2magnetic,
+cyclotron, Obstacle, Circular, Disk, Antidot, Wall, FiniteWall, PeriodicWall, normalvec,
+distance, randominside
+
 ####################################################
 ## Particles
 ####################################################
@@ -95,7 +97,7 @@ end
 
 """
 ```julia
-magnetic2standard(omega, p::Particle, use_cell = true)
+standard2magnetic(omega, p::Particle, use_cell = true)
 ```
 Create a magnetic particle from a `Particle`.
 """
@@ -179,24 +181,24 @@ Used in ray-splitting billiards.
 ## Fields:
 * `c::SVector{2,Float64}` : Center.
 * `r::Float64` : Radius.
-* `inside::Bool` : Flag that keeps track whether the particle is inside or outside
-of the disk.
+* `where::Bool` : Flag that keeps track of where the particle is currently propagating.
+`true` stands for *outside* the disk, `false` for *inside* the disk.
 * `name::String` : Name of the obstacle given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
 type Antidot <: Circular
     c::SVector{2,Float64}
     r::Float64
-    inside::Bool
+    where::Bool
     name::String
-    function Antidot(c, r::Real, name::String = "antidot", inside::Bool = false)
-      new(SVector{2,Float64}(c), abs(r), name, inside)
+    function Antidot(c, r::Real, where::Bool = true, name::String = "antidot")
+      new(SVector{2,Float64}(c), abs(r), where, name)
     end
 end
 
 show(io::IO, w::Circular) =
     print(io, "$(w.name)\n",
-    "center: $(w.c)\nradius: $(w.ep)")
+    "center: $(w.c)\nradius: $(w.r)")
 
 
 """
@@ -287,19 +289,18 @@ show(io::IO, w::PeriodicWall) =
 
 """
 ```julia
-normalvec(obst::Obstacle, position::SVector{2,Float64})
+normalvec(obst::Obstacle, position)
 ```
-Return the vector normal to the obstacle from the current particle position (which is
-assumed to be very close to the obstacle's boundary). The normal must be looking towards
-the direction the particle is expected to come from.
+Return the vector normal to the obstacle at the given position (which is
+assumed to be very close to the obstacle's boundary).
+
+The normal vector of any Obstacle must be looking towards
+the direction a particle is expected to come from.
 """
-normalvec(disk::Circular, pos::SVector{2,Float64}) = normalize(pos - disk.c)
-normalvec(disk::Circle, pos::SVector{2,Float64}) = -normalize(pos - disk.c)
-normalvec(wall::Wall, pos::SVector{2,Float64}) = normalize(wall.normal)
-function normalvec(a::Antidot, pos::SVector{2,Float64})
-  flag = a.inside ? -1.0 : 1.0
-  flag*normalize(pos - disk.c)
-end
+normalvec(disk::Circular, pos) = normalize(pos - disk.c)
+normalvec(disk::Circle, pos) = -normalize(pos - disk.c)
+normalvec(wall::Wall, pos) = normalize(wall.normal)
+normalvec(a::Antidot, pos) = (2*Int(a.where)- 1)*normalize(pos - a.c)
 
 
 ####################################################
@@ -308,11 +309,12 @@ end
 # This should not be exported
 """
 ```julia
-  distance(p::AbstractParticle, o::Obstacle)
-  ```
+distance(p::AbstractParticle, o::Obstacle)
+```
 Return the **signed** distance between particle `p` and obstacle `o`, based on `p.pos`.
-Positive distance corresponds to the particle being inside the *allowed* region
-of the Obstacle.
+Positive distance corresponds to the particle being on the *allowed* region
+of the Obstacle. E.g. for a Disk, the distance is positive when the particle is outside of
+the disk, negative otherwise.
     distance(p::AbstractParticle{Float64}, bt::Vector{Obstacle{Float64}})
 Return minimum `distance(p, obst)` for all `obst` in `bt`, which can be negative.
 """
@@ -330,13 +332,13 @@ function distance(p::AbstractParticle, w::Wall)
   dot(v1, w.normal)
 end
 
-function distance(p::AbstractParticle, d::Disk)
-  norm(p.pos - d.c) - d.r
+distance(p::AbstractParticle, d::Disk) = norm(p.pos - d.c) - d.r
+distance(p::AbstractParticle, d::Circle) = d.r - norm(p.pos - d.c)
+
+function distance(p::AbstractParticle, a::Antidot)
+  (2*Int(a.where)- 1)*(norm(p.pos - a.c) - a.r)
 end
 
-function distance(p::AbstractParticle, d::Circle)
-  d.r - norm(p.pos - d.c)
-end
 
 ####################################################
 ## Initial Conditions
@@ -351,6 +353,27 @@ function cellsize(bt::Vector{Obstacle})
   xmin = ymin = Inf
   xmax = ymax = -Inf
   #test if there is Circle in bt:
+  happened = false
+  if any(x -> isa(x, Antidot), bt)
+    i = find(x -> isa(x, Antidot), bt)
+    for j in i
+      if bt[j].where == true; continue; end
+      xmin2 = bt[j].c[1] -  bt[j].r
+      ymin2 = bt[j].c[2] -  bt[j].r
+      xmax2 = bt[j].c[1] +  bt[j].r
+      ymax2 = bt[j].c[2] +  bt[j].r
+
+      xmin = min(xmin, xmin2)
+      ymin = min(ymin, ymin2)
+      xmax = max(xmax, xmax2)
+      ymax = max(ymax, ymax2)
+      happened = true
+    end
+    if happened
+      return xmin, ymin, xmax, ymax
+    end
+  end
+
   if any(x -> isa(x, Circle), bt)
     i = find(x -> isa(x, Circle), bt)
     for j in i
@@ -366,6 +389,7 @@ function cellsize(bt::Vector{Obstacle})
     end
     return xmin, ymin, xmax, ymax
   end
+
   #Else, use the walls:
   for obst in bt
     if typeof(obst) <: Wall
@@ -389,8 +413,7 @@ end
 
 """
 ```julia
-randominside(bt::Vector{Obstacle})
-randominside(bt::Vector{Obstacle}, omega::Real)
+randominside(bt::Vector{Obstacle}[, omega::Real])
 ```
 Return a particle with correct (allowed) initial conditions inside the given billiard
 table defined by the vector `bt`. If supplied with a second argument the type of
@@ -411,7 +434,7 @@ function randominside(bt::Vector{Obstacle})
   p = Particle([xp, yp, φ0])
 
   dist = distance(p, bt)
-  while dist <= 0.0
+  while dist <= 1e-12
 
     xp = rand()*(xmax-xmin) + xmin
     yp = rand()*(ymax-ymin) + ymin
@@ -423,6 +446,10 @@ function randominside(bt::Vector{Obstacle})
 end
 
 function randominside(ω::Real, bt::Vector{Obstacle})
+
+  if ω == 0
+    return randominside(bt)
+  end
 
   xmin, ymin, xmax, ymax = cellsize(bt)
   f = rand()
@@ -436,7 +463,7 @@ function randominside(ω::Real, bt::Vector{Obstacle})
   p = MagneticParticle([xp, yp, φ0], ω)
 
   dist = distance(p, bt)
-  while dist <= 0.0
+  while dist <= 1e-12
 
     xp = rand()*(xmax-xmin) + xmin
     yp = rand()*(ymax-ymin) + ymin

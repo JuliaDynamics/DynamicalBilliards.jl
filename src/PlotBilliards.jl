@@ -1,5 +1,7 @@
 using PyPlot
 
+export plot_obstacle, plot_particle, plot_billiard, plot_cyclotron,
+plot_evolution
 ####################################################
 ## Plot Billiards
 ####################################################
@@ -11,6 +13,12 @@ end
 
 function plot_obstacle(d::Circle; color = "black")
   circle1 = PyPlot.plt[:Circle](d.c, d.r, color=color, fill=false, lw=3.0)
+  PyPlot.gca()[:add_artist](circle1)
+  PyPlot.show()
+end
+
+function plot_obstacle(d::Antidot; color = "red")
+  circle1 = PyPlot.plt[:Circle](d.c, d.r, color=color, fill=false, lw=1.0)
   PyPlot.gca()[:add_artist](circle1)
   PyPlot.show()
 end
