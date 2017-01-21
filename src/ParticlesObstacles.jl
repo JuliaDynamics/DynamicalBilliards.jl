@@ -228,7 +228,7 @@ immutable FiniteWall <: Wall
   function FiniteWall(sp::SVector{2,Float64}, ep::SVector{2,Float64},
                       normal::SVector{2,Float64}, name::String)
     d = dot(normal, ep-sp)
-    if d != 0.0
+    if abs(d) >= 1e-14
       error("Normal vector is not actually normal to the wall")
     end
     new(sp, ep, normal, name)
@@ -270,7 +270,7 @@ type PeriodicWall <: Wall
   function PeriodicWall(sp::SVector{2,Float64}, ep::SVector{2,Float64},
                         normal::SVector{2,Float64}, name::String)
     d = dot(normal, ep-sp)
-    if d != 0.0
+    if abs(d) >= 1e-14
       error("Normal vector is not actually normal to the wall")
     end
     new(sp, ep, normal, name) # The `partner` field is uninitialized.
