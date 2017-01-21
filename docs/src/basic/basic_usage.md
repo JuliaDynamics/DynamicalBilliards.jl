@@ -93,14 +93,12 @@ ray-splitting functions: (φ is the angle of incidence)
 * θ(φ, where, ω) : Transmission (aka diffraction) angle.
 * new_ω(ω, where) : Angular velocity after transmission.
 
-Assuming you have defined a billiard table and a ray-splitter dictionary, the implementation is exactly the same as in the two previous cases:
+Assuming you have defined a billiard table and a ray-splitter dictionary, the implementation is exactly the same as in the two previous cases: the ray-splitting dictionary is passed to `evolve!()` as a fourth argument.
 ```julia
 ray_splitter = Dict(5 => [foo, bar, baz])
 p = randominside(bt, 4.0)
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)...)
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., dt = 0.01)
 ```
-
-An example implementation of Ray-Splitting is shown in the Visualizing section.
 
 For more information and instructions on defining the "ray_splitter" dictionary
 please visit the "Ray-Splitting" tutorial here.
