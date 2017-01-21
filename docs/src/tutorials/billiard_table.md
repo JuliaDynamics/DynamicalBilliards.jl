@@ -24,12 +24,13 @@ hexver = hexagon_vertex(2.0)
 for i in eachindex(hexver)
   starting = hexver[i]
   ending = hexver[mod1(i+1, length(hexver))]
-  normal = - (ending + starting)/2
+  w = ending - starting
+  normal = [-w[2], w[1]]
   wall = FiniteWall(starting, ending, normal, "wall $i")
   push!(bt, wall)
 end
 ```
-The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the user because it must point towards where the particle is expected to come from. In this case this is very easy, since the normal has to simply point towards the origin.
+The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the user because it must point towards where the particle is expected to come from. If `w` is the vector (wall) pointing from start- to end-point then the vector `[-w[2], w[1]]` is pointing to the left of `w` and the vector `[w[2], -[w1]]` is pointing to the right. Both are normal to `w`, but you have to know which one to pick. In this case this is very easy, since the normal has to simply point towards the origin.
 
 We add a disk by specifying a center and radius (and optionally a name): 
 ```julia
