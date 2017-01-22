@@ -37,7 +37,7 @@ system. This output is a tuple of three vectors:
 * `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions (i.e. reflections).
 
 The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
-state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[0], vels[0]` are
+state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[1], vels[1]` are
 the initial conditions.
 
 If this output is not convenient for you, the function `construct(t, poss, vels)` is provided, 
