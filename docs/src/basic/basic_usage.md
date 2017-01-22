@@ -13,7 +13,7 @@ A billiard table is simply a collection (`Vector`) of `Obstacle`s. The most conv
 one of the pre-defined billiard tables offered by the package. For example, let's create a periodic Sinai 
 billiard with disk radius of 0.3 and with one side of length 2 and one of length 1:
 ```julia
-bt = billiard_sinai_periodic(0.3, 2.0, 1.0)                                                    
+bt = billiard_sinai(0.3, 2.0, 1.0; periodic=true)                                                    
 ```
 (for more information about defining billiard tables see the official documentation here)
 
