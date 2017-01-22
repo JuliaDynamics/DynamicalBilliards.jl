@@ -1,22 +1,21 @@
-# Example.jl Documentation
+# DynamicalBilliards Documentation
 
 ```@contents
 ```
 
-## Functions, Methods, Types
+# Tutorials
+```@contents
+Pages = [
+    "tutorials/billiard_table.md",
+    "tutorials/ray-splitting.md"
+    ]
+Depth = 1
+```
 
-```@docs
-Particle
-MagneticParticle
-magnetic2standard
-standard2magnetic
-cyclotron
-Obstacle
-Disk
-Antidot
-FiniteWall
-PeriodicWall
-normalvec
-distance
-randominside
+# Library
+```@contents
+Pages = [
+    "basic/library.md"
+    ]
+Depth = 2
 ```
