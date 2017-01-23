@@ -6,13 +6,13 @@ longtests = false
 
 # Get tests options:
 if haskey(ENV, "DYNAMICALBILLIARDS_PRINTTEST")
-  if ENV["DYNAMICALBILLIARDS_PRINTTEST") == true
+  if ENV["DYNAMICALBILLIARDS_PRINTTEST"] == true
       printinfo = true
     end
 end
 
 if haskey(ENV, "DYNAMICALBILLIARDS_LONGTEST")
-  if ENV["DYNAMICALBILLIARDS_LONGTEST") == true
+  if ENV["DYNAMICALBILLIARDS_LONGTEST"] == true
       printinfo = true
     end
 end
