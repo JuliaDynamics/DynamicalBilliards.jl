@@ -23,6 +23,9 @@ else
     include("shorttests.jl")
 endst
 
+print("DynamicalBilliards tests started at: ")
+print(Dates.format(now(), "HH:MM:s"), "\n")
+
 # Perform tests:
 @test check_straight_sinai(printinfo = printinfo)
 @test check_magnetic_sinai(printinfo = printinfo)
@@ -33,3 +36,7 @@ endst
 @test check_raysplitting_omega(printinfo = printinfo)
 @test check_raysplitting_periodic(printinfo = printinfo)
 @test check_splitterwall(printinfo = printinfo)
+
+print("DynamicalBilliards tests ended at ")
+println(Dates.format(now(), "HH:MM:s"))
+println("without any errors!!")
