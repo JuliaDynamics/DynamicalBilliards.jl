@@ -11,12 +11,6 @@ function plot_obstacle(d::Disk; color = "green")
   PyPlot.show()
 end
 
-function plot_obstacle(d::Circle; color = "black")
-  circle1 = PyPlot.plt[:Circle](d.c, d.r, color=color, fill=false, lw=3.0)
-  PyPlot.gca()[:add_artist](circle1)
-  PyPlot.show()
-end
-
 function plot_obstacle(d::Antidot; color = "red")
   circle1 = PyPlot.plt[:Circle](d.c, d.r, color=color, fill=false, lw=1.0)
   PyPlot.gca()[:add_artist](circle1)
@@ -25,6 +19,11 @@ end
 
 function plot_obstacle(w::FiniteWall; color = "black")
   PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]], color=color, linewidth = 3.0)
+  PyPlot.show()
+end
+
+function plot_obstacle(w::SplitterWall; color = "red")
+  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]], color=color, linewidth = 2.0)
   PyPlot.show()
 end
 
@@ -65,7 +64,7 @@ end
 
 
 function plot_evolution(p::MagneticParticle, bt, colnumber = 50;
-  sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
+  sleeptime = 0.1, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ω = p.omega
@@ -76,8 +75,7 @@ function plot_evolution(p::MagneticParticle, bt, colnumber = 50;
 
   while i < colnumber
 
-    t, poss, vels = evolve!(p, bt, ε)
-    xt, yt, vxt, vyt, ts = construct(ω, t, poss, vels)
+    xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ε)...)
 
     if i < col_to_plot
       push!(xdata, xt)
@@ -114,7 +112,7 @@ function plot_evolution(p::MagneticParticle, bt, colnumber = 50;
 end
 
 function plot_evolution(p::Particle, bt, colnumber = 50;
-  sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
+  sleeptime = 0.1, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ε = eps()
@@ -124,8 +122,7 @@ function plot_evolution(p::Particle, bt, colnumber = 50;
 
   while i < colnumber
 
-    t, poss, vels = evolve!(p, bt, ε)
-    xt, yt, vxt, vyt, ts = construct(t, poss, vels)
+    xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ε)...)
 
     if i < col_to_plot
       push!(xdata, xt)

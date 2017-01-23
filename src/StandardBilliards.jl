@@ -10,7 +10,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 function billiard_rectangle(x=1.0, y=1.0; periodic = false)
 
   bt = Obstacle[]
-  if periodic == false
+  if !periodic
     o = 0.0
     sp = [o,o]; ep = [o, y]; n = [x,o]
     leftw2 = FiniteWall(sp, ep, n, "Left wall")
@@ -27,14 +27,10 @@ function billiard_rectangle(x=1.0, y=1.0; periodic = false)
     leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
     sp = [x,o]; ep = [x, y]; n = [-x,o]
     rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
-    leftw.partner = rightw
-    rightw.partner = leftw
     sp = [o,y]; ep = [x, y]; n = [o,-y]
     topw = PeriodicWall(sp, ep, n, "Top periodic boundary")
     sp = [o,o]; ep = [x, o]; n = [o,y]
     botw = PeriodicWall(sp, ep, n, "Bottom periodic boundary")
-    topw.partner = botw
-    botw.partner = topw
     push!(bt, leftw, rightw, topw, botw)
   end
   return bt
@@ -51,10 +47,31 @@ function billiard_sinai(r, x=1.0, y=1.0; periodic = false)
   bt = billiard_rectangle(x,y; periodic = periodic)
   if periodic && r>=x/2 || r>=y/2
     es = "Disk radius too big for a periodic Sinai billiard.\n"
-    es*= "Obstacles cannot overlap with `PeriodicWall`s."
+    es*= "Obstacles must not overlap with `PeriodicWall`s."
     error(es)
   end
   c = [x/2, y/2]
   centerdisk = Disk(c, r, "Disk")
   push!(bt, centerdisk)
+end
+
+"""
+    billiard_polygon(n::Int, r, center = [0,0])
+Return a vector of obstacles that defines a regular-polygonal billiard table with `n` sides,
+radius `r` and given `center`.
+"""
+function billiard_polygon(sides::Int, r::Real, center = [0,0])
+  bt = Obstacle[]
+  verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
+  for i in eachindex(verteces)
+    N = length(verteces)
+    starting = verteces[i]
+    ending = verteces[mod1(i+1, N)]
+    # Normal vector must look at where the particle is coming from
+    w = ending - starting
+    normal = [-w[2], w[1]]
+    wall = FiniteWall(starting, ending, normal, "Wall $i")
+    push!(bt, wall)
+  end
+  return bt
 end

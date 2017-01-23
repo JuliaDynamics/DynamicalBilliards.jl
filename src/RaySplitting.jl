@@ -1,8 +1,9 @@
-export resolvecollision!, evolve!, construct, isphysical
+export isphysical
 
+# Resolve collision for Ray-splitting
+function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
+  θ::Function, new_ω::Function = ((x, bool) -> x))
 
-function resolvecollision!(p::MagneticParticle, a::Antidot, T::Function, θ::Function,
-  new_ω::Function = ((x, bool) -> x))
   dt = 0.0
   ω = p.omega
   # Determine incidence angle (0 < θ < π/4)
@@ -51,7 +52,8 @@ function resolvecollision!(p::MagneticParticle, a::Antidot, T::Function, θ::Fun
   return dt
 end
 
-function resolvecollision!(p::Particle, a::Antidot, T::Function, θ::Function)
+# Resolve collision for ray-splitting
+function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
 
   dt = 0.0
   ω = 0.0
@@ -66,7 +68,6 @@ function resolvecollision!(p::Particle, a::Antidot, T::Function, θ::Function)
     else
       println("Particle should be coming from inside of disk")
     end
-    plot_particle(p)
     error("φ shoud be between 0 and π/2")
   end
   # ray-splitting (step 2)
@@ -135,7 +136,6 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64,
     end#obstacle loop
     # if tmin < 1e-10 && tcount!=0
     #   println("-----------------")
-    #   plot_particle(p)
     #   println("In raysplit evolve, tmin = $tmin")
     #   println("tcount = $tcount")
     #   println("Collision is to happen with $(colobst.name)")
@@ -182,7 +182,6 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
   tcount = 0.0
   t_to_write = 0.0
   colobst = bt[1]
-  #prev_obst = bt[1]
   colind = 1
 
   while tcount < ttotal
@@ -223,7 +222,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
     end
     t_to_write += tmin + dt
     # Write output only if the collision was not made with PeriodicWall
-    if typeof(colobst) <: PeriodicWall
+    if typeof(colobst) == PeriodicWall
       # Pinned particle:
       if t_to_write >= 2π/p.omega
         println("pinned particle! (completed circle)")
@@ -285,17 +284,21 @@ function construct(t::Vector{Float64}, poss::Vector{SVector{2,Float64}},
 end
 
 """
-    isphysical(ray::Dict{Int, Vector{Function}}; check_symmetry = true)
+    isphysical(raysplitter::Dict{Int, Vector{Function}}; only_mandatory = false)
 Return `true` if the given ray-splitting dictionary represends the physical world.
 
-Specifically, check if:
-* Transmission probability T(φ) is even function.
-* Refraction angle θ(φ) is odd function (φ is the incidence angle).
-* If θ(φ) > π/2 then T(φ) ≤ 0 ?
-* If ray-reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
-The first two checks are optional.
+Specifically, check if (φ is the incidence angle):
+* Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) ≤ 0
+* Transmission probability is even function: T(φ) ≈ T(-φ)
+* Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
+* If ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
+* If magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
+
+The first property is mandatory and must hold for correct propagation.
+They keyword `only_mandatory` notes whether the rest of
+the properties should be tested or not.
 """
-function isphysical(ray::Dict{Int, Vector{Function}}; check_symmetry::Bool = true)
+function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
   for i in keys(ray)
     scatter = ray[i][2]
     tr = ray[i][1]
@@ -307,8 +310,15 @@ function isphysical(ray::Dict{Int, Vector{Function}}; check_symmetry::Bool = tru
         for φ in range
           θ = scatter(φ, where, ω)
           T = tr(φ, where, ω)
-          # Check symmetry:
-          if check_symmetry
+          # Check critical angle:
+          if θ >= π/2 && T > 0
+            es = "Refraction angle >= π/2 and T > 0 !\n"
+            es*= "For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+            println(es)
+            return false
+          end
+          if !only_mandatory
+            # Check symmetry:
             if !isapprox(θ, -scatter(-φ, where, ω))
               es = "Scattering angle function is not odd!\n"
               es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
@@ -321,20 +331,19 @@ function isphysical(ray::Dict{Int, Vector{Function}}; check_symmetry::Bool = tru
               println(es)
               return false
             end
-          end
-          # Check critical angle:
-          if θ >= π/2 && T > 0
-            es = "Refraction angle > π/2 and T > 0 !\n"
-            es*= "For index = $i, tested with φ = $φ, where = $where, ω = $ω"
-            println(es)
-            return false
-          end
-          # Check ray-reversal:
-          if !isapprox(scatter(θ, !where, ω), φ)
-            es = "Ray-reversal does not hold!\n"
-            es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
-            println(es)
-            return false
+            # Check ray-reversal:
+            if !isapprox(scatter(θ, !where, ω), φ)
+              es = "Ray-reversal does not hold!\n"
+              es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+              println(es)
+              return false
+            end
+            if !isapprox(om(om(ω, where), !where), ω)
+              es = "Magnetic reversal does not hold!\n"
+              es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+              println(es)
+              return false
+            end
           end
         end#φ range
       end#ω range
