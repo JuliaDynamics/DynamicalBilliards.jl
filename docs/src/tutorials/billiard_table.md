@@ -37,12 +37,12 @@ We add a disk by specifying a center and radius (and optionally a name):
 d = Disk([0,0], 0.8)
 push!(bt, d)
 ```
-To make sure the billiard looks as you would expect, use the function `plot_billiard(bt)`. Create a particle inside that billiard and evolve it while also plotting it:
+To make sure the billiard looks as you would expect, use the function `plot_billiard(bt)`. Create a particle inside that billiard and evolve it:
 ```julia
 plot_billiard(bt)
 ω = 0.5
 p = randominside(p, ω)
-plot_evolution(p, bt, 100)
+xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 100)...)
 ```
     
 The billiard table now works for straight or magnetic propagation. To expand this to ray-splitting you have to use ray-splitting Obstacles (see the tutorial on Ray-Splitting). Additional information on how to define your own `Obstacle` sub-type is given in the tutorial on Defining your own Obstacles.
