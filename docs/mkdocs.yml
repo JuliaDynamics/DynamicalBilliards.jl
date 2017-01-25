@@ -1,0 +1,32 @@
+site_name:           DynamicalBilliards
+repo_url:            https://github.com/Datseris/DynamicalBilliards.jl
+site_description:    An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions. 
+site_author:         George Datseris
+theme:               readthedocs
+
+markdown_extensions:
+  - codehilite
+  - extra
+  - tables
+  - fenced_code
+  - mdx_math
+
+extra_css:
+  - assets/Documenter.css
+
+extra_javascript:
+  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
+  - assets/mathjaxhelper.js
+
+docs_dir: 'build'
+
+pages:
+- Introduction: index.md
+- Basic Usage: basic/basic_usage.md
+- Tutorials
+  - Defining a Billiard Table: tutorials/billiard_table.md
+  - Ray-Splitting: tutorials/ray-splitting.md
+  - Creating your own Obstacle: tutorials/own_obstacle.md
+  - Examples: tutorials/examples.md
+- Library: basic/library.md
+ 
