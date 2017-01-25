@@ -13,8 +13,8 @@ and then you create your obstacles one by one and add them to it. All obstacles 
 can be found at the Obstacles page. For the example of this page, we will create a hexagonal billiard with a disk in the middle.
 
 The first step is to define the six walls of the billiard table. A `FiniteWall` object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name. The vertex points of a regular hexagon of radius `r` are given by the formula:
-```julia
-( r*cos(2π*i/6), r*sin(2π*i/6) ) for i in 1:6 
+```math
+(x,y) = \left( r\cos\left(\frac{2\pi i}{6}\right), r\cos\left(\frac{2\pi i}{6}\right) \right) \quad \text{for i $\in$ \{1,...,6\}}
 ```
 To create each wall object, we will implement the following loop, choosing a size of 2.0:
 ```julia
