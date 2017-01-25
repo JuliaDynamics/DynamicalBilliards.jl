@@ -301,11 +301,11 @@ end
 Return `true` if the given ray-splitting dictionary represends the physical world.
 
 Specifically, check if (φ is the incidence angle):
-* Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) ≤ 0
+* Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
 * Transmission probability is even function: T(φ) ≈ T(-φ)
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
-* If ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
-* If magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
+* Ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
+* Magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
 
 The first property is mandatory and must hold for correct propagation.
 They keyword `only_mandatory` notes whether the rest of

@@ -1,11 +1,26 @@
-# Basic Usage
-> *all names of* `DynamicalBilliards.jl` *have detailed docstrings. Use* `?` *when in doubt.*
-    
-The simplest usage of this package revolves around a single function: 
+#Basic Usage
+
+`DynamicalBilliards.jl` was created with easy-of-use as its main cornerstone. 
+With 3 simple steps, the user can fully initalize, evolve, and get the output of the propagation of a particle in a billiard system.
+
+In general, the workflow of `DynamicalBilliards.jl` follows these simple steps:
+1. Create a billiard table, a `Vector{Obstacle}`.
+2. Create a particle inside that billiard table.
+3. Get the output by evolving the particle.
+
+Adding more complexity in your billiard table does not add complexity in your code. For example, to implement a ray-splitting billiard
+you only need to define one additional variable, a dictionary `Dict{Int, Vector{Function}}`. After reading through this basic usage page, 
+you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effort.
+
+## Straight Propagation
+
+---
+
+The usage of this package revolves around a single function: 
 ```julia
 evolve!(p::AbstractParticle, bt::Vector{Obstacle}, total_time)
 ```
-The function evolves a particle `p` inside a billiard table `bt` for a given amount of time `total_time`, 
+which evolves a particle `p` inside a billiard table `bt` for a given amount of time `total_time`, 
 while taking care of all the details internally. 
 
 The first step is to define the billiard table `bt`, which is the system the particle `p` will propagate in. 
@@ -13,9 +28,10 @@ A billiard table is simply a collection (`Vector`) of `Obstacle`s. The most conv
 one of the pre-defined billiard tables offered by the package. For example, let's create a periodic Sinai 
 billiard with disk radius of 0.3 and with one side of length 2 and one of length 1:
 ```julia
-bt = billiard_sinai(0.3, 2.0, 1.0; periodic=true)                                                    
+using DynamicalBilliards
+bt = billiard_sinai(0.3, 2.0, 1.0; periodic=true)
 ```
-(for more information about defining billiard tables see the official documentation here)
+*(for more information about defining billiard tables visit the [tutorial on defining your own billiard table](/tutorials/billiard_table))*
 
 Afterwards, you want to create a particle inside that billiard system. 
 For that, the function `randominside(bt::Vector{Obstacle})` is provided. 
@@ -24,12 +40,13 @@ while making sure that it is always in the allowed region of the billiard table.
 ```julia
 p = randominside(bt)
 ```
+If you want to specify the initial conditions yourself, simply pass them to the `Particle` constructor, like `p = Particle(x0, y0, φ0)`.
 Now you are ready to evolve this particle:
 ```julia
 ct, poss, vels = evolve!(p, bt, 1000.0)
 ```
 The return values of the `evolve!()` function need some brief explaining: As noted by the "!" at the end of the function, 
-it changes its argument `p` (specifically, it updates almost all the fields of `p`).
+it changes its argument `p`.
 Most importantly however, this function also returns the main output expected by a billiard
 system. This output is a tuple of three vectors:
 * `ct::Vector` : Collision times.
@@ -40,7 +57,7 @@ The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting
 state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[1], vels[1]` are
 the initial conditions.
 
-If this output is not convenient for you, the function `construct(t, poss, vels)` is provided, 
+If this output is not convenient for you, the function `construct(ct, poss, vels)` is provided, 
 which constructs the (continuous) timeseries of the position and velocity, as well as the time-vector, when given the main output of `evolve!()`:
 ```julia
 xt, yt, vxt, vyt, ts = construct(ct, poss, vels)
@@ -49,8 +66,11 @@ or, by taking advantage of the awesome ellipsis operator, you can do:
 ```julia
 xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0)...)
 ```
----
+
 ## Magnetic Propagation
+
+---
+
 The are only two differences between magnetic and straight propagation. 
 Firstly, the particle type is not `Particle` anymore, but `MagneticParticle`. 
 The latter has an extra field called `omega` which is the cyclic frequency of rotation 
@@ -76,9 +96,11 @@ to the `construct()` function, in order for it to construct circular motion inst
 The final optional argument `dt` is the time-step at which the timeseries are constructed 
 (since they are made up of sines and cosines).
 
----
 
 ## Ray-Splitting
+
+---
+
 No matter how complex ray-splitting processes you want, and irrespectively of
 how many obstacles in the billiard table can perform ray-splitting, there is only
 a single difference on the main function call:
@@ -100,11 +122,12 @@ p = randominside(bt, 4.0)
 xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., dt = 0.01)
 ```
 
-For more information and instructions on defining the "ray_splitter" dictionary
-please visit the "Ray-Splitting" tutorial here.
+For more information and instructions on defining the "ray_splitter" dictionary visit the [Ray-Splitting tutorial here](/tutorials/ray-splitting).
+
+## Visualizing
 
 ---
-## Visualizing
+
 *(all plotting in* `DynamicalBilliards` *is currently done through the* `PyPlot` *package. In a future update a switch will happen towards* `Plots.jl` *)*
 
 The functions `plot_obstacle(o::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle}; kwargs...)` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. In order to animate the evolution of a particle in a billiard table, use the function:
