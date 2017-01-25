@@ -34,6 +34,10 @@ and obstacle, given the calculated distance between them.
 function lct(p::AbstractParticle, o::Obstacle, dist::Real)
   n = normalvec(o, p.pos)
   t = -dist/dot(p.vel, n)
+  if abs(t) >= 1e-5
+    error("lct > 1e-5. Dist = $dist\n dotvel = $(dot(p.vel, n))")
+  end
+  return t
 end
 
 """
@@ -209,7 +213,6 @@ function collisiontime(p::Particle, d::Antidot)
     t = -B + sqrtD
   end
 
-
   # If collision time is negative, return Inf:
   t <= 0.0 ? Inf : t
 end
@@ -269,9 +272,9 @@ In the case of magnetic propagation, the 4th value is returned as well.
 This is either the angular velocity of the particle (`Float64`), or in the case of
 ray-splitting it is a vector of the angular velocities at each time step (`Vector`).
 
-The time `ct[i]` is the time necessary to reach state `poss[i], vels[i]` starting
-from the state `poss[i-1], vels[i-1]`. That is why `ct[1]` is always 0 since
-`poss[0], vels[0]` are the initial conditions. The angular velocity ω[i] is the one
+The time `ct[i]` is the time necessary to reach state `poss[i+1], vels[i+1]` starting
+from the state `poss[i], vels[i]`. That is why `ct[1]` is always 0 since
+`poss[1], vels[1]` are the initial conditions. The angular velocity `ω[i]` is the one
 the particle has while propagating from state `poss[i], vels[i]` to `i+1`.
 
 Notice that at any point, the velocity vector `vels[i]` is the one obtained **after**
@@ -511,6 +514,7 @@ end
 function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
 
   ω = p.omega
+  absω = abs(ω)
   rt = Float64[]
   rpos = SVector{2,Float64}[]
   rvel = SVector{2,Float64}[]
@@ -548,7 +552,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
     # Write output only if the collision was not made with PeriodicWall
     if typeof(colobst) == PeriodicWall
       # Pinned particle:
-      if t_to_write >= 2π/ω
+      if t_to_write >= 2π/absω
         println("pinned particle! (completed circle)")
         push!(rpos, rpos[end])
         push!(rvel, rvel[end])

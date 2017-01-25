@@ -2,7 +2,7 @@ using StaticArrays
 import Base.show
 export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
 standard2magnetic, cyclotron, Obstacle, Disk, Antidot, FiniteWall, PeriodicWall,
-normalvec, randominside, SplitterWall
+normalvec, randominside, SplitterWall, distance
 
 ####################################################
 ## Particles
@@ -73,14 +73,14 @@ type MagneticParticle <: AbstractParticle
     if omega==0
       error("Angular velocity cannot be 0.")
     end
-    new(pos, vel, current_cell, omega)
+    new(pos, vel, current_cell, float(omega))
   end
 end
 
 function MagneticParticle{T<:Real}(ic::Vector{T}, ω::Real)
   φ0 = ic[3]
   pos = SVector{2,Float64}(ic[1:2]); vel = SVector{2,Float64}(cos(φ0), sin(φ0))
-  return MagneticParticle(pos, vel, SVector{2,Float64}(0,0), ω)
+  return MagneticParticle(pos, vel, SVector{2,Float64}(0,0), float(ω))
 end
 MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real) =
 MagneticParticle([x0, y0, φ0], ω)
@@ -183,6 +183,9 @@ type Antidot <: Circular
       new(SVector{2,Float64}(c), abs(r), where, name)
     end
 end
+function Antidot(c, r::Real, name::String)
+  Antidot(SVector{2,Float64}(c), abs(r), true, name)
+end
 
 show(io::IO, w::Circular) =
     print(io, "$(w.name)\n",
@@ -196,7 +199,7 @@ Wall obstacle supertype.
 abstract Wall <: Obstacle
 
 """
-    FiniteWall{Float64<:AbstractFloat} <: Wall{Float64}
+    FiniteWall <: Wall
 Wall obstacle imposing specular reflection during collision.
 ## Fields:
 * `sp::SVector{2,Float64}` : Starting point of the Wall.
@@ -276,7 +279,7 @@ print(io, "$(w.name)\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
-    FiniteWall{Float64<:AbstractFloat} <: Wall{Float64}
+    SplitterWall <: Wall
 Wall obstacle imposing specular reflection during collision.
 ## Fields:
 * `sp::SVector{2,Float64}` : Starting point of the Wall.
@@ -331,14 +334,14 @@ assumed to be very close to the obstacle's boundary).
 The normal vector of any Obstacle must be looking towards
 the direction a particle is expected to come from.
 """
-normalvec(disk::Circular, pos) = normalize(pos - disk.c)
 normalvec(wall::FiniteWall, pos) = wall.normal
 normalvec(w::PeriodicWall, pos) = normalize(w.normal)
-normalvec(a::Antidot, pos) = (2*Int(a.where)- 1)*normalize(pos - a.c)
 normalvec(w::SplitterWall, pos) = (2*Int(w.where)- 1)*w.normal
+normalvec(disk::Circular, pos) = normalize(pos - disk.c)
+normalvec(a::Antidot, pos) = (2*Int(a.where)- 1)*normalize(pos - a.c)
 
 ####################################################
-## Distances (not exported!)
+## Distances
 ####################################################
 """
 ```julia
@@ -362,9 +365,14 @@ function distance(p::AbstractParticle, bt::Vector{Obstacle})
   return mindist
 end
 
+# function distance(p::AbstractParticle, w::Wall)
+#   v1 = p.pos - w.sp
+#   dot(v1, w.normal)
+# end
+
 function distance(p::AbstractParticle, w::Wall)
   v1 = p.pos - w.sp
-  dot(v1, w.normal)
+  dot(v1, normalvec(w, p.pos))
 end
 
 # no new distance needed for SplitterWall because the `where` field

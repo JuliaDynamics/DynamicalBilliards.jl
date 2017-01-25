@@ -6,6 +6,8 @@ fast implementation of billiard systems of arbitrary construction.
 """
 module DynamicalBilliards
 
+export test_options
+
 """
     test_options(;print_info = false, long_tests = false)
 Set if you want the long version of the tests and if you want information to be

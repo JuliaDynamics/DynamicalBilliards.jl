@@ -10,10 +10,13 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   n = normalvec(a, p.pos)
   φ = acos(dot(p.vel, -n))
   # if this is wrong then my normal vec is wrong:
-  if φ >= π/2
-    println("φ=$φ")
-    error("φ shoud be between 0 and π/2")
-  end
+  # if φ >= π/2
+  #   println("φ=$φ")
+  #   println("Collision happens with $(a.name)")
+  #   println("Distance is: $(distance(p, a))")
+  #   #error("φ shoud be between 0 and π/2")
+  #   println("-----------")
+  # end
   # ray-splitting (step 2)
   if T(φ, a.where, ω) > rand()
     # Step 3
@@ -48,7 +51,9 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
     #perform specular
     specular!(p, a)
   end
-
+  if abs(dt) > 1e-4
+    error("dt = $dt in resolve ray-splitting Magnetic.")
+  end
   return dt
 end
 
@@ -100,7 +105,9 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
     #perform specular
     specular!(p, a)
   end
-
+  if abs(dt) > 1e-4
+    error("dt = $dt in resolve ray-splitting Straight.")
+  end
   return dt
 end
 
@@ -116,7 +123,7 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64,
   push!(rt, 0.0)
   tcount = 0.0
   colobst = bt[1]
-  #prev_obst = bt[1]
+  prev_obst = bt[1]
   colind::Int = length(bt)
   t_to_write = 0.0
 
@@ -151,9 +158,9 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64,
       dt = resolvecollision!(p, colobst)
     end
     t_to_write += tmin + dt
-    #prev_obst = colobst
+    prev_obst = colobst
 
-    if typeof(colobst) <: PeriodicWall
+    if typeof(colobst) == PeriodicWall
       continue
     else
       push!(rpos, p.pos + p.current_cell)
@@ -182,6 +189,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
   tcount = 0.0
   t_to_write = 0.0
   colobst = bt[1]
+  prev_obst = bt[end]
   colind = 1
 
   while tcount < ttotal
@@ -205,14 +213,14 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       push!(rt, Inf)
       return (rt, rpos, rvel)
     end
-    # if tmin < 1e-10 && tcount!=0
-    #         println("-----------------")
-    #   println("In raysplit evolve, tmin = $tmin")
-    #   println("tcount = $tcount")
-    #   println("Collision is to happen with $(colobst.name)")
-    #   println("Antidot state: where = $(bt[5].where)")
-    #   println("Previous collision with: $(prev_obst.name)")
-    # end
+    if tmin < 1e-10 && tcount!=0
+      println("-----------------")
+      println("In raysplit evolve, tmin = $tmin")
+      println("tcount = $tcount")
+      println("Collision is to happen with $(colobst.name)")
+      println("$(colobst.name) state: where = $(colobst.where)")
+      println("Previous collision with: $(prev_obst.name)")
+    end
 
     propagate!(p, tmin)
     if haskey(ray, colind)
@@ -224,15 +232,17 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
     # Write output only if the collision was not made with PeriodicWall
     if typeof(colobst) == PeriodicWall
       # Pinned particle:
-      if t_to_write >= 2π/p.omega
+      if t_to_write >= 2π/abs(p.omega)
+        #println("t_to_write = $t_to_write while circle time = $")
         println("pinned particle! (completed circle)")
         push!(rpos, rpos[end])
         push!(rvel, rvel[end])
         push!(rt, Inf)
         push!(omegas, p.omega)
-        return (rt, rpos, rvel)
+        return (rt, rpos, rvel, omegas)
       end
       #If not pinned, continue (do not write for PeriodicWall)
+      prev_obst = colobst
       continue
     else
       push!(rpos, p.pos + p.current_cell)
@@ -242,6 +252,9 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       tcount += t_to_write
       t_to_write = 0.0
     end
+    # if (prev_obst == colobst) && (typeof(colobst) == SplitterWall)
+    #   error("Double collision with splitter wall!\n tmin was $tmin\ndt was $dt")
+    # end
     #prev_obst = colobst
   end#time loop
   return (rt, rpos, rvel, omegas)

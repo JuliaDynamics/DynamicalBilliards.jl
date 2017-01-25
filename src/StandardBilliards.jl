@@ -1,4 +1,4 @@
-export billiard_rectangle, billiard_sinai
+export billiard_rectangle, billiard_sinai, billiard_polygon
 
 ####################################################
 ## Famous/Standard Billiards
@@ -56,22 +56,42 @@ function billiard_sinai(r, x=1.0, y=1.0; periodic = false)
 end
 
 """
-    billiard_polygon(n::Int, r, center = [0,0])
-Return a vector of obstacles that defines a regular-polygonal billiard table with `n` sides,
-radius `r` and given `center`.
+    billiard_polygon(n::Int, R, center = [0,0]; periodic = true)
+Return a vector of obstacles that defines a regular-polygonal billiard table
+with `n` sides, radius `r` and given `center`. If `n` is even, you may choose a
+periodic version of the billiard.
+
+Note: `R` denotes the so-called outer radius, not the inner one.
 """
-function billiard_polygon(sides::Int, r::Real, center = [0,0])
+function billiard_polygon(sides::Int, r::Real, center = [0,0]; periodic = false)
   bt = Obstacle[]
   verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
-  for i in eachindex(verteces)
-    N = length(verteces)
-    starting = verteces[i]
-    ending = verteces[mod1(i+1, N)]
-    # Normal vector must look at where the particle is coming from
-    w = ending - starting
-    normal = [-w[2], w[1]]
-    wall = FiniteWall(starting, ending, normal, "Wall $i")
-    push!(bt, wall)
+  if !periodic
+    for i in eachindex(verteces)
+      N = length(verteces)
+      starting = verteces[i]
+      ending = verteces[mod1(i+1, N)]
+      # Normal vector must look at where the particle is coming from
+      w = ending - starting
+      normal = [-w[2], w[1]]
+      wall = FiniteWall(starting, ending, normal, "Wall $i")
+      push!(bt, wall)
+    end
+  else
+    !iseven(sides) && error("A periodic billiard must have even number of sides.")
+    for i in eachindex(verteces)
+      N = length(verteces)
+      starting = verteces[i]
+      ending = verteces[mod1(i+1, N)]
+      # Normal vector must look at where the particle is coming from
+      # and in the case of periodic must have length exactly as much as it is
+      # from one side to the opposite
+      w = ending - starting
+      inr = r*cos(π/sides)
+      normal = inr*normalize([-w[2], w[1]])
+      wall = PeriodicWall(starting, ending, normal, "Periodic wall $i")
+      push!(bt, wall)
+    end
   end
   return bt
 end
