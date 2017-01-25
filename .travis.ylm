@@ -9,7 +9,7 @@ notifications:
   email: false
 script:
   - julia -e 'Pkg.clone(pwd())'
-  - julia -e 'Pkg.test("DynamicalBilliards",coverage=true)'
+  - julia -e 'Pkg.test("DynamicalBilliards")'
 after_success:
   - julia -e julia -e 'Pkg.add("Documenter")'
   - julia -e 'cd(Pkg.dir("DynamicalBilliards")); include(joinpath("docs", "make.jl"))'
