@@ -18,7 +18,7 @@ function check_straight_sinai(; printinfo = true)
       p = randominside(bt)
       ts, poss, vels = evolve!(p, bt, tt)
 
-      error_level = 1e-16
+      error_level = 1e-15
 
       xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
       dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
@@ -68,7 +68,7 @@ function check_magnetic_sinai(; printinfo = true)
         end
 
         xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
-        error_level = 0.0
+        error_level = 1e-15
         dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
         mind = minimum(dist)
         if mind - d.r < error_level
