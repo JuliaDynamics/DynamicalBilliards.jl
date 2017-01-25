@@ -18,11 +18,12 @@ if haskey(ENV, "DYNAMICALBILLIARDS_LONGTEST")
 end
 
 if longtests
-    include("longtests.jl")
+    const partnum = 1000
 else
-    include("shorttests.jl")
-endst
+    const partnum = 10
+end
 
+include("testfunctions.jl")
 print("DynamicalBilliards tests started at: ")
 print(Dates.format(now(), "HH:MM:s"), "\n")
 
