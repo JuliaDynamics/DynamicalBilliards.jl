@@ -4,7 +4,7 @@ makedocs(modules=[DynamicalBilliards], doctest=false)
 
 deploydocs(
     deps   = Deps.pip("mkdocs", "mkdocs-material" ,"python-markdown-math"),
-    repo   = "github.com/USER_NAME/PACKAGE_NAME.jl.git",
+    repo   = "github.com/Datseris/DynamicalBilliards.jl.git",
     julia  = "0.5",
     osname = "linux"
 )
