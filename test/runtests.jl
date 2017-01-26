@@ -38,6 +38,5 @@ print(Dates.format(now(), "HH:MM:s"), "\n")
 @test check_raysplitting_periodic(printinfo = printinfo)
 @test check_splitterwall(printinfo = printinfo)
 
-print("DynamicalBilliards tests ended at ")
+print("DynamicalBilliards tests ended (successfully) at: ")
 println(Dates.format(now(), "HH:MM:s"))
-println("without any errors!!")
