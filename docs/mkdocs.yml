@@ -13,6 +13,7 @@ extra:
       link: 'https://github.com/Datseris/DynamicalBilliards.jl'
  
 markdown_extensions:
+  - admonition
   - codehilite
   - extra
   - tables
