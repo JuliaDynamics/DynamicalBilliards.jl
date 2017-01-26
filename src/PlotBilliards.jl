@@ -1,4 +1,4 @@
-using PyPlot
+#using PyPlot
 
 export plot_obstacle, plot_particle, plot_billiard, plot_cyclotron,
 plot_evolution

@@ -71,7 +71,7 @@ function check_magnetic_sinai(; printinfo = true)
         error_level = 1e-15
         dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
         mind = minimum(dist)
-        if mind - d.r < error_level
+        if mind - d.r < -error_level
           error("POS: min((x,y)-r) = $(mind - d.r)")
         end
         dmaxx = maximum(xt) - x
