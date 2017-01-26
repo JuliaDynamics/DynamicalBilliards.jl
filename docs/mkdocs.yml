@@ -6,8 +6,8 @@ theme:               'material'
 
 extra:
   palette:
-    primary: 'indigo'
-    accent: 'light blue'
+    primary: 'deep purple'
+    accent: 'cyan'
   social:
     - type: 'github'
       link: 'https://github.com/Datseris/DynamicalBilliards.jl'
