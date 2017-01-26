@@ -129,7 +129,7 @@ For more information and instructions on defining the "ray_splitter" dictionary 
 ---
 !!! failure "Currently offline!"
 
-    Plotting in `DynamicalBilliards` is was done through the `PyPlot` package. However the development has now 
+    Plotting in `DynamicalBilliards` was done through the `PyPlot` package. However the development has now 
     switched to using `Plots` in conjuction with `RecipesBase`. This happened for increased ease-of-use and 
     decrease of the package total size. Until the transition from `PyPlot` to `RecipesBase` is final, the plotting 
     features of this package are offline, since the dependency on `PyPlot` had to be taken off.
