@@ -5,9 +5,9 @@
 [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl)
 
 A Julia package for dynamical billiard systems in two dimensions.
-The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction. ![Example animation](https://github.com/Datseris/DynamicalBilliards.jl/blob/master/images/plot_example.gif "Evolution of particle in a magnetic field.")
+The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction. 
 
-*(the code that generated this animation is shown at the end of this README)*
+![Example animation](https://github.com/Datseris/DynamicalBilliardsFigures/blob/master/gifs/plot_example.gif "Evolution of particle in a magnetic field.")
 
 The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular structures:
 * **Straight propagation** : The standard billiard dynamical system. A particle is propagating in a straight line, until a specular reflection is performed at a boundary.
@@ -18,9 +18,6 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 
 NOTICE: This package does not support collision between particles. All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
 
-Documentation: coming soon.
-
-*(all exported names of DynamicalBilliards.jl have detailed docstrings. Use `?` when in doubt)*
-
 ### Installation
-This package is not yet registered. Use `Pkg.clone("https://github.com/Datseris/DynamicalBilliards.jl")` in order to install it.
+This package is not yet registered, but it is currently in the registration process. 
+Use `Pkg.clone("https://github.com/Datseris/DynamicalBilliards.jl")` in order to install it until this process is complete.
