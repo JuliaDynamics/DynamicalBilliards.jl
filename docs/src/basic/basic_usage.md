@@ -127,8 +127,12 @@ For more information and instructions on defining the "ray_splitter" dictionary 
 ## Visualizing
 
 ---
+!!! note
 
-*(all plotting in* `DynamicalBilliards` *is currently done through the* `PyPlot` *package. In a future update a switch will happen towards* `Plots.jl` *)*
+    Plotting in `DynamicalBilliards` is currently done through the `PyPlot` package. However the development has now 
+    switched to using `Plots` in conjuction with `RecipesBase`. Until those changes are final, the plotting features 
+    of this package are summarized in the following paragraphs.
+
 
 The functions `plot_obstacle(o::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle}; kwargs...)` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. In order to animate the evolution of a particle in a billiard table, use the function:
 ```julia
@@ -141,7 +145,7 @@ Direct animation saving is not supported yet. However, optionally, you could sav
 
 Be sure to first call `plot_billiard` before calling `plot_evolution`.
 
-The example .gif shown in the beginning of this README, was generated simply with the code:
+The example .gif shown in the introduction, was generated simply with the code:
 ```julia
 using DynamicalBilliards
 using PyPlot
