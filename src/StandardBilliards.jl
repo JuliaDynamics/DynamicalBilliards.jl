@@ -44,12 +44,12 @@ a disk in its center, of radius `r`.
 In the periodic case, the system is also known as "Lorentz Gas".
 """
 function billiard_sinai(r, x=1.0, y=1.0; periodic = false)
-  bt = billiard_rectangle(x,y; periodic = periodic)
-  if periodic && r>=x/2 || r>=y/2
+  if (periodic == true) && (r>=x/2 || r>=y/2)
     es = "Disk radius too big for a periodic Sinai billiard.\n"
     es*= "Obstacles must not overlap with `PeriodicWall`s."
     error(es)
   end
+  bt = billiard_rectangle(x,y; periodic = periodic)
   c = [x/2, y/2]
   centerdisk = Disk(c, r, "Disk")
   push!(bt, centerdisk)
