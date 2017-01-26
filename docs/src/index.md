@@ -3,7 +3,7 @@
 `DynamicalBilliards.jl` is an easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.
 
 
-![Example of a dynamical billiard with magnetic field](https://github.com/Datseris/DynamicalBilliardsFigures/blob/master/gifs/plot_example.gif "Evolution of particle in a magnetic field.")
+![Example of a dynamical billiard with magnetic field](http://i.imgur.com/OasQRyQ.gifv)
 
 A dynamical billiard is a system where a particle is propagating as a straight line from obstacle-to-obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in chaos and nonlinear dynamics and played an important role in the development of nonlinear science. 
 
