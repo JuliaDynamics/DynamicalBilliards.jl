@@ -1,35 +1,41 @@
-#using PyPlot
+using PyPlot
 
 export plot_obstacle, plot_particle, plot_billiard, plot_cyclotron,
 plot_evolution
 ####################################################
 ## Plot Billiards
 ####################################################
-function plot_obstacle(d::Disk; color = "green")
-  circle1 = PyPlot.plt[:Circle](d.c, d.r, alpha=0.3, color=color, lw=0.0)
+function plot_obstacle(d::Disk; kwargs...)
+  circle1 = PyPlot.plt[:Circle](d.c, d.r;
+  edgecolor = (0,0.6,0), facecolor = (0, 0.6,0, 0.5), kwargs...)
   PyPlot.gca()[:add_artist](circle1)
   PyPlot.show()
 end
 
-function plot_obstacle(d::Antidot; color = "red")
-  circle1 = PyPlot.plt[:Circle](d.c, d.r, color=color, fill=false, lw=1.0)
+
+function plot_obstacle(d::Antidot; kwargs...)
+  circle1 = PyPlot.plt[:Circle](d.c, d.r;
+  edgecolor = (0.8,0.0,0), linewidth = 2.0, facecolor = (0.6, 0.0, 0, 0.1),
+  kwargs...)
   PyPlot.gca()[:add_artist](circle1)
   PyPlot.show()
 end
 
-function plot_obstacle(w::FiniteWall; color = "black")
-  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]], color=color, linewidth = 3.0)
+function plot_obstacle(w::FiniteWall; kwargs...)
+  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]],
+  color=(0,0,0), linewidth = 2.0, ms=0)
   PyPlot.show()
 end
 
-function plot_obstacle(w::SplitterWall; color = "red")
-  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]], color=color, linewidth = 2.0)
+function plot_obstacle(w::SplitterWall; kwargs...)
+  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]],
+  color=(0.8,0.0,0), linewidth = 3.0)
   PyPlot.show()
 end
 
-function plot_obstacle(w::PeriodicWall; color = "purple")
-  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]], color=color,
-  linewidth = 2.0, alpha = 0.5, linestyle="dashed")
+function plot_obstacle(w::PeriodicWall; kwargs...)
+  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]],
+  color="purple", linewidth = 1.0, alpha = 0.5, linestyle="dashed", kwargs...)
   PyPlot.show()
 end
 
@@ -37,30 +43,42 @@ function plot_billiard(bt::Vector{Obstacle})
   for obst in bt
     plot_obstacle(obst)
   end
-  gca()[:set_aspect]("equal")
+  PyPlot.gca()[:set_aspect]("equal")
 end
 
 
 ####################################################
 ## Plot Particle Evolution
 ####################################################
-function plot_cyclotron(p::MagneticParticle; use_cell=true)
+function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
   ω = p.omega
   pos = use_cell ? p.pos + p.current_cell : p.pos
   c = pos - (1/ω)*[p.vel[2], -p.vel[1]]
   r = abs(1/ω)
-  circle1 = PyPlot.plt[:Circle](c, r, alpha=0.1, color = "red")
+  circle1 = PyPlot.plt[:Circle](c, r,
+  edgecolor = (0.0,0.0,0.8, 0.5), linewidth = 2.0, facecolor = (0., 0.0, 0.8, 0.05),
+  kwargs...)
   PyPlot.gca()[:add_artist](circle1)
   PyPlot.show()
 end
 
-function plot_particle(p::AbstractParticle; color = (0.0, 0.0, 0.0), use_cell=true)
+function plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
   pos = use_cell ? p.pos + p.current_cell : p.pos
-  s1 = scatter(pos..., color=color)
+  kwargs = Dict(kwargs)
+  # Set same color for arrow and point:
+  if haskey(kwargs, :color)
+    c = kwargs[:color]
+  else
+    c = (0,0,0)
+  end
+  # Plot position:
+  s1 = scatter(pos...; color=c, s= 20.0, kwargs...)
+  # Plot velocity:
   q1 = quiver(pos..., p.vel...,
-  units="dots", angles = "xy", scale = 0.02, width = 2.0, color=color)
+  units="dots", angles = "xy", scale = 0.02, width = 2.0, color=c)
   return s1, q1
 end
+
 
 
 function plot_evolution(p::MagneticParticle, bt, colnumber = 50;
