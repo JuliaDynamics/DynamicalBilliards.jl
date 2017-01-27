@@ -127,15 +127,16 @@ For more information and instructions on defining the "ray_splitter" dictionary 
 ## Visualizing
 
 ---
-!!! failure "Currently offline!"
+!!! warning "Under development!"
 
-    Plotting in `DynamicalBilliards` was done through the `PyPlot` package. However the development has now 
-    switched to using `Plots` in conjuction with `RecipesBase`. This happened for increased ease-of-use and 
-    decrease of the package total size. Until the transition from `PyPlot` to `RecipesBase` is final, the plotting 
-    features of this package are offline, since the dependency on `PyPlot` had to be taken off.
+    Plotting in `DynamicalBilliards` is done through `PyPlot` package, due to its maturity and detailed documentation.
+    The plotting section is under development and daily improvements. Soon there will be a dedicated tutorial on how
+    to fully utilize the plotting features of `DynamicalBilliards`.
 
 
-The functions `plot_obstacle(o::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle}; kwargs...)` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. In order to animate the evolution of a particle in a billiard table, use the function:
+The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`. Be careful to only pass keywords that actually make sense. For example the `Particle` type is plotted through `scatter`. Using `linewidth = 2.0` with `plot_particle` will result in an error.
+
+In order to currently animate the evolution of a particle in a billiard table, use the function:
 ```julia
 plot_evolution(p::AbstractParticle, bt::Vector{Obstacle}, colnumber = 50;
                sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
