@@ -119,7 +119,7 @@ Assuming you have defined a billiard table and a ray-splitter dictionary, the im
 ```julia
 ray_splitter = Dict(5 => [foo, bar, baz])
 p = randominside(bt, 4.0)
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., dt = 0.01)
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., 0.01)
 ```
 
 For more information and instructions on defining the "ray_splitter" dictionary visit the [Ray-Splitting tutorial here](/tutorials/ray-splitting).
