@@ -9,6 +9,7 @@ notifications:
   email: false
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'ENV["PYTHON"]=""; Pkg.add("PyPlot"); Pkg.build("PyPlot"); using PyPlot;'
   - julia -e 'Pkg.clone(pwd())'
   - julia -e 'Pkg.test("DynamicalBilliards")'
 after_success:
