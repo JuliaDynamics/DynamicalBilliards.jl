@@ -13,9 +13,9 @@ The "standard" billiard described above can be extended in many ways. The [wikip
 
 ---
 
-This package is currently under the registration process. When this process is over, you can install the package using `Pkg.add("DynamicalBilliards")`.
+This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it. **WARNING:** this package has a dependency on `PyPlot` for its plotting features. If you want to use the latest features, compatible with the latest documentation, use `Pkg.checkout("DynamicalBilliards")`.
 
-After first installation, it is advised to run the short tests to be sure that everything works as expected. This will only take 2 minutes:
+After the first installation, it is advised to run the short tests to be sure that everything works as expected. This will only take about 2-3 minutes:
 ```julia
 using DynamicalBilliards
 test_options(print_info = false)
