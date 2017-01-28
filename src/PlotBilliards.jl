@@ -144,7 +144,7 @@ collisions is passed.
 * `savefigs` : Save .png figures to enable the creation of animation afterwards.
   **WARNING:** currently the .gif production has to be made by the user!
 * `savename` : Name (*including path!*) of the figures to be produced. The ending
-  "\_$(i).png" will be attached to all.
+  "_ i.png" will be attached to all.
 """
 function animate_evolution(p::MagneticParticle, bt, colnumber;
   sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
