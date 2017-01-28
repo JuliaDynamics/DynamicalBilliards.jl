@@ -424,10 +424,6 @@ function cellsize(a::Antidot)
   return xmin, ymin, xmax, ymax
 end
 
-"""
-    cellsize(bt::Vector{Obstacle})
-Return the delimiters `xmin, ymin, xmax, ymax` of the given billiard table.
-"""
 function cellsize(bt::Vector{Obstacle})
 
   xmin = ymin = Inf
