@@ -134,7 +134,7 @@ For more information and instructions on defining the "ray_splitter" dictionary 
     to fully utilize the plotting features of `DynamicalBilliards`.
 
 
-The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`. Be careful to only pass keywords that actually make sense. For example the `Particle` type is plotted through `scatter`. Using `linewidth = 2.0` with `plot_particle` will result in an error.
+The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`). Be careful to only pass keywords that actually make sense. For example the `Particle` type is plotted through `scatter`. Using `linewidth = 2.0` with `plot_particle` will result in an error.
 
 In order to currently animate the evolution of a particle in a billiard table, use the function:
 ```julia
