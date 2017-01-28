@@ -1,5 +1,5 @@
 All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
-These functions are nicely grouped in the library section(link).
+These functions are nicely grouped in this [library section](/latest/basic/library/#visualization).
 
 ## Plotting the Billiard Table
 
