@@ -251,7 +251,6 @@ Wall obstacle that imposes periodic boundary conditions upon collision.
   periodic cell.
 * `name::String` : Name of the obstacle, e.g. "left boundary", given for user
   convenience.
-
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
 immutable PeriodicWall <: Wall
@@ -292,7 +291,6 @@ Wall obstacle imposing specular reflection during collision.
   instantiated with.
 * `name::String` : Name of the obstacle, e.g. "ray-splitting wall 1",
   given for user convenience.
-
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
 type SplitterWall <: Wall
@@ -330,7 +328,6 @@ normalvec(obst::Obstacle, position)
 ```
 Return the vector normal to the obstacle at the given position (which is
 assumed to be very close to the obstacle's boundary).
-
 The normal vector of any Obstacle must be looking towards
 the direction a particle is expected to come from.
 """
@@ -392,53 +389,55 @@ end
 ####################################################
 ## Initial Conditions
 ####################################################
+
+"""
+```julia
+    cellsize(obst::Obstacle)
+    cellsize(bt::Vector{Obstacle})
+```
+Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard table.
+
+Used in `randominside()` and error checking.
+"""
+function cellsize(d::Disk)
+  xmin = ymin = Inf
+  xmax = ymax = -Inf
+  return xmin, ymin, xmax, ymax
+end
+
+function cellsize(w::Wall)
+  xmin = min(w.sp[1], w.ep[1])
+  xmax = max(w.sp[1], w.ep[1])
+  ymin = min(w.sp[2], w.ep[2])
+  ymax = max(w.sp[2], w.ep[2])
+  return xmin, ymin, xmax, ymax
+end
+
+function cellsize(a::Antidot)
+  if a.where
+    xmin = ymin = Inf
+    xmax = ymax = -Inf
+  else
+    xmin, ymin = a.c .- a.r
+    xmax, ymax = a.c .+ a.r
+  end
+  return xmin, ymin, xmax, ymax
+end
+
 """
     cellsize(bt::Vector{Obstacle})
 Return the delimiters `xmin, ymin, xmax, ymax` of the given billiard table.
-Used in `randominside()` and error checking.
 """
 function cellsize(bt::Vector{Obstacle})
 
   xmin = ymin = Inf
   xmax = ymax = -Inf
-  #test if there is Antidot with where=false in bt:
-  happened = false
-  if any(x -> isa(x, Antidot), bt)
-    i = find(x -> isa(x, Antidot), bt)
-    for j in i
-      if bt[j].where == true; continue; end
-      xmin2 = bt[j].c[1] -  bt[j].r
-      ymin2 = bt[j].c[2] -  bt[j].r
-      xmax2 = bt[j].c[1] +  bt[j].r
-      ymax2 = bt[j].c[2] +  bt[j].r
-
-      xmin = min(xmin, xmin2)
-      ymin = min(ymin, ymin2)
-      xmax = max(xmax, xmax2)
-      ymax = max(ymax, ymax2)
-      happened = true
-    end
-    if happened
-      return xmin, ymin, xmax, ymax
-    end
-  end
-
-  #Else, use the walls:
   for obst in bt
-    if typeof(obst) <: Wall
-      xmin2 = min(obst.sp[1], obst.ep[1])
-      ymin2 = min(obst.sp[2], obst.ep[2])
-      xmax2 = max(obst.sp[1], obst.ep[1])
-      ymax2 = max(obst.sp[2], obst.ep[2])
-      xmin = min(xmin, ymin2)
-      ymin = min(ymin, ymin2)
-      xmax = max(xmax, xmax2)
-      ymax = max(ymax, ymax2)
-    end
-    if any(x -> isa(x, PeriodicWall), bt) && [xmin, ymin] != [0,0]
-      #Is the following still valid??? no, right?
-      error("Periodic billiard tables must have (0,0) as the bottom left corner.")
-    end
+    xs, ys, xm, ym = cellsize(obst)
+    xmin = xmin > xs ? xs : xmin
+    ymin = ymin > ys ? ys : ymin
+    xmax = xmax < xm ? xm : xmax
+    ymax = ymax < ym ? ym : ymax
   end
   return xmin, ymin, xmax, ymax
 end
