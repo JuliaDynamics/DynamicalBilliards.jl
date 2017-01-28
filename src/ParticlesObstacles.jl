@@ -480,12 +480,8 @@ function randominside(ω::Real, bt::Vector{Obstacle})
   end
 
   xmin, ymin, xmax, ymax = cellsize(bt)
-  f = rand()
-  while f == 0 || f==1/4 || f==1/2 || f == 3/4
-    f = rand()
-  end
-  φ0 = f*2π
-
+  
+  φ0 = 2π*rand()
   xp = rand()*(xmax-xmin) + xmin
   yp = rand()*(ymax-ymin) + ymin
   p = MagneticParticle([xp, yp, φ0], ω)
