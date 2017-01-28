@@ -16,8 +16,13 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 * **Standard billiards** : A library of pre-constructed billiard systems that have already been used in Physics/Mathematics (e.g. Sinai, periodic Sinai, Buminovich etc.)
 * **Visualization** : functions for plotting and visualizing aspects of a billiard system, such as obstacles, orbits and more. Also includes animation related content.
 
-NOTICE: This package does not support collision between particles. All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
+**NOTICE:** This package does not support collision between particles (currently). All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
 
-### Installation
-This package is not yet registered, but it is currently in the registration process. 
-Use `Pkg.clone("https://github.com/Datseris/DynamicalBilliards.jl")` in order to install it until this process is complete.
+## Installation
+This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it. **WARNING:** this package has a dependency on `PyPlot` for its plotting features. 
+
+If you want to use the latest features, compatible with the latest documentation, use `Pkg.checkout("DynamicalBilliards")`.
+
+Documentation:
+* [Stable](https://Datseris.github.io/DynamicalBilliards.jl/stable)
+* [Latest](https://Datseris.github.io/DynamicalBilliards.jl/latest)
