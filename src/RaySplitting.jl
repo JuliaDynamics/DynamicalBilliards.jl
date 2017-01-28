@@ -1,4 +1,28 @@
-export isphysical
+export isphysical, acceptable_raysplitter
+
+function supports_raysplitting(obst::Obstacle)
+  n = fieldnames(typeof(obst))
+  in(:where, n) ? true : false
+end
+
+"""
+```julia
+acceptable_raysplitter(raysplitter, bt)
+```
+Check if the given ray-splitting dictionary `raysplitter` can be used in conjuction with
+given billiard table `bt`.
+"""
+function acceptable_raysplitter(ray::Dict{Int, Vector{Function}}, bt::Vector{Obstacle})
+  for i in keys(ray)
+    if !supports_raysplitting(bt[i])
+      println("Obstacle at index $i of given billiard table does not have a field `where`")
+      println("and therefore does not support ray-splitting.")
+      return false
+    end
+  end
+  true
+end
+
 
 # Resolve collision for Ray-splitting
 function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
@@ -299,14 +323,12 @@ end
 """
     isphysical(raysplitter::Dict{Int, Vector{Function}}; only_mandatory = false)
 Return `true` if the given ray-splitting dictionary represends the physical world.
-
 Specifically, check if (φ is the incidence angle):
 * Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
 * Transmission probability is even function: T(φ) ≈ T(-φ)
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
 * Ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
-
 The first property is mandatory and must hold for correct propagation.
 They keyword `only_mandatory` notes whether the rest of
 the properties should be tested or not.
