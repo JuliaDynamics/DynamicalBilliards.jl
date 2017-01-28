@@ -15,8 +15,8 @@ The default arguments for each type of obstacle have been chosen for maximum cla
 visual beauty.
 
 The `kwargs...` given by the user are keywords passed directly into PyPlot's
-constructors (like e.g. linewidth = 2.0). Be careful to only pass keywords
-that are accepted by `PyPlot`.
+constructors. For `Wall` obstacles, kwargs are passed into `PyPlot.plot()`. For
+`Disk` obstacles, kwargs are passed into `PyPlot.plt[:Circle]()`.
 """
 function plot_obstacle(d::Disk; kwargs...)
   circle1 = PyPlot.plt[:Circle](d.c, d.r;
@@ -59,7 +59,7 @@ plot_billiard(bt::Vector{Obstacle})
 
 Plot all obstacles in `bt` using the default arguments, set
 `xlim` and `ylim` to be 10% larger than `cellsize` and
-set the axis aspect ration to equal.
+set the axis aspect ratio to equal.
 """
 function plot_billiard(bt::Vector{Obstacle})
   for obst in bt
@@ -94,7 +94,7 @@ plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
 ```
 
 Plot given particle on the current `PyPlot` figure. Optionally use `p.current_cell` for
-the particle's position.
+the particle's position. Kwargs are passed into `PyPlot.scatter()`.
 
 The particle is represented as a small ball (`scatter()`) and a small arrow (`quiver()`).
 The user provided `kwargs...` are passed only onto the `scatter()` call. However,
@@ -112,7 +112,7 @@ function plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
   # Plot position:
   s1 = scatter(pos...; color=c, s= 30.0, kwargs...)
   # Plot velocity:
-  q1 = quiver(pos..., 0.08p.vel..., angles = "xy", scale = 1, width = 0.005, color=c)
+  q1 = quiver(pos..., 0.08p.vel...; angles = "xy", scale = 1, width = 0.005, color=c)
   return s1, q1
 end
 
