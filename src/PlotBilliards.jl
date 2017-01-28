@@ -12,7 +12,7 @@ plot_obstacle(obst::Obstacle; kwargs...)
 Plot given obstacle on the current `PyPlot` figure.
 
 The default arguments for each type of obstacle have been chosen for maximum clarity and
-visual beauty.
+consistency.
 
 The `kwargs...` given by the user are keywords passed directly into PyPlot's
 constructors. For `Wall` obstacles, kwargs are passed into `PyPlot.plot()`. For
@@ -101,11 +101,11 @@ end
 plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
 ```
 Plot given particle on the current `PyPlot` figure. Optionally use `p.current_cell` for
-the particle's position. Kwargs are passed into `PyPlot.scatter()`.
+the particle's position. Given `kwargs...` are passed onto `PyPlot.scatter()`.
 
 The particle is represented as a small ball (`PyPlot.scatter()`) and a small arrow (`PyPlot.quiver()`).
-The user provided `kwargs...` are passed only onto the `scatter()` call. However,
-if a keyword argument `color` is given, it is also passed to `quiver()`.
+All `kwargs...` are given to `scatter()` but if a keyword argument `color` is given, 
+it is also passed to `quiver()`.
 """
 function plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
   pos = use_cell ? p.pos + p.current_cell : p.pos
