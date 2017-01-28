@@ -72,21 +72,7 @@ The condition for transmission is simply: `T(φ, where, ω) > rand()`. If it ret
 
 The three key functions given to the `raysplitter` dictionary must have some properties in order to have physical meaning, like for example that the scattering probability function is even towards φ. One of these properties is absolutely **mandatory** for this package to work properly. This is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. **This condition is not assured internally** and thefore you must be sure that your transmission probability function satisfies it. In the above example, the function `T` makes sure to return 0 in that case.
 
-In order to test if the `raysplitter` dictionary you have defined has physical meaning, the function `isphysical()` is provided. Its documentation string has all the details one should know:
->```julia
->isphysical(raysplitter::Dict{Int, Vector{Function}}; only_mandatory = false)
->```
->Return `true` if the given ray-splitting dictionary has properties of the physical world.
->
->Specifically, check if (φ is the incidence angle):
->* Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
->* Transmission probability is even function: T(φ) ≈ T(-φ)
->* Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
->* Ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
->* Magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
->
->The first property is mandatory and must hold for correct propagation.
->They keyword `only_mandatory` notes whether the rest of the properties should be tested or not.
+In order to test if the `raysplitter` dictionary you have defined has physical meaning, the function `isphysical()` is provided. Its [documentation string](/basic/library/#DynamicalBilliards.isphysical) has all the details one should know:
 
 ### Velocity measure
 
