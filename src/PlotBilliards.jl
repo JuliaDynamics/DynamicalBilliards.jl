@@ -112,8 +112,7 @@ function plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
   # Plot position:
   s1 = scatter(pos...; color=c, s= 20.0, kwargs...)
   # Plot velocity:
-  q1 = quiver(pos..., p.vel...,
-  units="dots", angles = "xy", scale = 0.02, width = 2.0, color=c)
+  q1 = quiver(pos..., 0.08p.vel..., angles = "xy", scale = 1, width = 0.005, color=c)
   return s1, q1
 end
 
