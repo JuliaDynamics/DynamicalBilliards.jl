@@ -1,5 +1,14 @@
 Below you find all the docstrings of all exported names of `DynamicalBilliards.jl` in convenient groups.
 
+## Standard Billiards
+
+```@docs
+billiard_rectangle
+billiard_sinai
+billiard_polygon
+```
+
+
 ## Particles
 
 ```@docs
@@ -35,6 +44,14 @@ construct
 isphysical
 ```
 
+## Ray-splitting
+
+```@docs
+isphysical
+acceptable_raysplitter
+supports_raysplitting
+```
+
 ## Visualization
 ```@docs
 plot_obstacle
@@ -44,10 +61,3 @@ plot_cyclotron
 animate_evolution
 ```
 
-## Standard Billiards
-
-```@docs
-billiard_rectangle
-billiard_sinai
-billiard_polygon
-```
