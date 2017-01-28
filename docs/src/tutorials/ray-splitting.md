@@ -58,6 +58,15 @@ plot(xt, yt)
 ```
 and everything works like a charm! A final difference to be noted is that in the case of ray-splitting with magnetic fields, the fourth value returned by `evolve!()` is not a number, but a vector of angular velocities `omegas`. The value `omegas[i]` is the angular velocity the particle has while propagating from state `pos[i], vel[i]` to state `pos[i+1], vel[i+1]`. The `construct()` function takes this into account.
 
+### No field "where" error
+
+If you ever encounter the error `ERROR: type SomeObstacleType has no field where` this means that the index provided by your ray-splitting dictionary points to an object that does not support ray-splitting. Use the functions:
+```julia
+acceptable_raysplitter(raysplitter, bt)
+supports_raysplitting(obst::Obstacle)
+```
+to find out what you did wrong. Most likely, the index you supported was incorrect, i.e. the index could be `5` instead of `4`.
+
 ## Physics
 The condition for transmission is simply: `T(φ, where, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. Otherwise just specular reflection will take place.
 
