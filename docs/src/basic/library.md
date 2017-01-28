@@ -41,7 +41,6 @@ collisiontime
 propagate!
 evolve!
 construct
-isphysical
 ```
 
 ## Ray-splitting
