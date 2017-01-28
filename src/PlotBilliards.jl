@@ -76,6 +76,18 @@ end
 ####################################################
 ## Plot Particle
 ####################################################
+
+"""
+```julia
+plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
+```
+Plot the circle traced by the free particle motion. Optionally use `p.current_cell` for
+the particle's position. The user provided `kwargs...` are passed onto `PyPlot.plt[:Circle]()`.
+
+The particle is represented as a small ball (`PyPlot.scatter()`) and a small arrow (`PyPlot.quiver()`).
+The user provided `kwargs...` are passed only onto the `PyPlot.scatter()` call. However,
+if a keyword argument `color` is given, it is also passed to `quiver()`.
+"""
 function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
   ω = p.omega
   pos = use_cell ? p.pos + p.current_cell : p.pos
