@@ -43,7 +43,7 @@ end
 Particle(x0::Real, y0::Real, φ0::Real) = Particle([x0, y0, φ0])
 Particle() = Particle(rand(), rand(), rand()*2π)
 show(io::IO, p::Particle) =
-    print(io, "MagneticParticle\n",
+    print(io, "Particle\n",
     "position: $(p.pos)\nvelocity: $(p.vel)")
 
 """
