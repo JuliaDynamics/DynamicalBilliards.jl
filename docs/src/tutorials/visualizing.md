@@ -60,10 +60,8 @@ The default plotting settings have been chosen for maximum clarity and consisten
 ## Animating the motion of a particle
 
 The function `animate_evolution` is provided to animate the evolution of a particle from collision to collision, using the default arguments.
-Its documentation string contains all the information necessary for its usage:
-```@docs
-animate_evolution
-```
+Its [documentation string](/latest/basic/library/#DynamicalBilliards.animate_evolution) contains all the information necessary for its usage.
+
 
 Automatic output into an animated image (e.g. ".gif" format) is not yet supported. However, `animate_evolution` gives users the possibility
 to save each produce figure in order to merge as an animation using an external tool.
