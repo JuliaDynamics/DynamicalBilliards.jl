@@ -127,30 +127,19 @@ For more information and instructions on defining the "ray_splitter" dictionary 
 ## Visualizing
 
 ---
-!!! warning "Under development!"
+!!! warning "Uses PyPlot!"
 
-    Plotting in `DynamicalBilliards` is done through `PyPlot` package, due to its maturity and detailed documentation.
-    The plotting section is under development and daily improvements. Soon there will be a dedicated tutorial on how
-    to fully utilize the plotting features of `DynamicalBilliards`.
+    Plotting in `DynamicalBilliards` is done through `PyPlot` package, due to its maturity, huge library and detailed documentation.
 
+The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`). 
 
-The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`). Be careful to only pass keywords that actually make sense. For example the `Particle` type is plotted through `scatter`. Using `linewidth = 2.0` with `plot_particle` will result in an error.
+[The tutorial on visualizing](/tutorials/visualizing)) has step-by-step description on how to handle all plotting offered by `DynamicalBilliards`.
 
-In order to currently animate the evolution of a particle in a billiard table, use the function:
-```julia
-plot_evolution(p::AbstractParticle, bt::Vector{Obstacle}, colnumber = 50;
-               sleeptime = 0.5, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
-```
-which propagates the particle from collision to collision up to a total of `colnumber` collisions. Then, it draws the collisions, drawing always only the last `col_to_plot` collisions with orbit color `color`.  `sleeptime` signals the waiting time between each plot update.
-
-Direct animation saving is not supported yet. However, optionally, you could save each figure of the animation using `savefigs = true` and `savename = "path/to/your/folder/figurename"`. A total of `colnumber` figures will be created, ending with `_#.png`.
-
-Be sure to first call `plot_billiard` before calling `plot_evolution`.
+### Introduction animation
 
 The example .gif shown in the introduction, was generated simply with the code:
 ```julia
-using DynamicalBilliards
-using PyPlot
+using DynamicalBilliards, PyPlot
 
 bt = billiard_rectangle(1.5, 1.0)
 d1 = Disk([0.45, 0.6], 0.3, "Upper-left Disk")
@@ -164,13 +153,9 @@ p = randominside(bt, ω)
 plot_billiard(bt)
 axis("off")
 tight_layout()
-xlim(0,1.5)
-ylim(0,1.0)
 
 sname = "C:\\***\\example"
 plot_evolution(p, bt, 200;
-sleeptime = 0.1, col_to_plot = 4, savefigs = true, savename = sname)
+col_to_plot = 4, savefigs = true, savename = sname)
 ```
-Afterwards the outputed .png files where merged into a single .gif externally.
-
-A full overview of all plotting procedures offered by this package is coming soon.
+Afterwards the outputed .png files where merged into a single .gif externally using for example the website gifmaker.me.

@@ -35,6 +35,7 @@ pages:
 - Tutorials:
   - Defining a Billiard Table: tutorials/billiard_table.md
   - Ray-Splitting: tutorials/ray-splitting.md
+  - Visualizing: tutorials/visualizing.md
   - Creating your own Obstacle: tutorials/own_obstacle.md
   - Examples: tutorials/examples.md
 - Library: basic/library.md
