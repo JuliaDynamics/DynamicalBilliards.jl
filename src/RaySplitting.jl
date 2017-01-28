@@ -1,5 +1,11 @@
-export isphysical, acceptable_raysplitter
+export isphysical, acceptable_raysplitter, supports_raysplitting
 
+"""
+```julia
+supports_raysplitting(obst::Obstacle)
+```
+Return `true` if the given obstacle supports ray-splitting.
+"""
 function supports_raysplitting(obst::Obstacle)
   n = fieldnames(typeof(obst))
   in(:where, n) ? true : false
