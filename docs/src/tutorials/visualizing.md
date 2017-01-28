@@ -30,7 +30,7 @@ plot_billiard(bt)
 ```
 which will plot something like this:
 
-![Visualizing tutorial 2](http://i.imgur.com/46AomXm.png)
+![Visualizing tutorial 2](http://i.imgur.com/UyiW2N2.gif)
 
 `plot_billiard()` also sets up the axis to have equal aspect ration and sets up the axis limits to be large enough to contain the entire billiard.
 
