@@ -35,6 +35,15 @@ construct
 isphysical
 ```
 
+## Visualization
+```@docs
+plot_obstacle
+plot_billiard
+plot_particle
+plot_cyclotron
+animate_evolution
+```
+
 ## Standard Billiards
 
 ```@docs
