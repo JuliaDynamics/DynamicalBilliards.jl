@@ -30,7 +30,7 @@ plot_billiard(bt)
 ```
 which will plot something like this:
 
-![Visualizing tutorial 2](http://i.imgur.com/UyiW2N2.gif)
+![Visualizing tutorial 2](http://i.imgur.com/46AomXm.png)
 
 `plot_billiard()` also sets up the axis to have equal aspect ration and sets up the axis limits to be large enough to contain the entire billiard.
 
@@ -48,7 +48,7 @@ plot_particle(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
 ```
 which should give you something like this (notice that the particle position and direction are random):
 
-![Visualizing tutorial 2](http://i.imgur.com/8a4ajfA.png)
+![Visualizing tutorial 3](http://i.imgur.com/8a4ajfA.png)
 
 ### Color conventions
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:
@@ -85,7 +85,7 @@ This code produced 50 ".png" images which were later mixed (using e.g. www.gifma
 The output figures have a dpi=60 and therefore take only a dozen kb of space.
 The animation produced should look like:
 
-![Visualizing Animation 1](http://i.imgur.com/UyiW2N2.gifv)
+![Visualizing Animation 1](http://i.imgur.com/UyiW2N2.gif)
 
 
 
