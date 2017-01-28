@@ -83,10 +83,6 @@ plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
 ```
 Plot the circle traced by the free particle motion. Optionally use `p.current_cell` for
 the particle's position. The user provided `kwargs...` are passed onto `PyPlot.plt[:Circle]()`.
-
-The particle is represented as a small ball (`PyPlot.scatter()`) and a small arrow (`PyPlot.quiver()`).
-The user provided `kwargs...` are passed only onto the `PyPlot.scatter()` call. However,
-if a keyword argument `color` is given, it is also passed to `quiver()`.
 """
 function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
   ω = p.omega
@@ -104,11 +100,10 @@ end
 ```julia
 plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
 ```
-
 Plot given particle on the current `PyPlot` figure. Optionally use `p.current_cell` for
 the particle's position. Kwargs are passed into `PyPlot.scatter()`.
 
-The particle is represented as a small ball (`scatter()`) and a small arrow (`quiver()`).
+The particle is represented as a small ball (`PyPlot.scatter()`) and a small arrow (`PyPlot.quiver()`).
 The user provided `kwargs...` are passed only onto the `scatter()` call. However,
 if a keyword argument `color` is given, it is also passed to `quiver()`.
 """
@@ -158,7 +153,8 @@ collisions is passed.
   "_ i.png" will be attached to all.
 """
 function animate_evolution(p::MagneticParticle, bt, colnumber;
-  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
+  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), 
+  savefigs = false, savename = "")
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ω = p.omega
