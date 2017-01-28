@@ -1,5 +1,5 @@
 All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
-These functions are nicely grouped in this [library section](/latest/basic/library/#visualization).
+These functions are nicely grouped in this [library section](/basic/library/#visualization).
 
 ## Plotting the Billiard Table
 
@@ -60,8 +60,7 @@ The default plotting settings have been chosen for maximum clarity and consisten
 ## Animating the motion of a particle
 
 The function `animate_evolution` is provided to animate the evolution of a particle from collision to collision, using the default arguments.
-Its [documentation string](/latest/basic/library/#DynamicalBilliards.animate_evolution) contains all the information necessary for its usage.
-
+Its [documentation string](/basic/library/#DynamicalBilliards.animate_evolution) contains all the information necessary for its usage.
 
 Automatic output into an animated image (e.g. ".gif" format) is not yet supported. However, `animate_evolution` gives users the possibility
 to save each produce figure in order to merge as an animation using an external tool.
