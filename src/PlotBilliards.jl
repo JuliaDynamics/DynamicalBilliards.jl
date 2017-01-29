@@ -152,7 +152,7 @@ collisions is passed.
 * `savename` : Name (*including path!*) of the figures to be produced. The ending
   "i.png" will be attached to all.
 """
-function animate_evolution(p::MagneticParticle, bt, colnumber;
+function animate_evolution(p::AbstractParticle, bt, colnumber;
   sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), 
   savefigs = false, savename = "")
 
@@ -203,7 +203,7 @@ function animate_evolution(p::MagneticParticle, bt, colnumber;
 end
 
 # Magnetic + Ray-splitting
-function animate_evolution(p::MagneticParticle, bt,
+function animate_evolution(p::AbstractParticle, bt,
   colnumber, rayspl::Dict{Int, Vector{Function}};
   sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
 
