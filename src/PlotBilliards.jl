@@ -157,7 +157,6 @@ function animate_evolution(p::AbstractParticle, bt, colnumber;
   savefigs = false, savename = "")
 
   sleeptime == 0 && (sleeptime = 1e-6)
-  ω = p.omega
   ε = eps()
   i=0
   xdata = Vector{Float64}[]
@@ -208,7 +207,6 @@ function animate_evolution(p::AbstractParticle, bt,
   sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
 
   sleeptime == 0 && (sleeptime = 1e-6)
-  ω = p.omega
   ε = eps()
   i=0
   xdata = Vector{Float64}[]
