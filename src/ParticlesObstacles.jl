@@ -44,7 +44,7 @@ Particle(x0::Real, y0::Real, φ0::Real) = Particle([x0, y0, φ0])
 Particle() = Particle(rand(), rand(), rand()*2π)
 show(io::IO, p::Particle) =
     print(io, "Particle\n",
-    "position: $(p.pos)\nvelocity: $(p.vel)")
+    "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
 
 """
     MagneticParticle <: AbstractParticle
@@ -88,7 +88,7 @@ MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
 show(io::IO, p::MagneticParticle) =
     print(io, "MagneticParticle\n",
-    "position: $(p.pos)\nvelocity: $(p.vel)\nω: $(p.omega)")
+    "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)\nang. velocity: $(p.omega)")
 
 """
 ```julia
@@ -320,7 +320,7 @@ end
 show(io::IO, w::SplitterWall) =
 print(io, "$(w.name)\n",
 "start point: $(w.sp)\nend point: $(w.ep)\n",
-"current normal: $((2*Int(w.where)- 1)*w.normal)")
+"normal: $(w.normal)\nwhere = $(w.where)")
 
 """
 ```julia
@@ -351,7 +351,10 @@ outside of the disk, negative otherwise.
 ```julia
 distance(p::AbstractParticle, bt::Vector{Obstacle})
 ```
-Return minimum `distance(p, obst)` for all `obst` in `bt`, which can be negative.
+Return minimum `distance(p, obst)` for all `obst` in `bt`, which should be positive.
+
+If the `distance(p, bt)` is negative this means that the particle is outside the billiard
+table. If this was *not* intended, please file an error immediately!
 """
 function distance(p::AbstractParticle, bt::Vector{Obstacle})
   mindist = Inf
