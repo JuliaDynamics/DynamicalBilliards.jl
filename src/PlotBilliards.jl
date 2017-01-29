@@ -205,7 +205,7 @@ end
 # Magnetic + Ray-splitting
 function animate_evolution(p::MagneticParticle, bt,
   colnumber, rayspl::Dict{Int, Vector{Function}};
-  sleeptime = 0.1, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
+  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ω = p.omega
@@ -246,105 +246,6 @@ function animate_evolution(p::MagneticParticle, bt,
 
     sleep(sleeptime)
 
-    if i < colnumber - 1
-      point[:remove]()
-      quiv[:remove]()
-    end
-    i+=1
-  end
-end
-
-# Straight
-function animate_evolution(p::Particle, bt, colnumber;
-  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
-
-  sleeptime == 0 && (sleeptime = 1e-6)
-  ε = eps()
-  i=0
-  xdata = Vector{Float64}[]
-  ydata = Vector{Float64}[]
-
-  while i < colnumber
-
-    xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ε)...)
-
-    if i < col_to_plot
-      push!(xdata, xt)
-      push!(ydata, yt)
-    else
-      shift!(xdata); shift!(ydata)
-      push!(xdata, xt); push!(ydata, yt)
-    end
-
-    xpd = Float64[]
-    for el in xdata; append!(xpd, el); end
-
-    ypd = Float64[]
-    for el in ydata; append!(ypd, el); end
-
-    if i == 0
-      line, = plot(xpd, ypd, color = orbit_color)
-    end
-    line[:set_xdata](xpd)
-    line[:set_ydata](ypd)
-    point, quiv = plot_particle(p)
-    if savefigs
-      s = savename*"_$(i+1).png"
-      savefig(s, dpi = 60, bbox_inches="tight")
-    end
-
-
-    sleep(sleeptime)
-    if i < colnumber - 1
-      point[:remove]()
-      quiv[:remove]()
-    end
-    i+=1
-  end
-end
-
-
-# Straight + Ray-splitting
-function animate_evolution(p::Particle, bt, colnumber, rayspl::Dict{Int, Vector{Function}};
-  sleeptime = 0.1, col_to_plot = 5, color = (0,0,1), savefigs = false, savename = "")
-
-  sleeptime == 0 && (sleeptime = 1e-6)
-  ε = eps()
-  i=0
-  xdata = Vector{Float64}[]
-  ydata = Vector{Float64}[]
-
-  while i < colnumber
-
-    xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ε, rayspl)...)
-
-    if i < col_to_plot
-      push!(xdata, xt)
-      push!(ydata, yt)
-    else
-      shift!(xdata); shift!(ydata)
-      push!(xdata, xt); push!(ydata, yt)
-    end
-
-    xpd = Float64[]
-    for el in xdata; append!(xpd, el); end
-
-    ypd = Float64[]
-    for el in ydata; append!(ypd, el); end
-
-    if i == 0
-      line, = plot(xpd, ypd, color = color)
-    end
-    line[:set_xdata](xpd)
-    line[:set_ydata](ypd)
-    point, quiv = plot_particle(p)
-    if savefigs
-      s = savename*"_$(i+1).png"
-      savefig(s, dpi = 60, bbox_inches="tight")
-    end
-
-
-    sleep(sleeptime)
     if i < colnumber - 1
       point[:remove]()
       quiv[:remove]()
