@@ -19,10 +19,19 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 **NOTICE:** This package does not support collision between particles (currently). All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
 
 ## Installation
-This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it. **WARNING:** this package has a dependency on `PyPlot` for its plotting features. 
+This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it. 
 
 If you want to use the latest features, compatible with the latest documentation, use `Pkg.checkout("DynamicalBilliards")`.
 
 Documentation:
 * [Stable](https://Datseris.github.io/DynamicalBilliards.jl/stable)
 * [Latest](https://Datseris.github.io/DynamicalBilliards.jl/latest)
+
+
+### PyPlot
+**WARNING:** this package has a dependency on `PyPlot` for its plotting features. If you are having trouble installing PyPlot and you **do not have** a Python installation in your computer, simply run the following line in your julia terminal:
+
+`ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
+
+This will install the minimal Python library called "miniconda" and afterwards it will install PyPlot.
+
