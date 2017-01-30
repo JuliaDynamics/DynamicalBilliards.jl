@@ -130,7 +130,8 @@ end
 """
 ```julia
 animate_evolution(p, bt, colnumber[, ray-splitter];
-sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
+sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), particlecolor = (0,0,0), 
+savefigs = false, savename = "")
 ```
 
 Animate the evolution of the particle, plotting the orbit from collision to collision.
@@ -154,7 +155,7 @@ collisions is passed.
 """
 function animate_evolution(p::AbstractParticle, bt, colnumber;
   sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), 
-  savefigs = false, savename = "")
+  savefigs = false, savename = "", particle_color = (0,0,0))
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ε = eps()
@@ -185,7 +186,7 @@ function animate_evolution(p::AbstractParticle, bt, colnumber;
     end
     line[:set_xdata](xpd)
     line[:set_ydata](ypd)
-    point, quiv = plot_particle(p)
+    point, quiv = plot_particle(p; color = particle_color)
     if savefigs
       s = savename*"_$(i+1).png"
       savefig(s, dpi = 60, bbox_inches="tight")
@@ -204,7 +205,7 @@ end
 # Magnetic + Ray-splitting
 function animate_evolution(p::AbstractParticle, bt,
   colnumber, rayspl::Dict{Int, Vector{Function}};
-  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "")
+  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "", particle_color = (0,0,0))
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ε = eps()
@@ -235,7 +236,7 @@ function animate_evolution(p::AbstractParticle, bt,
     end
     line[:set_xdata](xpd)
     line[:set_ydata](ypd)
-    point, quiv = plot_particle(p)
+    point, quiv = plot_particle(p; color = particle_color)
     if savefigs
       s = savename*"_$(i+1).png"
       savefig(s, dpi = 60, bbox_inches="tight")
