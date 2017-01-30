@@ -397,7 +397,7 @@ end
 ## Magnetic Propagation
 ####################################################
 
-function propagate!(p::MagneticParticle, t::Real)
+function propagate!(p::MagneticParticle, t::Float64)
 
   # "Initial" conditions
   ω  = p.omega
