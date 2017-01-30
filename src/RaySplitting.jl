@@ -329,13 +329,16 @@ end
 """
     isphysical(raysplitter::Dict{Int, Vector{Function}}; only_mandatory = false)
 Return `true` if the given ray-splitting dictionary represends the physical world.
+
 Specifically, check if (φ is the incidence angle):
 * Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
 * Transmission probability is even function: T(φ) ≈ T(-φ)
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
 * Ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
-The first property is mandatory and must hold for correct propagation.
+The first property is mandatory and must hold for correct propagation. 
+The above tests are done for all possible combinations of arguments.
+
 They keyword `only_mandatory` notes whether the rest of
 the properties should be tested or not.
 """
@@ -344,8 +347,8 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
     scatter = ray[i][2]
     tr = ray[i][1]
     om = ray[i][3]
-    range = -π/2:0.001:π/2
-    orange = -1.0:0.01:1.0
+    range = -π/2:0.01:π/2
+    orange = -1.0:0.1:1.0
     display_er = true
     for where in [true, false]
       for ω in orange
@@ -356,9 +359,10 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
             θ = scatter(φ, where, ω)
           catch er
             if display_er
-              println("Error message: $er")
-              println("while calculating the refraction angle with settings:")
-              println("index = $i, φ = $φ, where = $where, ω = $ω")
+              ws = "Got error message: $er\n"
+              ws*= "while calculating the refraction angle with settings:\n"
+              ws*= "index = $i, φ = $φ, where = $where, ω = $ω\n"
+              ws*= "Similar warnings will be skipped as long as Tr. prob. is 0."
             end
             display_er = false
             T = tr(φ, where, ω)
@@ -366,7 +370,7 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
               println("Error message: $er")
               println("while calculating the refraction angle with settings:")
               println("index = $i, φ = $φ, where = $where, ω = $ω")
-              println("Also, transmission prob. was not 0 for these settings. (major problem!)")
+              println("PROBLEM: Transmission prob. was not 0 for these settings!")
               return false
             else
               continue
