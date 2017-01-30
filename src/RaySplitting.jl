@@ -142,9 +142,10 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
 end
 
 # For Particle and Ray-Splitting:
-function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64,
+function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
   ray::Dict{Int, Vector{Function}})
 
+  ttotal = Float64(ttotal)
   rt = Float64[]
   rpos = SVector{2,Float64}[]
   rvel = SVector{2,Float64}[]
@@ -205,8 +206,9 @@ end
 
 # For MagneticParticle and Ray-Splitting. Returns one extra vector with omegas!!!
 function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
-                 ttotal::Float64, ray::Dict{Int, Vector{Function}})
+                 ttotal::Real, ray::Dict{Int, Vector{Function}})
 
+  ttotal = Float64(ttotal)
   omegas = Float64[]
   rt = Float64[]
   rpos = SVector{2,Float64}[]
