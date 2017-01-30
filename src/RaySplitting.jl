@@ -362,12 +362,13 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
               ws = "Got error message: $er\n"
               ws*= "while calculating the refraction angle with settings:\n"
               ws*= "index = $i, φ = $φ, where = $where, ω = $ω\n"
-              ws*= "Similar warnings will be skipped as long as Tr. prob. is 0."
+              ws*= "Similar warnings will be skipped as long as the Tr. prob. is 0."
+              wanr("ws")
             end
             display_er = false
             T = tr(φ, where, ω)
             if T!= 0
-              println("Error message: $er")
+              println("Got error message: $er")
               println("while calculating the refraction angle with settings:")
               println("index = $i, φ = $φ, where = $where, ω = $ω")
               println("PROBLEM: Transmission prob. was not 0 for these settings!")
