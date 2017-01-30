@@ -297,7 +297,7 @@ ray-splitting functions: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real)
+function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
 
   rt = Float64[]
   rpos = SVector{2,Float64}[]
@@ -337,11 +337,13 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real)
   end#time loop
   return (rt, rpos, rvel)
 end
+
 function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real)
+  ti = Float64(ttotal)
   if ttotal <= 0
     error("`evolve!()` cannot evolve backwards in time.")
   else
-    evolve!(p, bt, Float64(ttotal))
+    evolve!(p, bt, Float64(ti))
   end
 end
 
@@ -512,7 +514,7 @@ function collisiontime(p::MagneticParticle, o::Circular)
 end
 
 
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real)
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
 
   ω = p.omega
   absω = abs(ω)
@@ -571,6 +573,15 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real)
     end
   end#time loop
   return (rt, rpos, rvel, ω)
+end
+
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real)
+  ti = Float64(ttotal)
+  if ttotal <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+  else
+    evolve!(p, bt, Float64(ti))
+  end
 end
 
 function construct(t::Vector{Float64},  poss::Vector{SVector{2,Float64}},
