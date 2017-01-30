@@ -363,7 +363,7 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
               ws*= "while calculating the refraction angle with settings:\n"
               ws*= "index = $i, φ = $φ, where = $where, ω = $ω\n"
               ws*= "Similar warnings will be skipped as long as the Tr. prob. is 0."
-              wanr("ws")
+              warn("ws")
             end
             display_er = false
             T = tr(φ, where, ω)
