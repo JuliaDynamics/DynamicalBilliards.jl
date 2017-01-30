@@ -349,6 +349,8 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
     for where in [true, false]
       for ω in orange
         for φ in range
+          θ::Float64 = 0.0
+          # Calculate refraction angle:
           try
             θ = scatter(φ, where, ω)
           catch er
@@ -363,6 +365,7 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
               continue
             end
           end
+          # Calculate transmission probability:
           T = tr(φ, where, ω)
           # Check critical angle:
           if θ >= π/2 && T > 0
