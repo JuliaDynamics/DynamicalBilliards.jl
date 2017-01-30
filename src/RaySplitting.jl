@@ -349,7 +349,20 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
     for where in [true, false]
       for ω in orange
         for φ in range
-          θ = scatter(φ, where, ω)
+          try
+            θ = scatter(φ, where, ω)
+          catch er
+            println("Error message: $er")
+            println("while calculating the refraction angle with settings:")
+            println("index = $i, φ = $φ, where = $where, ω = $ω")
+            T = tr(φ, where, ω)
+            if T!= 0
+              println("Transmission prob. was not 0 for these settings.")
+              return false
+            else
+              continue
+            end
+          end
           T = tr(φ, where, ω)
           # Check critical angle:
           if θ >= π/2 && T > 0
