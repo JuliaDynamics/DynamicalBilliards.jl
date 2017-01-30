@@ -297,8 +297,8 @@ ray-splitting functions: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
-
+function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real)
+  ttotal = Float64(ttotal)
   rt = Float64[]
   rpos = SVector{2,Float64}[]
   rvel = SVector{2,Float64}[]
@@ -395,7 +395,8 @@ end
 ## Magnetic Propagation
 ####################################################
 
-function propagate!(p::MagneticParticle, t::Float64)
+function propagate!(p::MagneticParticle, t::Real)
+  t = Float64(t)
   # "Initial" conditions
   ω  = p.omega
   vx0= p.vel[1]
@@ -511,8 +512,9 @@ function collisiontime(p::MagneticParticle, o::Circular)
 end
 
 
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real)
 
+  ttotal = Float64(ttotal)
   ω = p.omega
   absω = abs(ω)
   rt = Float64[]
