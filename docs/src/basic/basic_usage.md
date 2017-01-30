@@ -49,9 +49,9 @@ The return values of the `evolve!()` function need some brief explaining: As not
 it changes its argument `p`.
 Most importantly however, this function also returns the main output expected by a billiard
 system. This output is a tuple of three vectors:
-* `ct::Vector` : Collision times.
+* `ct::Vector{Float64}` : Collision times.
 * `poss::Vector{SVector{2}}` : Positions during collisions.
-* `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions (i.e. reflections).
+* `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions (e.g. after reflection).
 
 The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
 state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[1], vels[1]` are
@@ -127,13 +127,10 @@ For more information and instructions on defining the "ray_splitter" dictionary 
 ## Visualizing
 
 ---
-!!! warning "Uses PyPlot!"
-
-    Plotting in `DynamicalBilliards` is done through `PyPlot` package, due to its maturity, huge library and detailed documentation.
 
 The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`). 
 
-[The tutorial on visualizing](/tutorials/visualizing)) has step-by-step description on how to handle all plotting offered by `DynamicalBilliards`.
+[The tutorial on visualizing](/tutorials/visualizing) has step-by-step descriptions on how to handle all plotting offered by `DynamicalBilliards.jl`.
 
 ### Introduction animation
 
