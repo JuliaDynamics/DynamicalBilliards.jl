@@ -346,6 +346,7 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
     om = ray[i][3]
     range = -π/2:0.001:π/2
     orange = -1.0:0.01:1.0
+    display_er = true
     for where in [true, false]
       for ω in orange
         for φ in range
@@ -354,12 +355,18 @@ function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
           try
             θ = scatter(φ, where, ω)
           catch er
-            println("Error message: $er")
-            println("while calculating the refraction angle with settings:")
-            println("index = $i, φ = $φ, where = $where, ω = $ω")
+            if display_er
+              println("Error message: $er")
+              println("while calculating the refraction angle with settings:")
+              println("index = $i, φ = $φ, where = $where, ω = $ω")
+            end
+            display_er = false
             T = tr(φ, where, ω)
             if T!= 0
-              println("Transmission prob. was not 0 for these settings.")
+              println("Error message: $er")
+              println("while calculating the refraction angle with settings:")
+              println("index = $i, φ = $φ, where = $where, ω = $ω")
+              println("Also, transmission prob. was not 0 for these settings. (major problem!)")
               return false
             else
               continue
