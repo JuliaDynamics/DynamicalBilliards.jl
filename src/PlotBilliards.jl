@@ -154,8 +154,8 @@ collisions is passed.
   "i.png" will be attached to all.
 """
 function animate_evolution(p::AbstractParticle, bt, colnumber;
-  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), 
-  savefigs = false, savename = "", particle_color = (0,0,0))
+  sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
+  particle_kwargs = nothing, orbit_kwargs = nothing)
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ε = eps()
@@ -182,11 +182,15 @@ function animate_evolution(p::AbstractParticle, bt, colnumber;
     for el in ydata; append!(ypd, el); end
 
     if i == 0
-      line, = plot(xpd, ypd, color = orbit_color)
+      if orbit_kwargs != nothing
+        line, = plot(xpd, ypd; orbit_kwargs...)
+      else
+        line, = plot(xpd, ypd; color = "blue")
+      end
     end
     line[:set_xdata](xpd)
     line[:set_ydata](ypd)
-    point, quiv = plot_particle(p; color = particle_color)
+    point, quiv = plot_particle(p; particle_kwargs...)
     if savefigs
       s = savename*"_$(i+1).png"
       savefig(s, dpi = 60, bbox_inches="tight")
