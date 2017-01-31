@@ -1,8 +1,9 @@
 using StaticArrays
 import Base.show
 export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
-standard2magnetic, cyclotron, Obstacle, Disk, Antidot, RandomDisk, FiniteWall, PeriodicWall,
-normalvec, randominside, SplitterWall, distance, cellsize
+standard2magnetic, cyclotron, Obstacle, Disk, Antidot, RandomDisk,
+FiniteWall, PeriodicWall, RandomWall, SplitterWall,
+normalvec, randominside, distance, cellsize
 
 ####################################################
 ## Particles
@@ -165,7 +166,7 @@ end
 """
     RandomDisk <: Circular
 Disk-like obstacle that randomly (and uniformly) reflects colliding particles.
-The propagation is allowed outside of the circle. 
+The propagation is allowed outside of the circle.
 ## Fields:
 * `c::SVector{2,Float64}` : Center.
 * `r::Float64` : Radius.
@@ -224,7 +225,7 @@ Wall obstacle imposing specular reflection during collision.
 * `sp::SVector{2,Float64}` : Starting point of the Wall.
 * `ep::SVector{2,Float64}` : Ending point of the Wall.
 * `normal::SVector{2,Float64}` : Normal vector to the wall, pointing to where the
-  particle *will come from before a collision* (pointing towards the inside the
+  particle *will come from before a collision* (pointing towards the inside of the
   billiard table). The size of the vector is irrelevant.
 * `name::String` : Name of the obstacle, e.g. "left wall", given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
@@ -246,8 +247,42 @@ immutable FiniteWall <: Wall
     new(sp, ep, n, name)
   end
 end
-function FiniteWall(sp, ep, n, name::String = "wall")
+function FiniteWall(sp, ep, n, name::String = "Wall")
   FiniteWall(SVector{2, Float64}(sp), SVector{2, Float64}(ep),
+  SVector{2, Float64}(n), name)
+end
+
+"""
+    RandomWall <: Wall
+Wall obstacle imposing (uniformly) random reflection during collision.
+## Fields:
+* `sp::SVector{2,Float64}` : Starting point of the Wall.
+* `ep::SVector{2,Float64}` : Ending point of the Wall.
+* `normal::SVector{2,Float64}` : Normal vector to the wall, pointing to where the
+  particle *is expected to come from* (pointing towards the inside of the
+  billiard table). The size of the vector is irrelevant.
+* `name::String` : Name of the obstacle, e.g. "random wall", given for user convenience.
+Constructors accept any vectors convertible to SVector{2,Float64}.
+"""
+immutable RandomWall <: Wall
+  sp::SVector{2,Float64}
+  ep::SVector{2,Float64}
+  normal::SVector{2,Float64}
+  name::String
+  #Inner constructor, do not add {Float64} after name
+  function RandomWall(sp::SVector{2,Float64}, ep::SVector{2,Float64},
+    normal::SVector{2,Float64}, name::String = "Random wall")
+
+    n = normalize(normal)
+    d = dot(n, ep-sp)
+    if abs(d) > 1e-15
+      error("Normal vector is not actually normal to the wall")
+    end
+    new(sp, ep, n, name)
+  end
+end
+function RandomWall(sp, ep, n, name::String = "Random wall")
+  RandomWall(SVector{2, Float64}(sp), SVector{2, Float64}(ep),
   SVector{2, Float64}(n), name)
 end
 
@@ -341,7 +376,7 @@ assumed to be very close to the obstacle's boundary).
 The normal vector of any Obstacle must be looking towards
 the direction a particle is expected to come from.
 """
-normalvec(wall::FiniteWall, pos) = wall.normal
+normalvec(wall::Wall, pos) = wall.normal
 normalvec(w::PeriodicWall, pos) = normalize(w.normal)
 normalvec(w::SplitterWall, pos) = (2*Int(w.where)- 1)*w.normal
 normalvec(disk::Circular, pos) = normalize(pos - disk.c)
@@ -381,7 +416,7 @@ function distance(p::AbstractParticle, w::Wall)
 end
 
 # no new distance needed for SplitterWall because the `where` field
-# has the necessary information to give the correct dinstance, 
+# has the necessary information to give the correct dinstance,
 # since the distance is calculated throught the normalvec.
 
 distance(p::AbstractParticle, d::Circular) = norm(p.pos - d.c) - d.r
@@ -402,7 +437,7 @@ end
 ```
 Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard table.
 
-Used in `randominside()` and error checking.
+Used in `randominside()`, error checking and plotting.
 """
 function cellsize(d::Circular)
   xmin = ymin = Inf
@@ -485,7 +520,7 @@ function randominside(ω::Real, bt::Vector{Obstacle})
   end
 
   xmin, ymin, xmax, ymax = cellsize(bt)
-  
+
   φ0 = 2π*rand()
   xp = rand()*(xmax-xmin) + xmin
   yp = rand()*(ymax-ymin) + ymin

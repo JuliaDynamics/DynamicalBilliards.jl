@@ -34,10 +34,6 @@ and obstacle, given the calculated distance between them.
 function lct(p::AbstractParticle, o::Obstacle, dist::Real)
   n = normalvec(o, p.pos)
   t = -dist/dot(p.vel, n)
-  if abs(t) >= 1e-5
-    error("lct > 1e-5. Dist = $dist\n dotvel = $(dot(p.vel, n))")
-  end
-  return t
 end
 
 """
@@ -59,7 +55,7 @@ function relocate!(p::AbstractParticle, o::Obstacle, dist)
   if pe - ve > 16.0
     dt *= 10^(pe - ve - 16.0)
   end
-  # Propagate backwards:
+  # Propagate backwards or forwards:
   p.pos += [p.vel[1]*dt, p.vel[2]*dt]
   return dt
 end
@@ -84,7 +80,13 @@ function specular!(p::AbstractParticle, r::RandomDisk)
     φ = atan2(n[2], n[1]) + π*rand() - π/2
     p.vel = SVector(cos(φ), sin(φ))
 end
-  
+
+function specular!(p::AbstractParticle, r::RandomWall)
+    n = normalvec(r, p.pos)
+    φ = atan2(n[2], n[1]) + π*rand() - π/2
+    p.vel = SVector(cos(φ), sin(φ))
+end
+
 """
 ```julia
 periodicity!(p::AbstractParticle, w::PeriodicWall)
@@ -243,7 +245,7 @@ function propagate!(p::Particle, t::Real)
   # Set initial conditions
   vx0=p.vel[1]
   vy0=p.vel[2]
-  # Set current (final) values for `pos` (`vel` is unchanged)
+  # Set current (final) values for `pos` (`vel` does not change)
   p.pos += [vx0*t, vy0*t]
 end
 

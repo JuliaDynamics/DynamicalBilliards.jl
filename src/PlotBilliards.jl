@@ -25,11 +25,17 @@ function plot_obstacle(d::Disk; kwargs...)
   PyPlot.show()
 end
 
+function plot_obstacle(d::RandomDisk; kwargs...)
+  circle1 = PyPlot.plt[:Circle](d.c, d.r;
+  edgecolor = (0.8,0.8,0), facecolor = (0.8, 0.8, 0, 0.5), linewidth = 2.0, kwargs...)
+  PyPlot.gca()[:add_artist](circle1)
+  PyPlot.show()
+end
 
 function plot_obstacle(d::Antidot; kwargs...)
   circle1 = PyPlot.plt[:Circle](d.c, d.r;
   edgecolor = (0.8,0.0,0), linewidth = 2.0, facecolor = (0.6, 0.0, 0, 0.1),
-  kwargs...)
+  linestyle="dashed", kwargs...)
   PyPlot.gca()[:add_artist](circle1)
   PyPlot.show()
 end
@@ -40,15 +46,21 @@ function plot_obstacle(w::FiniteWall; kwargs...)
   PyPlot.show()
 end
 
+function plot_obstacle(w::RandomWall; kwargs...)
+  PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
+  color=(0.8,0.8,0), linewidth = 2.0, ms=0, kwargs...)
+  PyPlot.show()
+end
+
 function plot_obstacle(w::SplitterWall; kwargs...)
   PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
-  color=(0.8,0.0,0), linewidth = 3.0, kwargs...)
+  color=(0.8,0.0,0), linewidth = 3.0, linestyle="dashed", kwargs...)
   PyPlot.show()
 end
 
 function plot_obstacle(w::PeriodicWall; kwargs...)
   PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
-  color="purple", linewidth = 1.0, alpha = 0.5, linestyle="dashed", kwargs...)
+  color="purple", linewidth = 1.0, alpha = 0.5, kwargs...)
   PyPlot.show()
 end
 
@@ -104,7 +116,7 @@ Plot given particle on the current `PyPlot` figure. Optionally use `p.current_ce
 the particle's position. Given `kwargs...` are passed onto `PyPlot.scatter()`.
 
 The particle is represented as a small ball (`PyPlot.scatter()`) and a small arrow (`PyPlot.quiver()`).
-All `kwargs...` are given to `scatter()` but if a keyword argument `color` is given, 
+All `kwargs...` are given to `scatter()` but if a keyword argument `color` is given,
 it is also passed to `quiver()`.
 """
 function plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
@@ -130,7 +142,7 @@ end
 """
 ```julia
 animate_evolution(p, bt, colnumber[, ray-splitter];
-sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), particlecolor = (0,0,0), 
+sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), particlecolor = (0,0,0),
 savefigs = false, savename = "")
 ```
 
@@ -190,13 +202,13 @@ function animate_evolution(p::AbstractParticle, bt, colnumber;
     end
     line[:set_xdata](xpd)
     line[:set_ydata](ypd)
-    
+
     if particle_kwargs != nothing
       point, quiv = plot_particle(p; particle_kwargs...)
     else
       point, quiv = plot_particle(p)
     end
-    
+
     if savefigs
       s = savename*"_$(i+1).png"
       savefig(s, dpi = 60, bbox_inches="tight")
