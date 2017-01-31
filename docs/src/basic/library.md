@@ -24,6 +24,7 @@ cyclotron
 ```@docs
 Obstacle
 Disk
+RandomDisk
 Antidot
 FiniteWall
 PeriodicWall
