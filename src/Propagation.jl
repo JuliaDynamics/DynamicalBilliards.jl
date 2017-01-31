@@ -70,12 +70,21 @@ specular!(p::AbstractParticle, o::Obstacle)
 ```
 Perform specular reflection, i.e. set `p.vel = p.vel - 2*dot(n, p.vel)*n` with `n`
 the normal vector from the obstacle's boundary.
+
+In the case where the given obstacle is a `RandomObstacle`, the specular reflection
+randomizes the velocity instead (within -π/2 to π/2 of the normal vector).
 """
 function specular!(p::AbstractParticle, o::Obstacle)
   n = normalvec(o, p.pos)
   p.vel = p.vel - 2*dot(n, p.vel)*n
 end
 
+function specular!(p::AbstractPartcle, r::RandomDisk)
+    n = normalvec(r, p.pos)
+    φ = atan(n[2], n[1]) + π*rand() - π/2
+    p.vel = SVector(cos(φ), sin(φ))
+end
+  
 """
 ```julia
 periodicity!(p::AbstractParticle, w::PeriodicWall)
