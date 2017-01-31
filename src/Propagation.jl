@@ -160,7 +160,7 @@ function collisiontime(p::Particle, w::Wall)
   t <= 0.0 ? Inf : t
 end
 
-function collisiontime(p::Particle, d::Disk)
+function collisiontime(p::Particle, d::Circular)
 
   dotp = dot(p.vel, normalvec(d, p.pos))
   # Gotta rethink thins for ray spliting
