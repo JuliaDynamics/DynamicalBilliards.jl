@@ -14,7 +14,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 * "periodic" : The walls are `PeriodicWall` type, enforcing periodicity at the boundaries
 * "random" : The velocity is randomized upon collision.
 """
-function billiard_rectangle(x=1.0, y=1.0; setting::String = "normal")
+function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
   bt = Obstacle[]
   if setting == "standard"
