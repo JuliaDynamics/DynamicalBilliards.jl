@@ -79,7 +79,7 @@ function specular!(p::AbstractParticle, o::Obstacle)
   p.vel = p.vel - 2*dot(n, p.vel)*n
 end
 
-function specular!(p::AbstractPartcle, r::RandomDisk)
+function specular!(p::AbstractParticle, r::RandomDisk)
     n = normalvec(r, p.pos)
     φ = atan(n[2], n[1]) + π*rand() - π/2
     p.vel = SVector(cos(φ), sin(φ))
