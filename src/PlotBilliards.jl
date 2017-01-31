@@ -190,7 +190,13 @@ function animate_evolution(p::AbstractParticle, bt, colnumber;
     end
     line[:set_xdata](xpd)
     line[:set_ydata](ypd)
-    point, quiv = plot_particle(p; particle_kwargs...)
+    
+    if particle_kwargs != nothing
+      point, quiv = plot_particle(p; particle_kwargs...)
+    else
+      point, quiv = plot_particle(p)
+    end
+    
     if savefigs
       s = savename*"_$(i+1).png"
       savefig(s, dpi = 60, bbox_inches="tight")
