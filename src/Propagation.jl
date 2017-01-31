@@ -81,7 +81,7 @@ end
 
 function specular!(p::AbstractParticle, r::RandomDisk)
     n = normalvec(r, p.pos)
-    φ = atan(n[2], n[1]) + π*rand() - π/2
+    φ = atan2(n[2], n[1]) + π*rand() - π/2
     p.vel = SVector(cos(φ), sin(φ))
 end
   
