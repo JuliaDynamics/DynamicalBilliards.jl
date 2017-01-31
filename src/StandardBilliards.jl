@@ -17,7 +17,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "normal")
 
   bt = Obstacle[]
-  if setting == "normal"
+  if setting == "standard"
     o = 0.0
     sp = [o,o]; ep = [o, y]; n = [x,o]
     leftw2 = FiniteWall(sp, ep, n, "Left wall")

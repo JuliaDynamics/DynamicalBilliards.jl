@@ -3,7 +3,7 @@ These functions are nicely grouped in this [library section](/basic/library/#vis
 
 ## Plotting the Billiard Table
 
-The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`). 
+The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
 For example:
 ```julia
 using DynamicalBilliards, PyPlot
@@ -55,7 +55,8 @@ The default plotting settings have been chosen for maximum clarity and consisten
 * Particles are black.
 * Particle orbits/trajectories are blue.
 * Reflecting obstacles (e.g. `Disk` or `FiniteWall`) are green.
-* Ray-splitting obstacles are red.
+* Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are yellow.
+* Ray-splitting obstacles are red with dashed linestyle.
 
 ## Animating the motion of a particle
 
@@ -78,11 +79,8 @@ savedir = "C:\\some_path\\anim1"
 animate_evolution(p, bt, 50; savefigs = true, savename = savedir)
 ```
 
-This code produced 50 ".png" images which were later mixed (using e.g. www.gifmaker.me) into a single ".gif" animation. 
+This code produced 50 ".png" images which were later mixed (using e.g. www.gifmaker.me) into a single ".gif" animation.
 The output figures have a dpi=60 and therefore take only a dozen kb of space.
 The animation produced should look like:
 
 ![Visualizing Animation 1](http://i.imgur.com/UyiW2N2.gif)
-
-
-

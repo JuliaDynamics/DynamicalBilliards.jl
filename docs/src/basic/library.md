@@ -8,7 +8,6 @@ billiard_sinai
 billiard_polygon
 ```
 
-
 ## Particles
 
 ```@docs
@@ -27,6 +26,7 @@ Disk
 RandomDisk
 Antidot
 FiniteWall
+RandomWall
 PeriodicWall
 SplitterWall
 normalvec
@@ -53,6 +53,7 @@ supports_raysplitting
 ```
 
 ## Visualization
+
 ```@docs
 plot_obstacle
 plot_billiard
@@ -60,4 +61,3 @@ plot_particle
 plot_cyclotron
 animate_evolution
 ```
-

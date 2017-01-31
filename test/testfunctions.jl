@@ -121,7 +121,7 @@ function check_straight_sinai_periodic(; printinfo = true)
 
   for (r, x, y) in [(0.3, 1.5, 1.0), (0.5, 1.4, 2.2), (0.2, 0.8, 2.2)]
     printinfo && println("...for (r,x,y) = ", (r, x, y))
-    bt = billiard_sinai(r, x, y; periodic=true)
+    bt = billiard_sinai(r, x, y; setting="periodic")
     xmin, ymin, xmax, ymax = cellsize(bt)
     d = bt[5]
     c = d.c
@@ -173,7 +173,7 @@ function check_magnetic_sinai_periodic(; printinfo = true)
   for (r, x, y) in [(0.4, 1.5, 1.0), (0.5, 1.4, 2.2)]
     for ω in [0.1, 0.5]
       printinfo && println("...for (ω,r,x,y) = ", (ω, r, x, y))
-      bt = billiard_sinai(r, x, y; periodic=true)
+      bt = billiard_sinai(r, x, y; setting="periodic")
       xmin, ymin, xmax, ymax = cellsize(bt)
       d = bt[5]
       c = d.c
@@ -219,7 +219,7 @@ function check_magnetic_pinned(; printinfo = true)
   for (r, x, y) in [(0.4, 1.0, 1.0)]
     for ω in [0.02, 0.04]
       printinfo && println("...for (ω,r,x,y) = ", (ω, r, x, y))
-      bt = billiard_sinai(r, x, y; periodic = true)
+      bt = billiard_sinai(r, x, y; setting="periodic")
       tt=10000.0
 
       for i in 1:2partnum
@@ -239,7 +239,6 @@ function check_previous_obstacle(; printinfo = true)
     println("Currently testing if...")# Test:
     println("--The previous collision obstacle is never the same as the")
     println("  current in straight closed sinai billiard.")
-    println("--Minimum collision time is never less than 1e-10")
   end
   ttotal = 10000.0
   bt = billiard_sinai(0.3)
@@ -267,9 +266,6 @@ function check_previous_obstacle(; printinfo = true)
         println("Current obstacle: $(colobst.name)")
             println("tmin = $tmin")
         error("Previus obstacle same as current obstacle")
-      end
-      if tcount !=0 && tmin < 1e-10
-        error("Minimum collision time = $tmin")
       end
 
       propagate!(p, tmin)
@@ -340,7 +336,7 @@ function check_raysplitting_periodic(; printinfo = true)
   newo = ((x, bool) -> bool ? -2.0x : -0.5x)
   rayspl = Dict{Int, Vector{Function}}(5 => [T, sa, newo])
 
-  bt = billiard_rectangle(periodic = true)
+  bt = billiard_rectangle(setting="periodic")
   a = Antidot([0.5, 0.5], 0.3, true)
   push!(bt, a)
   if !isphysical(rayspl)
@@ -406,5 +402,46 @@ function check_splitterwall(; printinfo = true)
       xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0, rayspl)...)
     end
   end
+  return true
+end
+
+function check_random_sinai(; printinfo = true)
+  if printinfo
+    println("Currently testing if...")# Test:
+    println("--billiard_sinai works with setting = `random` ")
+    println("--collisiontime for RandomWall and RandomDisk works")
+    println("--resolvecollision for Particle with")
+    println("  random obstacle works and reflects randomly")
+    println("--evolve!() works and never there is infinite time")
+  end
+  for (r, x, y) in [(0.4, 1.0, 1.0), (0.5, 1.4, 2.2)]
+    printinfo && println("...for (r,x,y) = ", (r, x, y))
+    bt = billiard_sinai(r, x, y; setting = "random")
+    d = bt[5]
+    c = d.c
+    tt=1000.0
+
+    for i in 1:partnum
+      p = randominside(bt)
+      ts, poss, vels = evolve!(p, bt, tt)
+
+      error_level = 1e-15
+
+      xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
+      dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+      mind = minimum(dist)
+      if mind - d.r < -error_level
+        error("min((x,y)-r) = $(mind - d.r)")
+      end
+      dmaxx = maximum(xt) - x
+      dmaxx > error_level && error("xmax - x = $dmaxx")
+      dminx = minimum(xt)
+      dminx < -error_level && error("xmin = $dminx")
+      dmaxy = maximum(yt) - y
+      dmaxy > error_level && error("ymax - y = $dmaxy")
+      dminy = minimum(yt)
+      dminy < -error_level && error("ymin = $dminy")
+    end#particle loop
+  end#x,y loop
   return true
 end
