@@ -1,8 +1,8 @@
 using StaticArrays
 import Base.show
 export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
-standard2magnetic, cyclotron, Obstacle, Disk, Antidot, FiniteWall, PeriodicWall,
-normalvec, randominside, SplitterWall, distance, cellsize, RandomDisk
+standard2magnetic, cyclotron, Obstacle, Disk, Antidot, RandomDisk, FiniteWall, PeriodicWall,
+normalvec, randominside, SplitterWall, distance, cellsize
 
 ####################################################
 ## Particles
