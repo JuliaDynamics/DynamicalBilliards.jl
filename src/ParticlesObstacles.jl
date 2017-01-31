@@ -2,7 +2,7 @@ using StaticArrays
 import Base.show
 export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
 standard2magnetic, cyclotron, Obstacle, Disk, Antidot, FiniteWall, PeriodicWall,
-normalvec, randominside, SplitterWall, distance, cellsize
+normalvec, randominside, SplitterWall, distance, cellsize, RandomDisk
 
 ####################################################
 ## Particles
@@ -163,6 +163,25 @@ immutable Disk <: Circular
 end
 
 """
+    RandomDisk <: Circular
+Disk-like obstacle that randomly (and uniformly) reflects colliding particles.
+The propagation is allowed outside of the circle. 
+## Fields:
+* `c::SVector{2,Float64}` : Center.
+* `r::Float64` : Radius.
+* `name::String` : Some name given for user convenience.
+Constructors accept any vectors convertible to SVector{2,Float64}.
+"""
+immutable RandomDisk <: Circular
+    c::SVector{2,Float64}
+    r::Float64
+    name::String
+    function Disk(c, r::Real, name::String = "Random disk")
+      new(SVector{2,Float64}(c), abs(r), name)
+    end
+end
+
+"""
     Antidot <: Circular
 Disk-like obstacle that allows propagation both inside and outside of the disk.
 Used in ray-splitting billiards.
@@ -232,11 +251,6 @@ function FiniteWall(sp, ep, n, name::String = "wall")
   SVector{2, Float64}(n), name)
 end
 
-#pretty print
-show(io::IO, w::FiniteWall) =
-    print(io, "$(w.name)\n",
-    "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
-
 """
     PeriodicWall <: Wall
 Wall obstacle that imposes periodic boundary conditions upon collision.
@@ -245,7 +259,7 @@ Wall obstacle that imposes periodic boundary conditions upon collision.
 * `ep::SVector{2,Float64}` : Ending point of the Wall.
 * `normal::SVector{2,Float64}` : Normal vector to the wall, pointing to where the
   particle *will come from* (to the inside the billiard table).
-  The size of the vector is **important**.
+  The size of the vector is **important**!
   This vector is added to a particle's `pos` during collision. Therefore the
   size of the normal vector must be correctly associated with the size of the
   periodic cell.
@@ -272,10 +286,6 @@ function PeriodicWall(sp, ep, n, name::String = "Periodic wall")
   return PeriodicWall(SVector{2, Float64}(sp), SVector{2, Float64}(ep),
   SVector{2, Float64}(n), name)
 end
-
-show(io::IO, w::PeriodicWall) =
-print(io, "$(w.name)\n",
-"start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
     SplitterWall <: Wall
@@ -317,10 +327,10 @@ function SplitterWall(sp, ep, n, where::Bool=true, name::String="Ray-splitting w
   SVector{2, Float64}(n), where, name)
 end
 
-show(io::IO, w::SplitterWall) =
+#pretty print:
+show(io::IO, w::Wall) =
 print(io, "$(w.name)\n",
-"start point: $(w.sp)\nend point: $(w.ep)\n",
-"normal: $(w.normal)\nwhere = $(w.where)")
+"start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
 ```julia
@@ -365,24 +375,16 @@ function distance(p::AbstractParticle, bt::Vector{Obstacle})
   return mindist
 end
 
-# function distance(p::AbstractParticle, w::Wall)
-#   v1 = p.pos - w.sp
-#   dot(v1, w.normal)
-# end
-
 function distance(p::AbstractParticle, w::Wall)
   v1 = p.pos - w.sp
   dot(v1, normalvec(w, p.pos))
 end
 
 # no new distance needed for SplitterWall because the `where` field
-# has the necessary information to give the correct dinstance.
-# function distance(p::AbstractParticle, w::SplitterWall)
-#   v1 = p.pos - w.sp
-#   (2*Int(a.where)- 1)*dot(v1, w.normal)
-# end
+# has the necessary information to give the correct dinstance, 
+# since the distance is calculated throught the normalvec.
 
-distance(p::AbstractParticle, d::Disk) = norm(p.pos - d.c) - d.r
+distance(p::AbstractParticle, d::Circular) = norm(p.pos - d.c) - d.r
 
 function distance(p::AbstractParticle, a::Antidot)
   (2*Int(a.where)- 1)*(norm(p.pos - a.c) - a.r)
@@ -402,7 +404,7 @@ Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard ta
 
 Used in `randominside()` and error checking.
 """
-function cellsize(d::Disk)
+function cellsize(d::Circular)
   xmin = ymin = Inf
   xmax = ymax = -Inf
   return xmin, ymin, xmax, ymax
