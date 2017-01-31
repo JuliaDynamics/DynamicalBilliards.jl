@@ -176,7 +176,7 @@ immutable RandomDisk <: Circular
     c::SVector{2,Float64}
     r::Float64
     name::String
-    function Disk(c, r::Real, name::String = "Random disk")
+    function RandomDisk(c, r::Real, name::String = "Random disk")
       new(SVector{2,Float64}(c), abs(r), name)
     end
 end
