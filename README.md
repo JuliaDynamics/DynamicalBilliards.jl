@@ -1,13 +1,12 @@
-# DynamicalBilliards.jl
+![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
+
+A Julia package for dynamical billiard systems in two dimensions.
+The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction. 
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/latest)
 [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl)
 
-A Julia package for dynamical billiard systems in two dimensions.
-The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction. 
-
-![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
 
 The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular structures:
 * **Straight propagation** : The standard billiard dynamical system. A particle is propagating in a straight line, until a specular reflection is performed at a boundary.
