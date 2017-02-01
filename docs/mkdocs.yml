@@ -5,7 +5,6 @@ site_author:         George Datseris
 theme:               'material'
 
 extra:
-  logo: 'images/logo.png'
   palette:
     primary: 'deep purple'
     accent: 'cyan'
