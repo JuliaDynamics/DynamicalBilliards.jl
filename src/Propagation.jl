@@ -557,7 +557,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
       push!(rpos, rpos[end])
       push!(rvel, rvel[end])
       push!(rt, Inf)
-      return (rt, rpos, rvel)
+      return (rt, rpos, rvel, ω)
     end
 
     propagate!(p, tmin)
