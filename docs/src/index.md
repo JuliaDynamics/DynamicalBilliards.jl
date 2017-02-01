@@ -1,7 +1,11 @@
 ![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
 
 `DynamicalBilliards.jl` is an easy-to-use, modular and extendable Julia package for
-Dynamical Billiard systems in two dimensions.
+Dynamical Billiard systems in two dimensions. 
+
+!!! tip "Logo billiard"
+    Checkout the [Julia billiard animation](#julia-billiard-animation) 
+    code to see how to create the animated billiard of our logo. 
 
 A dynamical billiard is a system where a particle is propagating as a straight line from obstacle-to-obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in chaos and nonlinear dynamics and played an important role in the development of nonlinear science.
 
@@ -53,12 +57,12 @@ If however, you want to make the most out if, the following tutorials offer deta
 
 The [Library](/basic/library) section has the docstrings of all exported names in convenient groups.
 
-## Example Animation
+## Julia Billiard Animation
 The animation of a particle inside a "Julia" billiard was generated with the code:
 ```julia
 using DynamicalBilliards
 
-bt = billiard_julia()
+bt = billiard_julia(plotit = true)
 p = randominside(bt)
 
 darkblue = (64/255, 99/255, 216/255)
@@ -72,5 +76,6 @@ animate_evolution(p, bt, 200; col_to_plot = 7,
 particle_kwargs = pkwargs, orbit_kwargs = okwargs,
 savefigs = true, savename = sname)
 
-#use gifmaker.me to merge all figures into one .gif
+# use gifmaker.me to merge all figures into one .gif
+# in a future upadte, automatic support will be added
 ```
