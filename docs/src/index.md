@@ -55,10 +55,10 @@ The [Library](/basic/library) section has the docstrings of all exported names i
 
 ## Example Animation
 The animation of a particle inside a "Julia" billiard was generated with the code:
-```
+```julia
 using DynamicalBilliards
 
-jbt = billiard_julia()
+bt = billiard_julia()
 p = randominside(bt)
 
 darkblue = (64/255, 99/255, 216/255)
@@ -71,4 +71,6 @@ sname = "C:\\****\\anim"
 animate_evolution(p, bt, 200; col_to_plot = 7,
 particle_kwargs = pkwargs, orbit_kwargs = okwargs,
 savefigs = true, savename = sname)
+
+#use gifmaker.me to merge all figures into one .gif
 ```
