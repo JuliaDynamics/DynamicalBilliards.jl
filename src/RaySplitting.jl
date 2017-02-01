@@ -243,7 +243,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       push!(rpos, rpos[end])
       push!(rvel, rvel[end])
       push!(rt, Inf)
-      return (rt, rpos, rvel)
+      return (rt, rpos, rvel, omegas)
     end
     if tmin < 1e-10 && tcount!=0
       println("-----------------")
@@ -338,7 +338,7 @@ Specifically, check if (φ is the incidence angle):
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
 * Ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
-The first property is mandatory and must hold for correct propagation. 
+The first property is mandatory and must hold for correct propagation.
 The above tests are done for all possible combinations of arguments.
 
 They keyword `only_mandatory` notes whether the rest of
