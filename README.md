@@ -7,7 +7,7 @@
 A Julia package for dynamical billiard systems in two dimensions.
 The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction. 
 
-![Example animation](http://i.imgur.com/OasQRyQ.gif "Evolution of particle in a magnetic field.")
+![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
 
 The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular structures:
 * **Straight propagation** : The standard billiard dynamical system. A particle is propagating in a straight line, until a specular reflection is performed at a boundary.
