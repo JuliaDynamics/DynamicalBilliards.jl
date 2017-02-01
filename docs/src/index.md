@@ -48,7 +48,7 @@ These tests take on average 20 minutes to complete.
 
 For a crash course on how to use `DynamicalBilliards.jl`, you should visit the [Basic Usage](/basic/basic_usage) section.
 
-If however, you want to make the most out if, the following tutorials offer detailed descriptions:
+If however, you want to make the most out it, the following tutorials offer detailed descriptions:
 - [How to define your custom Billiard Table](/tutorials/billiard_table)
 - [Using Ray-Splitting billiards](/tutorials/ray-splitting)
 - [Visualizing the billiard table and animating the particle's evolution](/tutorials/visualizing)
