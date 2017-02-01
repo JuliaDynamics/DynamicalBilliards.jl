@@ -141,29 +141,30 @@ end
 
 """
 ```julia
-animate_evolution(p, bt, colnumber[, ray-splitter];
-sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), particlecolor = (0,0,0),
-savefigs = false, savename = "")
+animate_evolution(p, bt, colnumber[, ray-splitter]; kwargs)
 ```
-
 Animate the evolution of the particle, plotting the orbit from collision to collision.
 
 Notice the difference with `evolve!()`: No time is given here; instead a number of
 collisions is passed.
 
-### Arguments
+## Arguments
 * `p::AbstractParticle` : Either standard or magnetic.
 * `bt::Vector{Obstacle}` : The billiard table.
 * `colnumber::Int` : Number of collisions to evolve the particle for.
 * `ray-splitter::Dict{Int, Vector{Function}}` : (Optional) Ray-splitting dictionary
   that enables ray-splitting processes during evolution.
-### Keyword Arguments
+## Keyword Arguments
 * `sleeptime` : Time passed to `sleep()` between each collision.
 * `col_to_plot` : How many previous collisions are shown during the animation.
 * `savefigs` : Save .png figures to enable the creation of animation afterwards.
   **WARNING:** currently the .gif production has to be made by the user!
-* `savename` : Name (*including path!*) of the figures to be produced. The ending
-  "i.png" will be attached to all.
+* `savename` : Name (**including path!**) of the figures to be produced. The ending
+  "\_i.png" will be attached to all figures.
+* `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.
+  Keywords passed into `plot_particle()`.
+* `orbit_kwargs` : Either a Dict{Symbol, Any} or a Vector of Tuple{Symbol, Any}.
+  Keywords passed into `PyPlot.plot()` which plots the orbit of the particle.
 """
 function animate_evolution(p::AbstractParticle, bt, colnumber;
   sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
@@ -227,7 +228,9 @@ end
 # Magnetic + Ray-splitting
 function animate_evolution(p::AbstractParticle, bt,
   colnumber, rayspl::Dict{Int, Vector{Function}};
-  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1), savefigs = false, savename = "", particle_color = (0,0,0))
+  sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1),
+  savefigs = false, savename = "", particle_color = (0,0,0),
+  particle_kwargs = nothing, orbit_kwargs = nothing)
 
   sleeptime == 0 && (sleeptime = 1e-6)
   ε = eps()
@@ -254,16 +257,25 @@ function animate_evolution(p::AbstractParticle, bt,
     for el in ydata; append!(ypd, el); end
 
     if i == 0
-      line, = plot(xpd, ypd, color = orbit_color)
+      if orbit_kwargs != nothing
+        line, = plot(xpd, ypd; orbit_kwargs...)
+      else
+        line, = plot(xpd, ypd; color = "blue")
+      end
     end
     line[:set_xdata](xpd)
     line[:set_ydata](ypd)
-    point, quiv = plot_particle(p; color = particle_color)
+
+    if particle_kwargs != nothing
+      point, quiv = plot_particle(p; particle_kwargs...)
+    else
+      point, quiv = plot_particle(p)
+    end
+
     if savefigs
       s = savename*"_$(i+1).png"
       savefig(s, dpi = 60, bbox_inches="tight")
     end
-
 
     sleep(sleeptime)
 

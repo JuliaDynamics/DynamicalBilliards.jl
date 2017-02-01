@@ -3,7 +3,7 @@ import Base.show
 export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
 standard2magnetic, cyclotron, Obstacle, Disk, Antidot, RandomDisk,
 FiniteWall, PeriodicWall, RandomWall, SplitterWall,
-normalvec, randominside, distance, cellsize
+normalvec, randominside, distance, cellsize, Wall, Circular
 
 ####################################################
 ## Particles
