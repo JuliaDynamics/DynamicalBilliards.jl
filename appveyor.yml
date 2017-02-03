@@ -25,7 +25,7 @@ install:
 build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
   - IF EXIST .git\shallow (git fetch --unshallow)
-  - C:\projects\julia\bin\julia -e "ENV[\"PYTHON\"]=\"\"; Pkg.add(\"PyPlot\");P kg.build("PyCall");"
+  - C:\projects\julia\bin\julia -e "ENV[\"PYTHON\"]=\"\"; Pkg.add(\"PyCall\"); Pkg.build("PyCall");"
   - C:\projects\julia\bin\julia -e "Pkg.add(\"PyPlot\"); using PyPlot;"
   - C:\projects\julia\bin\julia -e "versioninfo();
       Pkg.clone(pwd(), \"DynamicalBilliards\"); Pkg.build(\"DynamicalBilliards\")"
