@@ -32,7 +32,7 @@ which will plot something like this:
 
 ![Visualizing tutorial 2](http://i.imgur.com/46AomXm.png)
 
-`plot_billiard()` also sets up the axis to have equal aspect ration and sets up the axis limits to be large enough to contain the entire billiard.
+`plot_billiard()` also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.
 
 
 
@@ -42,7 +42,8 @@ Following the above example, we create and plot a particle using the function `p
 ```julia
 p = randominside(bt)
 plot_particle(p)
-# Plot one more particle with purple color. pentagon shape and bigger size (default is s=30):
+# Plot one more particle with purple color,
+# pentagon shape and bigger size (default is s=30):
 p2 = randominside(bt)
 plot_particle(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
 ```
@@ -66,7 +67,7 @@ Its [documentation string](/basic/library/#DynamicalBilliards.animate_evolution)
 Automatic output into an animated image (e.g. ".gif" format) is not yet supported. However, `animate_evolution` gives users the possibility
 to save each produce figure in order to merge as an animation using an external tool.
 
-Let's animate a particle inside a simple pentagon:
+Let's animate a particle inside a simple pentagon with magnetic field:
 
 ```julia
 bt = billiard_polygon(5, 1)
@@ -74,12 +75,12 @@ a = Disk([0.0,0.0], 0.4)
 push!(bt, a)
 plot_billiard(bt)
 
-p = randominside(bt, 1.0)
+p = randominside(bt, 1.0) # second argument is magnetic field strength
 savedir = "C:\\some_path\\anim1"
 animate_evolution(p, bt, 50; savefigs = true, savename = savedir)
 ```
 
-This code produced 50 ".png" images which were later mixed (using e.g. www.gifmaker.me) into a single ".gif" animation.
+This code produced 50 ".png" images which were later mixed (using e.g. [gifmaker](www.gifmaker.me) into a single ".gif" animation.
 The output figures have a dpi=60 and therefore take only a dozen kb of space.
 The animation produced should look like:
 
