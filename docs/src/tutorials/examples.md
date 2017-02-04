@@ -55,11 +55,14 @@ produces:
 using DynamicalBilliards
 bt = billiard_lorentz(0.2) #alias for billiard_sinai(setting = "periodic")
 mfp = 0.0
-for i in 1:100
+for i in 1:1000
   p = randominside(bt)
-  ct, poss, vels = evolve!(p, bt, 1000.0)
-  mfp += mean(ct[3:end]) #skip first two entries because they are not "full" collisions
+  ct, poss, vels = evolve!(p, bt, 10000.0)
+  #skip first two entries because they are not "full" collisions:
+  mfp += mean(ct[3:end])
 end
-mfp /= 100
+mfp /= 1000
 ```
-gives the value of 
+gives the value of `2.1899...` which is very close to the analytic result:
+`` \frac{1-\pi r^2 }{2r} = 2.18584 ``
+which you can find for example [here](http://www.cmls.polytechnique.fr/perso/golse/Surveys/FGIcmp03.pdf)
