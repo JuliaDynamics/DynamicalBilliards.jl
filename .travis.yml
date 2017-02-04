@@ -3,11 +3,11 @@ os:
   - linux
 #  - osx
 julia:
-  - release
+  - 0.5
 notifications:
-  email: 
+  email:
     on_success: never
-    on_failure: always  
+    on_failure: always
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;'
