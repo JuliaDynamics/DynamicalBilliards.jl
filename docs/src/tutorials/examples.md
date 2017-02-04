@@ -1,1 +1,65 @@
-Here there will be examples in the format: Code followed by some animated gif.
+## Julia-logo Billiard
+
+```julia
+using DynamicalBilliards, PyPlot
+
+bt = Obstacle[]
+bt = billiard_rectangle()
+for w in bt
+  plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
+end
+
+r = 0.165
+ewidth = 6.0
+redcent = [0.28, 0.32]
+red = Disk(redcent, r, "red")
+plot_obstacle(red; edgecolor = (203/255, 60/255, 51/255),
+facecolor = (213/255, 99/255, 92/255), linewidth = ewidth)
+
+purple = Disk([1 - redcent[1], redcent[2]], r, "purple")
+plot_obstacle(purple; edgecolor = (149/255, 88/255, 178/255),
+facecolor = (170/255, 121/255, 193/255), linewidth = ewidth)
+
+green = Disk([0.5, 1 - redcent[2]], r, "green")
+plot_obstacle(green, edgecolor = (56/255, 152/255, 38/255),
+facecolor = (96/255, 173/255, 81/255), linewidth = ewidth)
+
+push!(bt, red, purple, green)
+# particle colors
+darkblue = (64/255, 99/255, 216/255)
+lightblue = (102/255, 130/255, 223/255)
+
+p = randominside(bt, 2.0)
+
+PyPlot.axis("off")
+PyPlot.tight_layout()
+PyPlot.gca()[:set_aspect]("equal")
+PyPlot.xlim(-0.1,1.1)
+PyPlot.ylim(-0.1,1.1)
+
+okwargs = Dict(:linewidth => 2.0, :color => lightblue)
+pkwargs = Dict(:color => darkblue, :s => 150.0)
+
+# create and save the animation:
+sname = "C:\\***\\anim"
+animate_evolution(p, bt, 200; col_to_plot = 7,
+particle_kwargs = pkwargs, orbit_kwargs = okwargs,
+savefigs = true, savename = sname)
+```
+produces:
+
+![Julia-logo billiard animation](http://i.imgur.com/EtKof48.gif)
+
+## Mean Free Path of the Lorentz Gas
+```julia
+using DynamicalBilliards
+bt = billiard_lorentz(0.2) #alias for billiard_sinai(setting = "periodic")
+mfp = 0.0
+for i in 1:100
+  p = randominside(bt)
+  ct, poss, vels = evolve!(p, bt, 1000.0)
+  mfp += mean(ct[3:end]) #skip first two entries because they are not "full" collisions
+end
+mfp /= 100
+```
+gives the value of 
