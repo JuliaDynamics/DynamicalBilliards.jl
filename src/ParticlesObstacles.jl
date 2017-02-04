@@ -139,6 +139,7 @@ end
 Obstacle supertype.
 """
 abstract Obstacle
+
 """
     Circular <: Obstacle
 Circular obstacle supertype.

@@ -87,6 +87,10 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
   push!(bt, centerdisk)
 end
 
+"""
+    billiard_lorentz(r=0.25, x=1.0, y=1.0)
+Alias for `billiard_sinai(r,x,y; setting = "periodic")`.
+"""
 billiard_lorentz(r=0.25, x=1.0, y=1.0) = billiard_sinai(r,x,y; setting = "periodic")
 
 """
@@ -135,7 +139,8 @@ end
 ```julia
 billiard_julia(; plotit = true)
 ```
-Return the awesome "Julia billiard" shown in the introduction of DynamicalBilliards.jl.
+Return the awesome "Julia-logo" billiard shown in the introduction
+of DynamicalBilliards.jl.
 
 By default it also plots the billiard in a new `PyPlot.figure()` using the correct colors.
 """

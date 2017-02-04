@@ -1,3 +1,6 @@
+This section has some examples of usage of `DynamicalBilliards.jl`, with some brief
+comments.
+
 ## Julia-logo Billiard
 
 ```julia
@@ -50,6 +53,8 @@ produces:
 
 ![Julia-logo billiard animation](http://i.imgur.com/EtKof48.gif)
 
+The function `billiard_julia(plotit = true)` wraps this code, just for fun!
+
 ## Mean Free Path of the Lorentz Gas
 ```julia
 using DynamicalBilliards
@@ -64,5 +69,7 @@ end
 mfp /= 1000
 ```
 gives the value of `2.1899...` which is very close to the analytic result:
-`` \frac{1-\pi r^2 }{2r} = 2.18584 ``
-which you can find for example [here](http://www.cmls.polytechnique.fr/perso/golse/Surveys/FGIcmp03.pdf)
+
+``\text{m.f.p.} =  \frac{1-\pi r^2 }{2r} \stackrel{r=0.2}{=} 2.18584 ``
+
+which you can find for example [here](http://www.cmls.polytechnique.fr/perso/golse/Surveys/FGIcmp03.pdf).

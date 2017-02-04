@@ -41,7 +41,9 @@ end
 relocate!(p::AbstractParticle, o::Obstacle, distance)
 ```
 Relocate the particle `p` with respect to the obstacle `o` by a total amount of
-of `10lct(p, o, distance)`.
+10 times the linearized collision time (`lct`, assuming linear obstacle and linear motion).
+
+Internally takes care of problems of finite accuracy of `Float64`.
 """
 function relocate!(p::AbstractParticle, o::Obstacle, dist)
   dt = 10lct(p, o, dist) #linearized collision time

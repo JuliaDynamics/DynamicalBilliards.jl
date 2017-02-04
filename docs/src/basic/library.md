@@ -6,6 +6,7 @@ Below you find all the docstrings of all exported names of `DynamicalBilliards.j
 billiard_rectangle
 billiard_sinai
 billiard_polygon
+billiard_julia
 ```
 
 ## Particles
@@ -22,9 +23,11 @@ cyclotron
 
 ```@docs
 Obstacle
+Circular
 Disk
 RandomDisk
 Antidot
+Wall
 FiniteWall
 RandomWall
 PeriodicWall
@@ -38,10 +41,15 @@ randominside
 
 ```@docs
 resolvecollision!
+relocate!
+specular!
+lct
+periodicity!
 collisiontime
 propagate!
 evolve!
 construct
+realangle
 ```
 
 ## Ray-splitting
