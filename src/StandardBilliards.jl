@@ -1,4 +1,5 @@
-export billiard_rectangle, billiard_sinai, billiard_polygon
+export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
+billiard_julia
 
 ####################################################
 ## Famous/Standard Billiards
@@ -58,7 +59,7 @@ end
 
 """
 ```julia
-billiard_sinai(r, x=1.0, y=1.0; setting = "standard")
+billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
 ```
 Return a vector of obstacles that defines a Sinai billiard of size (`x`, `y`) with
 a disk in its center, of radius `r`.
@@ -70,7 +71,7 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "periodic" : The walls are `PeriodicWall` type, enforcing periodicity at the boundaries
 * "random" : The velocity is randomized upon collision.
 """
-function billiard_sinai(r, x=1.0, y=1.0; setting = "standard")
+function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
   if (setting == "periodic") && (r>=x/2 || r>=y/2)
     es = "Disk radius too big for a periodic Sinai billiard.\n"
     es*= "Obstacles must not overlap with `PeriodicWall`s."
@@ -85,6 +86,8 @@ function billiard_sinai(r, x=1.0, y=1.0; setting = "standard")
   end
   push!(bt, centerdisk)
 end
+
+billiard_lorentz(r=0.25, x=1.0, y=1.0) = billiard_sinai(r,x,y; setting = "periodic")
 
 """
     billiard_polygon(n::Int, R, center = [0,0]; periodic = true)
