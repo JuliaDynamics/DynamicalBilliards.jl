@@ -1,8 +1,26 @@
-Introductory stuff.
+This page briefly discusses physical aspects of billiard systems.
 
-# Implementation
+## Implementation
+Firstly one defines a billiard table and (if desired) the [ray-splitting dictionary](/tutorials/ray-splitting/#ray-splitter-dictionary). Then one creates a particle inside the defined billiard table. The algorithm followed for the propagation of a particle is the following:
 
-# Ray-Splitting Functions
+1. Calculate the `collisiontime()` for **all** obstacles in the billiard table.
+2. Choose the smallest time and `propagate!()` the particle for that amount of time. The obstacle corresponding to that minimum time is `colobst`.
+3. `resolvecollision!()` between the particle and `colobst`:
+   1. Check whether there is transmission or not: `T(φ) > rand()`
+   4. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
+   2. For no transmission, perform `spcular!()` reflection or `periodicity!()` conditions.
+   3. Otherwise, implement the ray-splitting algorithm.
+
+4. Continue the loop 1-3 for a given amount of time.
+
+In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
+
+Notice that the `relocate!()` step is actually very important because it takes care that there is not particle "leakage": particles being outside the billiard table due to the finite precision of floating numbers.
+
+!!! note
+    The first step of the algorithm is very inefficient, since many of the obstacles (especially in ray-splitting) can be safely excluded from search. If you have better solutions on how to find the minimum collision time you are more than welcome to submit a Pull Request or open an issue to discuss about it.
+
+## Ray-Splitting Functions
 The condition for transmission is simply: `T(φ, where, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed in the
 [Ray-Splitting tutorial](/tutorials/ray-splitting), the condition of total internal reflection
 must be taken care by the user.
@@ -11,7 +29,10 @@ The [three key functions](/tutorials/ray-splitting/#ray-splitting-functions) giv
 
 In order to test if the `raysplitter` dictionary you have defined has physical meaning, the function `isphysical()` is provided. Its [documentation string](/basic/library/#DynamicalBilliards.isphysical) has all the details one should know.
 
-# Velocity measure
+
+## Pinned Particles
+
+## Velocity measure
 
 Both `Particle` and `MagneticParticle` are assumed to **always** have a velocity vector of measure 1 during evolution. This simplifies the formulas used internally to a significant amount.
 
