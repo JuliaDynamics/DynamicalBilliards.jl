@@ -1,13 +1,13 @@
 ![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
 
 A Julia package for dynamical billiard systems in two dimensions.
-The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction. 
+The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction.
 
 <center>
 
 | **Documentation**   | [**Package Evaluator**](http://pkg.julialang.org/?pkg=DynamicalBilliards#DynamicalBilliards) | **Build Status**     |
 |:--------:|:-------------------:|:-----------------------:|
-| [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/stable) |[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.5.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards) | [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl) | 
+| [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/stable) |[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.5.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards) | [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl) |
 | [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/latest) |[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.6.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards)  | [![Build status](https://ci.appveyor.com/api/projects/status/r087ojfuh2rtrxtm?svg=true)](https://ci.appveyor.com/project/Datseris/dynamicalbilliards-jl)|
 
 
@@ -23,19 +23,17 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 **NOTICE:** This package does not support collision between particles (currently). All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
 
 ## Installation
-This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it. 
+This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
 
 If you want to use the latest features, compatible with the latest documentation, use `Pkg.checkout("DynamicalBilliards")`.
 
-Documentation:
-* [Stable](https://Datseris.github.io/DynamicalBilliards.jl/stable)
-* [Latest](https://Datseris.github.io/DynamicalBilliards.jl/latest)
+Documentation: [Stable](https://Datseris.github.io/DynamicalBilliards.jl/stable) or [Latest](https://Datseris.github.io/DynamicalBilliards.jl/latest).
 
 
 ### PyPlot
-**WARNING:** this package has a dependency on `PyPlot` for its plotting features. If you are having trouble installing PyPlot and you **do not have** a Python installation in your computer, simply run the following line in your julia terminal:
+**WARNING:** this package has a dependency on `PyPlot` for its plotting features. If you are having trouble installing PyPlot you can always use the minimal Python installation through miniconda by running these lines in your Julia terminal:
 
-`ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
-
-This will install the minimal Python library called "miniconda" and afterwards it will install PyPlot.
-
+```julia
+ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.build("PyCall");
+Pkg.add("PyPlot"); using PyPlot;
+```
