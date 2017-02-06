@@ -10,7 +10,6 @@ Firstly one defines a billiard table and (if desired) the [ray-splitting diction
    4. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
    2. For no transmission, perform `spcular!()` reflection or `periodicity!()` conditions.
    3. Otherwise, implement the ray-splitting algorithm.
-
 4. Continue the loop 1-3 for a given amount of time.
 
 In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
@@ -21,9 +20,7 @@ Notice that the `relocate!()` step is actually very important because it takes c
     The first step of the algorithm is very inefficient, since many of the obstacles (especially in ray-splitting) can be safely excluded from search. If you have better solutions on how to find the minimum collision time you are more than welcome to submit a Pull Request or open an issue to discuss about it.
 
 ## Ray-Splitting Functions
-The condition for transmission is simply: `T(φ, where, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed in the
-[Ray-Splitting tutorial](/tutorials/ray-splitting), the condition of total internal reflection
-must be taken care by the user.
+If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, where, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed in the [Ray-Splitting tutorial](/tutorials/ray-splitting), the condition of total internal reflection must be taken care of by the user.
 
 The [three key functions](/tutorials/ray-splitting/#ray-splitting-functions) given to the `ray-splitter` dictionary must have some properties in order to have physical meaning, like for example that the scattering probability function is even towards φ. One of these properties is absolutely **mandatory** for this package to work properly. This is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. **This condition is not assured internally** and thefore you must be sure that your transmission probability function satisfies it. In the above example, the function `T` makes sure to return 0 in that case.
 
