@@ -94,42 +94,50 @@ Alias for `billiard_sinai(r,x,y; setting = "periodic")`.
 billiard_lorentz(r=0.25, x=1.0, y=1.0) = billiard_sinai(r,x,y; setting = "periodic")
 
 """
-    billiard_polygon(n::Int, R, center = [0,0]; periodic = true)
+    billiard_polygon(n::Int, R, center = [0,0]; setting = "standard")
 Return a vector of obstacles that defines a regular-polygonal billiard table
-with `n` sides, radius `r` and given `center`. If `n` is even, you may choose a
-periodic version of the billiard.
+with `n` sides, radius `r` and given `center`.
 
 Note: `R` denotes the so-called outer radius, not the inner one.
+
+### Settings
+* "standard" : Specular reflection occurs during collision.
+* "periodic" : The walls are `PeriodicWall` type, enforcing periodicity
+  at the boundaries. Only available for `n=4` or `n=6`.
+* "random" : The velocity is randomized upon collision.
 """
-function billiard_polygon(sides::Int, r::Real, center = [0,0]; periodic = false)
+function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
   bt = Obstacle[]
   verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
-  if !periodic
-    for i in eachindex(verteces)
-      N = length(verteces)
-      starting = verteces[i]
-      ending = verteces[mod1(i+1, N)]
-      # Normal vector must look at where the particle is coming from
-      w = ending - starting
-      normal = [-w[2], w[1]]
-      wall = FiniteWall(starting, ending, normal, "Wall $i")
-      push!(bt, wall)
+  
+  if setting == "standard"
+    T = FiniteWall
+    wallname = "wall"
+  elseif setting == "periodic"
+    if n!= 4 && n != 6
+      error("Polygonal and periodic billiard can exist only for `n=4` or `n=6`")
     end
-  else
-    !iseven(sides) && error("A periodic billiard must have even number of sides.")
-    for i in eachindex(verteces)
-      N = length(verteces)
-      starting = verteces[i]
-      ending = verteces[mod1(i+1, N)]
-      # Normal vector must look at where the particle is coming from
-      # and in the case of periodic must have length exactly as much as it is
-      # from one side to the opposite
-      w = ending - starting
-      inr = r*cos(π/sides)
+    T = PeriodicWall
+    wallname = "periodic wall"
+    inr = r*cos(π/sides)
+  elseif setting == "random"
+    T = RandomWall
+    wallname = "random wall"
+  end
+
+  for i in eachindex(verteces)
+    N = length(verteces)
+    starting = verteces[i]
+    ending = verteces[mod1(i+1, N)]
+    # Normal vector must look at where the particle is coming from
+    w = ending - starting
+    if setting == "periodic"
       normal = inr*normalize([-w[2], w[1]])
-      wall = PeriodicWall(starting, ending, normal, "Periodic wall $i")
-      push!(bt, wall)
+    else
+      normal = [-w[2], w[1]]
     end
+    wall = FiniteWall(starting, ending, normal, wallname*" $i")
+    push!(bt, wall)
   end
   return bt
 end
