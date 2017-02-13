@@ -80,8 +80,36 @@ savedir = "C:\\some_path\\anim1"
 animate_evolution(p, bt, 50; savefigs = true, savename = savedir)
 ```
 
-This code produced 50 ".png" images which were later mixed (using e.g. [gifmaker](www.gifmaker.me) into a single ".gif" animation.
+This code produced 50 ".png" images which were later mixed (using e.g. [gifmaker](www.gifmaker.me)) into a single ".gif" animation.
 The output figures have a dpi=60 and therefore take only a dozen kb of space.
 The animation produced should look like:
 
 ![Visualizing Animation 1](http://i.imgur.com/UyiW2N2.gif)
+
+## Periodic Billiards
+In order to plot periodic billiards, you have need to call a different method of
+[`plot_billiard`](/basic/library/#DynamicalBilliards.plot_billiard), since now you
+also have to specify the limits of plotting. The
+methods provided are:
+```julia
+plot_billiard(bt, xmin, ymin, xmax, ymax)
+plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64})
+```
+The last one conveniently plots the combo of particle-trajectory and periodic-billiard
+taking care of all the details internally.
+
+For example, the following code
+```julia
+using DynamicalBilliards
+r = 0.25
+bt = billiard_rectangle(2, 1; setting = "periodic")
+d = Disk([0.5, 0.5], r)
+d2 = Disk([1.5, 0.5], r/2)
+push!(bt, d, d2)
+p = randominside(bt)
+xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 50)...)
+plot_billiard(bt, xt, yt)
+plot_particle(p)
+```
+will produce something like this:
+![Periodic Billiard plot](http://i.imgur.com/rOpU7sl.png)
