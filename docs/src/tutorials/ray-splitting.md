@@ -28,7 +28,10 @@ Secondly, for each obstacle in your billiard table that you want to perform ray-
 The above three functions use the **same convention**: the argument `where` is the one the Obstacle has **before transmission**. For example, if a particle is outside a disk (let `where = true` here) and is transmitted inside the disk (`where` becomes `false` here), then all three functions will be given their second argument (the boolean one) as `true`!
 
 ## Ray-Splitter Dictionary
-To pass the information of the aforementioned functions into the main API (`evolve!()`) a dictionary is required, which we will call "raysplitter": `raysplitter::Dict{Int, Vector{Function}}`. The keys are integers and the values are vectors of functions.
+To pass the information of the aforementioned functions into the main API (`evolve!()`) a dictionary is required:
+```julia
+raysplitter::Dict{Int, Vector{Function}}
+```
 This dictionary is a map of the obstacle index within the billiard table to the ray-splitting functions. For example, if we wanted to allocate ray-splitting functions for the 5th obstacle in our billiard table, which could be e.g. an `Antidot`, we would write something like:
 ```julia
 sa = (θ, where, ω) -> where ? 2θ : 0.5θ
@@ -47,13 +50,20 @@ Notice the following two very important points: The functions **must accept the 
 The next step is very simple: the `raysplitter` dictionary is directly passed into `evolve!()` as a fourth argument.
 Using the billiard table we defined previously, where its 5th element is a ray-splitting `Antidot`, we now do:
 ```julia
-ω = 4.0
+bt = billiard_rectangle()
+a = Antidot([0.5, 0.5], 0.25)
+push!(bt, a)
+ω = 1.25
 p = randominside(bt, ω)
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, raysplitter)..., dt = 0.05)
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, raysplitter)...)
 plot_billiard(bt)
 plot(xt, yt)
 ```
-and everything works like a charm! A final difference to be noted is that in the case of ray-splitting with magnetic fields, the fourth value returned by `evolve!()` is not a number, but a vector of angular velocities `omegas`. The value `omegas[i]` is the angular velocity the particle has while propagating from state `pos[i], vel[i]` to state `pos[i+1], vel[i+1]`. The `construct()` function takes this into account.
+which should give a result similar to this:
+
+![Ray-splitting billiard](http://i.imgur.com/UfGQfOm.png)
+
+A final difference to be noted is that in the case of ray-splitting with magnetic fields, the fourth value returned by `evolve!()` is not a number, but a vector of angular velocities `omegas`. The value `omegas[i]` is the angular velocity the particle has while propagating from state `pos[i], vel[i]` to state `pos[i+1], vel[i+1]`. The `construct()` function takes this into account.
 
 ### No field "where" error
 
