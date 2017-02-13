@@ -6,10 +6,10 @@ Firstly one defines a billiard table and (if desired) the [ray-splitting diction
 1. Calculate the `collisiontime()` for **all** obstacles in the billiard table.
 2. Choose the smallest time and `propagate!()` the particle for that amount of time. The obstacle corresponding to that minimum time is `colobst`.
 3. `resolvecollision!()` between the particle and `colobst`:
-   1. Check whether there is transmission or not: `T(φ) > rand()`
-   4. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
-   2. For no transmission, perform `spcular!()` reflection or `periodicity!()` conditions.
-   3. Otherwise, implement the ray-splitting algorithm.
+1. Check whether there is transmission or not: `T(φ) > rand()`
+    4. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
+    2. For no transmission, perform `spcular!()` reflection or `periodicity!()` conditions.
+    3. Otherwise, implement the ray-splitting algorithm.
 4. Continue the loop 1-3 for a given amount of time.
 
 In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
@@ -28,6 +28,24 @@ In order to test if the `raysplitter` dictionary you have defined has physical m
 
 
 ## Pinned Particles
+In the case of propagation with magnetic field, a particle may be "pinned": There are
+no possible collisions that take place and the particle will revolve in circles
+forever. This can only happen for specific initial conditions that are collision-less.
+
+In such event, the convention followed by `DynamicalBilliards.jl` is the following:
+`evolve!()` returns the expected output, however all returned vectors have only 2
+entries. The collision times always have the entries `0.0, Inf`. All other returned
+vectors have the initial conditions, repeated once.
+
+`evolve!()` can be given the optional keyword argument `warning = true` in the case
+of magnetic propagation, which throws a `warn()` message that a pinned particle was
+evolved. 
+
+!!! warning "Using `construct()`"
+    When using the syntax `construct(evolve!(p, bt, t)...)` be careful that you are
+    sure that there aren't any pinned particles given to evolve. If there are any,
+    construct will result in an error.
+
 
 ## Velocity measure
 

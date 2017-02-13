@@ -172,15 +172,6 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
         colind = i
       end
     end#obstacle loop
-    # if tmin < 1e-10 && tcount!=0
-    #   println("-----------------")
-    #   println("In raysplit evolve, tmin = $tmin")
-    #   println("tcount = $tcount")
-    #   println("Collision is to happen with $(colobst.name)")
-    #   println("Antidot state: where = $(bt[5].where)")
-    #   println("Previous collision with: $(prev_obst.name)")
-    #
-    # end
 
     propagate!(p, tmin)
     if haskey(ray, colind)
@@ -206,7 +197,7 @@ end
 
 # For MagneticParticle and Ray-Splitting. Returns one extra vector with omegas!!!
 function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
-                 ttotal::Real, ray::Dict{Int, Vector{Function}})
+  ttotal::Real, ray::Dict{Int, Vector{Function}}; warning = false)
 
   ttotal = Float64(ttotal)
   omegas = Float64[]
@@ -239,19 +230,11 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
     end#obstacle loop
 
     if tmin == Inf
-      println("pinned particle! (Inf col t)")
+      warning && warn("Pinned particle in evolve! (Inf col t)")
       push!(rpos, rpos[end])
       push!(rvel, rvel[end])
       push!(rt, Inf)
       return (rt, rpos, rvel, omegas)
-    end
-    if tmin < 1e-10 && tcount!=0
-      println("-----------------")
-      println("In raysplit evolve, tmin = $tmin")
-      println("tcount = $tcount")
-      println("Collision is to happen with $(colobst.name)")
-      println("$(colobst.name) state: where = $(colobst.where)")
-      println("Previous collision with: $(prev_obst.name)")
     end
 
     propagate!(p, tmin)
@@ -266,7 +249,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       # Pinned particle:
       if t_to_write >= 2π/abs(p.omega)
         #println("t_to_write = $t_to_write while circle time = $")
-        println("pinned particle! (completed circle)")
+        warning && warn("Pinned particle in evolve! (completed circle)")
         push!(rpos, rpos[end])
         push!(rvel, rvel[end])
         push!(rt, Inf)

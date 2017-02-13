@@ -527,7 +527,8 @@ function collisiontime(p::MagneticParticle, o::Circular)
 end
 
 
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
+  warning = false)
 
   ω = p.omega
   absω = abs(ω)
@@ -555,7 +556,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
     end#obstacle loop
 
     if tmin == Inf
-      println("pinned particle! (Inf col t)")
+      warning && warn("Pinned particle in evolve! (Inf col t)")
       push!(rpos, rpos[end])
       push!(rvel, rvel[end])
       push!(rt, Inf)
@@ -569,7 +570,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64)
     if typeof(colobst) == PeriodicWall
       # Pinned particle:
       if t_to_write >= 2π/absω
-        println("pinned particle! (completed circle)")
+        warning && warn("Pinned particle in evolve! (completed circle)")
         push!(rpos, rpos[end])
         push!(rvel, rvel[end])
         push!(rt, Inf)
