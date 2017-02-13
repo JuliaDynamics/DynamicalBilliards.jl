@@ -3,11 +3,9 @@ Ray-splitting is a semiclassical approach to the billiard system, giving a wave 
 Upon collision a particle may propagate through an obstacle (transmission & refraction) or be reflected. Following the mindset of this package, implementing a ray-splitting billiard requires only three very simple steps.
 
 ## Ray-Splitting Obstacles
-First, an obstacle that supports ray-splitting is required to be present in your billiard table. The only new feature these obstacles have is an additional Boolean field called `where`. This field notes on which side of the obstacle the particle is currently propagating *(if you are wondering how a distance can change sign, see the tutorial on Defining your own Obstacles)*. The normal vector as well as the distance from boundary change sign depending on the value of `where`. The obstacles `Antidot` and `SplitterWall` are the equivalents of disk and wall for ray-splitting. To make your own defined obstacle support ray-splitting, visit this tutorial.
+First, an obstacle that supports ray-splitting is required to be present in your billiard table. The only new feature these obstacles have is an additional Boolean field called `where`. This field notes on which side of the obstacle the particle is currently propagating.
 
-> There is a simple reason for having extra Types to support ray-splitting: non ray-splitting Types
-> always perform 2 less operations in their innermost loops, saving a bit of time. Also, ray-splitting obstacles
-> are defined as `type` instead of as `immutable`.
+The normal vector as well as the distance from boundary change sign depending on the value of `where`. The obstacles `Antidot` and `SplitterWall` are the equivalents of disk and wall for ray-splitting.
 
 Let's add an `Antidot` to a billiard table:
 
@@ -19,13 +17,12 @@ push!(bt, a)
 ```
 
 ## Ray-Splitting Functions
-Secondly, for each obstacle in your billiard table that will perform ray-splitting, you have to define 3 functions. Notice that not every obstacle that supports ray-splitting actually has to perform it; it is up to the user. Those 3 functions are the following:
-1. T(φ, `where`, ω) : Takes as input the angle of incidence φ and returns the transmission probability Τ depending on
+Secondly, for each obstacle in your billiard table that you want to perform ray-splitting, you have to define 3 functions (φ = angle of incidence, ω = angular velocity *before* transmission):
+
+1. T(φ, `where`, ω) : Transmission probability Τ depending on
    whether the particle is inside or outside the obstacle (`where`) and optionally depending on ω.
-   This function should be an even function with respect to φ.
-2. θ(φ, `where`, ω) : Takes as input the angle of incidence 	φ and returns the the transmission (aka refraction)  angle θ
+2. θ(φ, `where`, ω) : Transmission (aka refraction) angle θ
    depending on whether the particle is inside or outside the obstacle (`where`) and optionally depending on ω.
-   This function should be an odd function with respect to φ.
 3. ω_new(ω, `where`) : Angular velocity after transmission.
 
 The above three functions use the **same convention**: the argument `where` is the one the Obstacle has **before transmission**. For example, if a particle is outside a disk (let `where = true` here) and is transmitted inside the disk (`where` becomes `false` here), then all three functions will be given their second argument (the boolean one) as `true`!
