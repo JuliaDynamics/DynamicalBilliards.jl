@@ -73,3 +73,38 @@ gives the value of `2.1899...` which is very close to the analytic result:
 ``\text{m.f.p.} =  \frac{1-\pi r^2 }{2r} \stackrel{r=0.2}{=} 2.18584 ``
 
 which you can find for example [here](http://www.cmls.polytechnique.fr/perso/golse/Surveys/FGIcmp03.pdf).
+
+## Semi-Periodic Billiard
+`DynamicalBilliards.jl` allows for your system to be periodic in only some specific
+directions. For example, the following code produces a billiard that is periodic
+on only the x-direction:
+
+```julia
+using DynamicalBilliards
+o = 0.0; x = 2.0; y=1.0
+bt = Obstacle[]
+
+sp = [o,o]; ep = [o, y]; n = [x,o]
+leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
+sp = [x,o]; ep = [x, y]; n = [-x,o]
+rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
+
+sp = [o,y]; ep = [x, y]; n = [o,-y]
+topw2 = FiniteWall(sp, ep, n, "Top wall")
+sp = [o,o]; ep = [x, o]; n = [o,y]
+botw2 = FiniteWall(sp, ep, n, "Bottom wall")
+push!(bt, leftw, rightw, topw2, botw2)
+
+r = 0.25
+d = Disk([0.5, 0.5], r)
+d2 = Disk([1.5, 0.5], r/2)
+push!(bt, d, d2)
+
+p = randominside(bt, 0.5)
+xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 25)...)
+plot_billiard(bt, xt, yt)
+plot_particle(p)
+```
+Result:
+
+![Semi-Periodic Billiard](http://i.imgur.com/Dbxmq8y.png)

@@ -109,7 +109,7 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
   bt = Obstacle[]
   verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
-  
+
   if setting == "standard"
     T = FiniteWall
     wallname = "wall"

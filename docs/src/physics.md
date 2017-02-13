@@ -39,11 +39,11 @@ vectors have the initial conditions, repeated once.
 
 `evolve!()` can be given the optional keyword argument `warning = true` in the case
 of magnetic propagation, which throws a `warn()` message that a pinned particle was
-evolved. 
+evolved.
 
 !!! warning "Using `construct()`"
-    When using the syntax `construct(evolve!(p, bt, t)...)` be careful that you are
-    sure that there aren't any pinned particles given to evolve. If there are any,
+    When using the syntax `construct(evolve!(p, bt, t)...)` be sure that there
+    aren't any pinned particles given to evolve. If there are any,
     construct will result in an error.
 
 

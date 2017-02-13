@@ -95,8 +95,9 @@ methods provided are:
 plot_billiard(bt, xmin, ymin, xmax, ymax)
 plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64})
 ```
-The last one conveniently plots the combo of particle-trajectory and periodic-billiard
-taking care of all the details internally.
+The last one conveniently plots the combo of particle-trajectory and
+periodic-billiard taking care of all the details internally. Give the keyword
+`plot_orbit = false` if you do not want to plot the orbit defined by `(xt, yt)`.
 
 For example, the following code
 ```julia

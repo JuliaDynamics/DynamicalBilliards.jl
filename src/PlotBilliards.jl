@@ -79,12 +79,13 @@ Plot the given (periodic) billiard `bt` on the current PyPlot figure, repeatedly
 plotting from `(xmin, ymin)` to `(xmax, ymax)`. Only works for rectangular billiards.
 
 ```julia
-plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64})
+plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64}; plot_orbit = true)
 ```
 Plot the given (periodic) billiard `bt` along with a particle trajectory defined
 by `xt` and `yt`, on the current PyPlot figure. Only works for rectangular billiards.
 
-Sets limits automatically.
+Sets limits automatically. Set the keyword argument `plot_orbit = false` to not
+plot the orbit defined by `(xt, yt)`.
 """
 function plot_billiard(bt::Vector{Obstacle})
   for obst in bt
@@ -127,10 +128,13 @@ function plot_billiard(bt, xmin, ymin, xmax, ymax)
   PyPlot.gca()[:set_aspect]("equal")
 end
 
-function plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64})
-  xmin = floor(minimum(xt)); xmax = ceil(maximum(xt))
-  ymin = floor(minimum(yt)); ymax = ceil(maximum(yt))
-  plot(xt, yt, color = "blue")
+function plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64}; plot_orbit = true)
+  xmin = floor(minimum(round(xt,8))); xmax = ceil(maximum(round(xt,8)))
+  ymin = floor(minimum(round(yt,8))); ymax = ceil(maximum(round(yt,8)))
+  if plot_orbit
+    plot(xt, yt, color = "blue")
+  end
+  
   plot_billiard(bt, xmin, ymin, xmax, ymax)
 end
 
