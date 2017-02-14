@@ -104,10 +104,10 @@ how many obstacles in the billiard table can perform ray-splitting, there is onl
 a single difference on the main function call:
 The `evolve!()` function is supplemented with a fourth argument, called "ray_splitter":
 ```julia
-ray_splitter::Dict{Int, Vector{Function}}
+ray_splitter::Dict{Int, Any}
 ```
 This argument is simply a dictionary which handles all ray-splitting processes in the billiard system.
-It is a map of the Obstacle index within the billiard table to the
+It is a map of the Obstacle index within the billiard table a container of the
 ray-splitting functions: (φ is the angle of incidence)
 * T(φ, where, ω) : Transmission probability.
 * θ(φ, where, ω) : Transmission (aka diffraction) angle.
@@ -115,7 +115,7 @@ ray-splitting functions: (φ is the angle of incidence)
 
 Assuming you have defined a billiard table and a ray-splitter dictionary, the implementation is exactly the same as in the two previous cases: the ray-splitting dictionary is passed to `evolve!()` as a fourth argument.
 ```julia
-ray_splitter = Dict(5 => [foo, bar, baz])
+ray_splitter = Dict(5 => (foo, bar, baz))
 p = randominside(bt, 4.0)
 xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., 0.01)
 ```
