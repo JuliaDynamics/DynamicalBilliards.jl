@@ -1,5 +1,5 @@
 # Ray-Splitting
-Ray-splitting is a semiclassical approach to the billiard system, giving a wave attribute to the ray traced by the particle.
+Ray-splitting is a semi-classical approach to the billiard system, giving a wave attribute to the ray traced by the particle.
 Upon collision a particle may propagate through an obstacle (transmission & refraction) or be reflected. Following the mindset of this package, implementing a ray-splitting billiard requires only three very simple steps.
 
 ## Ray-Splitting Obstacles
@@ -25,27 +25,31 @@ Secondly, for each obstacle in your billiard table that you want to perform ray-
    depending on whether the particle is inside or outside the obstacle (`where`) and optionally depending on ω.
 3. ω_new(ω, `where`) : Angular velocity after transmission.
 
-The above three functions use the **same convention**: the argument `where` is the one the Obstacle has **before transmission**. For example, if a particle is outside a disk (let `where = true` here) and is transmitted inside the disk (`where` becomes `false` here), then all three functions will be given their second argument (the boolean one) as `true`!
+The above three functions use the **same convention**: the argument `where` is the one the Obstacle has **before transmission**. For example, if a particle is outside a disk (let `where = true` here) and is transmitted inside the disk (`where` becomes `false` here), then all three functions will be given their second argument (the Boolean one) as `true`!
 
 ## Ray-Splitter Dictionary
-To pass the information of the aforementioned functions into the main API (`evolve!()`) a dictionary is required:
+To pass the information of the aforementioned functions into the main API a dictionary is required:
 ```julia
-raysplitter::Dict{Int, Vector{Function}}
+raysplitter::Dict{Int, Any}
 ```
-This dictionary is a map of the obstacle index within the billiard table to the ray-splitting functions. For example, if we wanted to allocate ray-splitting functions for the 5th obstacle in our billiard table, which could be e.g. an `Antidot`, we would write something like:
+This dictionary is a map of the **obstacle index** within the billiard table to a **container of the ray-splitting functions**. This container could be a `Vector` or a `Tuple` and the later is the suggested version.
+
+For example, if we wanted to allocate ray-splitting functions for the **5th** obstacle in our billiard table, which could be e.g. an `Antidot`, we would write something like:
 ```julia
-sa = (θ, where, ω) -> where ? 2θ : 0.5θ
-T = (θ, where, ω) -> begin
+sa = (θ, where, ω) -> where ? 2θ : 0.5θ  # refraction (scatter) angle
+T = (θ, where, ω) -> begin   # Transmission probability
   if where
     abs(θ) < π/4 ? 0.5exp(-(θ)^2/2(π/8)^2) : 0.0
   else
     0.75*exp(-(θ)^2/2(π/4)^2)
   end
 end
-newo = (ω, bool) -> bool ? -0.5ω : -2ω
-raysplitter = Dict(5 => [T, sa, newo])
+newo = (ω, bool) -> bool ? -0.5ω : -2ω   # new angular velocity
+raysplitter = Dict(5 => (T, sa, newo))  # Index maps to container of Functions
 ```
-Notice the following two very important points: The functions **must accept the specific number of arguments shown in the previous section** even if some are not used. Also, the functions must be given **in the specific order: 1. transmission probability, 2. refraction angle, 3. new ω** in the vector passed to the dictionary.
+
+!!! note "Order of Arguments"
+    The functions **must accept the specific number of arguments shown in the previous section** even if some are not used. Also, the functions must be given **in the specific order: [1. transmission probability, 2. refraction angle, 3. new ω]** in the vector passed to the dictionary.
 
 The next step is very simple: the `raysplitter` dictionary is directly passed into `evolve!()` as a fourth argument.
 Using the billiard table we defined previously, where its 5th element is a ray-splitting `Antidot`, we now do:
@@ -55,7 +59,8 @@ a = Antidot([0.5, 0.5], 0.25)
 push!(bt, a)
 ω = 1.25
 p = randominside(bt, ω)
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, raysplitter)...)
+dt = 0.05
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, raysplitter)..., dt)
 plot_billiard(bt)
 plot(xt, yt)
 ```
@@ -73,6 +78,12 @@ acceptable_raysplitter(raysplitter, bt)
 supports_raysplitting(obst::Obstacle)
 ```
 to find out what you did wrong. Most likely, the index you supplied was incorrect, i.e. the index could be `5` instead of `4`.
+
+## Example Animation
+In the [examples page], you can find the code for the following animation, which
+includes ray-splitting:
+
+![Ray-splitter animation](http://i.imgur.com/89s0fon.gif)
 
 ## Physics
 The condition for transmission is simply: `T(φ, where, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. Otherwise just specular reflection will take place. A more detailed discussion is on the ray-splitting section of the

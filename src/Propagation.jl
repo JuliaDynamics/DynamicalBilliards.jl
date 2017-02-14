@@ -295,14 +295,10 @@ the specular reflection of the (i-1)th collision.
 The function `construct` takes that into account.
 
 ## Ray-splitting billiards
-No matter how complex ray-splitting processes you want, and irrespectively of
-how many obstacles in the billiard table can perform ray-splitting, there is only
-a single difference on the main function call:
-The `evolve!()` function is supplemented with a fourth argument,
-`ray_splitter::Dict{Int, Vector{Function}}`.
-This dictionary object handles all ray-splitting processes in the billiard system.
-It is a map of the Obstacle index within the billiard table to the
-ray-splitting functions: (φ is the angle of incidence)
+To implement ray-splitting, the `evolve!()` function is supplemented with a
+fourth argument, `ray_splitter::Dict{Int, Any}`, which maps integers
+to some kind of Function container (Tuple or Vector). The functions in this
+container are: (φ is the angle of incidence)
 * T(φ, where, ω) : Transmission probability.
 * θ(φ, where, ω) : Transmission (aka refraction) angle.
 * ω_new(ω, where) : Angular velocity after transmission.

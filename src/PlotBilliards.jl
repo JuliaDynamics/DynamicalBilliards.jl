@@ -134,7 +134,7 @@ function plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64}; plot_orbit 
   if plot_orbit
     plot(xt, yt, color = "blue")
   end
-  
+
   plot_billiard(bt, xmin, ymin, xmax, ymax)
 end
 
@@ -223,7 +223,7 @@ collisions is passed.
 * `p::AbstractParticle` : Either standard or magnetic.
 * `bt::Vector{Obstacle}` : The billiard table.
 * `colnumber::Int` : Number of collisions to evolve the particle for.
-* `ray-splitter::Dict{Int, Vector{Function}}` : (Optional) Ray-splitting dictionary
+* `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
   that enables ray-splitting processes during evolution.
 ## Keyword Arguments
 * `sleeptime` : Time passed to `sleep()` between each collision.
@@ -298,7 +298,7 @@ end
 
 # Magnetic + Ray-splitting
 function animate_evolution(p::AbstractParticle, bt,
-  colnumber, rayspl::Dict{Int, Vector{Function}};
+  colnumber, rayspl::Dict;
   sleeptime = 0.1, col_to_plot = 5, orbit_color = (0,0,1),
   savefigs = false, savename = "", particle_color = (0,0,0),
   particle_kwargs = nothing, orbit_kwargs = nothing)

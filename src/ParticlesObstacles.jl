@@ -204,7 +204,7 @@ type Antidot <: Circular
       new(SVector{2,Float64}(c), abs(r), where, name)
     end
 end
-function Antidot(c, r::Real, name::String = "Antidot")
+function Antidot(c, r::Real, name::String)
   Antidot(SVector{2,Float64}(c), abs(r), true, name)
 end
 

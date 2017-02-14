@@ -2,7 +2,7 @@ This section has some examples of usage of `DynamicalBilliards.jl`, with some br
 comments.
 
 ## Julia-logo Billiard
-
+The "Julia-logo" billiard, accessed by `billiard_julia()` simply wraps this code:
 ```julia
 using DynamicalBilliards, PyPlot
 
@@ -49,11 +49,10 @@ animate_evolution(p, bt, 200; col_to_plot = 7,
 particle_kwargs = pkwargs, orbit_kwargs = okwargs,
 savefigs = true, savename = sname)
 ```
-produces:
+and produces:
 
 ![Julia-logo billiard animation](http://i.imgur.com/EtKof48.gif)
 
-The function `billiard_julia(plotit = true)` wraps this code, just for fun!
 
 ## Mean Free Path of the Lorentz Gas
 ```julia
@@ -108,3 +107,41 @@ plot_particle(p)
 Result:
 
 ![Semi-Periodic Billiard](http://i.imgur.com/Dbxmq8y.png)
+
+## Ray-Splitting
+The following code produces an animation of a Ray-Splitting billiard:
+```julia
+using DynamicalBilliards, PyPlot
+
+bt = billiard_rectangle(2, 1)
+sw = SplitterWall([1.0, 0.0], [1,1], [-1,0], true)
+push!(bt, sw)
+a1 = Antidot([0.5, 0.5], 0.3)
+push!(bt, a1)
+a2 = Antidot([1.5, 0.5], 0.2)
+push!(bt, a2)
+
+sa = (θ, where, ω) -> where ? 1.25*θ : 0.8*θ
+Tp = (p) -> (θ, where, ω) -> begin
+  if where
+    abs(θ) < π/2/1.25 ? p*exp(-(θ)^2/2(π/8)^2) : 0.0
+  else
+    (p)*exp(-(θ)^2/2(π/4)^2)
+  end
+end
+newo = ((x, bool) -> bool ? -2.0x : -0.5x)
+newo2 = ((x, bool) -> bool ? -x : -x)
+rayspl = Dict(
+5 => (Tp(0.9), sa, newo2),
+6 => (Tp(0.7), sa, newo),
+7 => (Tp(0.65), sa, newo))
+
+p = randominside(bt, 1.0)
+plot_billiard(bt)
+
+savedir = "C:\\***\\anim"
+animate_evolution(p, bt, 200, rayspl, savefigs = true, savename = savedir)
+```
+result:
+
+![Ray-splitter animation](http://i.imgur.com/89s0fon.gif)

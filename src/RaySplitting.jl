@@ -8,20 +8,21 @@ Return `true` if the given obstacle supports ray-splitting.
 """
 function supports_raysplitting(obst::Obstacle)
   n = fieldnames(typeof(obst))
-  in(:where, n) ? true : false
+  in(:where, n)
 end
 
 """
 ```julia
 acceptable_raysplitter(raysplitter, bt)
 ```
-Check if the given ray-splitting dictionary `raysplitter` can be used in conjuction with
-given billiard table `bt`.
+Check if the given ray-splitting dictionary `raysplitter` can be used in conjuction
+with given billiard table `bt`.
 """
-function acceptable_raysplitter(ray::Dict{Int, Vector{Function}}, bt::Vector{Obstacle})
+function acceptable_raysplitter(ray::Dict{Int, Any}, bt::Vector{Obstacle})
   for i in keys(ray)
     if !supports_raysplitting(bt[i])
-      println("Obstacle at index $i of given billiard table does not have a field `where`")
+      print("Obstacle at index $i of given billiard table")
+      println("does not have a field `where`")
       println("and therefore does not support ray-splitting.")
       return false
     end
@@ -30,7 +31,7 @@ function acceptable_raysplitter(ray::Dict{Int, Vector{Function}}, bt::Vector{Obs
 end
 
 
-# Resolve collision for Ray-splitting
+# Resolve collision for Ray-splitting with Magnetic
 function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   θ::Function, new_ω::Function = ((x, bool) -> x))
 
@@ -87,7 +88,7 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   return dt
 end
 
-# Resolve collision for ray-splitting
+# Resolve collision for ray-splitting with Normal
 function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
 
   dt = 0.0
@@ -141,9 +142,9 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
   return dt
 end
 
-# For Particle and Ray-Splitting:
+# evolve For Particle and Ray-Splitting:
 function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
-  ray::Dict{Int, Vector{Function}})
+  ray::Dict)
 
   ttotal = Float64(ttotal)
   rt = Float64[]
@@ -154,7 +155,6 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
   push!(rt, 0.0)
   tcount = 0.0
   colobst = bt[1]
-  prev_obst = bt[1]
   colind::Int = length(bt)
   t_to_write = 0.0
 
@@ -180,7 +180,6 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
       dt = resolvecollision!(p, colobst)
     end
     t_to_write += tmin + dt
-    prev_obst = colobst
 
     if typeof(colobst) == PeriodicWall
       continue
@@ -195,9 +194,9 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
   return (rt, rpos, rvel)
 end
 
-# For MagneticParticle and Ray-Splitting. Returns one extra vector with omegas!!!
+# evolve For MagneticParticle and Ray-Splitting
 function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
-  ttotal::Real, ray::Dict{Int, Vector{Function}}; warning = false)
+  ttotal::Real, ray::Dict; warning = false)
 
   ttotal = Float64(ttotal)
   omegas = Float64[]
@@ -212,7 +211,6 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
   tcount = 0.0
   t_to_write = 0.0
   colobst = bt[1]
-  prev_obst = bt[end]
   colind = 1
 
   while tcount < ttotal
@@ -257,7 +255,6 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
         return (rt, rpos, rvel, omegas)
       end
       #If not pinned, continue (do not write for PeriodicWall)
-      prev_obst = colobst
       continue
     else
       push!(rpos, p.pos + p.current_cell)
@@ -267,10 +264,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       tcount += t_to_write
       t_to_write = 0.0
     end
-    # if (prev_obst == colobst) && (typeof(colobst) == SplitterWall)
-    #   error("Double collision with splitter wall!\n tmin was $tmin\ndt was $dt")
-    # end
-    #prev_obst = colobst
+
   end#time loop
   return (rt, rpos, rvel, omegas)
 end
@@ -312,7 +306,7 @@ function construct(t::Vector{Float64}, poss::Vector{SVector{2,Float64}},
 end
 
 """
-    isphysical(raysplitter::Dict{Int, Vector{Function}}; only_mandatory = false)
+    isphysical(raysplitter::Dict{Int, Any}; only_mandatory = false)
 Return `true` if the given ray-splitting dictionary represends the physical world.
 
 Specifically, check if (φ is the incidence angle):
@@ -327,7 +321,7 @@ The above tests are done for all possible combinations of arguments.
 They keyword `only_mandatory` notes whether the rest of
 the properties should be tested or not.
 """
-function isphysical(ray::Dict{Int, Vector{Function}}; only_mandatory = false)
+function isphysical(ray::Dict; only_mandatory = false)
   for i in keys(ray)
     scatter = ray[i][2]
     tr = ray[i][1]
