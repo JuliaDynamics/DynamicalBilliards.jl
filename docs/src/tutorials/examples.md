@@ -77,7 +77,7 @@ which you can find for example [here](http://www.cmls.polytechnique.fr/perso/gol
 ## Semi-Periodic Billiard
 `DynamicalBilliards.jl` allows for your system to be periodic in only some specific
 directions. For example, the following code produces a billiard that is periodic
-on only the x-direction:
+in only the x-direction:
 
 ```julia
 using DynamicalBilliards

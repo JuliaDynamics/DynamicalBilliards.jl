@@ -6,11 +6,12 @@ Firstly one defines a billiard table and (if desired) the [ray-splitting diction
 1. Calculate the `collisiontime()` for **all** obstacles in the billiard table.
 2. Choose the smallest time and `propagate!()` the particle for that amount of time. The obstacle corresponding to that minimum time is `colobst`.
 3. `resolvecollision!()` between the particle and `colobst`:
-1. Check whether there is transmission or not: `T(φ) > rand()`
-    4. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
-    2. For no transmission, perform `spcular!()` reflection or `periodicity!()` conditions.
-    3. Otherwise, implement the ray-splitting algorithm.
-4. Continue the loop 1-3 for a given amount of time.
+4. Check whether there is transmission or not: `T(φ) > rand()`, and do:
+        1. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
+        2. For no transmission, perform `specular!()` reflection or `periodicity!()` conditions.
+        3. Otherwise, implement the ray-splitting algorithm.
+
+5. Continue the loop 1-3 for a given amount of time.
 
 In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
 
@@ -18,6 +19,11 @@ Notice that the `relocate!()` step is actually very important because it takes c
 
 !!! note
     The first step of the algorithm is very inefficient, since many of the obstacles (especially in ray-splitting) can be safely excluded from search. If you have better solutions on how to find the minimum collision time you are more than welcome to submit a Pull Request or open an issue to discuss about it.
+
+!!! note "Speed vs. Accuracy"
+    `DynamicalBilliards.jl` was made under the consideration of extreme accuracy. There are numerous actions taken such that
+    the particle propagation is as accurate as possible, and will not result in any kind of unexpected behavior.
+    Of course, this is a direct tradeoff in the expense of speed.
 
 ## Ray-Splitting Functions
 If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, where, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed in the [Ray-Splitting tutorial](/tutorials/ray-splitting), the condition of total internal reflection must be taken care of by the user.
