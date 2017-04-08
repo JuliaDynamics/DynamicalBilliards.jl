@@ -326,7 +326,7 @@ function isphysical(ray::Dict; only_mandatory = false)
     scatter = ray[i][2]
     tr = ray[i][1]
     om = ray[i][3]
-    range = -π/2:0.01:π/2
+    range = (-π/2+0.05):0.01:(π/2 - 0.05)
     orange = -1.0:0.1:1.0
     display_er = true
     for where in [true, false]
