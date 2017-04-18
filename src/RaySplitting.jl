@@ -326,7 +326,7 @@ function isphysical(ray::Dict; only_mandatory = false)
     scatter = ray[i][2]
     tr = ray[i][1]
     om = ray[i][3]
-    range = (-π/2+0.05):0.01:(π/2 - 0.05)
+    range = -1.5:0.01:1.5
     orange = -1.0:0.1:1.0
     display_er = true
     for where in [true, false]
@@ -367,17 +367,19 @@ function isphysical(ray::Dict; only_mandatory = false)
           end
           if !only_mandatory
             # Check symmetry:
-            if !isapprox(θ, -scatter(-φ, where, ω))
-              es = "Scattering angle function is not odd!\n"
-              es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
-              println(es)
-              return false
-            end
-            if !isapprox(T, tr(-φ, where, ω))
-              es = "Transmission probability function is not even!\n"
-              es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
-              println(es)
-              return false
+            if ω==0
+              if !isapprox(θ, -scatter(-φ, where, ω))
+                es = "Scattering angle function is not odd!\n"
+                es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+                println(es)
+                return false
+              end
+              if !isapprox(T, tr(-φ, where, ω))
+                es = "Transmission probability function is not even!\n"
+                es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+                println(es)
+                return false
+              end
             end
             # Check ray-reversal:
             if !isapprox(scatter(θ, !where, ω), φ)
