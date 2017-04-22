@@ -7,9 +7,9 @@ Firstly one defines a billiard table and (if desired) the [ray-splitting diction
 2. Choose the smallest time and `propagate!()` the particle for that amount of time. The obstacle corresponding to that minimum time is `colobst`.
 3. `resolvecollision!()` between the particle and `colobst`:
 4. Check whether there is transmission or not: `T(φ) > rand()`, and do:
-  1. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
-  2. For no transmission, perform `specular!()` reflection or `periodicity!()` conditions.
-  3. Otherwise, implement the ray-splitting algorithm (not discussed here).
+    1. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
+    2. For no transmission, perform `specular!()` reflection or `periodicity!()` conditions.
+    3. Otherwise, implement the ray-splitting algorithm (not discussed here).
 5. Continue the loop 1-3 for a given amount of time.
 
 In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
