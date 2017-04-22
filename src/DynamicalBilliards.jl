@@ -21,7 +21,7 @@ end
 include("ParticlesObstacles.jl")
 include("Propagation.jl")
 include("StandardBilliards.jl")
-include("PlotBilliards.jl")
+#include("PlotBilliards.jl")
 include("RaySplitting.jl")
 
 end
