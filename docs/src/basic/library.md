@@ -40,15 +40,12 @@ randominside
 
 ```@docs
 resolvecollision!
-relocate!
 specular!
-lct
 periodicity!
 collisiontime
 propagate!
 evolve!
 construct
-realangle
 ```
 
 ## Ray-splitting

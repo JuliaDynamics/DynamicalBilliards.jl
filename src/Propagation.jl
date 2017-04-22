@@ -1,5 +1,7 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
-export resolvecollision!, collisiontime, propagate!, evolve!, construct
+export resolvecollision!, collisiontime, propagate!, evolve!, construct, specular!,
+periodicity!
+
 ####################################################
 ## Mathetical/Convenience Functions
 ####################################################
