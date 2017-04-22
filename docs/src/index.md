@@ -22,9 +22,9 @@ This package is registered, simply use `Pkg.add("DynamicalBilliards")` to instal
 The [stable documentation](https://datseris.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
 
 !!! note "Plotting"
-  Plotting in `DynamicalBilliards` is done through a sister package, [`DynamicalBilliardsPlotting`](https://github.com/Datseris/DynamicalBilliardsPlotting.jl). This enables the core package to not have any dependency on plotting packages. If you want to use the plotting features of `DynamicalBilliards`, simply run `Pkg.add("DynamicalBilliardsPlotting")`. Notice that you must be able to install `PyPlot` for plotting to work. If you are not sure about how to install PyPlot,
-  simply run the commands:
-  `ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
+    Plotting in `DynamicalBilliards` is done through a sister package, [`DynamicalBilliardsPlotting`](https://github.com/Datseris/DynamicalBilliardsPlotting.jl). This enables the core package to not have any dependency on plotting packages. If you want to use the plotting features of `DynamicalBilliards`, simply run `Pkg.add("DynamicalBilliardsPlotting")`. Notice that you must be able to install `PyPlot` for plotting to work. If you are not sure about how to install PyPlot,
+    simply run the commands:
+    `ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
 
 If you want to use the
 latest features of `DynamicalBilliards`, compatible with the [latest documentation](https://datseris.github.io/DynamicalBilliards.jl/latest/), use `Pkg.checkout("DynamicalBilliards")`.
