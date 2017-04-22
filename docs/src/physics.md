@@ -7,23 +7,25 @@ Firstly one defines a billiard table and (if desired) the [ray-splitting diction
 2. Choose the smallest time and `propagate!()` the particle for that amount of time. The obstacle corresponding to that minimum time is `colobst`.
 3. `resolvecollision!()` between the particle and `colobst`:
 4. Check whether there is transmission or not: `T(φ) > rand()`, and do:
-        1. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
-        2. For no transmission, perform `specular!()` reflection or `periodicity!()` conditions.
-        3. Otherwise, implement the ray-splitting algorithm.
-
+  1. `relocate!()` the particle accordingly so that it is on the correct side of the billiard table.
+  2. For no transmission, perform `specular!()` reflection or `periodicity!()` conditions.
+  3. Otherwise, implement the ray-splitting algorithm (not discussed here).
 5. Continue the loop 1-3 for a given amount of time.
 
 In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
 
 Notice that the `relocate!()` step is actually very important because it takes care that there is not particle "leakage": particles being outside the billiard table due to the finite precision of floating numbers.
 
-!!! note
-    The first step of the algorithm is very inefficient, since many of the obstacles (especially in ray-splitting) can be safely excluded from search. If you have better solutions on how to find the minimum collision time you are more than welcome to submit a Pull Request or open an issue to discuss about it.
+!!! danger
+    The first step of the algorithm is **very inefficient** for large billiard tables, since many of the obstacles could be safely excluded from search. If you have better solutions on how to find the minimum collision time you are more than welcome to submit a Pull Request or open an issue to discuss about it. Unfortunately, in the present literature,
+    such an algorithm exists only for the periodic Sinai billiard specifically.
 
 !!! note "Speed vs. Accuracy"
-    `DynamicalBilliards.jl` was made under the consideration of extreme accuracy. There are numerous actions taken such that
-    the particle propagation is as accurate as possible, and will not result in any kind of unexpected behavior.
-    Of course, this is a direct tradeoff in the expense of speed.
+    `DynamicalBilliards.jl` was made under the consideration of extreme accuracy.
+    There are numerous actions performed internally such that
+    the particle propagation is as accurate as possible, and will not result in any kind of unexpected behavior,
+    like for example particle leakage.
+    Of course, this is a direct trade-off in the expense of speed.
 
 ## Ray-Splitting Functions
 If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed in the [Ray-Splitting tutorial](/tutorials/ray-splitting), the condition of total internal reflection must be taken care of by the user.
