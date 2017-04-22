@@ -8,7 +8,7 @@ Return `true` if the given obstacle supports ray-splitting.
 """
 function supports_raysplitting(obst::Obstacle)
   n = fieldnames(typeof(obst))
-  in(:where, n)
+  in(:pflag, n)
 end
 
 """
@@ -22,7 +22,7 @@ function acceptable_raysplitter(ray::Dict{Int, Any}, bt::Vector{Obstacle})
   for i in keys(ray)
     if !supports_raysplitting(bt[i])
       print("Obstacle at index $i of given billiard table")
-      println("does not have a field `where`")
+      println("does not have a field `pflag`")
       println("and therefore does not support ray-splitting.")
       return false
     end
@@ -49,15 +49,15 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   #   println("-----------")
   # end
   # ray-splitting (step 2)
-  if T(φ, a.where, ω) > rand()
+  if T(φ, a.pflag, ω) > rand()
     # Step 3
     if cross2D(p.vel, n) < 0
       φ *= -1
     end
     # Step 4
-    theta = θ(φ, a.where, ω)
+    theta = θ(φ, a.pflag, ω)
     # Step 5
-    a.where = !a.where
+    a.pflag = !a.pflag
     # Step 6
     n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
     Θ = theta + atan2(n[2], n[1])
@@ -70,7 +70,7 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
     # Step 9
     p.vel = [cos(Θ), sin(Θ)]
     # Step 10
-    p.omega = new_ω(ω, !a.where)  # notice the exclamation mark !
+    p.omega = new_ω(ω, !a.pflag)  # notice the exclamation mark !
   # No ray-splitting:
   else
     dist = distance(p, a)
@@ -99,7 +99,7 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
   # if this is wrong then my normal vec is wrong:
   if φ >= π/2
     println("φ=$φ")
-    if a.where == true
+    if a.pflag == true
       println("Particle should be coming from outside of disk")
     else
       println("Particle should be coming from inside of disk")
@@ -107,15 +107,15 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
     error("φ shoud be between 0 and π/2")
   end
   # ray-splitting (step 2)
-  if T(φ, a.where, ω) > rand()
+  if T(φ, a.pflag, ω) > rand()
     # Step 3
     if cross2D(p.vel, n) < 0
       φ *= -1
     end
     # Step 4
-    theta = θ(φ, a.where, ω)
+    theta = θ(φ, a.pflag, ω)
     # Step 5
-    a.where = !a.where
+    a.pflag = !a.pflag
     # Step 6
     n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
     Θ = theta + atan2(n[2], n[1])
@@ -313,8 +313,8 @@ Specifically, check if (φ is the incidence angle):
 * Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
 * Transmission probability is even function: T(φ) ≈ T(-φ)
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
-* Ray reversal is true: θ(θ(φ, where, ω), !where, ω) ≈ φ
-* Magnetic conservation is true: (ω_new(ω_new(ω, where), !where) ≈ ω
+* Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ
+* Magnetic conservation is true: (ω_new(ω_new(ω, pflag), !pflag) ≈ ω
 The first property is mandatory and must hold for correct propagation.
 The above tests are done for all possible combinations of arguments.
 
@@ -329,27 +329,27 @@ function isphysical(ray::Dict; only_mandatory = false)
     range = -1.5:0.01:1.5
     orange = -1.0:0.1:1.0
     display_er = true
-    for where in [true, false]
+    for pflag in [true, false]
       for ω in orange
         for φ in range
           θ::Float64 = 0.0
           # Calculate refraction angle:
           try
-            θ = scatter(φ, where, ω)
+            θ = scatter(φ, pflag, ω)
           catch er
             if display_er
               ws = "Got error message: $er\n"
               ws*= "while calculating the refraction angle with settings:\n"
-              ws*= "index = $i, φ = $φ, where = $where, ω = $ω\n"
+              ws*= "index = $i, φ = $φ, pflag = $pflag, ω = $ω\n"
               ws*= "Similar warnings will be skipped as long as the Tr. prob. is 0."
               warn(ws)
             end
             display_er = false
-            T = tr(φ, where, ω)
+            T = tr(φ, pflag, ω)
             if T!= 0
               println("Got error message: $er")
               println("while calculating the refraction angle with settings:")
-              println("index = $i, φ = $φ, where = $where, ω = $ω")
+              println("index = $i, φ = $φ, pflag = $pflag, ω = $ω")
               println("PROBLEM: Transmission prob. was not 0 for these settings!")
               return false
             else
@@ -357,47 +357,47 @@ function isphysical(ray::Dict; only_mandatory = false)
             end
           end
           # Calculate transmission probability:
-          T = tr(φ, where, ω)
+          T = tr(φ, pflag, ω)
           # Check critical angle:
           if θ >= π/2 && T > 0
             es = "Refraction angle >= π/2 and T > 0 !\n"
-            es*= "For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+            es*= "For index = $i, tested with φ = $φ, pflag = $pflag, ω = $ω"
             println(es)
             return false
           end
           if !only_mandatory
             # Check symmetry:
             if ω==0
-              if !isapprox(θ, -scatter(-φ, where, ω))
+              if !isapprox(θ, -scatter(-φ, pflag, ω))
                 es = "Scattering angle function is not odd!\n"
-                es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+                es *="For index = $i, tested with φ = $φ, pflag = $pflag, ω = $ω"
                 println(es)
                 return false
               end
-              if !isapprox(T, tr(-φ, where, ω))
+              if !isapprox(T, tr(-φ, pflag, ω))
                 es = "Transmission probability function is not even!\n"
-                es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+                es *="For index = $i, tested with φ = $φ, pflag = $pflag, ω = $ω"
                 println(es)
                 return false
               end
             end
             # Check ray-reversal:
-            if !isapprox(scatter(θ, !where, ω), φ)
+            if !isapprox(scatter(θ, !pflag, ω), φ)
               es = "Ray-reversal does not hold!\n"
-              es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+              es *="For index = $i, tested with φ = $φ, pflag = $pflag, ω = $ω"
               println(es)
               return false
             end
-            if !isapprox(om(om(ω, where), !where), ω)
+            if !isapprox(om(om(ω, pflag), !pflag), ω)
               es = "Magnetic reversal does not hold!\n"
-              es *="For index = $i, tested with φ = $φ, where = $where, ω = $ω"
+              es *="For index = $i, tested with φ = $φ, pflag = $pflag, ω = $ω"
               println(es)
               return false
             end
           end
         end#φ range
       end#ω range
-    end#where range
+    end#pflag range
   end#obstacle range
   return true
 end

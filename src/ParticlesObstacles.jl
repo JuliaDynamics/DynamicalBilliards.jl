@@ -190,18 +190,19 @@ Used in ray-splitting billiards.
 ## Fields:
 * `c::SVector{2,Float64}` : Center.
 * `r::Float64` : Radius.
-* `where::Bool` : Flag that keeps track of where the particle is currently
-  propagating. `true` stands for *outside* the disk, `false` for *inside* the disk.
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating (`pflag` = propagation-flag).
+  `true` stands for *outside* the disk, `false` for *inside* the disk.
 * `name::String` : Name of the obstacle given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
 type Antidot <: Circular
     c::SVector{2,Float64}
     r::Float64
-    where::Bool
+    pflag::Bool
     name::String
-    function Antidot(c, r::Real, where::Bool = true, name::String = "Antidot")
-      new(SVector{2,Float64}(c), abs(r), where, name)
+    function Antidot(c, r::Real, pflag::Bool = true, name::String = "Antidot")
+      new(SVector{2,Float64}(c), abs(r), pflag, name)
     end
 end
 function Antidot(c, r::Real, name::String)
@@ -332,8 +333,9 @@ Wall obstacle imposing specular reflection during collision.
 * `normal::SVector{2,Float64}` : Normal vector to the wall, pointing to where the
   particle *will come from before a collision*.
   The size of the vector is irrelevant.
-* `where::Bool` : Flag that keeps track of where the particle is currently
-  propagating. `true` is associated with the `normal` vector the wall is
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating (`pflag` = propagation flag).
+  `true` is associated with the `normal` vector the wall is
   instantiated with.
 * `name::String` : Name of the obstacle, e.g. "ray-splitting wall 1",
   given for user convenience.
@@ -343,24 +345,24 @@ type SplitterWall <: Wall
   sp::SVector{2,Float64}
   ep::SVector{2,Float64}
   normal::SVector{2,Float64}
-  where::Bool
+  pflag::Bool
   name::String
   #Inner constructor, do not add {Float64} after name
   function SplitterWall(sp::SVector{2,Float64}, ep::SVector{2,Float64},
-    normal::SVector{2,Float64}, where::Bool = true, name::String = "Wall")
+    normal::SVector{2,Float64}, pflag::Bool = true, name::String = "Wall")
 
     n = normalize(normal)
     d = dot(n, ep-sp)
     if abs(d) > 1e-15
       error("Normal vector is not actually normal to the wall")
     end
-    new(sp, ep, n, where, name)
+    new(sp, ep, n, pflag, name)
   end
 end
 
-function SplitterWall(sp, ep, n, where::Bool=true, name::String="Ray-splitting wall")
+function SplitterWall(sp, ep, n, pflag::Bool=true, name::String="Ray-splitting wall")
   return SplitterWall(SVector{2, Float64}(sp), SVector{2, Float64}(ep),
-  SVector{2, Float64}(n), where, name)
+  SVector{2, Float64}(n), pflag, name)
 end
 
 #pretty print:
@@ -379,9 +381,9 @@ the direction a particle is expected to come from.
 """
 normalvec(wall::Wall, pos) = wall.normal
 normalvec(w::PeriodicWall, pos) = normalize(w.normal)
-normalvec(w::SplitterWall, pos) = (2*Int(w.where)- 1)*w.normal
+normalvec(w::SplitterWall, pos) = (2*Int(w.pflag)- 1)*w.normal
 normalvec(disk::Circular, pos) = normalize(pos - disk.c)
-normalvec(a::Antidot, pos) = (2*Int(a.where)- 1)*normalize(pos - a.c)
+normalvec(a::Antidot, pos) = (2*Int(a.pflag)- 1)*normalize(pos - a.c)
 
 ####################################################
 ## Distances
@@ -416,14 +418,14 @@ function distance(p::AbstractParticle, w::Wall)
   dot(v1, normalvec(w, p.pos))
 end
 
-# no new distance needed for SplitterWall because the `where` field
+# no new distance needed for SplitterWall because the `pflag` field
 # has the necessary information to give the correct dinstance,
 # since the distance is calculated throught the normalvec.
 
 distance(p::AbstractParticle, d::Circular) = norm(p.pos - d.c) - d.r
 
 function distance(p::AbstractParticle, a::Antidot)
-  (2*Int(a.where)- 1)*(norm(p.pos - a.c) - a.r)
+  (2*Int(a.pflag)- 1)*(norm(p.pos - a.c) - a.r)
 end
 
 
@@ -455,7 +457,7 @@ function cellsize(w::Wall)
 end
 
 function cellsize(a::Antidot)
-  if a.where
+  if a.pflag
     xmin = ymin = Inf
     xmax = ymax = -Inf
   else
