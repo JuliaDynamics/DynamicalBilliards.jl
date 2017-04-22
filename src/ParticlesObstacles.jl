@@ -1,5 +1,3 @@
-using StaticArrays
-import Base.show
 export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
 standard2magnetic, cyclotron, Obstacle, Disk, Antidot, RandomDisk,
 FiniteWall, PeriodicWall, RandomWall, SplitterWall,

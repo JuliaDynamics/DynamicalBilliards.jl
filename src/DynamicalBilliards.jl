@@ -6,6 +6,9 @@ fast implementation of billiard systems of arbitrary construction.
 """
 module DynamicalBilliards
 
+using StaticArrays
+import Base.show
+
 # export test_options
 
 """
