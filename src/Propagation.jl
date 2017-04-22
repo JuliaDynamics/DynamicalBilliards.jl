@@ -203,7 +203,7 @@ end
 function collisiontime(p::Particle, d::Antidot)
 
   dotp = dot(p.vel, normalvec(d, p.pos))
-  if d.where == true
+  if d.pflag == true
     dotp >=0 && return Inf
   end
 
@@ -299,9 +299,9 @@ To implement ray-splitting, the `evolve!()` function is supplemented with a
 fourth argument, `ray_splitter::Dict{Int, Any}`, which maps integers
 to some kind of Function container (Tuple or Vector). The functions in this
 container are: (φ is the angle of incidence)
-* T(φ, where, ω) : Transmission probability.
-* θ(φ, where, ω) : Transmission (aka refraction) angle.
-* ω_new(ω, where) : Angular velocity after transmission.
+* T(φ, pflag, ω) : Transmission probability.
+* θ(φ, pflag, ω) : Transmission (aka refraction) angle.
+* ω_new(ω, pflag) : Angular velocity after transmission.
 
 For more information and instructions on defining these functions
 please visit the official documentation.
