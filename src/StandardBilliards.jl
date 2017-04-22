@@ -1,5 +1,4 @@
-export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
-billiard_julia
+export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz
 
 ####################################################
 ## Famous/Standard Billiards
@@ -139,53 +138,5 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     wall = FiniteWall(starting, ending, normal, wallname*" $i")
     push!(bt, wall)
   end
-  return bt
-end
-
-
-"""
-```julia
-billiard_julia(; plotit = true)
-```
-Return the awesome "Julia-logo" billiard shown in the introduction
-of DynamicalBilliards.jl.
-
-By default it also plots the billiard in a new `PyPlot.figure()` using the correct colors.
-"""
-function billiard_julia(; plotit = true)
-
-  bt = billiard_rectangle()
-
-  r = 0.165
-  ewidth = 6.0
-  redcent = [0.28, 0.32]
-  red = Disk(redcent, r, "Red dot")
-  purple = Disk([1 - redcent[1], redcent[2]], r, "Purple dot")
-  green = Disk([0.5, 1 - redcent[2]], r, "Green dot")
-  push!(bt, red, purple, green)
-
-  if plotit == true
-    PyPlot.figure()
-    for w in bt
-      plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
-    end
-    plot_obstacle(red; edgecolor = (203/255, 60/255, 51/255),
-    facecolor = (213/255, 99/255, 92/255), linewidth = ewidth)
-    plot_obstacle(purple; edgecolor = (149/255, 88/255, 178/255),
-    facecolor = (170/255, 121/255, 193/255), linewidth = ewidth)
-    plot_obstacle(green, edgecolor = (56/255, 152/255, 38/255),
-    facecolor = (96/255, 173/255, 81/255), linewidth = ewidth)
-
-    # particle edge color
-    # darkblue = (64/255, 99/255, 216/255)
-    # lightblue = (102/255, 130/255, 223/255)
-
-    PyPlot.axis("off")
-    PyPlot.tight_layout()
-    PyPlot.gca()[:set_aspect]("equal")
-    PyPlot.xlim(-0.1,1.1)
-    PyPlot.ylim(-0.1,1.1)
-  end
-
   return bt
 end
