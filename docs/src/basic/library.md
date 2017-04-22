@@ -6,7 +6,6 @@ Below you find all the docstrings of all exported names of `DynamicalBilliards.j
 billiard_rectangle
 billiard_sinai
 billiard_polygon
-billiard_julia
 ```
 
 ## Particles
