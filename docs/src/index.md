@@ -59,7 +59,7 @@ The [Library](/basic/library) section has the docstrings of all exported names i
 ## Julia Billiard Animation
 The animation of a particle inside a "Julia" billiard was generated with the code:
 ```julia
-using DynamicalBilliards
+using DynamicalBilliards, DynamicalBilliardsPlotting
 
 bt = billiard_julia(plotit = true)
 p = randominside(bt)
