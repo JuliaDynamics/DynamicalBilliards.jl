@@ -30,8 +30,10 @@ If you want to use the latest features, compatible with the latest documentation
 Documentation: [Stable](https://Datseris.github.io/DynamicalBilliards.jl/stable) or [Latest](https://Datseris.github.io/DynamicalBilliards.jl/latest).
 
 
-### PyPlot
-**WARNING:** this package has a dependency on `PyPlot` for its plotting features. If you are having trouble installing PyPlot you can always use the minimal Python installation through miniconda by running these lines in your Julia terminal:
+## Plotting
+Plotting in `DynamicalBilliards` is done through a sister package, [`DynamicalBilliardsPlotting`](https://github.com/Datseris/DynamicalBilliardsPlotting.jl). This enables the core package to not have any dependency on plotting packages.
+
+If you want to use the plotting features of `DynamicalBilliards`, simply run `Pkg.add("DynamicalBilliardsPlotting")`. Notice that you must be able to install `PyPlot` for plotting to work. If you are having trouble installing `PyPlot` you can always use the minimal Python installation through miniconda by running these lines in your Julia terminal:
 
 ```julia
 ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.build("PyCall");

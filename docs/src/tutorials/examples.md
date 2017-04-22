@@ -4,7 +4,7 @@ comments.
 ## Julia-logo Billiard
 The "Julia-logo" billiard, accessed by `billiard_julia()` simply wraps this code:
 ```julia
-using DynamicalBilliards, PyPlot
+using DynamicalBilliards, DynamicalBilliardsPlotting, PyPlot
 
 bt = Obstacle[]
 bt = billiard_rectangle()
@@ -79,7 +79,7 @@ directions. For example, the following code produces a billiard that is periodic
 in only the x-direction:
 
 ```julia
-using DynamicalBilliards
+using DynamicalBilliards, DynamicalBilliardsPlotting
 o = 0.0; x = 2.0; y=1.0
 bt = Obstacle[]
 

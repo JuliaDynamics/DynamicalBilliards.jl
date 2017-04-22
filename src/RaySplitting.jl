@@ -307,12 +307,12 @@ end
 
 """
     isphysical(raysplitter::Dict{Int, Any}; only_mandatory = false)
-Return `true` if the given ray-splitting dictionary represends the physical world.
+Return `true` if the given ray-splitting dictionary has physically plausible properties.
 
-Specifically, check if (φ is the incidence angle):
+Specifically, check if (φ is the incidence angle, θ the refraction angle):
 * Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
-* Transmission probability is even function: T(φ) ≈ T(-φ)
-* Refraction angle is odd function: θ(φ) ≈ -θ(-φ)
+* Transmission probability is even function: T(φ) ≈ T(-φ) at ω = 0
+* Refraction angle is odd function: θ(φ) ≈ -θ(-φ) at ω = 0
 * Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, pflag), !pflag) ≈ ω
 The first property is mandatory and must hold for correct propagation.

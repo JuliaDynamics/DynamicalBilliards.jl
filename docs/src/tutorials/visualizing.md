@@ -1,12 +1,13 @@
-All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
+All plotting functionality of `DynamicalBilliards` is contained in the package `DynamicalBilliardsPlotting`, therefore the latter must be loaded via `using` before attempting to use the plotting functions.
+The functionality lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
 These functions are nicely grouped in this [library section](/basic/library/#visualization).
 
 ## Plotting the Billiard Table
 
-The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
+The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the given obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
 For example:
 ```julia
-using DynamicalBilliards, PyPlot
+using DynamicalBilliards, DynamicalBilliardsPlotting, PyPlot
 bt = billiard_sinai(0.3)
 # Plot disk:
 plot_obstacle(bt[5])
@@ -101,7 +102,7 @@ periodic-billiard taking care of all the details internally. Give the keyword
 
 For example, the following code
 ```julia
-using DynamicalBilliards
+using DynamicalBilliards, DynamicalBilliardsPlotting
 r = 0.25
 bt = billiard_rectangle(2, 1; setting = "periodic")
 d = Disk([0.5, 0.5], r)
