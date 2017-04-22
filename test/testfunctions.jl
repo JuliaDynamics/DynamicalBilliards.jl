@@ -1,4 +1,4 @@
-function check_straight_sinai(; printinfo = true)
+function check_straight_sinai(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--billiard_sinai works, and randominside() works")
@@ -39,7 +39,7 @@ function check_straight_sinai(; printinfo = true)
   return true
 end
 
-function check_magnetic_sinai(; printinfo = true)
+function check_magnetic_sinai(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--ωpropagate!() and ωevolve!() work")
@@ -108,7 +108,7 @@ function check_magnetic_sinai(; printinfo = true)
 end
 
 
-function check_straight_sinai_periodic(; printinfo = true)
+function check_straight_sinai_periodic(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--randominside() works for periodic billiards")
@@ -160,7 +160,7 @@ function check_straight_sinai_periodic(; printinfo = true)
   return true
 end
 
-function check_magnetic_sinai_periodic(; printinfo = true)
+function check_magnetic_sinai_periodic(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--ωcollisiontime for PeriodicWall works")
@@ -210,7 +210,7 @@ function check_magnetic_sinai_periodic(; printinfo = true)
   return true
 end
 
-function check_magnetic_pinned(; printinfo = true)
+function check_magnetic_pinned(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--there are not any pinned particles for very small ω")
@@ -234,7 +234,7 @@ function check_magnetic_pinned(; printinfo = true)
   return true
 end
 
-function check_previous_obstacle(; printinfo = true)
+function check_previous_obstacle(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--The previous collision obstacle is never the same as the")
@@ -281,7 +281,7 @@ end#test
 
 
 
-function check_raysplitting_omega(; printinfo = true)
+function check_raysplitting_omega(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--ray-splitting with Antidot works")
@@ -318,7 +318,7 @@ function check_raysplitting_omega(; printinfo = true)
   return true
 end
 
-function check_raysplitting_periodic(; printinfo = true)
+function check_raysplitting_periodic(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--ray-splitting with Antidot works in periodic billiard")
@@ -362,7 +362,7 @@ function check_raysplitting_periodic(; printinfo = true)
   return true
 end
 
-function check_splitterwall(; printinfo = true)
+function check_splitterwall(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--ray-splitting with SplitterWall and Antidot works")
@@ -405,7 +405,7 @@ function check_splitterwall(; printinfo = true)
   return true
 end
 
-function check_random_sinai(; printinfo = true)
+function check_random_sinai(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--billiard_sinai works with setting = `random` ")
