@@ -448,18 +448,15 @@ end
 
 
 
-function check_raysplitting_periodic(partnum; printinfo = true)
+function check_klein_magnetic(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
-    println("--ray-splitting with Antidot works in periodic billiard")
-    println("  for very complicated, magnetic-field dependent Tunneling")
+    println("--ray-splitting with Antidot works in a periodic billiard")
+    println("  for very complicated, magnetic field dependent Tunneling")
     println("--emulates klein tunneling in magnetic fields")
   end
-  partnum = 1000
   #Create raysplitting
-  α = 300.0
-  w = 100.0
-  n = 1.0
+  α = 300.0;  w = 100.0;  n = 1.0
   B0 = 233.3*sqrt(n)/α #this value is in tesla
   Bstar = 116.6*sqrt(n)/w #this value is in tesla
   Bstar /= B0
@@ -483,23 +480,23 @@ function check_raysplitting_periodic(partnum; printinfo = true)
 
   rayspl = Dict{Int, Vector{Function}}(5 => [Transmission, sangle, newo])
 
-  bt = billiard_rectangle(setting="periodic")
-  a = Antidot([0.5, 0.5], 0.25, true)
-  push!(bt, a)
+  bt = billiard_rectangle()
+  ad = Antidot([0.5, 0.5], 0.25, true)
+  push!(bt, ad)
   if !isphysical(rayspl)
     error("Given ray-splitter is not physical!")
   end
 
-  for ω in [0.0, 0.16, -1.0]
+  for ω in [0.0, 0.16, -0.5, -1.0]
     printinfo && println("...for ω = ", ω)
 
 
     for i in 1:partnum
       p = randominside(bt, ω)
       if ω == 0
-        ct, ps, vs = evolve!(p, bt, 1000.0, rayspl)
+        ct, ps, vs = evolve!(p, bt, 2000.0, rayspl)
       else
-        ct, ps, vs, os = evolve!(p, bt, 1000.0, rayspl)
+        ct, ps, vs, os = evolve!(p, bt, 2000.0, rayspl)
       end
       if ct[end] == Inf
         error("Infinite collision time in periodic sinai with Antidot (pinned)!")
