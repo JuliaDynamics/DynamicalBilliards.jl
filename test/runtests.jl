@@ -38,7 +38,7 @@ print(Dates.format(now(), "HH:MM:s"), "\n")
 @test check_raysplitting_periodic(partnum, printinfo = printinfo)
 @test check_splitterwall(partnum, printinfo = printinfo)
 @test check_random_sinai(partnum, printinfo = printinfo)
-@check_klein_magnetic(partnum, printinfo = printinfo)
+@test check_klein_magnetic(partnum, printinfo = printinfo)
 
 print("DynamicalBilliards tests ended (successfully) at: ")
 println(Dates.format(now(), "HH:MM:s"))
