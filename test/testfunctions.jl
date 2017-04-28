@@ -169,7 +169,7 @@ function check_magnetic_sinai_periodic(partnum; printinfo = true)
     println("--ωevolve!() works and `pos` is always out of Disk")
     println("--minimum collision time is always >= 1-2r")
   end
-  # Be sure to choose ω where pinned cannot exist
+  # Be sure to choose ω pflag pinned cannot exist
   for (r, x, y) in [(0.4, 1.5, 1.0), (0.5, 1.4, 2.2)]
     for ω in [0.1, 0.5]
       printinfo && println("...for (ω,r,x,y) = ", (ω, r, x, y))
@@ -215,7 +215,7 @@ function check_magnetic_pinned(partnum; printinfo = true)
     println("Currently testing if...")# Test:
     println("--there are not any pinned particles for very small ω")
   end
-  # Be sure to choose ω where pinned cannot exist
+  # Be sure to choose ω pflag pinned cannot exist
   for (r, x, y) in [(0.4, 1.0, 1.0)]
     for ω in [0.02, 0.04]
       printinfo && println("...for (ω,r,x,y) = ", (ω, r, x, y))
@@ -288,9 +288,9 @@ function check_raysplitting_omega(partnum; printinfo = true)
     println("  for magnetic and straight propagation")
   end
 
-  sa = (θ, where, ω) -> where ? 2.0*θ : 0.5*θ
-  T = (θ, where, ω) -> begin
-    if where
+  sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
+  T = (θ, pflag, ω) -> begin
+    if pflag
       abs(θ) < π/4 ? 0.5*exp(-(θ)^2/2(π/8)^2) : 0.0
     else
       0.5*exp(-(θ)^2/2(π/4)^2)
@@ -325,9 +325,9 @@ function check_raysplitting_periodic(partnum; printinfo = true)
     println("  for magnetic and straight propagation")
   end
 
-  sa = (θ, where, ω) -> where ? 2.0*θ : 0.5*θ
-  T = (θ, where, ω) -> begin
-    if where
+  sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
+  T = (θ, pflag, ω) -> begin
+    if pflag
       abs(θ) < π/4 ? 0.5*exp(-(θ)^2/2(π/8)^2) : 0.0
     else
       0.5*exp(-(θ)^2/2(π/4)^2)
@@ -368,9 +368,9 @@ function check_splitterwall(partnum; printinfo = true)
     println("--ray-splitting with SplitterWall and Antidot works")
   end
 
-  sa = (θ, where, ω) -> where ? 2.0*θ : 0.5*θ
-  Tp = (p) -> (θ, where, ω) -> begin
-    if where
+  sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
+  Tp = (p) -> (θ, pflag, ω) -> begin
+    if pflag
       abs(θ) < π/4 ? p*exp(-(θ)^2/2(π/8)^2) : 0.0
     else
       (1-p)*exp(-(θ)^2/2(π/4)^2)
@@ -443,5 +443,68 @@ function check_random_sinai(partnum; printinfo = true)
       dminy < -error_level && error("ymin = $dminy")
     end#particle loop
   end#x,y loop
+  return true
+end
+
+
+
+function check_raysplitting_periodic(partnum; printinfo = true)
+  if printinfo
+    println("Currently testing if...")# Test:
+    println("--ray-splitting with Antidot works in periodic billiard")
+    println("  for very complicated, magnetic-field dependent Tunneling")
+    println("--emulates klein tunneling in magnetic fields")
+  end
+  partnum = 1000
+  #Create raysplitting
+  α = 300.0
+  w = 100.0
+  n = 1.0
+  B0 = 233.3*sqrt(n)/α #this value is in tesla
+  Bstar = 116.6*sqrt(n)/w #this value is in tesla
+  Bstar /= B0
+  kf = sqrt(π*n)
+  a = -π*kf*w
+
+  function Transmission(φ, pflag, ω)
+    B = ω/2
+    β = - B/Bstar
+    γ = 1/sqrt(1 - β^2);
+
+    if pflag == true
+      return exp( a*γ^3*(sin(φ) - B/Bstar)^2 )
+    else
+      return exp( a*γ^3*(sin(φ) + B/Bstar)^2 )
+    end
+  end
+
+  sangle(φ, pflag, ω) = -φ
+  newo(x, bool) = -x
+
+  rayspl = Dict{Int, Vector{Function}}(5 => [Transmission, sangle, newo])
+
+  bt = billiard_rectangle(setting="periodic")
+  a = Antidot([0.5, 0.5], 0.25, true)
+  push!(bt, a)
+  if !isphysical(rayspl)
+    error("Given ray-splitter is not physical!")
+  end
+
+  for ω in [0.0, 0.16, -1.0]
+    printinfo && println("...for ω = ", ω)
+
+
+    for i in 1:partnum
+      p = randominside(bt, ω)
+      if ω == 0
+        ct, ps, vs = evolve!(p, bt, 1000.0, rayspl)
+      else
+        ct, ps, vs, os = evolve!(p, bt, 1000.0, rayspl)
+      end
+      if ct[end] == Inf
+        error("Infinite collision time in periodic sinai with Antidot (pinned)!")
+      end
+    end
+  end
   return true
 end

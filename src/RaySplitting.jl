@@ -40,7 +40,7 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)
   φ = acos(dot(p.vel, -n))
-  # if this is wrong then my normal vec is wrong:
+  # if this is wrong then my normal vec is wrong (probably double collision):
   # if φ >= π/2
   #   println("φ=$φ")
   #   println("Collision happens with $(a.name)")
