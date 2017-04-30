@@ -455,6 +455,10 @@ function check_klein_magnetic(partnum; printinfo = true)
     println("  for very complicated, magnetic field dependent Tunneling")
     println("--emulates klein tunneling in magnetic fields")
   end
+  if partnum < 1000
+    partnum = 1000
+  end
+
   #Create raysplitting
   α = 300.0;  w = 100.0;  n = 1.0
   B0 = 233.3*sqrt(n)/α #this value is in tesla
@@ -494,9 +498,9 @@ function check_klein_magnetic(partnum; printinfo = true)
     for i in 1:partnum
       p = randominside(bt, ω)
       if ω == 0
-        ct, ps, vs = evolve!(p, bt, 2000.0, rayspl)
+        ct, ps, vs = evolve!(p, bt, 4000.0, rayspl)
       else
-        ct, ps, vs, os = evolve!(p, bt, 2000.0, rayspl)
+        ct, ps, vs, os = evolve!(p, bt, 4000.0, rayspl)
       end
       if ct[end] == Inf
         error("Infinite collision time in periodic sinai with Antidot (pinned)!")
