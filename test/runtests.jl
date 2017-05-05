@@ -1,7 +1,7 @@
 using DynamicalBilliards
 using Base.Test
 # Test options:
-printinfo = false
+printinfo = true
 longtests = true
 
 # Get tests options:
