@@ -2,7 +2,7 @@ using DynamicalBilliards
 using Base.Test
 # Test options:
 printinfo = false
-longtests = false
+longtests = true
 
 # Get tests options:
 if haskey(ENV, "DYNAMICALBILLIARDS_PRINTTEST")

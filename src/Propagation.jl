@@ -428,7 +428,8 @@ realangle(p::MagneticParticle, o::Obstacle, inter::Vector{SVector}, pc, pr)
 ```
 Given the intersections `inter` of the trajectory of a magnetic particle `p` with
 some obstacle `o`, find which of the two is the "real" one, i.e. occurs first.
-Returns the angle of first collision.
+Returns the angle of first collision, which is equat to the time to first
+collision divided by ω.
 
 The function also takes care of problems that may arise when particles are very
 close to the obstacle's boundaries, due to Floating-point precision.
@@ -444,17 +445,25 @@ function realangle(p::MagneticParticle, o::Obstacle,
   PC = pc - P0
   θ = Inf
   for i in intersections
-    d2 = dot(i-P0,i-P0)
+    d2 = dot(i-P0,i-P0) #distance of particle from intersection point
     # Check dot product for close points:
-    if d2 <= 1e-10
+    if d2 <= 1e-10 #THIS CONDITION MUST DEPEND ON THE Cyclotron Radius!!!
+      # AND ALSO ON THE TYPE OF OBSTACLE
+      # AND ALSO IF I HAVE TWO INTERSECTIONS ISTEAD OF ONLY ONE!!!
       dotp = dot(p.vel, normalvec(o,  p.pos))
       # Case where velocity points away from obstacle:
       dotp >= 0 && continue
     end
 
     d2r = (d2/(2pr^2))
+    if d2r > 2  #notice that these lines have to be removed!
+      println(" --- ERROR ! ! ! --- ")
+      println("Inside function realangle, we got d2r = $d2r (>2)")
+      println("which means that acos gets argument >-1")
+      error("")
+    end
     # Correct angle value for small arguments:
-    θprime = d2r < 1e-16 ? acos1mx(d2r) : acos(1-d2r)
+    θprime = d2r < 1e-8 ? acos1mx(d2r) : acos(1-d2r)
 
     # Get "side" of i:
     PI = i - P0

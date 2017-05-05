@@ -503,7 +503,7 @@ function randominside(bt::Vector{Obstacle})
   p = Particle([xp, yp, φ0])
 
   dist = distance(p, bt)
-  while dist <= 1e-12
+  while dist <= 1e-8
 
     xp = rand()*(xmax-xmin) + xmin
     yp = rand()*(ymax-ymin) + ymin
@@ -528,7 +528,7 @@ function randominside(ω::Real, bt::Vector{Obstacle})
   p = MagneticParticle([xp, yp, φ0], ω)
 
   dist = distance(p, bt)
-  while dist <= 1e-12
+  while dist <= 1e-8
 
     xp = rand()*(xmax-xmin) + xmin
     yp = rand()*(ymax-ymin) + ymin

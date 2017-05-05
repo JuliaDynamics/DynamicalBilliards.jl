@@ -238,44 +238,84 @@ function check_previous_obstacle(partnum; printinfo = true)
   if printinfo
     println("Currently testing if...")# Test:
     println("--The previous collision obstacle is never the same as the")
-    println("  current in straight closed sinai billiard.")
+    println("  current in a closed sinai billiard.")
+    println("--For straight propagation")
+    println("--For magnetic propagation with very small fields")
+    println("  (same obstacle not possible for very small distances)")
   end
-  ttotal = 10000.0
+  ttotal = 1000.0
   bt = billiard_sinai(0.3)
 
-  for j in 1:partnum
-    p = randominside(bt)
-    colobst = bt[1]
-    prev_obst = nothing
-    tcount = 0.0
-    t_to_write = 0.0
+  for ω in [0.0, 0.002, -0.004]
+    printinfo && println("...for ω=$ω")
 
-    while tcount < ttotal
-      tmin = Inf
-
-      for obst in bt
-        tcol = collisiontime(p, obst)
-        # Set minimum time:
-        if tcol < tmin
-          tmin = tcol
-          colobst = obst
-        end
-      end#obstacle loop
-
-      if colobst == prev_obst
-        println("Current obstacle: $(colobst.name)")
-            println("tmin = $tmin")
-        error("Previus obstacle same as current obstacle")
-      end
-
-      propagate!(p, tmin)
-      dt = resolvecollision!(p, colobst)
-      t_to_write += tmin + dt
-      tcount += t_to_write
+    for j in 1:partnum
+      p = randominside(bt, ω)
+      d = distance(p, bt) #initial distance
+      prev_pos = p.pos
+      prev_vel = p.vel
+      new_pos = p.pos
+      new_vel = p.vel
+      colobst = nothing
+      prev_obst = nothing
+      tcount = 0.0
       t_to_write = 0.0
-      prev_obst = colobst
-    end#time loop
-  end#particle loop
+      colnumber = 0
+
+      while tcount < ttotal
+        tmin = Inf
+
+        for obst in bt
+          tcol = collisiontime(p, obst)
+          # Set minimum time:
+          if tcol < tmin
+            tmin = tcol
+            colobst = obst
+          end
+        end#obstacle loop
+
+        if colobst == prev_obst
+          if ω==0
+            println("Collision with obstacle: $(colobst.name)")
+            println("collision time = $tmin")
+            println("init. distance = $d")
+            println("current pos = $(new_pos)")
+            println("current vel = $(new_vel)")
+            println("previus pos = $(prev_pos)")
+            println("previus vel = $(prev_vel)")
+            println("Collision number: $colnumber")
+            error("Previuus obstacle was same as current for straight prop.")
+          else
+            if tmin<1e-6
+              println("Collision with obstacle: $(colobst.name)")
+              println("collision time = $tmin")
+              println("init. distance = $d")
+              println("current pos = $(new_pos)")
+              println("current vel = $(new_vel)")
+              println("previus pos = $(prev_pos)")
+              println("previus vel = $(prev_vel)")
+              println("Collision number: $colnumber")
+              error("Previuus obstacle was same as current for straight prop.")
+            end
+          end
+        end
+
+        propagate!(p, tmin)
+        dt = resolvecollision!(p, colobst)
+        t_to_write += tmin + dt
+        tcount += t_to_write
+        t_to_write = 0.0
+        prev_obst = colobst
+        prev_pos = new_pos
+        prev_vel = new_vel
+        new_pos=p.pos
+        new_vel=p.vel
+        colnumber += 1
+
+
+      end#time loop
+    end#particle loop
+  end#omega loop
   return true
 end#test
 
