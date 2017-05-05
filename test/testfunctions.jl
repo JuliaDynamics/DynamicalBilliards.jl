@@ -1,6 +1,6 @@
 function check_straight_sinai(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--billiard_sinai works, and randominside() works")
     println("--collisiontime for FiniteWall and Disk works")
     println("--resolvecollision for Particle with")
@@ -41,7 +41,7 @@ end
 
 function check_magnetic_sinai(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--ωpropagate!() and ωevolve!() work")
     println("  for particle in Sinai billiard")
     println("--back-propagation for magnetic billiards works")
@@ -110,7 +110,7 @@ end
 
 function check_straight_sinai_periodic(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--randominside() works for periodic billiards")
     println("--collisiontime for PeriodicWall works")
     println("--resolvecollision for Particle with")
@@ -162,7 +162,7 @@ end
 
 function check_magnetic_sinai_periodic(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--ωcollisiontime for PeriodicWall works")
     println("--resolvecollision for Particle with")
     println("  PeriodicWall works and forward-propagates")
@@ -212,7 +212,7 @@ end
 
 function check_magnetic_pinned(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--there are not any pinned particles for very small ω")
   end
   # Be sure to choose ω pflag pinned cannot exist
@@ -220,7 +220,7 @@ function check_magnetic_pinned(partnum; printinfo = true)
     for ω in [0.02, 0.04]
       printinfo && println("...for (ω,r,x,y) = ", (ω, r, x, y))
       bt = billiard_sinai(r, x, y; setting="periodic")
-      tt=10000.0
+      tt=1000.0
 
       for i in 1:2partnum
         p = randominside(ω, bt)
@@ -236,7 +236,7 @@ end
 
 function check_previous_obstacle(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--The previous collision obstacle is never the same as the")
     println("  current in a closed sinai billiard.")
     println("--For straight propagation")
@@ -323,7 +323,7 @@ end#test
 
 function check_raysplitting_omega(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--ray-splitting with Antidot works")
     println("  for magnetic and straight propagation")
   end
@@ -360,7 +360,7 @@ end
 
 function check_raysplitting_periodic(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--ray-splitting with Antidot works in periodic billiard")
     println("  for magnetic and straight propagation")
   end
@@ -404,7 +404,7 @@ end
 
 function check_splitterwall(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--ray-splitting with SplitterWall and Antidot works")
   end
 
@@ -447,7 +447,7 @@ end
 
 function check_random_sinai(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--billiard_sinai works with setting = `random` ")
     println("--collisiontime for RandomWall and RandomDisk works")
     println("--resolvecollision for Particle with")
@@ -490,7 +490,7 @@ end
 
 function check_klein_magnetic(partnum; printinfo = true)
   if printinfo
-    println("Currently testing if...")# Test:
+    println("\nCurrently testing if...")# Test:
     println("--ray-splitting with Antidot works in a periodic billiard")
     println("  for very complicated, magnetic field dependent Tunneling")
     println("--emulates klein tunneling in magnetic fields")

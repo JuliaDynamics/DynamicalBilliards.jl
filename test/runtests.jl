@@ -26,12 +26,13 @@ end
 include("testfunctions.jl")
 print("DynamicalBilliards tests started at: ")
 print(Dates.format(now(), "HH:MM:s"), "\n")
+t = time()
 
 # Perform tests:
-@test check_straight_sinai(partnum, printinfo = printinfo)
-@test check_magnetic_sinai(partnum, printinfo = printinfo)
-@test check_straight_sinai_periodic(partnum, printinfo = printinfo)
-@test check_magnetic_sinai_periodic(partnum, printinfo = printinfo)
+#@test check_straight_sinai(partnum, printinfo = printinfo)
+#@test check_magnetic_sinai(partnum, printinfo = printinfo)
+#@test check_straight_sinai_periodic(partnum, printinfo = printinfo)
+#@test check_magnetic_sinai_periodic(partnum, printinfo = printinfo)
 @test check_magnetic_pinned(partnum, printinfo = printinfo)
 @test check_previous_obstacle(partnum, printinfo = printinfo)
 @test check_raysplitting_omega(partnum, printinfo = printinfo)
@@ -42,3 +43,6 @@ print(Dates.format(now(), "HH:MM:s"), "\n")
 
 print("DynamicalBilliards tests ended (successfully) at: ")
 println(Dates.format(now(), "HH:MM:s"))
+t = time() - t
+println("Total time required was:")
+println(round(t, 3), " seconds, or ", round(t/60, 3), " minutes")
