@@ -537,11 +537,7 @@ function check_klein_magnetic(partnum; printinfo = true)
 
     for i in 1:partnum
       p = randominside(bt, ω)
-      if ω == 0
-        ct, ps, vs = evolve!(p, bt, 4000.0, rayspl)
-      else
-        ct, ps, vs, os = evolve!(p, bt, 4000.0, rayspl)
-      end
+      ct, ps, vs = evolve!(p, bt, 4000.0, rayspl)
       if ct[end] == Inf
         error("Infinite collision time in periodic sinai with Antidot (pinned)!")
       end

@@ -379,9 +379,9 @@ the direction a particle is expected to come from.
 """
 normalvec(wall::Wall, pos) = wall.normal
 normalvec(w::PeriodicWall, pos) = normalize(w.normal)
-normalvec(w::SplitterWall, pos) = (2*Int(w.pflag)- 1)*w.normal
+normalvec(w::SplitterWall, pos) = w.pflag ? w.normal : -w.normal
 normalvec(disk::Circular, pos) = normalize(pos - disk.c)
-normalvec(a::Antidot, pos) = (2*Int(a.pflag)- 1)*normalize(pos - a.c)
+normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 
 ####################################################
 ## Distances

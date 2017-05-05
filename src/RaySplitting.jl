@@ -95,6 +95,16 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
   ω = 0.0
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)
+  inverse_dot = dot(p.vel, -n)
+  if abs(inverse_dot) > 1
+    println("in resolvecollision, the inverse_dot is")
+    println(inverse_dot)
+    println("The current distance of particle with obstacle $(a.name) is:")
+    println(distance(p, a))
+    println("And the pflag of the obstacle is")
+    println(a.pflag)
+    error("Since abs(inverse_dot) > 1, acos() gets DomainError!")
+  end
   φ = acos(dot(p.vel, -n))
   # if this is wrong then my normal vec is wrong:
   if φ >= π/2
