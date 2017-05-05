@@ -169,9 +169,9 @@ function check_magnetic_sinai_periodic(partnum; printinfo = true)
     println("--ωevolve!() works and `pos` is always out of Disk")
     println("--minimum collision time is always >= 1-2r")
   end
-  # Be sure to choose ω pflag pinned cannot exist
-  for (r, x, y) in [(0.4, 1.5, 1.0), (0.5, 1.4, 2.2)]
-    for ω in [0.1, 0.5]
+  # Pinned particles are excluded, so don't care about ω
+  for (r, x, y) in [(0.4, 1.5, 1.0), (0.25, 1.0, 1.0)]
+    for ω in [0.1, 2.18]
       printinfo && println("...for (ω,r,x,y) = ", (ω, r, x, y))
       bt = billiard_sinai(r, x, y; setting="periodic")
       xmin, ymin, xmax, ymax = cellsize(bt)
