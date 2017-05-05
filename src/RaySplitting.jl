@@ -39,15 +39,27 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   ω = p.omega
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)
-  φ = acos(dot(p.vel, -n))
-  # if this is wrong then my normal vec is wrong (probably double collision):
-  # if φ >= π/2
-  #   println("φ=$φ")
-  #   println("Collision happens with $(a.name)")
-  #   println("Distance is: $(distance(p, a))")
-  #   #error("φ shoud be between 0 and π/2")
-  #   println("-----------")
-  # end
+  inverse_dot = dot(p.vel, -n)
+  if abs(inverse_dot) > 1
+    println("in resolvecollision, the inverse_dot is")
+    println(inverse_dot)
+    println("The current distance of particle with obstacle $(a.name) is:")
+    println(distance(p, a))
+    println("And the pflag of the obstacle is")
+    println(a.pflag)
+    error("Since abs(inverse_dot) > 1, acos() gets DomainError!")
+  end
+  φ = acos(inverse_dot)
+  # if this is wrong then my normal vec is wrong:
+  if φ > π/2
+    println("φ=$φ")
+    if a.pflag == true
+      println("Particle should be coming from outside of disk")
+    else
+      println("Particle should be coming from inside of disk")
+    end
+    error("φ shoud be between 0 and π/2")
+  end
   # ray-splitting (step 2)
   if T(φ, a.pflag, ω) > rand()
     # Step 3
@@ -105,9 +117,9 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
     println(a.pflag)
     error("Since abs(inverse_dot) > 1, acos() gets DomainError!")
   end
-  φ = acos(dot(p.vel, -n))
+  φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
-  if φ >= π/2
+  if φ > π/2
     println("φ=$φ")
     if a.pflag == true
       println("Particle should be coming from outside of disk")
