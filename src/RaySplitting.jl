@@ -52,36 +52,45 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
   if φ > π/2
-    println("φ=$φ")
+    println("in resolvecollision, the inverse_dot is")
+    println(inverse_dot)
+    println("The current distance of particle with obstacle $(a.name) is:")
+    println(distance(p, a))
+    println("And the pflag of the obstacle is")
+    println(a.pflag)
     if a.pflag == true
-      println("Particle should be coming from outside of disk")
+      println("(so Particle should be coming from outside of disk)")
     else
-      println("Particle should be coming from inside of disk")
+      println("(so Particle should be coming from inside of disk)")
     end
+    println("Current particle velocity:")
+    println(p.vel)
+    println("This inverse_dot gives insidence angle")
+    println("φ=$φ")
     error("φ shoud be between 0 and π/2")
   end
   # ray-splitting (step 2)
+  if cross2D(p.vel, n) < 0
+    φ *= -1
+  end
+  # Step 3
   if T(φ, a.pflag, ω) > rand()
-    # Step 3
-    if cross2D(p.vel, n) < 0
-      φ *= -1
-    end
-    # Step 4
+    # Step 4: find transmission angle in relative angles
     theta = θ(φ, a.pflag, ω)
-    # Step 5
+    # Step 5: reverse the Obstacle propagation flag
     a.pflag = !a.pflag
-    # Step 6
+    # Step 6: find transmission angle in real-space angles
     n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
     Θ = theta + atan2(n[2], n[1])
-    # Step 7
-    dist = distance(p, a)  #this is also reversed! It's the new distance!
-    # Step 8
+    # Step 7: Check the "new" distance between Particle and Obstacle
+    dist = distance(p, a)  #this is also reversed!
+    # Step 8: Relocate accordingly
     if dist < 0.0
       dt = relocate!(p, a, dist)
     end
-    # Step 9
+    # Step 9: Perform refraction
     p.vel = [cos(Θ), sin(Θ)]
-    # Step 10
+    # Step 10: set new magnetic field
     p.omega = new_ω(ω, !a.pflag)  # notice the exclamation mark !
   # No ray-splitting:
   else
@@ -94,8 +103,8 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
     #perform specular
     specular!(p, a)
   end
-  if abs(dt) > 1e-4
-    error("dt = $dt in resolve ray-splitting Magnetic.")
+  if abs(dt) > 1e-8
+    error("dt = $dt (too big) in resolve ray-splitting Magnetic.")
   end
   return dt
 end
@@ -120,34 +129,43 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
   φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
   if φ > π/2
-    println("φ=$φ")
+    println("in resolvecollision, the inverse_dot is")
+    println(inverse_dot)
+    println("The current distance of particle with obstacle $(a.name) is:")
+    println(distance(p, a))
+    println("And the pflag of the obstacle is")
+    println(a.pflag)
     if a.pflag == true
-      println("Particle should be coming from outside of disk")
+      println("(so Particle should be coming from outside of disk)")
     else
-      println("Particle should be coming from inside of disk")
+      println("(so Particle should be coming from inside of disk)")
     end
+    println("Current particle velocity:")
+    println(p.vel)
+    println("This inverse_dot gives insidence angle")
+    println("φ=$φ")
     error("φ shoud be between 0 and π/2")
   end
   # ray-splitting (step 2)
+  if cross2D(p.vel, n) < 0
+    φ *= -1
+  end
+  # Step 3: check transmission probability
   if T(φ, a.pflag, ω) > rand()
-    # Step 3
-    if cross2D(p.vel, n) < 0
-      φ *= -1
-    end
-    # Step 4
+    # Step 4: find transmission angle in relative angles
     theta = θ(φ, a.pflag, ω)
-    # Step 5
+    # Step 5: reverse the Obstacle propagation flag
     a.pflag = !a.pflag
-    # Step 6
+    # Step 6: find transmission angle in real-space angles
     n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
     Θ = theta + atan2(n[2], n[1])
-    # Step 7
-    dist = distance(p, a)  #this is also reversed! It's the new distance!
-    # Step 8
+    # Step 7: Check the "new" distance between Particle and Obstacle
+    dist = distance(p, a)  #this is also reversed!
+    # Step 8: Relocate accordingly
     if dist < 0.0
       dt = relocate!(p, a, dist)
     end
-    # Step 9
+    # Step 9: Perform refraction
     p.vel = [cos(Θ), sin(Θ)]
   # No ray-splitting:
   else
@@ -158,8 +176,8 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
     #perform specular
     specular!(p, a)
   end
-  if abs(dt) > 1e-4
-    error("dt = $dt in resolve ray-splitting Straight.")
+  if abs(dt) > 1e-8
+    error("dt = $dt (too big) in resolve ray-splitting Straight.")
   end
   return dt
 end
