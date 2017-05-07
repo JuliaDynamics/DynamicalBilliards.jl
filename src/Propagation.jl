@@ -43,11 +43,12 @@ end
 relocate!(p::AbstractParticle, o::Obstacle, distance)
 ```
 Relocate the particle `p` with respect to the obstacle `o` by a total amount of
-10 times the linearized collision time (`lct`, assuming linear obstacle and linear motion).
+10 times the linearized collision time `lct`
+(assuming linear obstacle and linear motion).
 
 Internally takes care of problems of finite accuracy of `Float64`.
 """
-function relocate!(p::AbstractParticle, o::Obstacle, dist)
+function relocate!(p::AbstractParticle, o::Obstacle, dist::Real)
   dt = 10lct(p, o, dist) #linearized collision time
   # Check the orders of magnitude:
   vxt=p.vel[1]*dt; vyt= p.vel[2]*dt
@@ -456,10 +457,11 @@ function realangle(p::MagneticParticle, o::Obstacle,
     end
 
     d2r = (d2/(2pr^2))
-    if d2r > 2  #notice that these lines have to be removed!
+    if d2r > 2  || d2r < 0 #notice that these lines have to be removed!
       println(" --- ERROR ! ! ! --- ")
-      println("Inside function realangle, we got d2r = $d2r (>2)")
-      println("which means that acos gets argument >-1")
+      println("Inside function realangle, we got d2r = $d2r ")
+      println("If it is > 2, we got DomainError at acos()")
+      println("If it is < 0, we got insanity error (it is a ratio of 2 squares!)")
       error("")
     end
     # Correct angle value for small arguments:

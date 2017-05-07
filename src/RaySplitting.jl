@@ -39,16 +39,7 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   ω = p.omega
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)
-  inverse_dot = dot(p.vel, -n)
-  if abs(inverse_dot) > 1
-    println("in resolvecollision, the inverse_dot is")
-    println(inverse_dot)
-    println("The current distance of particle with obstacle $(a.name) is:")
-    println(distance(p, a))
-    println("And the pflag of the obstacle is")
-    println(a.pflag)
-    error("Since abs(inverse_dot) > 1, acos() gets DomainError!")
-  end
+  inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
   φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
   if φ > π/2
@@ -103,7 +94,7 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
     #perform specular
     specular!(p, a)
   end
-  if abs(dt) > 1e-8
+  if abs(dt) > 1e-6
     error("dt = $dt (too big) in resolve ray-splitting Magnetic.")
   end
   return dt
@@ -116,16 +107,7 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
   ω = 0.0
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)
-  inverse_dot = dot(p.vel, -n)
-  if abs(inverse_dot) > 1
-    println("in resolvecollision, the inverse_dot is")
-    println(inverse_dot)
-    println("The current distance of particle with obstacle $(a.name) is:")
-    println(distance(p, a))
-    println("And the pflag of the obstacle is")
-    println(a.pflag)
-    error("Since abs(inverse_dot) > 1, acos() gets DomainError!")
-  end
+  inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
   φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
   if φ > π/2
@@ -176,7 +158,7 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
     #perform specular
     specular!(p, a)
   end
-  if abs(dt) > 1e-8
+  if abs(dt) > 1e-6
     error("dt = $dt (too big) in resolve ray-splitting Straight.")
   end
   return dt
