@@ -47,7 +47,8 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
     println(inverse_dot)
     println("The current distance of particle with obstacle $(a.name) is:")
     println(distance(p, a))
-    println("And the pflag of the obstacle is")
+    println("notice that the pflag is not yet reversed")
+    println("The pflag of the obstacle is")
     println(a.pflag)
     if a.pflag == true
       println("(so Particle should be coming from outside of disk)")

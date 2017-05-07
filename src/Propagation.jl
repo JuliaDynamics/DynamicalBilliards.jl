@@ -122,7 +122,6 @@ the particle forwards or backwards in time using **linear** motion.
 This is the ray-splitting implementation. The three functions given are drawn from
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
-(See the section "Ray-Splitting" of the official documentation for more info.)
 """
 function resolvecollision!(p::AbstractParticle, o::Obstacle)
   dist = distance(p, o)
@@ -335,6 +334,11 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
 
     propagate!(p, tmin)
     dt = resolvecollision!(p, colobst)
+    if abs(dt) > 1e-9
+      println("dt = $dt")
+      error("Too big dt!")
+    end
+
     t_to_write += tmin + dt
 
     if typeof(colobst) <: PeriodicWall
@@ -448,7 +452,7 @@ function realangle(p::MagneticParticle, o::Obstacle,
   for i in intersections
     d2 = dot(i-P0,i-P0) #distance of particle from intersection point
     # Check dot product for close points:
-    if d2 <= 1e-10 #THIS CONDITION MUST DEPEND ON THE Cyclotron Radius!!!
+    if d2 <= 1e-6 #THIS CONDITION MUST DEPEND ON THE Cyclotron Radius!!!
       # AND ALSO ON THE TYPE OF OBSTACLE
       # AND ALSO IF I HAVE TWO INTERSECTIONS ISTEAD OF ONLY ONE!!!
       dotp = dot(p.vel, normalvec(o,  p.pos))
@@ -457,21 +461,15 @@ function realangle(p::MagneticParticle, o::Obstacle,
     end
 
     d2r = (d2/(2pr^2))
-    if d2r > 2  || d2r < 0 #notice that these lines have to be removed!
-      println(" --- ERROR ! ! ! --- ")
-      println("Inside function realangle, we got d2r = $d2r ")
-      println("If it is > 2, we got DomainError at acos()")
-      println("If it is < 0, we got insanity error (it is a ratio of 2 squares!)")
-      error("")
-    end
-    # Correct angle value for small arguments:
-    θprime = d2r < 1e-8 ? acos1mx(d2r) : acos(1-d2r)
+    d2r > 2 && (d2r = 2.0)
+    # Correct angle value for small arguments (between 0 and π/2):
+    θprime = d2r < 1e-8 ? acos1mx(d2r) : acos(1.0 - d2r)
 
     # Get "side" of i:
     PI = i - P0
     side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
     # Get angle until i (positive number between 0 and 2π)
-    side < 0 && (θprime = abs(2π-θprime))
+    side < 0 && (θprime = 2π-θprime)
     # Set minimum angle (first collision)
     if θprime < θ
       θ = θprime
@@ -574,6 +572,10 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
 
     propagate!(p, tmin)
     dt = resolvecollision!(p, colobst)
+    if abs(dt) > 1e-9
+      println("dt = $dt")
+      error("Way too big dt")
+    end
     t_to_write += tmin + dt
     # Write output only if the collision was not made with PeriodicWall
     if typeof(colobst) == PeriodicWall

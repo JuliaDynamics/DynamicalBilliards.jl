@@ -239,11 +239,10 @@ function check_previous_obstacle(partnum; printinfo = true)
     println("\nCurrently testing if...")# Test:
     println("--The previous collision obstacle is never the same as the")
     println("  current in a closed sinai billiard.")
-    println("--For straight propagation")
-    println("--For magnetic propagation with very small fields")
-    println("  (same obstacle not possible for very small distances)")
+    println("  for straight and magnetic propagation")
+    println("--The relocation `dt` is no bigger than 1e-9")
   end
-  ttotal = 1000.0
+  ttotal = 10000.0
   bt = billiard_sinai(0.3)
 
   for ω in [0.0, 0.002, -0.004]
@@ -302,6 +301,18 @@ function check_previous_obstacle(partnum; printinfo = true)
 
         propagate!(p, tmin)
         dt = resolvecollision!(p, colobst)
+        if abs(dt) > 1e-9
+          println("dt = $dt, TOO BIG!")
+          println("Collision with obstacle: $(colobst.name)")
+          println("collision time = $tmin")
+          println("init. distance = $d")
+          println("current pos = $(new_pos)")
+          println("current vel = $(new_vel)")
+          println("previus pos = $(prev_pos)")
+          println("previus vel = $(prev_vel)")
+          println("Collision number: $colnumber")
+          error("Too big dt!")
+        end
         t_to_write += tmin + dt
         tcount += t_to_write
         t_to_write = 0.0

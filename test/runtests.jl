@@ -29,9 +29,9 @@ print(Dates.format(now(), "HH:MM:s"), "\n")
 t = time()
 
 # Perform tests:
-#@test check_straight_sinai(partnum, printinfo = printinfo)
-#@test check_magnetic_sinai(partnum, printinfo = printinfo)
-#@test check_straight_sinai_periodic(partnum, printinfo = printinfo)
+@test check_straight_sinai(partnum, printinfo = printinfo)
+@test check_magnetic_sinai(partnum, printinfo = printinfo)
+@test check_straight_sinai_periodic(partnum, printinfo = printinfo)
 @test check_magnetic_sinai_periodic(partnum, printinfo = printinfo)
 @test check_magnetic_pinned(partnum, printinfo = printinfo)
 @test check_previous_obstacle(partnum, printinfo = printinfo)

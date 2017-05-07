@@ -423,7 +423,8 @@ end
 distance(p::AbstractParticle, d::Circular) = norm(p.pos - d.c) - d.r
 
 function distance(p::AbstractParticle, a::Antidot)
-  (2*Int(a.pflag)- 1)*(norm(p.pos - a.c) - a.r)
+  d = norm(p.pos - a.c) - a.r
+  a.pflag ? d : -d
 end
 
 
