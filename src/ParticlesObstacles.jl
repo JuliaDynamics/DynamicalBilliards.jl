@@ -10,7 +10,7 @@ normalvec, randominside, distance, cellsize, Wall, Circular
     AbstractParticle
 Particle supertype.
 """
-abstract type AbstractParticle end
+abstract AbstractParticle
 
 """
     Particle <: AbstractParticle
@@ -136,13 +136,13 @@ end
     Obstacle
 Obstacle supertype.
 """
-abstract type Obstacle end
+abstract Obstacle
 
 """
     Circular <: Obstacle
 Circular obstacle supertype.
 """
-abstract type Circular <: Obstacle end
+abstract Circular <: Obstacle
 
 """
     Disk <: Circular
@@ -216,7 +216,7 @@ show(io::IO, w::Circular) =
     Wall <: Obstacle
 Wall obstacle supertype.
 """
-abstract type Wall <: Obstacle end
+abstract Wall <: Obstacle
 
 """
     FiniteWall <: Wall
