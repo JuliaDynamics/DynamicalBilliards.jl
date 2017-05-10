@@ -26,20 +26,18 @@ The [stable documentation](https://datseris.github.io/DynamicalBilliards.jl/stab
     simply run the commands:
     `ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
 
-If you want to use the
-latest features of `DynamicalBilliards`, compatible with the [latest documentation](https://datseris.github.io/DynamicalBilliards.jl/latest/), use `Pkg.checkout("DynamicalBilliards")`.
+The master branch of `DynamicalBilliards` is used for development purposes. It is not advised to use `Pkg.checkout("DynamicalBilliards")`, unless you want to contribute to the development of the package.
 
 After the first installation, it is advised to run the short tests to be sure that
 everything works as expected. This will only take about 2 minutes:
 ```julia
 using DynamicalBilliards
-DynamicalBilliards.test_options(print_info = true)
+DynamicalBilliards.test_options(print_info = true, long_tests = false)
 Pkg.test("DynamicalBilliards")
 ```
-If you do not want to see what tests are done, do not use any keywords.
-If you use this package for scientific research, you should run the long tests at least once.
-To do this, pass the keyword argument `long_tests = true` to the `test_options` function.
-These tests take on average 10 minutes to complete.
+If you do not want to see what tests are done, use `print_info = false`.
+If you use this package for scientific research, you should run the long tests at least once. To do this, pass the keyword argument `long_tests = true` to the `test_options` function.
+These tests take on average 10-20 minutes to complete.
 
 ## Usage
 

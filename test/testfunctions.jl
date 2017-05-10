@@ -1,11 +1,11 @@
 function check_straight_sinai(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_straight_sinai")
+    println("--evolve!() works for Particle and has finite collision time")
     println("--billiard_sinai works, and randominside() works")
-    println("--collisiontime for FiniteWall and Disk works")
-    println("--resolvecollision for Particle with")
-    println("  FiniteWall and Disk works and backpropagates")
-    println("--evolve!() works and never there is infinite time")
+    println("--collisiontime for FiniteWall and Disk with `Particle` works")
+    println("--resolvecollision for Particle with FiniteWall and Disk works")
+    println("--back-propagation happens and particle is never outside of billiard")
   end
   for (r, x, y) in [(0.4, 1.0, 1.0), (0.3, 1.5, 1.0), (0.5, 1.4, 2.2)]
     printinfo && println("...for (r,x,y) = ", (r, x, y))
@@ -21,7 +21,7 @@ function check_straight_sinai(partnum; printinfo = true)
       error_level = 1e-15
 
       xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
-      dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+      dist = sqrt.(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
       mind = minimum(dist)
       if mind - d.r < -error_level
         error("min((x,y)-r) = $(mind - d.r)")
@@ -41,13 +41,12 @@ end
 
 function check_magnetic_sinai(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
-    println("--ωpropagate!() and ωevolve!() work")
-    println("  for particle in Sinai billiard")
-    println("--back-propagation for magnetic billiards works")
-    println("--particle is always inside the billiard")
-    println("--ωconstruct works and timeseries is always inside")
-    println("--the collision time is always finite")
+    println("\nCurrently testing: check_magnetic_sinai")
+    println("--evolve!() works for MagneticParticle and has finite collision time")
+    println("--billiard_sinai works, and randominside(bt, ω) works for given ω")
+    println("--collisiontime for FiniteWall and Disk with MagneticParticle works")
+    println("--resolvecollision for MagneticParticle with FiniteWall and Disk works")
+    println("--back-propagation happens and particle is never outside of billiard")
   end
   for ω in [-0.5, 1.2]
     for (r, x, y) in [(0.4, 1.0, 1.0), (0.3, 1.5, 1.0)]
@@ -69,7 +68,7 @@ function check_magnetic_sinai(partnum; printinfo = true)
 
         xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
         error_level = 1e-15
-        dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+        dist = sqrt.(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
         mind = minimum(dist)
         if mind - d.r < -error_level
           error("POS: min((x,y)-r) = $(mind - d.r)")
@@ -83,12 +82,13 @@ function check_magnetic_sinai(partnum; printinfo = true)
         dminy = minimum(yt)
         dminy < -error_level && error("POS: ymin = $dminy")
 
-        # TWO ERROR CHECKS. One with pos and level = 0.0
-        # one with xt and error level 15
+        # Additional error check for Construct.
+        # Here, have very big error_level because we check if
+        # something really wrong is happening
         xt, yt, vxt, vyt, ts = construct(t, poss, vels, ω)
         #this cannot be less than 1e15 due to resolvecoolision!() and construct()
-        error_level = 1e-15
-        dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+        error_level = 1e-9
+        dist = sqrt.(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
         mind = minimum(dist)
         if mind - d.r < -error_level
           error("min((x,y)-r) = $(mind - d.r)")
@@ -110,11 +110,10 @@ end
 
 function check_straight_sinai_periodic(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_straight_sinai_periodic")# Test:
     println("--randominside() works for periodic billiards")
     println("--collisiontime for PeriodicWall works")
-    println("--resolvecollision for Particle with")
-    println("  PeriodicWall works and forward-propagates")
+    println("--resolvecollision for Particle with PeriodicWall works")
     println("--evolve!() works and `pos` is always out of Disk")
     println("--minimum collision time is always >= 1-2r")
   end
@@ -144,7 +143,7 @@ function check_straight_sinai_periodic(partnum; printinfo = true)
       xt = [mod(pos[1], xmax) for pos in poss]
       yt = [mod(pos[2], ymax) for pos in poss]
 
-      dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+      dist = sqrt.(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
       mind = minimum(dist)
       if mind - d.r < -error_level
         error("min((x,y)-r) = $(mind - d.r)")
@@ -162,11 +161,11 @@ end
 
 function check_magnetic_sinai_periodic(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
-    println("--ωcollisiontime for PeriodicWall works")
-    println("--resolvecollision for Particle with")
-    println("  PeriodicWall works and forward-propagates")
-    println("--ωevolve!() works and `pos` is always out of Disk")
+    println("\nCurrently testing: check_magnetic_sinai_periodic")# Test:
+    println("--randominside() works MagneticParticle in periodic billiards")
+    println("--collisiontime for PeriodicWall with MagneticParticle works")
+    println("--resolvecollision for MagneticParticle with PeriodicWall works")
+    println("--evolve!() with MagneticParticle works and `pos` is always out of Disk")
     println("--minimum collision time is always >= 1-2r")
   end
   # Pinned particles are excluded, so don't care about ω
@@ -193,7 +192,7 @@ function check_magnetic_sinai_periodic(partnum; printinfo = true)
         xt = [mod(pos[1], xmax) for pos in poss]
         yt = [mod(pos[2], ymax) for pos in poss]
 
-        dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+        dist = sqrt.(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
         mind = minimum(dist)
         if mind - d.r < -error_level
           error("min((x,y)-r) = $(mind - d.r)")
@@ -212,8 +211,9 @@ end
 
 function check_magnetic_pinned(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_magnetic_pinned")# Test:
     println("--there are not any pinned particles for very small ω")
+    println("--(equivalent to Inf collision time in periodic Sinai)")
   end
   # Be sure to choose ω pflag pinned cannot exist
   for (r, x, y) in [(0.4, 1.0, 1.0)]
@@ -236,14 +236,13 @@ end
 
 function check_previous_obstacle(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_previous_obstacle")# Test:
     println("--The previous collision obstacle is never the same as the")
     println("  current in a closed sinai billiard.")
-    println("  for straight and magnetic propagation")
-    println("--The relocation `dt` is no bigger than 1e-9")
+    println("--For bot straight and magnetic propagation")
   end
   ttotal = 10000.0
-  bt = billiard_sinai(0.3)
+  bt = billiard_sinai()
 
   for ω in [0.0, 0.002, -0.004]
     printinfo && println("...for ω=$ω")
@@ -258,7 +257,6 @@ function check_previous_obstacle(partnum; printinfo = true)
       colobst = nothing
       prev_obst = nothing
       tcount = 0.0
-      t_to_write = 0.0
       colnumber = 0
 
       while tcount < ttotal
@@ -300,29 +298,14 @@ function check_previous_obstacle(partnum; printinfo = true)
         end
 
         propagate!(p, tmin)
-        dt = resolvecollision!(p, colobst)
-        if abs(dt) > 1e-9
-          println("dt = $dt, TOO BIG!")
-          println("Collision with obstacle: $(colobst.name)")
-          println("collision time = $tmin")
-          println("init. distance = $d")
-          println("current pos = $(new_pos)")
-          println("current vel = $(new_vel)")
-          println("previus pos = $(prev_pos)")
-          println("previus vel = $(prev_vel)")
-          println("Collision number: $colnumber")
-          error("Too big dt!")
-        end
-        t_to_write += tmin + dt
-        tcount += t_to_write
-        t_to_write = 0.0
+        resolvecollision!(p, colobst)
+        tcount += tmin
         prev_obst = colobst
         prev_pos = new_pos
         prev_vel = new_vel
         new_pos=p.pos
         new_vel=p.vel
         colnumber += 1
-
 
       end#time loop
     end#particle loop
@@ -334,9 +317,12 @@ end#test
 
 function check_raysplitting_omega(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_raysplitting_omega")# Test:
     println("--ray-splitting with Antidot works")
-    println("  for magnetic and straight propagation")
+    println("--for straight propagation")
+    println("--for magnetic propagation")
+    println("--when transmission NOT depending on ω")
+    println("--Also checking `isphysical()`")
   end
 
   sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
@@ -349,8 +335,8 @@ function check_raysplitting_omega(partnum; printinfo = true)
   end
   newo = ((x, bool) -> bool ? -0.5x : -2.0x)
   rayspl = Dict{Int, Vector{Function}}(5 => [T, sa, newo])
-
-  bt = billiard_rectangle()
+  x = 1.0; y = 1.0
+  bt = billiard_rectangle(x, y)
   a = Antidot([0.5, 0.5], 0.3, true)
   push!(bt, a)
   if !isphysical(rayspl)
@@ -359,11 +345,20 @@ function check_raysplitting_omega(partnum; printinfo = true)
 
   for ω in [0.0, 1.0, -0.5, 0.02]
     printinfo && println("...for ω = ", ω)
-
+    error_level = 1e-9
 
     for i in 1:partnum
       p = randominside(bt, ω)
       xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0, rayspl)...)
+      dmaxx = maximum(xt) - x
+      dmaxx > error_level && error("xmax - x = $dmaxx")
+      dminx = minimum(xt)
+      dminx < -error_level && error("xmin = $dminx")
+      dmaxy = maximum(yt) - y
+      dmaxy > error_level && error("ymax - y = $dmaxy")
+      dminy = minimum(yt)
+      dminy < -error_level && error("ymin = $dminy")
+      bt[5].pflag = true
     end
   end
   return true
@@ -371,9 +366,12 @@ end
 
 function check_raysplitting_periodic(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_raysplitting_periodic")# Test:
     println("--ray-splitting with Antidot works in periodic billiard")
-    println("  for magnetic and straight propagation")
+    println("--for straight propagation")
+    println("--for magnetic propagation")
+    println("--when transmission does NOT depend on ω")
+    println("--Also testing `isphysical()`")
   end
 
   sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
@@ -405,6 +403,7 @@ function check_raysplitting_periodic(partnum; printinfo = true)
       else
         ct, ps, vs, os = evolve!(p, bt, 1000.0, rayspl)
       end
+      bt[5].pflag = true
       if ct[end] == Inf
         error("Infinite collision time in periodic sinai with Antidot (pinned)!")
       end
@@ -471,28 +470,30 @@ function check_random_sinai(partnum; printinfo = true)
     d = bt[5]
     c = d.c
     tt=1000.0
+    for ω in [0.0, 0.02]
+      printinfo && println("......and ω = ", ω)
+      for i in 1:partnum
+        p = randominside(bt, ω)
+        ts, poss, vels = evolve!(p, bt, tt)
 
-    for i in 1:partnum
-      p = randominside(bt)
-      ts, poss, vels = evolve!(p, bt, tt)
+        error_level = 1e-15
 
-      error_level = 1e-15
-
-      xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
-      dist = sqrt(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
-      mind = minimum(dist)
-      if mind - d.r < -error_level
-        error("min((x,y)-r) = $(mind - d.r)")
-      end
-      dmaxx = maximum(xt) - x
-      dmaxx > error_level && error("xmax - x = $dmaxx")
-      dminx = minimum(xt)
-      dminx < -error_level && error("xmin = $dminx")
-      dmaxy = maximum(yt) - y
-      dmaxy > error_level && error("ymax - y = $dmaxy")
-      dminy = minimum(yt)
-      dminy < -error_level && error("ymin = $dminy")
-    end#particle loop
+        xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
+        dist = sqrt.(((xt .- c[1]).^2 .+ (yt .- c[2]).^2))
+        mind = minimum(dist)
+        if mind - d.r < -error_level
+          error("min((x,y)-r) = $(mind - d.r)")
+        end
+        dmaxx = maximum(xt) - x
+        dmaxx > error_level && error("xmax - x = $dmaxx")
+        dminx = minimum(xt)
+        dminx < -error_level && error("xmin = $dminx")
+        dmaxy = maximum(yt) - y
+        dmaxy > error_level && error("ymax - y = $dmaxy")
+        dminy = minimum(yt)
+        dminy < -error_level && error("ymin = $dminy")
+      end#particle loop
+    end#omega loop
   end#x,y loop
   return true
 end
@@ -501,10 +502,10 @@ end
 
 function check_klein_magnetic(partnum; printinfo = true)
   if printinfo
-    println("\nCurrently testing if...")# Test:
+    println("\nCurrently testing: check_klein_magnetic")# Test:
     println("--ray-splitting with Antidot works in a periodic billiard")
-    println("  for very complicated, magnetic field dependent Tunneling")
-    println("--emulates klein tunneling in magnetic fields")
+    println("--For complicated, magnetic field dependent Tunneling")
+    println("--Emulates klein tunneling in magnetic fields")
   end
   if partnum < 1000
     partnum = 1000
@@ -548,7 +549,7 @@ function check_klein_magnetic(partnum; printinfo = true)
 
     for i in 1:partnum
       p = randominside(bt, ω)
-      ct, ps, vs = evolve!(p, bt, 4000.0, rayspl)
+      ct, ps, vs = evolve!(p, bt, 1000.0, rayspl)
       if ct[end] == Inf
         error("Infinite collision time in periodic sinai with Antidot (pinned)!")
       end

@@ -48,7 +48,7 @@ Relocate the particle `p` with respect to the obstacle `o` by a total amount of
 
 Internally takes care of problems of finite accuracy of `Float64`.
 """
-function relocate!(p::AbstractParticle, o::Obstacle, dist::Real)
+function relocate!_OLD(p::AbstractParticle, o::Obstacle, dist::Real)
   dt = 10lct(p, o, dist) #linearized collision time
   # Check the orders of magnitude:
   vxt=p.vel[1]*dt; vyt= p.vel[2]*dt
@@ -67,10 +67,33 @@ end
 
 """
 ```julia
+relocate!(p::AbstractParticle, o::Obstacle, distance)
+```
+Relocate the particle `p` with respect to the obstacle `o` along the direction of
+the normal vector of `o`, so that it is on the correct side of the obstacle.
+
+Internally takes care of problems of finite accuracy of `Float64`.
+"""
+function relocate!(p::AbstractParticle, o::Obstacle, dist::Float64)::Void
+  n = normalvec(o, p.pos)
+  ex = Int(floor(exponent(dist)*0.3010299956639812))
+  if ex < -15
+    p.pos -= 10^(-ex - 15)*2*dist*n
+  else
+    p.pos -= 2*dist*n
+  end
+  newdist = distance(p, o)
+  if sign(newdist) == sign(dist)
+    error("New distance should have opposite sign from old!")
+  end
+  return
+end
+
+"""
+```julia
 specular!(p::AbstractParticle, o::Obstacle)
 ```
-Perform specular reflection, i.e. set `p.vel = p.vel - 2*dot(n, p.vel)*n` with `n`
-the normal vector from the obstacle's boundary.
+Perform specular reflection based on the normal vector of the Obstacle.
 
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2 to π/2 of the normal vector).
@@ -96,8 +119,7 @@ end
 ```julia
 periodicity!(p::AbstractParticle, w::PeriodicWall)
 ```
-Perform periodicity conditions of `w` on `p`, i.e. set `p.pos += w.normal` and
-`p.current_cell -= w.normal`.
+Perform periodicity conditions of `w` on `p`.
 """
 function periodicity!(p::AbstractParticle, w::PeriodicWall)
   p.pos += w.normal
@@ -108,31 +130,33 @@ end
 
 """
     resolvecollision!(p::AbstractParticle, o::Obstacle)
-Resolve the collision between particle `p` and obstacle `o`. If the obstacle is not a
-periodic wall, the function performs specular reflection. If it is a periodic wall, it
-performs the periodicity condition.
-
-`resolvecollision!()` takes special care so that the particle is always inside the
+Resolve the collision between particle `p` and obstacle `o`, depending on the
+type of `o`. `resolvecollision!()` takes special care so that the particle is always inside the
 correct side of the billiard table, in order to avoid particle leakage.
-Specifically, it calculates the distance from particle and obstacle and,
-depending on the obstacle type, makes necessary adjustments by propagating
-the particle forwards or backwards in time using **linear** motion.
 
     resolvecollision!(p, o, T::Function, θ::Function, new_ω::Function)
 This is the ray-splitting implementation. The three functions given are drawn from
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-function resolvecollision!(p::AbstractParticle, o::Obstacle)
+function resolvecollision!(p::AbstractParticle, o::Obstacle)::Void
   dist = distance(p, o)
-  dt = 0.0
+  if abs(dist) > 1e-9
+    println("After propagation, in resolvecollision, we got distance")
+    println("dist = $dist")
+    println("Collision is to be made with $(o.name)")
+    println("particle velocity (before reflection):")
+    println("vx = $(p.vel[1])")
+    println("vy = $(p.vel[2])")
+    error("Too big distance after propagation into resolve!")
+  end
 
   if dist < 0.0
     dt = relocate!(p, o, dist)
   end
   # Perform specular reflection:
   specular!(p, o)
-  return dt
+  return
 end
 
 function resolvecollision!(p::AbstractParticle, o::PeriodicWall)
@@ -191,13 +215,13 @@ function collisiontime(p::Particle, d::Circular)
 
   # Closest point:
   t = -B - sqrtD
-  # Case of being on top of circle and looking inside:
-  if t==0.0 && B < 0.0
-    t=-2B
-  # Case of being inside but closest point is in negative time
-  elseif t < 0.0 && C < 0.0
-    t = -B + sqrtD
-  end
+  # # Case of being on top of circle and looking inside:
+  # if t==0.0 && B < 0.0
+  #   t=-2B
+  # # Case of being inside but closest point is in negative time
+  # elseif t < 0.0 && C < 0.0
+  #   t = -B + sqrtD
+  # end
 
   t <=0 ? Inf : t
 end
@@ -240,10 +264,8 @@ Propagate the particle `p` for given time `t`, changing appropriately the the
 `p.pos` and `p.vel` fields.
 
 For a `Particle` the propagation is a straight line
-(i.e. velocity vector is constant).
-
-For a `MagneticParticle` the propagation is circular motion with cyclic frequency
-`p.omega` and radius `1/p.omega`.
+(i.e. velocity vector is constant). For a `MagneticParticle` the propagation
+is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
 """
 function propagate!(p::Particle, t::Real)
   # Set initial conditions
@@ -317,31 +339,28 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
   push!(rvel, p.vel)
   push!(rt, 0.0)
   tcount = 0.0
-  colobst = bt[end]
+  colobst_idx = 1
   t_to_write = 0.0
 
   while tcount < ttotal
     tmin = Inf
 
-    for obst in bt
+    for i in eachindex(bt)
+      obst = bt[i]
       tcol = collisiontime(p, obst)
       # Set minimum time:
       if tcol < tmin
         tmin = tcol
-        colobst = obst
+        colobst_idx = i
       end
     end#obstacle loop
 
     propagate!(p, tmin)
-    dt = resolvecollision!(p, colobst)
-    if abs(dt) > 1e-9
-      println("dt = $dt")
-      error("Too big dt!")
-    end
+    resolvecollision!(p, bt[colobst_idx])
 
-    t_to_write += tmin + dt
+    t_to_write += tmin
 
-    if typeof(colobst) <: PeriodicWall
+    if typeof(bt[colobst_idx]) <: PeriodicWall
       continue
     else
       push!(rpos, p.pos + p.current_cell)
@@ -548,17 +567,18 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
 
   tcount = 0.0
   t_to_write = 0.0
-  colobst = bt[1]
+  colobst_idx = 1
 
   while tcount < ttotal
     tmin = Inf
 
-    for obst in bt
+    for i in eachindex(bt)
+      obst = bt[i]
       tcol = collisiontime(p, obst)
       # Set minimum time:
       if tcol < tmin
         tmin = tcol
-        colobst = obst
+        colobst_idx = i
       end
     end#obstacle loop
 
@@ -571,14 +591,11 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
     end
 
     propagate!(p, tmin)
-    dt = resolvecollision!(p, colobst)
-    if abs(dt) > 1e-9
-      println("dt = $dt")
-      error("Way too big dt")
-    end
-    t_to_write += tmin + dt
+    resolvecollision!(p, bt[colobst_idx])
+
+    t_to_write += tmin
     # Write output only if the collision was not made with PeriodicWall
-    if typeof(colobst) == PeriodicWall
+    if typeof(bt[colobst_idx]) == PeriodicWall
       # Pinned particle:
       if t_to_write >= 2π/absω
         warning && warn("Pinned particle in evolve! (completed circle)")

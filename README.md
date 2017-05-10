@@ -5,10 +5,11 @@ The goals of the package is to provide a flexible and intuitive framework for fa
 
 <center>
 
-| **Documentation**   | [**Package Evaluator**](http://pkg.julialang.org/?pkg=DynamicalBilliards#DynamicalBilliards) | **Build Status**     |
-|:--------:|:-------------------:|:-----------------------:|
-| [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/stable) |[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.5.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards) | [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl) |
-| [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/latest) |[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.6.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards)  | [![Build status](https://ci.appveyor.com/api/projects/status/r087ojfuh2rtrxtm?svg=true)](https://ci.appveyor.com/project/Datseris/dynamicalbilliards-jl)|
+| **Documentation**   | [**Package Evaluator**](http://pkg.julialang.org/?pkg=DynamicalBilliards#DynamicalBilliards) | **Travis**     | **AppVeyor** |
+|:--------:|:-------------------:|:-----------------------:|:-----:|
+| [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/stable) |[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.6.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards)
+| [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl)
+| [![Build status](https://ci.appveyor.com/api/projects/status/r087ojfuh2rtrxtm?svg=true)](https://ci.appveyor.com/project/Datseris/dynamicalbilliards-jl)|
 
 
 </center>
@@ -25,10 +26,7 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 ## Installation
 This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
 
-If you want to use the latest features, compatible with the latest documentation, use `Pkg.checkout("DynamicalBilliards")`.
-
-Documentation: [Stable](https://Datseris.github.io/DynamicalBilliards.jl/stable) or [Latest](https://Datseris.github.io/DynamicalBilliards.jl/latest).
-
+The master branch of `DynamicalBilliards` is used for development purposes. It is not advised to use `Pkg.checkout("DynamicalBilliards")`, unless you want to contribute to the development of the package.
 
 ## Plotting
 Plotting in `DynamicalBilliards` is done through a sister package, [`DynamicalBilliardsPlotting`](https://github.com/Datseris/DynamicalBilliardsPlotting.jl). This enables the core package to not have any dependency on plotting packages.

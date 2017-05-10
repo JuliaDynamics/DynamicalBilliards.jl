@@ -33,7 +33,7 @@ end
 
 # Resolve collision for Ray-splitting with Magnetic
 function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
-  θ::Function, new_ω::Function = ((x, bool) -> x))
+  θ::Function, new_ω::Function = ((x, bool) -> x))::Void
 
   dt = 0.0
   ω = p.omega
@@ -42,25 +42,25 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
   φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
-  if φ > π/2
-    println("in resolvecollision, the inverse_dot is")
-    println(inverse_dot)
-    println("The current distance of particle with obstacle $(a.name) is:")
-    println(distance(p, a))
-    println("notice that the pflag is not yet reversed")
-    println("The pflag of the obstacle is")
-    println(a.pflag)
-    if a.pflag == true
-      println("(so Particle should be coming from outside of disk)")
-    else
-      println("(so Particle should be coming from inside of disk)")
-    end
-    println("Current particle velocity:")
-    println(p.vel)
-    println("This inverse_dot gives insidence angle")
-    println("φ=$φ")
-    error("φ shoud be between 0 and π/2")
-  end
+  # if φ > π/2
+  #   println("in resolvecollision, the inverse_dot is")
+  #   println(inverse_dot)
+  #   println("The current distance of particle with obstacle $(a.name) is:")
+  #   println(distance(p, a))
+  #   println("notice that the pflag is not yet reversed")
+  #   println("The pflag of the obstacle is")
+  #   println(a.pflag)
+  #   if a.pflag == true
+  #     println("(so Particle should be coming from outside of disk)")
+  #   else
+  #     println("(so Particle should be coming from inside of disk)")
+  #   end
+  #   println("Current particle velocity:")
+  #   println(p.vel)
+  #   println("This inverse_dot gives insidence angle")
+  #   println("φ=$φ")
+  #   error("φ shoud be between 0 and π/2")
+  # end
   # ray-splitting (step 2)
   if cross2D(p.vel, n) < 0
     φ *= -1
@@ -77,8 +77,17 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
     # Step 7: Check the "new" distance between Particle and Obstacle
     dist = distance(p, a)  #this is also reversed!
     # Step 8: Relocate accordingly
+    if abs(dist) > 1e-9
+      println("After propagation, in resolvecollision, we got distance")
+      println("dist = $dist")
+      println("Collision is to be made with $(o.name)")
+      println("particle velocity (before reflection):")
+      println("vx = $(p.vel[1])")
+      println("vy = $(p.vel[2])")
+      error("Too big distance after propagation into resolve!")
+    end
     if dist < 0.0
-      dt = relocate!(p, a, dist)
+      relocate!(p, a, dist)
     end
     # Step 9: Perform refraction
     p.vel = [cos(Θ), sin(Θ)]
@@ -87,48 +96,51 @@ function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   # No ray-splitting:
   else
     dist = distance(p, a)
-    dt = 0.0
-
+    if abs(dist) > 1e-9
+      println("After propagation, in resolvecollision, we got distance")
+      println("dist = $dist")
+      println("Collision is to be made with $(o.name)")
+      println("particle velocity (before reflection):")
+      println("vx = $(p.vel[1])")
+      println("vy = $(p.vel[2])")
+      error("Too big distance after propagation into resolve!")
+    end
     if dist < 0.0
-      dt = relocate!(p, a, dist)
+      relocate!(p, a, dist)
     end
     #perform specular
     specular!(p, a)
   end
-  if abs(dt) > 1e-6
-    error("dt = $dt (too big) in resolve ray-splitting Magnetic.")
-  end
-  return dt
+  return
 end
 
 # Resolve collision for ray-splitting with Normal
-function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
+function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)::Void
 
-  dt = 0.0
   ω = 0.0
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)
   inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
   φ = acos(inverse_dot)
   # if this is wrong then my normal vec is wrong:
-  if φ > π/2
-    println("in resolvecollision, the inverse_dot is")
-    println(inverse_dot)
-    println("The current distance of particle with obstacle $(a.name) is:")
-    println(distance(p, a))
-    println("And the pflag of the obstacle is")
-    println(a.pflag)
-    if a.pflag == true
-      println("(so Particle should be coming from outside of disk)")
-    else
-      println("(so Particle should be coming from inside of disk)")
-    end
-    println("Current particle velocity:")
-    println(p.vel)
-    println("This inverse_dot gives insidence angle")
-    println("φ=$φ")
-    error("φ shoud be between 0 and π/2")
-  end
+  # if φ > π/2
+  #   println("in resolvecollision, the inverse_dot is")
+  #   println(inverse_dot)
+  #   println("The current distance of particle with obstacle $(a.name) is:")
+  #   println(distance(p, a))
+  #   println("And the pflag of the obstacle is")
+  #   println(a.pflag)
+  #   if a.pflag == true
+  #     println("(so Particle should be coming from outside of disk)")
+  #   else
+  #     println("(so Particle should be coming from inside of disk)")
+  #   end
+  #   println("Current particle velocity:")
+  #   println(p.vel)
+  #   println("This inverse_dot gives insidence angle")
+  #   println("φ=$φ")
+  #   error("φ shoud be between 0 and π/2")
+  # end
   # ray-splitting (step 2)
   if cross2D(p.vel, n) < 0
     φ *= -1
@@ -144,25 +156,40 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)
     Θ = theta + atan2(n[2], n[1])
     # Step 7: Check the "new" distance between Particle and Obstacle
     dist = distance(p, a)  #this is also reversed!
+    if abs(dist) > 1e-9
+      println("After propagation, in resolvecollision, we got distance")
+      println("dist = $dist")
+      println("Collision is to be made with $(o.name)")
+      println("particle velocity (before reflection):")
+      println("vx = $(p.vel[1])")
+      println("vy = $(p.vel[2])")
+      error("Too big distance after propagation into resolve!")
+    end
     # Step 8: Relocate accordingly
     if dist < 0.0
-      dt = relocate!(p, a, dist)
+      relocate!(p, a, dist)
     end
     # Step 9: Perform refraction
     p.vel = [cos(Θ), sin(Θ)]
   # No ray-splitting:
   else
     dist = distance(p, a)
+    if abs(dist) > 1e-9
+      println("After propagation, in resolvecollision, we got distance")
+      println("dist = $dist")
+      println("Collision is to be made with $(o.name)")
+      println("particle velocity (before reflection):")
+      println("vx = $(p.vel[1])")
+      println("vy = $(p.vel[2])")
+      error("Too big distance after propagation into resolve!")
+    end
     if dist < 0.0
-      dt = relocate!(p, a, dist)
+      relocate!(p, a, dist)
     end
     #perform specular
     specular!(p, a)
   end
-  if abs(dt) > 1e-6
-    error("dt = $dt (too big) in resolve ray-splitting Straight.")
-  end
-  return dt
+  return
 end
 
 # evolve For Particle and Ray-Splitting:
@@ -198,11 +225,11 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
 
     propagate!(p, tmin)
     if haskey(ray, colind)
-      dt = resolvecollision!(p, colobst, ray[colind][1], ray[colind][2])
+      resolvecollision!(p, colobst, ray[colind][1], ray[colind][2])
     else
-      dt = resolvecollision!(p, colobst)
+      resolvecollision!(p, colobst)
     end
-    t_to_write += tmin + dt
+    t_to_write += tmin
 
     if typeof(colobst) == PeriodicWall
       continue
@@ -260,16 +287,15 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
 
     propagate!(p, tmin)
     if haskey(ray, colind)
-      dt = resolvecollision!(p, colobst, ray[colind][1], ray[colind][2], ray[colind][3])
+      resolvecollision!(p, colobst, ray[colind][1], ray[colind][2], ray[colind][3])
     else
-      dt = resolvecollision!(p, colobst)
+      resolvecollision!(p, colobst)
     end
-    t_to_write += tmin + dt
+    t_to_write += tmin
     # Write output only if the collision was not made with PeriodicWall
     if typeof(colobst) == PeriodicWall
       # Pinned particle:
       if t_to_write >= 2π/abs(p.omega)
-        #println("t_to_write = $t_to_write while circle time = $")
         warning && warn("Pinned particle in evolve! (completed circle)")
         push!(rpos, rpos[end])
         push!(rvel, rvel[end])
