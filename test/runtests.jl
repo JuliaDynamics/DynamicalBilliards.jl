@@ -18,7 +18,7 @@ if haskey(ENV, "DYNAMICALBILLIARDS_LONGTEST")
 end
 
 if longtests
-    const partnum = 1000
+    const partnum = 500
 else
     const partnum = 10
 end
