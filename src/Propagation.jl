@@ -28,45 +28,6 @@ cross2D(a::AbstractArray, b::AbstractArray) = a[1]*b[2]-a[2]*b[1]
 ####################################################
 """
 ```julia
-lct(p::AbstractParticle, o::Obstacle, distance)
-```
-Return the Linearized Collision Time (`-dist/dot(p.vel, normal)`) between particle
-and obstacle, given the calculated distance between them.
-"""
-function lct(p::AbstractParticle, o::Obstacle, dist::Real)
-  n = normalvec(o, p.pos)
-  t = -dist/dot(p.vel, n)
-end
-
-"""
-```julia
-relocate!(p::AbstractParticle, o::Obstacle, distance)
-```
-Relocate the particle `p` with respect to the obstacle `o` by a total amount of
-10 times the linearized collision time `lct`
-(assuming linear obstacle and linear motion).
-
-Internally takes care of problems of finite accuracy of `Float64`.
-"""
-function relocate!_OLD(p::AbstractParticle, o::Obstacle, dist::Real)
-  dt = 10lct(p, o, dist) #linearized collision time
-  # Check the orders of magnitude:
-  vxt=p.vel[1]*dt; vyt= p.vel[2]*dt
-  #exponent of velocity*time
-  ve = exponent(min(abs(vxt), abs(vyt)))*0.3010299956639812
-  #exponent of position
-  pe = exponent(max(abs(p.pos[1]), abs(p.pos[2])))*0.3010299956639812
-  # Ensure that the position will be changed
-  if pe - ve > 16.0
-    dt *= 10^(pe - ve - 16.0)
-  end
-  # Propagate backwards or forwards:
-  p.pos += [p.vel[1]*dt, p.vel[2]*dt]
-  return dt
-end
-
-"""
-```julia
 relocate!(p::AbstractParticle, o::Obstacle, distance)
 ```
 Relocate the particle `p` with respect to the obstacle `o` along the direction of
@@ -105,13 +66,13 @@ end
 
 function specular!(p::AbstractParticle, r::RandomDisk)
     n = normalvec(r, p.pos)
-    φ = atan2(n[2], n[1]) + π*rand() - π/2
+    φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector(cos(φ), sin(φ))
 end
 
 function specular!(p::AbstractParticle, r::RandomWall)
     n = normalvec(r, p.pos)
-    φ = atan2(n[2], n[1]) + π*rand() - π/2
+    φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector(cos(φ), sin(φ))
 end
 
@@ -126,13 +87,11 @@ function periodicity!(p::AbstractParticle, w::PeriodicWall)
   p.current_cell -= w.normal
 end
 
-# resolvecollision!() will depend on velocity angle for ray-splitting billiards.
-
 """
     resolvecollision!(p::AbstractParticle, o::Obstacle)
 Resolve the collision between particle `p` and obstacle `o`, depending on the
-type of `o`. `resolvecollision!()` takes special care so that the particle is always inside the
-correct side of the billiard table, in order to avoid particle leakage.
+type of `o`. `resolvecollision!()` takes special care so that the particle is always
+inside the correct side of the billiard table, in order to avoid particle leakage.
 
     resolvecollision!(p, o, T::Function, θ::Function, new_ω::Function)
 This is the ray-splitting implementation. The three functions given are drawn from
@@ -538,6 +497,19 @@ function collisiontime(p::MagneticParticle, o::Circular)
   end
   # Solve quadratic:
   a = (rc^2 - r1^2 + d^2)/2d
+  test = rc^2 - a^2
+  if test < 0
+    println("ω = $ω")
+    println("pc = $pc")
+    println("rc = $rc")
+    println("p1 = $p1")
+    println("r1 = $r1")
+    println("centers d = $d")
+    println("distance = $(distance(p, o))")
+    println("a = $a")
+    println("rc^2 - a^2 = $test")
+  end
+
   h = sqrt(rc^2 - a^2)
   # Collision points (always 2):
   I1 = SVector{2, Float64}(
@@ -617,12 +589,13 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
   return (rt, rpos, rvel, ω)
 end
 
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real)
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real;
+  warning = false)
   ti = Float64(ttotal)
   if ttotal <= 0
     error("`evolve!()` cannot evolve backwards in time.")
   else
-    evolve!(p, bt, Float64(ti))
+    evolve!(p, bt, Float64(ti); waning = warning)
   end
 end
 

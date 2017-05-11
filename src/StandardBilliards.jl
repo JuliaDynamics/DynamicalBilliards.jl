@@ -11,8 +11,10 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 
 ### Settings
 * "standard" : Specular reflection occurs during collision.
-* "periodic" : The walls are `PeriodicWall` type, enforcing periodicity at the boundaries
+* "periodic" : The walls are `PeriodicWall` type,
+  enforcing periodicity at the boundaries
 * "random" : The velocity is randomized upon collision.
+* "ray-splitting" : All obstacles in the billiard table allow for ray-splitting.
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
@@ -42,13 +44,24 @@ function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
   elseif setting == "random"
     o = 0.0
     sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = RandomWall(sp, ep, n, "Left periodic boundary")
+    leftw = RandomWall(sp, ep, n, "Left random wall")
     sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = RandomWall(sp, ep, n, "Right periodic boundary")
+    rightw = RandomWall(sp, ep, n, "Right random wall")
     sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = RandomWall(sp, ep, n, "Top periodic boundary")
+    topw = RandomWall(sp, ep, n, "Top random wall")
     sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = RandomWall(sp, ep, n, "Bottom periodic boundary")
+    botw = RandomWall(sp, ep, n, "Bottom random wall")
+    push!(bt, leftw, rightw, topw, botw)
+  elseif setting == "ray-splitting"
+    o = 0.0
+    sp = [o,o]; ep = [o, y]; n = [x,o]
+    leftw = SplitterWall(sp, ep, n, "Left ray-splitting wall")
+    sp = [x,o]; ep = [x, y]; n = [-x,o]
+    rightw = SplitterWall(sp, ep, n, "Right ray-splitting wall")
+    sp = [o,y]; ep = [x, y]; n = [o,-y]
+    topw = SplitterWall(sp, ep, n, "Top ray-splitting wall")
+    sp = [o,o]; ep = [x, o]; n = [o,y]
+    botw = SplitterWall(sp, ep, n, "Bottom ray-splitting wall")
     push!(bt, leftw, rightw, topw, botw)
   else
     error("The given setting=$setting is unknown.")
@@ -67,8 +80,10 @@ In the periodic case, the system is also known as "Lorentz Gas".
 
 ### Settings
 * "standard" : Specular reflection occurs during collision.
-* "periodic" : The walls are `PeriodicWall` type, enforcing periodicity at the boundaries
+* "periodic" : The walls are `PeriodicWall` type,
+  enforcing periodicity at the boundaries
 * "random" : The velocity is randomized upon collision.
+* "ray-splitting" : All obstacles in the billiard table allow for ray-splitting.
 """
 function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
   if (setting == "periodic") && (r>=x/2 || r>=y/2)
@@ -80,6 +95,8 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
   c = [x/2, y/2]
   if setting == "random"
     centerdisk = RandomDisk(c, r, "Random disk")
+  elseif setting == "ray-splitting"
+    centerdisk = Antidot(c, r, "Antidot")
   else
     centerdisk = Disk(c, r, "Disk")
   end

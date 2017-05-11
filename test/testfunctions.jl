@@ -7,7 +7,7 @@ function check_straight_sinai(partnum; printinfo = true)
     println("--resolvecollision for Particle with FiniteWall and Disk works")
     println("--back-propagation happens and particle is never outside of billiard")
   end
-  for (r, x, y) in [(0.4, 1.0, 1.0), (0.3, 1.5, 1.0), (0.5, 1.4, 2.2)]
+  for (r, x, y) in [(0.15, 1.0, 1.0), (0.3, 1.5, 1.0), (0.4, 1.4, 2.2)]
     printinfo && println("...for (r,x,y) = ", (r, x, y))
     bt = billiard_sinai(r, x, y)
     d = bt[5]
@@ -416,6 +416,7 @@ function check_splitterwall(partnum; printinfo = true)
   if printinfo
     println("\nCurrently testing if...")# Test:
     println("--ray-splitting with SplitterWall and Antidot works")
+    println("--for both straight and magnetic propagation")
   end
 
   sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
@@ -460,21 +461,34 @@ function check_random_sinai(partnum; printinfo = true)
     println("\nCurrently testing if...")# Test:
     println("--billiard_sinai works with setting = `random` ")
     println("--collisiontime for RandomWall and RandomDisk works")
-    println("--resolvecollision for Particle with")
+    println("--resolvecollision for AbstractParticle with")
     println("  random obstacle works and reflects randomly")
     println("--evolve!() works and never there is infinite time")
   end
-  for (r, x, y) in [(0.4, 1.0, 1.0), (0.5, 1.4, 2.2)]
+  for (r, x, y) in [(0.25, 1.0, 1.0), (0.35, 1.4, 2.2)]
     printinfo && println("...for (r,x,y) = ", (r, x, y))
     bt = billiard_sinai(r, x, y; setting = "random")
     d = bt[5]
     c = d.c
     tt=1000.0
-    for ω in [0.0, 0.02]
+    for ω in [0.0, 0.02, 0.78596]
       printinfo && println("......and ω = ", ω)
       for i in 1:partnum
         p = randominside(bt, ω)
         ts, poss, vels = evolve!(p, bt, tt)
+        if ts[end] == Inf
+          println("Final pos:")
+          println("px = $(p.pos[1])")
+          println("py = $(p.pos[2])")
+          println("Final vel:")
+          println("vx = $(p.vel[1])")
+          println("vy = $(p.vel[2])")
+          println("Length of ts = $(length(ts))")
+          # plot_billiard(bt)
+          # plot_particle(p)
+          # return p, bt
+          error("Infinite collision time in Random Sinai")
+        end
 
         error_level = 1e-15
 
