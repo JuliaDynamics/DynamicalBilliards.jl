@@ -17,14 +17,14 @@ In the standard billiard case, one can always exclude the collision with the pre
 
 Notice that the `relocate!()` step is actually very important because it takes care that there is not particle "leakage": particles being outside the billiard table due to the finite precision of floating numbers.
 
-!!! danger
+!!! danger "Inefficiency "
     The first step of the algorithm is **very inefficient** for large billiard tables, since many of the obstacles could be safely excluded from search. If you have better solutions on how to find the minimum collision time you are more than welcome to submit a Pull Request or open an issue to discuss about it. Unfortunately, in the present literature,
     such an algorithm exists only for the periodic Sinai billiard specifically.
 
 !!! note "Speed vs. Accuracy"
-    `DynamicalBilliards.jl` was made under the consideration of extreme accuracy.
+    `DynamicalBilliards.jl` was made under the consideration of as much accuracy as possible.
     There are numerous actions performed internally such that
-    the particle propagation is as accurate as possible, and will not result in any kind of unexpected behavior,
+    the particle propagation is accurate (bounded by `Float64` precision of course), and will not result in any kind of unexpected behavior,
     like for example particle leakage.
     Of course, this is a direct trade-off in the expense of speed.
 
@@ -63,8 +63,8 @@ In such event, the convention followed by `DynamicalBilliards.jl` is the followi
 entries. The collision times always have the entries `0.0, Inf`. All other returned
 vectors have the initial conditions, repeated once.
 
-`evolve!()` can be given the optional keyword argument `warning = true` in the case
-of magnetic propagation, which throws a `warn()` message that a pinned particle was
+`evolve!()` can be given an additional `true` optional argument in the case
+of magnetic propagation. If you are using ray-splitting it is the 5th argument, otherwise it is the 4th argument. This optional argument throws a `warn()` message whenever a pinned particle is
 evolved.
 
 !!! warning "Using `construct()`"

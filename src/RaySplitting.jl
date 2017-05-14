@@ -193,51 +193,54 @@ function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function):
 end
 
 # evolve For Particle and Ray-Splitting:
-function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real,
+function evolve!(p::Particle, bt::Vector{Obstacle}, t,
   ray::Dict)
 
-  ttotal = Float64(ttotal)
+  if t <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+  end
+
   rt = Float64[]
   rpos = SVector{2,Float64}[]
   rvel = SVector{2,Float64}[]
   push!(rpos, p.pos)
   push!(rvel, p.vel)
   push!(rt, 0.0)
-  tcount = 0.0
-  colobst = bt[1]
-  colind::Int = length(bt)
+
+  count = zero(t)
+  colobst_idx = 1
   t_to_write = 0.0
 
-
-  while tcount < ttotal
-    tmin = Inf
+  while count < t
+    # Declare these because `bt` is of un-stable type!
+    tcol::Float64 = 0.0
+    tmin::Float64 = Inf
 
     for i in eachindex(bt)
-      obst = bt[i]
-      tcol = collisiontime(p, obst)
+      tcol = collisiontime(p, bt[i])
       # Set minimum time:
       if tcol < tmin
         tmin = tcol
-        colobst = obst
-        colind = i
+        colobst_idx = i
       end
     end#obstacle loop
 
     propagate!(p, tmin)
-    if haskey(ray, colind)
-      resolvecollision!(p, colobst, ray[colind][1], ray[colind][2])
+
+    if haskey(ray, colobst_idx)
+      resolvecollision!(p, bt[colobst_idx], ray[colobst_idx][1], ray[colobst_idx][2])
     else
-      resolvecollision!(p, colobst)
+      resolvecollision!(p, bt[colobst_idx])
     end
     t_to_write += tmin
 
-    if typeof(colobst) == PeriodicWall
+    if typeof(bt[colobst_idx]) == PeriodicWall
       continue
     else
       push!(rpos, p.pos + p.current_cell)
       push!(rvel, p.vel)
       push!(rt, t_to_write)
-      tcount += t_to_write
+      count += increment_counter(t, t_to_write)
       t_to_write = 0.0
     end
   end#time loop
@@ -246,34 +249,35 @@ end
 
 # evolve For MagneticParticle and Ray-Splitting
 function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
-  ttotal::Real, ray::Dict; warning = false)
+  t, ray::Dict, warning::Bool = false)
 
-  ttotal = Float64(ttotal)
+  if t <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+  end
+
   omegas = Float64[]
   rt = Float64[]
   rpos = SVector{2,Float64}[]
   rvel = SVector{2,Float64}[]
   push!(rpos, p.pos)
   push!(rvel, p.vel)
-  push!(rt, zero(Float64))
+  push!(rt, 0.0)
   push!(omegas, p.omega)
 
-  tcount = 0.0
+  count = zero(t)
   t_to_write = 0.0
-  colobst = bt[1]
-  colind = 1
+  colobst_idx = 1
 
-  while tcount < ttotal
-    tmin = Inf
+  while count < t
+    tmin::Float64 = Inf
+    tcol::Float64 = 0.0
 
     for i in eachindex(bt)
-      obst = bt[i]
-      tcol = collisiontime(p, obst)
+      tcol = collisiontime(p, bt[i])
       # Set minimum time:
       if tcol < tmin
         tmin = tcol
-        colobst = obst
-        colind = i
+        colobst_idx = i
       end
     end#obstacle loop
 
@@ -286,14 +290,16 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
     end
 
     propagate!(p, tmin)
-    if haskey(ray, colind)
-      resolvecollision!(p, colobst, ray[colind][1], ray[colind][2], ray[colind][3])
+    if haskey(ray, colobst_idx)
+      resolvecollision!(p, bt[colobst_idx], ray[colobst_idx][1],
+      ray[colobst_idx][2], ray[colobst_idx][3])
     else
-      resolvecollision!(p, colobst)
+      resolvecollision!(p, bt[colobst_idx])
     end
+
     t_to_write += tmin
     # Write output only if the collision was not made with PeriodicWall
-    if typeof(colobst) == PeriodicWall
+    if typeof(bt[colobst_idx]) == PeriodicWall
       # Pinned particle:
       if t_to_write >= 2π/abs(p.omega)
         warning && warn("Pinned particle in evolve! (completed circle)")
@@ -310,7 +316,7 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
       push!(rvel, p.vel)
       push!(rt, t_to_write)
       push!(omegas, p.omega)
-      tcount += t_to_write
+      count += increment_counter(t, t_to_write)
       t_to_write = 0.0
     end
 

@@ -18,10 +18,9 @@ you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effo
 
 The usage of this package revolves around a single function:
 ```julia
-evolve!(p::AbstractParticle, bt::Vector{Obstacle}, total_time)
+evolve!(p::AbstractParticle, bt::Vector{Obstacle}, t::Union{Int, Float64})
 ```
-which evolves a particle `p` inside a billiard table `bt` for a given amount of time `total_time`,
-while taking care of all the details internally.
+which evolves a particle `p` inside a billiard table `bt`. If the given `t` is of type `Float64`, the evolution happens for `t` amount of time. If however `t` is of type `Int`, the evolution happens for `t` number of collisions (other types are not supported).
 
 The first step is to define the billiard table `bt`, which is the system the particle `p` will propagate in.
 A billiard table is simply a collection (`Vector`) of `Obstacle`s. The most convenient way is to use
@@ -43,16 +42,21 @@ Now you are ready to evolve this particle:
 ```julia
 ct, poss, vels = evolve!(p, bt, 1000.0)
 ```
+
+!!! note
+    The behavior of `evolve!` depends on the type of the third argument,
+    which represents total amount. If it is `Float64`, it represents total amoount of time, but if it is `Int` it represents total amount of collisions.
+
 The return values of the `evolve!()` function need some brief explaining: As noted by the "!" at the end of the function,
 it changes its argument `p`.
 Most importantly however, this function also returns the main output expected by a billiard
 system. This output is a tuple of three vectors:
 * `ct::Vector{Float64}` : Collision times.
 * `poss::Vector{SVector{2}}` : Positions during collisions.
-* `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions (e.g. after reflection).
+* `vels::Vector{SVector{2}})` : Velocities **exactly after** the collisions (e.g. after reflection).
 
-The time `t[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
-state `poss[i-1], vels[i-1]`. That is why `t[1]` is always 0 since `poss[1], vels[1]` are
+The time `ct[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
+state `poss[i-1], vels[i-1]`. That is why `ct[1]` is always 0 since `poss[1], vels[1]` are
 the initial conditions.
 
 If this output is not convenient for you, the function `construct(ct, poss, vels)` is provided,
@@ -62,7 +66,7 @@ xt, yt, vxt, vyt, ts = construct(ct, poss, vels)
 ```
 or, by taking advantage of the awesome ellipsis operator, you can do:
 ```julia
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0)...)
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0)...)
 ```
 
 ## Magnetic Propagation

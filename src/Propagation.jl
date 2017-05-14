@@ -23,6 +23,8 @@ Equivalent to the determinant of the matrix [a b].
 cross2D{T<:Real, P<:Real}(a::SVector{2,T}, b::SVector{2,P}) = a[1]*b[2]-a[2]*b[1]
 cross2D(a::AbstractArray, b::AbstractArray) = a[1]*b[2]-a[2]*b[1]
 
+increment_counter(::Int, t_to_write)::Int = 1
+increment_counter(::Float64, t_to_write)::Float64 = t_to_write
 ####################################################
 ## Resolve Collisions
 ####################################################
@@ -174,14 +176,6 @@ function collisiontime(p::Particle, d::Circular)
 
   # Closest point:
   t = -B - sqrtD
-  # # Case of being on top of circle and looking inside:
-  # if t==0.0 && B < 0.0
-  #   t=-2B
-  # # Case of being inside but closest point is in negative time
-  # elseif t < 0.0 && C < 0.0
-  #   t = -B + sqrtD
-  # end
-
   t <=0 ? Inf : t
 end
 
@@ -235,9 +229,11 @@ function propagate!(p::Particle, t::Real)
 end
 
 """
-    evolve!(p::AbstractParticle, bt::Vector{Obstacle}, ttotal)
-Evolve the given particle `p` inside the billiard table `bt`
-for a total amount of time `ttotal`.
+    evolve!(p::AbstractParticle, bt::Vector{Obstacle}, t [, ray_splitter])
+Evolve the given particle `p` inside the billiard table `bt`. If `t` is of type
+`Float64`, evolve for as much time as `t`. If however `t` is of type `Int`,
+evolve for as many collisions as `t`.
+
 Return the states of the particle between collisions.
 
 The evolution takes into account the particle's Type.
@@ -246,7 +242,7 @@ E.g. if `typeof(p) == MagneticParticle` then magnetic evolution will take place.
 ## Calling
 Call the function like:
 ```julia
-t, poss, vels, (ω)* = evolve!(p, bt, ttotal)
+t, poss, vels [, ω]* = evolve!(p, bt, t)
 ```
 (see "Returns" section for more)
 
@@ -260,10 +256,10 @@ As noted by the "!" at the end of the function, it changes its argument
 expected by a billiard system. This output is a tuple of 3 (or 4) vectors:
 * `ct::Vector{Float64}` : Collision times.
 * `poss::Vector{SVector{2}}` : Positions during collisions.
-* `vels:: Vector{SVector{2}})` : Velocities **exactly after** the collisions.
+* `vels::Vector{SVector{2}})` : Velocities **exactly after** the collisions.
 * `ω`, either `Float64` or `Vector{Float64}` : Angular velocity(/ies).
-In the case of straight propagation, only the first 3 are returned.
 
+In the case of straight propagation, only the first 3 are returned.
 In the case of magnetic propagation, the 4th value is returned as well.
 This is either the angular velocity of the particle (`Float64`), or in the case of
 ray-splitting it is a vector of the angular velocities at each time step (`Vector`).
@@ -289,7 +285,11 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
+function evolve!(p::Particle, bt::Vector{Obstacle}, t)
+
+  if t <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+  end
 
   rt = Float64[]
   rpos = SVector{2,Float64}[]
@@ -297,16 +297,19 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
   push!(rpos, p.pos)
   push!(rvel, p.vel)
   push!(rt, 0.0)
-  tcount = 0.0
+
+  count = zero(t)
+
   colobst_idx = 1
   t_to_write = 0.0
 
-  while tcount < ttotal
-    tmin = Inf
+  while count < t
+    # Declare these because `bt` is of un-stable type!
+    tcol::Float64 = 0.0
+    tmin::Float64 = Inf
 
     for i in eachindex(bt)
-      obst = bt[i]
-      tcol = collisiontime(p, obst)
+      tcol = collisiontime(p, bt[i])
       # Set minimum time:
       if tcol < tmin
         tmin = tcol
@@ -325,20 +328,12 @@ function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Float64)
       push!(rpos, p.pos + p.current_cell)
       push!(rvel, p.vel)
       push!(rt, t_to_write)
-      tcount += t_to_write
+      # set counter
+      count += increment_counter(t, t_to_write)
       t_to_write = 0.0
     end
   end#time loop
   return (rt, rpos, rvel)
-end
-
-function evolve!(p::Particle, bt::Vector{Obstacle}, ttotal::Real)
-  ti = Float64(ttotal)
-  if ttotal <= 0
-    error("`evolve!()` cannot evolve backwards in time.")
-  else
-    evolve!(p, bt, Float64(ti))
-  end
 end
 
 """
@@ -349,7 +344,7 @@ Given the main output of this package (see `evolve!()` function) construct the
 timeseries of the position and velocity, as well as the time vector.
 
 In case of not given ω (or ω == 0), straight construction takes place.
-In case of ω != 0 or in case of ω::Vector{Real} magnetic construction takes place.
+In case of ω != 0 or ω::Vector{Real} magnetic construction takes place.
 
 The additional optional argument of `dt` (only valid for Magnetic construction)
 is the timestep with which the timeseries are constructed.
@@ -525,8 +520,11 @@ function collisiontime(p::MagneticParticle, o::Circular)
 end
 
 
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
-  warning = false)
+function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, t, warning::Bool = false)
+
+  if t <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+  end
 
   ω = p.omega
   absω = abs(ω)
@@ -537,16 +535,16 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
   push!(rvel, p.vel)
   push!(rt, zero(Float64))
 
-  tcount = 0.0
+  count = zero(t)
   t_to_write = 0.0
   colobst_idx = 1
 
-  while tcount < ttotal
-    tmin = Inf
+  while count < t
+    tmin::Float64 = Inf
+    tcol::Float64 = 0.0
 
     for i in eachindex(bt)
-      obst = bt[i]
-      tcol = collisiontime(p, obst)
+      tcol = collisiontime(p, bt[i])
       # Set minimum time:
       if tcol < tmin
         tmin = tcol
@@ -582,21 +580,12 @@ function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Float64;
       push!(rpos, p.pos + p.current_cell)
       push!(rvel, p.vel)
       push!(rt, t_to_write)
-      tcount += t_to_write
+      # set counting variable
+      count += increment_counter(t, t_to_write)
       t_to_write = 0.0
     end
   end#time loop
   return (rt, rpos, rvel, ω)
-end
-
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle}, ttotal::Real;
-  warning = false)
-  ti = Float64(ttotal)
-  if ttotal <= 0
-    error("`evolve!()` cannot evolve backwards in time.")
-  else
-    evolve!(p, bt, Float64(ti); waning = warning)
-  end
 end
 
 function construct(t::Vector{Float64},  poss::Vector{SVector{2,Float64}},
