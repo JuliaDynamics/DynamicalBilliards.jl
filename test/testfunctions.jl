@@ -239,7 +239,7 @@ function check_previous_obstacle(partnum; printinfo = true)
     println("\nCurrently testing: check_previous_obstacle")# Test:
     println("--The previous collision obstacle is never the same as the")
     println("  current in a closed sinai billiard.")
-    println("--The `distance` after propagation always less that 1e-10.")
+    println("--The `distance` after propagation is not big.")
   end
   ttotal = 10000.0
   bt = billiard_sinai()
@@ -263,7 +263,7 @@ function check_previous_obstacle(partnum; printinfo = true)
         tmin::Float64 = Inf
 
         for i in eachindex(bt)
-          tcol::Float64 = collisiontime(p, obst)
+          tcol::Float64 = collisiontime(p, bt[i])
           # Set minimum time:
           if tcol < tmin
             tmin = tcol
