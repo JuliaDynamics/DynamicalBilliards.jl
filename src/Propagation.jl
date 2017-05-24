@@ -102,18 +102,9 @@ incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
 function resolvecollision!(p::AbstractParticle, o::Obstacle)::Void
   dist = distance(p, o)
-  if abs(dist) > 1e-9
-    println("After propagation, in resolvecollision, we got distance")
-    println("dist = $dist")
-    println("Collision is to be made with $(o.name)")
-    println("particle velocity (before reflection):")
-    println("vx = $(p.vel[1])")
-    println("vy = $(p.vel[2])")
-    error("Too big distance after propagation into resolve!")
-  end
 
   if dist < 0.0
-    dt = relocate!(p, o, dist)
+    relocate!(p, o, dist)
   end
   # Perform specular reflection:
   specular!(p, o)
@@ -122,14 +113,13 @@ end
 
 function resolvecollision!(p::AbstractParticle, o::PeriodicWall)
   dist = distance(p, o)
-  dt = 0.0
 
   if dist > 0.0
-    dt = relocate!(p, o, dist)
+    relocate!(p, o, dist)
   end
   #perform periodicity
   periodicity!(p, o)
-  return dt
+  return
 end
 
 ####################################################

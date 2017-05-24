@@ -35,7 +35,6 @@ end
 function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
   θ::Function, new_ω::Function = ((x, bool) -> x))::Void
 
-  dt = 0.0
   ω = p.omega
   # Determine incidence angle (0 < θ < π/4)
   n = normalvec(a, p.pos)

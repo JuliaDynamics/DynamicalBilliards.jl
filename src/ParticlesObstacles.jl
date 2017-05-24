@@ -403,9 +403,9 @@ If the `distance(p, bt)` is negative this means that the particle is outside the
 table. If this was *not* intended, please file an error immediately!
 """
 function distance(p::AbstractParticle, bt::Vector{Obstacle})
-  mindist = Inf
-  for obst in bt
-    dist = distance(p, obst)
+  mindist::Float64  = Inf
+  for i in eachindex(bt)
+    dist::Float64 = distance(p, bt[i])
     if dist <= mindist; mindist = dist; end
   end
   return mindist
@@ -468,10 +468,11 @@ end
 
 function cellsize(bt::Vector{Obstacle})
 
-  xmin = ymin = Inf
-  xmax = ymax = -Inf
-  for obst in bt
-    xs, ys, xm, ym = cellsize(obst)
+  xmin::Float64 = ymin::Float64 = Inf
+  xmax::Float64 = ymax::Float64 = -Inf
+  for i in eachindex(bt)
+    xs::Float64 = ys::Float64 = xm::Float64 = ym::Float64 = 1.0
+    xs, ys, xm, ym = cellsize(bt[i])
     xmin = xmin > xs ? xs : xmin
     ymin = ymin > ys ? ys : ymin
     xmax = xmax < xm ? xm : xmax
@@ -491,7 +492,7 @@ type of the returned particle is `MagneticParticle`, with angular velocity `omeg
 Else, it is `Particle`.
 """
 function randominside(bt::Vector{Obstacle})
-
+  xmin::Float64 = ymin::Float64 = xmax::Float64 = ymax::Float64 = 1.0
   xmin, ymin, xmax, ymax = cellsize(bt)
   f = rand()
   while f == 0 || f==1/4 || f==1/2 || f == 3/4
@@ -521,6 +522,7 @@ function randominside(ω::Real, bt::Vector{Obstacle})
     return randominside(bt)
   end
 
+  xmin::Float64 = ymin::Float64 = xmax::Float64 = ymax::Float64 = 1.0
   xmin, ymin, xmax, ymax = cellsize(bt)
 
   φ0 = 2π*rand()

@@ -239,12 +239,12 @@ function check_previous_obstacle(partnum; printinfo = true)
     println("\nCurrently testing: check_previous_obstacle")# Test:
     println("--The previous collision obstacle is never the same as the")
     println("  current in a closed sinai billiard.")
-    println("--For bot straight and magnetic propagation")
+    println("--The `distance` after propagation always less that 1e-10.")
   end
   ttotal = 10000.0
   bt = billiard_sinai()
 
-  for ω in [0.0, 0.002, -0.004]
+  for ω in [0.0, 0.002, -0.8]
     printinfo && println("...for ω=$ω")
 
     for j in 1:partnum
@@ -254,26 +254,26 @@ function check_previous_obstacle(partnum; printinfo = true)
       prev_vel = p.vel
       new_pos = p.pos
       new_vel = p.vel
-      colobst = nothing
-      prev_obst = nothing
-      tcount = 0.0
+      colobst_idx::Int = 99
+      prev_obst_idx::Int = 99
+      tcount::Float64 = 0.0
       colnumber = 0
 
       while tcount < ttotal
-        tmin = Inf
+        tmin::Float64 = Inf
 
-        for obst in bt
-          tcol = collisiontime(p, obst)
+        for i in eachindex(bt)
+          tcol::Float64 = collisiontime(p, obst)
           # Set minimum time:
           if tcol < tmin
             tmin = tcol
-            colobst = obst
+            colobst_idx = i
           end
         end#obstacle loop
 
-        if colobst == prev_obst
+        if colobst_idx == prev_obst_idx
           if ω==0
-            println("Collision with obstacle: $(colobst.name)")
+            println("Collision with obstacle: $(bt[colobst_idx].name)")
             println("collision time = $tmin")
             println("init. distance = $d")
             println("current pos = $(new_pos)")
@@ -284,7 +284,7 @@ function check_previous_obstacle(partnum; printinfo = true)
             error("Previuus obstacle was same as current for straight prop.")
           else
             if tmin<1e-6
-              println("Collision with obstacle: $(colobst.name)")
+              println("Collision with obstacle: $(bt[colobst_idx].name)")
               println("collision time = $tmin")
               println("init. distance = $d")
               println("current pos = $(new_pos)")
@@ -298,9 +298,22 @@ function check_previous_obstacle(partnum; printinfo = true)
         end
 
         propagate!(p, tmin)
-        resolvecollision!(p, colobst)
+        dis = distance(p, bt[colobst_idx])
+        if abs(dis) >= 1e-10
+          println("Collision with obstacle: $(bt[colobst_idx].name)")
+          println("collision time = $tmin")
+          println("current pos = $(new_pos)")
+          println("current vel = $(new_vel)")
+          println("previus pos = $(prev_pos)")
+          println("previus vel = $(prev_vel)")
+          println("Collision number: $colnumber")
+          println("distance after propagation: $dis")
+          error("Too large distance after propagation...")
+        end
+        ### CHECK DISTANCE HERE
+        resolvecollision!(p, bt[colobst_idx])
         tcount += tmin
-        prev_obst = colobst
+        prev_obst_idx = colobst_idx
         prev_pos = new_pos
         prev_vel = new_vel
         new_pos=p.pos
