@@ -81,9 +81,14 @@ However, during ray-splitting, the a `MagneticParticle` may be in areas with dif
 
 In any case, such a change is not accounted for internally by `DynamicalBilliards`. However it is very easy to implement this by "re-normalizing" the angular velocities you use. Since the "code" velocity has measure one, the rotation radius is given by
 
-`` r = \frac{1}{\omega_\text{code}} = \frac{v_\text{real}}{\omega_\text{real}} ``
+```math
+r = \frac{1}{\omega_\text{code}} = \frac{v_\text{real}}{\omega_\text{real}}
+```
 
-then one simply has to adjust the values of `ω` given in the code with ``\omega_\text{code} = \frac{\omega_\text{real}}{v_\text{real}} ``.
+then one simply has to adjust the values of `ω` given in the code with
+```math
+\omega_\text{code} = \frac{\omega_\text{real}}{v_\text{real}}
+```
 
 After getting the timeseries from `construct()`:
 ```julia
