@@ -33,7 +33,7 @@ end
 # Plotting Routines (loaded on demand)   #
 ##########################################
 function plotting()
-  dir = joinpath(dirname(@__FILE__), "plotting")
+  dir = joinpath(homedir(), ".julia", "v$(VERSION.major).$(VERSION.minor)", "DynamicalBilliards", "plotting")
   for f in readdir(dir)
     include(f)
   end
