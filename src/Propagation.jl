@@ -396,7 +396,7 @@ realangle(p::MagneticParticle, o::Obstacle, inter::Vector{SVector}, pc, pr)
 ```
 Given the intersections `inter` of the trajectory of a magnetic particle `p` with
 some obstacle `o`, find which of the two is the "real" one, i.e. occurs first.
-Returns the angle of first collision, which is equat to the time to first
+Returns the angle of first collision, which is equal to the time to first
 collision divided by ω.
 
 The function also takes care of problems that may arise when particles are very

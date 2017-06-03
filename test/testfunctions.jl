@@ -292,7 +292,7 @@ function check_previous_obstacle(partnum; printinfo = true)
               println("previus pos = $(prev_pos)")
               println("previus vel = $(prev_vel)")
               println("Collision number: $colnumber")
-              error("Previuus obstacle was same as current for straight prop.")
+              error("Previuus obstacle was same as current for magnetic prop.")
             end
           end
         end

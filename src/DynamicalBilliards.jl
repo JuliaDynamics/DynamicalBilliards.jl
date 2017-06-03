@@ -9,8 +9,17 @@ module DynamicalBilliards
 using StaticArrays
 import Base.show
 
-# export test_options
+##########################################
+# Core                                   #
+##########################################
+include("ParticlesObstacles.jl")
+include("Propagation.jl")
+include("StandardBilliards.jl")
+include("RaySplitting.jl")
 
+##########################################
+# Test Options                           #
+##########################################
 """
     test_options(;print_info = false, long_tests = false)
 Set if you want the long version of the tests and if you want information to be
@@ -20,10 +29,12 @@ function test_options(;print_info::Bool = false, long_tests::Bool = false)
   ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
   ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
 end
-
-include("ParticlesObstacles.jl")
-include("Propagation.jl")
-include("StandardBilliards.jl")
-include("RaySplitting.jl")
-
+##########################################
+# Plotting Routines (loaded on demand)   #
+##########################################
+function plotting()
+  dir = joinpath(dirname(@__FILE__), "plotting")
+  for f in readdir(dir)
+    include(f)
+  end
 end
