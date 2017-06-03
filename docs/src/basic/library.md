@@ -57,14 +57,6 @@ supports_raysplitting
 ```
 
 ## Visualization
-```@docs
-plot_obstacle
-plot_particle
-plot_cyclotron
-plot_billiard
-animate_evolution
-billiard_julia
-```
 
 
 ```julia
