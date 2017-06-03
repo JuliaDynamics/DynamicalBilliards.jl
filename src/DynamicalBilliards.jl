@@ -32,9 +32,12 @@ end
 ##########################################
 # Plotting Routines (loaded on demand)   #
 ##########################################
-function plotting()
-  dir = joinpath(homedir(), ".julia", "v$(VERSION.major).$(VERSION.minor)",
-  "DynamicalBilliards", "src", "plotting")
+"""
+    (DynamicalBilliards.) enableplotting()
+Enable plotting for the package DynamicalBilliards.jl
+"""
+function enableplotting()
+  dir = joinpath(Pkg.dir("DynamicalBilliards"), "src", "plotting")
   for f in readdir(dir)
     include(joinpath(dir, f))
   end

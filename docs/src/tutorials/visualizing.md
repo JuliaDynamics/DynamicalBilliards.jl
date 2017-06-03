@@ -1,5 +1,4 @@
-All plotting functionality of `DynamicalBilliards` is contained in the package `DynamicalBilliardsPlotting`, therefore the latter must be loaded via `using` before attempting to use the plotting functions.
-The functionality lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
+All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
 These functions are nicely grouped in this [library section](/basic/library/#visualization).
 
 ## Plotting the Billiard Table
@@ -7,7 +6,8 @@ These functions are nicely grouped in this [library section](/basic/library/#vis
 The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the given obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
 For example:
 ```julia
-using DynamicalBilliards, DynamicalBilliardsPlotting, PyPlot
+using DynamicalBilliards, PyPlot
+DynamicalBilliards.enableplotting()
 bt = billiard_sinai(0.3)
 # Plot disk:
 plot_obstacle(bt[5])
@@ -52,7 +52,7 @@ which should give you something like this (notice that the particle position and
 
 ![Visualizing tutorial 3](http://i.imgur.com/8a4ajfA.png)
 
-### Color conventions
+## Color conventions
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:
 * Particles are black.
 * Particle orbits/trajectories are blue.
@@ -115,3 +115,5 @@ plot_particle(p)
 ```
 will produce something like this:
 ![Periodic Billiard plot](http://i.imgur.com/rOpU7sl.png)
+
+Animations for periodic billiards are not supported yet.

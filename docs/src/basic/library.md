@@ -57,8 +57,15 @@ supports_raysplitting
 ```
 
 ## Visualization
-All visualization-related functions are contained in the `DynamicalBilliardsPlotting` package.
-Here are their documentation strings:
+```@docs
+plot_obstacle
+plot_particle
+plot_cyclotron
+plot_billiard
+animate_evolution
+billiard_julia
+```
+
 
 ```julia
 plot_obstacle(obst::Obstacle; kwargs...)

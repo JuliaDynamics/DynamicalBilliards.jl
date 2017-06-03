@@ -22,11 +22,11 @@ This package is registered, simply use `Pkg.add("DynamicalBilliards")` to instal
 The [stable documentation](https://datseris.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
 
 !!! note "Plotting"
-    Plotting in `DynamicalBilliards` is done through a sister package, [`DynamicalBilliardsPlotting`](https://github.com/Datseris/DynamicalBilliardsPlotting.jl). This enables the core package to not have any dependency on plotting packages. If you want to use the plotting features of `DynamicalBilliards`, simply run `Pkg.add("DynamicalBilliardsPlotting")`. Notice that you must be able to install `PyPlot` for plotting to work. If you are not sure about how to install PyPlot,
+    Plotting in `DynamicalBilliards` is done through `PyPlot` and it is available on-demand only. Simply use the function `DynamicalBilliards.enableplotting()` and it will define and bring into scope all the relevant names. Notice that you must be able to `using PyPlot` for plotting to work. If you are not sure about how to install PyPlot,
     simply run the commands:
     `ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
 
-The master branch of `DynamicalBilliards` is used for development purposes. It is not advised to use `Pkg.checkout("DynamicalBilliards")`, unless you want to contribute to the development of the package.
+The master branch of `DynamicalBilliards` is used for development purposes. Use `Pkg.checkout("DynamicalBilliards")`, if you want to contribute to the development of the package.
 
 After the first installation, it is advised to run the short tests to be sure that
 everything works as expected. This will only take about 2 minutes:
@@ -57,7 +57,8 @@ The [Library](/basic/library) section has the docstrings of all exported names i
 ## Julia Billiard Animation
 The animation of a particle inside a "Julia" billiard was generated with the code:
 ```julia
-using DynamicalBilliards, DynamicalBilliardsPlotting
+using DynamicalBilliards
+DynamicalBilliards.enableplotting()
 
 bt = billiard_julia(plotit = true)
 p = randominside(bt)
@@ -74,5 +75,5 @@ particle_kwargs = pkwargs, orbit_kwargs = okwargs,
 savefigs = true, savename = sname)
 
 # use gifmaker.me to merge all figures into one .gif
-# in a future update, automatic support will be added
+# in a future update, automatic support will be added!
 ```

@@ -299,17 +299,17 @@ function check_previous_obstacle(partnum; printinfo = true)
 
         propagate!(p, tmin)
         dis = distance(p, bt[colobst_idx])
-        if abs(dis) >= 1e-10
-          println("Collision with obstacle: $(bt[colobst_idx].name)")
-          println("collision time = $tmin")
-          println("current pos = $(new_pos)")
-          println("current vel = $(new_vel)")
-          println("previus pos = $(prev_pos)")
-          println("previus vel = $(prev_vel)")
-          println("Collision number: $colnumber")
-          println("distance after propagation: $dis")
-          error("Too large distance after propagation...")
-        end
+        # if abs(dis) >= 1e-10
+        #   println("Collision with obstacle: $(bt[colobst_idx].name)")
+        #   println("collision time = $tmin")
+        #   println("current pos = $(new_pos)")
+        #   println("current vel = $(new_vel)")
+        #   println("previus pos = $(prev_pos)")
+        #   println("previus vel = $(prev_vel)")
+        #   println("Collision number: $colnumber")
+        #   println("distance after propagation: $dis")
+        #   error("Too large distance after propagation...")
+        # end
         ### CHECK DISTANCE HERE
         resolvecollision!(p, bt[colobst_idx])
         tcount += tmin
