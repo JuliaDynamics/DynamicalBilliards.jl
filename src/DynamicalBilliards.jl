@@ -36,7 +36,7 @@ function plotting()
   dir = joinpath(homedir(), ".julia", "v$(VERSION.major).$(VERSION.minor)",
   "DynamicalBilliards", "src", "plotting")
   for f in readdir(dir)
-    include(f)
+    include(joinpath(dir, f))
   end
 end
 
