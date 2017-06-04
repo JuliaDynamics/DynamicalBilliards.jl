@@ -431,7 +431,9 @@ function check_splitterwall(partnum; printinfo = true)
     println("--ray-splitting with SplitterWall and Antidot works")
     println("--for both straight and magnetic propagation")
   end
-
+  if partnum > 10
+    partnum = 10
+  end
   sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
   Tp = (p) -> (θ, pflag, ω) -> begin
     if pflag
