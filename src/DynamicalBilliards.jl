@@ -37,7 +37,7 @@ end
 Enable plotting for the package DynamicalBilliards.jl
 """
 function enableplotting()
-  dir = joinpath(Pkg.dir("DynamicalBilliards"), "src", "plotting")
+  dir = joinpath(dirname(@__FILE__), "plotting")
   for f in readdir(dir)
     include(joinpath(dir, f))
   end
