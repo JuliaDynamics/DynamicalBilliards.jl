@@ -23,7 +23,7 @@ This package is registered, simply use `Pkg.add("DynamicalBilliards")` to instal
 The master branch of `DynamicalBilliards` is used for development purposes. It is not advised to use `Pkg.checkout("DynamicalBilliards")`, unless you want to contribute to the development of the package.
 
 ## Plotting
-Plotting in `DynamicalBilliards` is done through the []`PyPlot` package]("https://github.com/JuliaPy/PyPlot.jl"). However, all plotting-related functions are not available by default but only "on-demand". Use `DynamicalBilliards.enableplotting()` to bring them into scope.
+Plotting in `DynamicalBilliards` is done through the [`PyPlot` package]("https://github.com/JuliaPy/PyPlot.jl"). However, all plotting-related functions are not available by default but only "on-demand". Use `DynamicalBilliards.enableplotting()` to bring them into scope.
 
 **WARNING**: You must be able to `using PyPlot` if you want to use the plotting capabilities of `DynamicalBilliards`! If you are having trouble installing `PyPlot` you can always use the minimal Python installation through miniconda by running these lines in your Julia terminal:
 
