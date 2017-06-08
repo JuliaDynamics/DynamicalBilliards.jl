@@ -1,4 +1,4 @@
-using PyPlot
+using PyPlot, StaticArrays
 export plot_cyclotron, plot_particle
 
 """
