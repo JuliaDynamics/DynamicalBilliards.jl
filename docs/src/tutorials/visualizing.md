@@ -59,6 +59,7 @@ The default plotting settings have been chosen for maximum clarity and consisten
 * Reflecting obstacles (e.g. `Disk` or `FiniteWall`) are green.
 * Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are yellow.
 * Ray-splitting obstacles are red with dashed linestyle.
+* Periodicity enforcing obstacles are purple with dotted linestyle (if and when plotted).
 
 ## Animating the motion of a particle
 

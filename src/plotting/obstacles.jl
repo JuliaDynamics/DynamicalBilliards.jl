@@ -56,6 +56,6 @@ end
 
 function plot_obstacle(w::PeriodicWall; kwargs...)
   PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
-  color="purple", linewidth = 1.0, alpha = 0.5, kwargs...)
+  color="purple", linewidth = 1.0, linestyle="dotted", alpha = 0.5, kwargs...)
   PyPlot.show()
 end

@@ -1,4 +1,4 @@
-using PyPlot
+using PyPlot, StaticArrays
 export plot_billiard, billiard_julia
 
 
