@@ -67,8 +67,8 @@ function plot_billiard(bt, xmin, ymin, xmax, ymax)
 end
 
 function plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64}; plot_orbit = true)
-  xmin = floor(minimum(round(xt,8))); xmax = ceil(maximum(round(xt,8)))
-  ymin = floor(minimum(round(yt,8))); ymax = ceil(maximum(round(yt,8)))
+  xmin = floor(minimum(round.(xt,8))); xmax = ceil(maximum(round.(xt,8)))
+  ymin = floor(minimum(round.(yt,8))); ymax = ceil(maximum(round.(yt,8)))
   if plot_orbit
     plot(xt, yt, color = "blue")
   end

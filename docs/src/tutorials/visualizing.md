@@ -1,6 +1,8 @@
 All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
 These functions are nicely grouped in this [library section](/basic/library/#visualization).
 
+*Remember to use* `DynamicalBilliards.enableplotting()` *to bring the plotting functions into scope!*
+
 ## Plotting the Billiard Table
 
 The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the given obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
