@@ -1,4 +1,4 @@
-site_name:           DynamicalBilliards
+site_name:           DynamicalBilliards.jl
 repo_url:            https://github.com/Datseris/DynamicalBilliards.jl
 site_description:    An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.
 site_author:         George Datseris

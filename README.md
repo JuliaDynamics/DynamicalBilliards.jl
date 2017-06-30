@@ -31,3 +31,10 @@ Plotting in `DynamicalBilliards` is done through the [`PyPlot` package]("https:/
 ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.build("PyCall");
 Pkg.add("PyPlot"); using PyPlot;
 ```
+
+## Acknowledgements
+This package is mainly developed by George Datseris. However, this development would not have been possible without significant help from other people:
+
+1. [David. P. Sanders](https://github.com/dpsanders) (@dpsanders) contributed in fruitful discussions about the programming and physics of Billiard systems all-around, as well as provided some reference code for the "straight-propagation" billiards.
+2. [Christopher Rackauckas](https://github.com/ChrisRackauckas) (@ChrisRackauckas) helped set-up the continuous integration, testing, documentation publishing and all around package development-related concepts.
+3. [Tony Kelman](https://github.com/tkelman) (@tkelman) helped significantly in the package publication process, especially in making it work correctly without destroying METADATA.jl.
