@@ -9,7 +9,9 @@ Dynamical Billiard systems in two dimensions.
 
 A dynamical billiard is a system where a particle is propagating as a straight line from obstacle to obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
 
-The "standard" billiard described above can be extended in many ways. The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. The types that are currently offered by this package, besides the standard one, are magnetic and ray-splitting billiards. In a magnetic billiard the particle's orbit is a circle (like electrons in a perpendicular magnetic field). In ray-splitting (a.k.a. semiclassical) billiards the particle may propagate *through* an obstacle, given some arbitrary transmission and refraction law.
+The above will be referred to as the "standard" billiard. The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. Also, the [scholarpedia](http://www.scholarpedia.org/article/Dynamical_billiards) entry is a good read on the subject. In general, the standard billiard can be extended in many ways.
+
+The types that are currently offered by this package, besides the standard one, are magnetic and ray-splitting billiards. In a magnetic billiard the particle's orbit is a circle (like electrons in a perpendicular magnetic field). In ray-splitting (a.k.a. semiclassical) billiards the particle may propagate *through* an obstacle, given some arbitrary transmission and refraction law.
 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
