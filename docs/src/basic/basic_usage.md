@@ -149,12 +149,13 @@ push!(bt, d1, d2, d3, w1)
 ω = 2.0
 p = randominside(bt, ω)
 
+DynamicalBilliards.enableplotting()
 plot_billiard(bt)
 axis("off")
 tight_layout()
 
 sname = "C:\\***\\example"
-plot_evolution(p, bt, 200;
+animate_evolution(p, bt, 200;
 col_to_plot = 4, savefigs = true, savename = sname)
 ```
 Afterwards the outputed .png files where merged into a single .gif externally using for example the website gifmaker.me.
