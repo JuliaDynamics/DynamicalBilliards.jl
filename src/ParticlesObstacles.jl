@@ -10,7 +10,7 @@ normalvec, randominside, distance, cellsize, Wall, Circular
     AbstractParticle
 Particle supertype.
 """
-abstract AbstractParticle
+abstract type AbstractParticle end
 
 """
     Particle <: AbstractParticle
@@ -27,7 +27,7 @@ Particle(x::Real, y::Real, φ::Real)
 Particle() = Particle(rand(), rand(), rand()*2π)
 ```
 """
-type Particle <: AbstractParticle
+mutable struct Particle <: AbstractParticle
   pos::SVector{2,Float64}
   vel::SVector{2,Float64}
   current_cell::SVector{2,Float64}
@@ -62,7 +62,7 @@ MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 ```
 """
-type MagneticParticle <: AbstractParticle
+mutable struct MagneticParticle <: AbstractParticle
   pos::SVector{2,Float64}
   vel::SVector{2,Float64}
   current_cell::SVector{2,Float64}
@@ -136,13 +136,13 @@ end
     Obstacle
 Obstacle supertype.
 """
-abstract Obstacle
+abstract type Obstacle end
 
 """
     Circular <: Obstacle
 Circular obstacle supertype.
 """
-abstract Circular <: Obstacle
+abstract type Circular <: Obstacle end
 
 """
     Disk <: Circular
@@ -153,7 +153,7 @@ Disk-like obstacle with propagation allowed outside of the circle.
 * `name::String` : Some name given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable Disk <: Circular
+struct Disk <: Circular
     c::SVector{2,Float64}
     r::Float64
     name::String
@@ -172,7 +172,7 @@ The propagation is allowed outside of the circle.
 * `name::String` : Some name given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable RandomDisk <: Circular
+struct RandomDisk <: Circular
     c::SVector{2,Float64}
     r::Float64
     name::String
@@ -194,7 +194,7 @@ Used in ray-splitting billiards.
 * `name::String` : Name of the obstacle given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-type Antidot <: Circular
+mutable struct Antidot <: Circular
     c::SVector{2,Float64}
     r::Float64
     pflag::Bool
@@ -216,7 +216,7 @@ show(io::IO, w::Circular) =
     Wall <: Obstacle
 Wall obstacle supertype.
 """
-abstract Wall <: Obstacle
+abstract type Wall <: Obstacle end
 
 """
     FiniteWall <: Wall
@@ -230,7 +230,7 @@ Wall obstacle imposing specular reflection during collision.
 * `name::String` : Name of the obstacle, e.g. "left wall", given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable FiniteWall <: Wall
+struct FiniteWall <: Wall
   sp::SVector{2,Float64}
   ep::SVector{2,Float64}
   normal::SVector{2,Float64}
@@ -264,7 +264,7 @@ Wall obstacle imposing (uniformly) random reflection during collision.
 * `name::String` : Name of the obstacle, e.g. "random wall", given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable RandomWall <: Wall
+struct RandomWall <: Wall
   sp::SVector{2,Float64}
   ep::SVector{2,Float64}
   normal::SVector{2,Float64}
@@ -302,7 +302,7 @@ Wall obstacle that imposes periodic boundary conditions upon collision.
   convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-immutable PeriodicWall <: Wall
+struct PeriodicWall <: Wall
   sp::SVector{2,Float64}
   ep::SVector{2,Float64}
   normal::SVector{2,Float64}
@@ -339,7 +339,7 @@ Wall obstacle imposing specular reflection during collision.
   given for user convenience.
 Constructors accept any vectors convertible to SVector{2,Float64}.
 """
-type SplitterWall <: Wall
+mutable struct SplitterWall <: Wall
   sp::SVector{2,Float64}
   ep::SVector{2,Float64}
   normal::SVector{2,Float64}
