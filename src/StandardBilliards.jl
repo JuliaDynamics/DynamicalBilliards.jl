@@ -130,7 +130,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     T = FiniteWall
     wallname = "wall"
   elseif setting == "periodic"
-    if n!= 4 && n != 6
+    if sides != 4 && sides != 6
       error("Polygonal and periodic billiard can exist only for `n=4` or `n=6`")
     end
     T = PeriodicWall
