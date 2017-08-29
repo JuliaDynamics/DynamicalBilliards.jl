@@ -148,7 +148,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     # Normal vector must look at where the particle is coming from
     w = ending - starting
     if setting == "periodic"
-      normal = inr*normalize([-w[2], w[1]])
+      normal = 2inr*normalize([-w[2], w[1]])
     else
       normal = [-w[2], w[1]]
     end
