@@ -16,6 +16,7 @@ include("ParticlesObstacles.jl")
 include("Propagation.jl")
 include("StandardBilliards.jl")
 include("RaySplitting.jl")
+include("LyapunovSpectrum.jl")
 
 ##########################################
 # Test Options                           #
