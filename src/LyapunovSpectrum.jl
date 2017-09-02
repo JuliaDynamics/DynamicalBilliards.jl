@@ -26,7 +26,7 @@ specular!(p::AbstractParticle, o::Obstacle, offset::Matrix)
 ```
 Perform specular reflection based on the normal vector of the Obstacle. The function updates the position and velocity of the particle together with the components of 4 offset vectors stored in the matrix  `offset` as columns.
 """
-function specular!(p::AbstractParticle, o::Circular, offset::Matrix)
+function specular!(p::AbstractParticle, o::Disk, offset::Matrix)
     n = normalvec(o, p.pos)
     ti = [-p.vel[2],p.vel[1]]
     cosa = dot(n, -p.vel)
@@ -42,12 +42,26 @@ function specular!(p::AbstractParticle, o::Circular, offset::Matrix)
     end
 end
 
+
+function specular!(p::AbstractParticle, o::FiniteWall, offset::Matrix)
+    n = normalvec(o, p.pos)
+    specular!(p, o)
+    for k in 1:4
+        x = offset[:,k]
+        ##Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (ec. 20) 
+        x[1:2]  = x[1:2] -  2.*dot(x[1:2],n)*n
+        x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n
+        ###
+        offset[:,k] = x
+    end
+end
+
 """
     resolvecollision!(p::AbstractParticle, o::Circular, offset::Matrix)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*, updating the components of the offset vectors stored in the matrix `offset` as columns.
 
 """
-function resolvecollision!(p::AbstractParticle, o::Disk, offset::Matrix)::Void
+function resolvecollision!(p::AbstractParticle, o::Union{Disk, FiniteWall}, offset::Matrix)::Void
     dist = distance(p, o)
     if dist < 0.0
         relocate!(p, o, dist)
@@ -56,6 +70,9 @@ function resolvecollision!(p::AbstractParticle, o::Disk, offset::Matrix)::Void
     return
 end
 
+
+resolvecollision!(p::AbstractParticle, o::PeriodicWall, offset::Matrix)::Void = 
+    resolvecollision!(p, o)
 
 resolvecollision!(p::AbstractParticle, o::PeriodicWall, offset::Matrix)::Void = 
     resolvecollision!(p, o)
@@ -121,7 +138,7 @@ function lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
         resolvecollision!(p, bt[colobst_idx], offset)
         t_to_write += tmin
         
-        if typeof(bt[colobst_idx]) <: PeriodicWall
+        if typeof(bt[colobst_idx]) <: Wall
             continue
         else
             offset = gramschmidt(offset)
