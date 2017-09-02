@@ -39,6 +39,7 @@ function check_straight_sinai(partnum; printinfo = true)
   return true
 end
 
+
 function check_magnetic_sinai(partnum; printinfo = true)
   if printinfo
     println("\nCurrently testing: check_magnetic_sinai")
@@ -585,4 +586,35 @@ function check_klein_magnetic(partnum; printinfo = true)
     end
   end
   return true
+end
+
+
+function check_lyapunov_spectrum(partnum; printinfo = true)
+    if printinfo
+        println("\nCurrently testing: check_lyapunov_spectrum")
+    println("--lyapunovspectrum works for a polygonar lorentz  gas with periodic walls")
+  end
+
+    l = 2.0
+    r = 1.0
+    sides = 6
+    printinfo && println("...for n = $(sides) sides, l_polygon = $l and r_disk = $r  ")
+    bt =  bt = billiard_polygon(6,l; setting = "periodic") 
+    disc = Disk([0., 0.], r)
+    push!(bt, disc)
+    tt=10000.0
+    
+    for i in 1:partnum
+        p = randominside(bt)
+        exps = lyapunovspectrum(p, bt, tt)
+        error_level = 1e-2
+        sumpair = exps[1] + exps[4]
+        
+        abs(sumpair) > error_level && error("λ1 + λ4 = $(sumpair) > $error_level")
+
+        exps[2] > error_level && error("λ2 > $error_level")
+
+        exps[3] > error_level && error("λ3 > $error_level")
+    end#particle loop
+    return true
 end

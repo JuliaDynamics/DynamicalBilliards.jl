@@ -40,3 +40,4 @@ pages:
   - Examples: tutorials/examples.md
 - Library: basic/library.md
 - Physics: physics.md
+- Lyapunov Exponents: lyapunovs.md
