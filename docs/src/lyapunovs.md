@@ -3,13 +3,15 @@ The Finite Time Lyapunov Spectrum (FTLS) for a billiard system consists of a set
 It can be shown theoretically that two of these exponents must be zero ($\lambda_2$ =$\lambda_3$ = 0) and the other two are paired in such a way that they sum up to zero, i.e. $\lambda_1 =  -\lambda_4$).
 
 The function provided to calculate the FTLS is
-```
+```julia
  lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
 ```
 and it returns an array with the 4 lyapunov exponents.
 
 Here its basic use is illustrated
-```
+```julia
+using DynamicalBilliards
+
 radius = 1.0
 l = 2.0
 
@@ -25,7 +27,7 @@ exps = lyapunovspectrum(p, bt, t)
 
 The following code is for a family of polygonal billiards (hexagonal unit cell) parameterized by the space between the disks.
 
-```
+```julia
 using DynamicalBilliards
 using PyPlot
 
@@ -50,8 +52,5 @@ plot(spaces, lyap_time, "*-")
 
 The plot of the maximum exponent is displayed below and it can be compared with the results reported by [Gaspard et. al](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.51.5332)(see figure 7.) for the average over an ensemble.
 
-
-![Lyapunov Exponent](lyap.png)
-![gaspard](gaspard.png)
 
 
