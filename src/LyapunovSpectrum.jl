@@ -74,9 +74,6 @@ end
 resolvecollision!(p::AbstractParticle, o::PeriodicWall, offset::Matrix)::Void = 
     resolvecollision!(p, o)
 
-resolvecollision!(p::AbstractParticle, o::PeriodicWall, offset::Matrix)::Void = 
-    resolvecollision!(p, o)
-
 """
 ```julia
 propagate!(p::AbstractParticle, t, offset::Matrix)
