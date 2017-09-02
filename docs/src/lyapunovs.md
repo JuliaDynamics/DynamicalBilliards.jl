@@ -1,4 +1,4 @@
-The Finite Time Lyapunov Spectrum (FTLS) for a 2D billiard system consists of a set of 4 numbers $\lambda_i \, , \{ i = 1, ...,4 \}$ that characterizes the chaoticity of the billiard. They depend on the initial condition and the total time of integration.
+The Finite Time Lyapunov Spectrum (FTLS) for a 2D billiard system consists of a set of 4 numbers $\lambda_i \, , \{ i = 1, ...,4 \}$ that characterize the chaoticity of the billiard. They depend on the initial condition and the total time of integration.
 
 It can be shown theoretically that two of these exponents must be zero ($\lambda_2$ =$\lambda_3$ = 0) and the other two are paired in such a way that they sum up to zero, i.e. $\lambda_1 =  -\lambda_4$).
 

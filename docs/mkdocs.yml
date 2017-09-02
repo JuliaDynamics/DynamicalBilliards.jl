@@ -19,17 +19,12 @@ markdown_extensions:
   - extra
   - tables
   - fenced_code
-#  - mdx_math
 
 extra_css:
   - assets/Documenter.css
 
 extra_javascript:
   - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
-
-# extra_javascript:
-#   - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
-#   - assets/mathjaxhelper.js
 
 docs_dir: 'build'
 
