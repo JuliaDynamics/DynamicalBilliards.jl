@@ -51,7 +51,7 @@ end
 plot(spaces, lyap_time, "*-")
 ```
 
-The plot of the maximum exponent is displayed below and it can be compared with the results reported by [Gaspard et. al](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.51.5332)(see figure 7. also displayed below) for the average over an ensemble.
+The plot of the maximum exponent is displayed below and it can be compared with the results reported by [Gaspard et. al](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.51.5332) (see figure 7, also displayed below) for the average over an ensemble.
 
 ![lyapunov](https://i.imgur.com/LuwksbL.png)
 ![gaspard](https://i.imgur.com/kBDh0OJ.png)
