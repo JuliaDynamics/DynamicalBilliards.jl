@@ -14,7 +14,7 @@ The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular 
 * **Ray-splitting billiards** : A semiclassical implementation of the dynamical billiard. After a collision of a particle with a boundary, the particle may propagate *through* the boundary given some arbitrary probability and transmission law.
 * **Standard billiards** : A library of pre-constructed billiard systems that have already been used in Physics/Mathematics (e.g. Sinai, periodic Sinai, Buminovich etc.)
 * **Visualization** : Functions for plotting and visualizing aspects of a billiard system, such as obstacles, orbits and more. Also includes animation related content.
-* **Lyapunov Spectrum** : Calculate the lyapunov spectrum of the trajectory of a particle in am arbitrary billiard table. Currently this is only available for `Particle`s.
+* **Lyapunov Spectrum** : Calculate the lyapunov spectrum of the trajectory of a particle in an arbitrary billiard table. Currently this is only available for `Particle`s.
 
 **NOTICE:** This package does not support collision between particles (currently). All particles are considered point-particles for all simulations offered by `DynamicalBilliards.jl`.
 
