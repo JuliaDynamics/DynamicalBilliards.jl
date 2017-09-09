@@ -5,7 +5,7 @@ The goals of the package is to provide a flexible and intuitive framework for fa
 
 | **Documentation**   | [**Package Evaluator**](http://pkg.julialang.org/?pkg=DynamicalBilliards#DynamicalBilliards) | **Travis**     | **AppVeyor** | **Gitter** |
 |:--------:|:-------------------:|:-----------------------:|:-----:|:-----:|
-|[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://Datseris.github.io/DynamicalBilliards.jl/latest)|[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.6.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards) | [![Build Status](https://travis-ci.org/Datseris/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/Datseris/DynamicalBilliards.jl) | [![Build status](https://ci.appveyor.com/api/projects/status/r087ojfuh2rtrxtm?svg=true)](https://ci.appveyor.com/project/Datseris/dynamicalbilliards-jl) | [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/JuliaDynamics/Lobby)
+|[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/latest)|[![](http://pkg.julialang.org/badges/DynamicalBilliards_0.6.svg)](http://pkg.julialang.org/?pkg=DynamicalBilliards) | [![Build Status](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl) | [![Build status](https://ci.appveyor.com/api/projects/status/r087ojfuh2rtrxtm?svg=true)](https://ci.appveyor.com/project/JuliaDynamics/dynamicalbilliards-jl) | [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/JuliaDynamics/Lobby)
 
 
 The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular structures:
