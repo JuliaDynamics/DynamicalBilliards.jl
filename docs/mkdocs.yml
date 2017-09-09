@@ -1,5 +1,5 @@
 site_name:           DynamicalBilliards.jl
-repo_url:            https://github.com/Datseris/DynamicalBilliards.jl
+repo_url:            https://github.com/JuliaDynamics/DynamicalBilliards.jl
 site_description:    An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.
 site_author:         George Datseris
 theme:               'material'
@@ -10,7 +10,7 @@ extra:
     accent: 'cyan'
   social:
     - type: 'github'
-      link: 'https://github.com/Datseris/DynamicalBilliards.jl'
+      link: 'https://github.com/JuliaDynamics/DynamicalBilliards.jl'
 
 markdown_extensions:
   - pymdownx.arithmatex
