@@ -5,11 +5,13 @@ periodicity!
 ####################################################
 ## Mathetical/Convenience Functions
 ####################################################
+const sixsqrt = 6sqrt(2)
+
 """
     acos1mx(x)
 Approximate arccos(1 - x) for x very close to 0.
 """
-acos1mx(x) = sqrt(2x) + sqrt(x)^3/(6sqrt(2))
+acos1mx(x) = sqrt(2x) + sqrt(x)^3/sixsqrt
 
 """
 ```julia
