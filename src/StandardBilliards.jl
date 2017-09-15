@@ -18,7 +18,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
-  bt = Obstacle[]
+  bt = Obstacle{eltype(x)}[]
   if setting == "standard"
     o = 0.0
     sp = [o,o]; ep = [o, y]; n = [x,o]
@@ -152,7 +152,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
       wall = PeriodicWall(starting, ending, normal, wallname*" $i")
     else
       normal = [-w[2], w[1]]
-      wall = FiniteWall(starting, ending, normal, wallname*" $i") 
+      wall = FiniteWall(starting, ending, normal, wallname*" $i")
     end
     push!(bt, wall)
   end

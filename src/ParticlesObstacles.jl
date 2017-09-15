@@ -1,8 +1,8 @@
 using StaticArrays
 import Base.show
 
-export AbstractParticle, Particle, MagneticParticle, magnetic2standard,
-standard2magnetic, cyclotron, Obstacle, Disk, Antidot, RandomDisk,
+export AbstractParticle, Particle, MagneticParticle,
+cyclotron, Obstacle, Disk, Antidot, RandomDisk,
 FiniteWall, PeriodicWall, RandomWall, SplitterWall,
 normalvec, randominside, distance, cellsize, Wall, Circular
 
@@ -14,7 +14,7 @@ normalvec, randominside, distance, cellsize, Wall, Circular
 Particle supertype.
 """
 abstract type AbstractParticle{T<:AbstractFloat} end
-
+eltype(AbstractParticle{T}) where {T} = T
 """
     Particle{T<:AbstractFloat} <: AbstractParticle{T}
 Two-dimensional particle in a billiard table (numbers of type T).
@@ -34,18 +34,20 @@ mutable struct Particle{T<:AbstractFloat} <: AbstractParticle{T}
     pos::SVector{2,T}
     vel::SVector{2,T}
     current_cell::SVector{2,T}
-    Particle{T}(pos, vel, cc) where {T<:AbstractFloat} = new(pos, normalize(vel), cc)
+    Particle{T}(pos::SVector{2,T}, vel::SVector{2,T}, cc::SVector{2,T}) where
+    {T<:AbstractFloat} = new(pos, normalize(vel), cc)
 end
 
-function Particle{T<:AbstractFloat}(ic::AbstractVector{T})
+function Particle(ic::AbstractVector{S}) where {S<:Real}
+    T = S<:Integer ? Float64 : S
     φ0 = ic[3]
     pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-    return Particle(pos, vel, SVector{2,T}(0,0))
+    return Particle{T}(pos, vel, SVector{2,T}(0,0))
 end
-Particle(x, y, φ) = Particle(collect(promote(x,y,φ)))
+Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
 Particle() = Particle(rand(), rand(), rand()*2π)
 show(io::IO, p::Particle{T}) where {T} =
-print(io, "Particle{$T}\n",
+print(io, "Particle {$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
 
 """
@@ -70,15 +72,16 @@ mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
     vel::SVector{2,T}
     current_cell::SVector{2,T}
     omega::T
-    function MagneticParticle{T}(pos, vel, current_cell, ω) where {T<:AbstractFloat}
-        if omega==0
+    function MagneticParticle{T}(pos::SVector{2,T}, vel::SVector{2,T},
+        current_cell::SVector{2,T}, ω::T) where {T<:AbstractFloat}
+        if ω==0
             throw(ArgumentError("Angular velocity of magnetic particle cannot be 0."))
         end
         new(pos, normalize(vel), current_cell, ω)
     end
 end
 
-function MagneticParticle{T<:Real}(ic::AbstractVector{T}, ω::Real)
+function MagneticParticle(ic::AbstractVector{T}, ω::Real) where {T<:Real}
     φ0 = ic[3]
     S = T<:Integer ? Float64 : T
     pos = SVector{2,S}(ic[1:2]); vel = SVector{2,S}(cos(φ0), sin(φ0))
@@ -91,32 +94,8 @@ end
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
 show(io::IO, p::MagneticParticle{T}) where {T} =
-print(io, "MagneticParticle{$T}\n",
+print(io, "Magnetic particle {$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)\nang. velocity: $(p.omega)")
-
-"""
-```julia
-magnetic2standard(p::MagneticParticle, use_cell = true)
-```
-Create a standard `Particle` from a `MagneticParticle`.
-"""
-function magnetic2standard(p::MagneticParticle{T}, use_cell = true) where {T}
-    pos = p.pos
-    cell = use_cell ? current_cell : SVector{T,2}(0,0)
-    return Particle(pos, p.vel, cell)
-end
-
-"""
-```julia
-standard2magnetic(p::Particle, omega, use_cell = true)
-```
-Create a `MagneticParticle` from a `Particle`.
-"""
-function standard2magnetic(p::Particle{T}, ω::Real, use_cell = true) where {T}
-    pos = p.pos
-    cell = use_cell ? current_cell : SVector{T,2}(0,0)
-    return MagneticParticle(pos, p.vel, cell, convert(T, ω))
-end
 
 
 """
@@ -142,7 +121,7 @@ end
 Obstacle supertype.
 """
 abstract type Obstacle{T<:AbstractFloat} end
-
+eltype(Obstacle{T}) where {T} = T
 """
     Circular{T<:AbstractFloat} <: Obstacle{T}
 Circular obstacle supertype.
@@ -214,7 +193,7 @@ function Antidot(c::AbstractVector{T}, r::Real,
 end
 
 show(io::IO, w::Circular{T}) where {T} =
-print(io, "$(w.name) ($T)\n", "center: $(w.c)\nradius: $(w.r)")
+print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)")
 
 
 """
@@ -241,18 +220,15 @@ struct FiniteWall{T<:AbstractFloat} <: Wall{T}
     ep::SVector{2,T}
     normal::SVector{2,T}
     name::String
-    function FiniteWall{T}(sp, ep, normal, name) where {T<:AbstractFloat}
-        n = normalize(normal)
-        d = dot(n, ep-sp)
-        if abs(d) > 10eps(T)
-            error("Normal vector is not actually normal to the wall")
-        end
-        return new(sp, ep, n, name)
-    end
 end
 function FiniteWall(sp::AbstractVector, ep::AbstractVector,
     n::AbstractVector, name::String = "Wall")
-
+    T = eltype(sp)
+    n = normalize(n)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall")
+    end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
@@ -274,18 +250,14 @@ struct RandomWall{T<:AbstractFloat} <: Wall{T}
     ep::SVector{2,T}
     normal::SVector{2,T}
     name::String
-    function RandomWall{T}(sp, ep, normal, name) where {T<:AbstractFloat}
-        n = normalize(normal)
-        d = dot(n, ep-sp)
-        if abs(d) > 10eps(T)
-            error("Normal vector is not actually normal to the wall")
-        end
-    return new(sp, ep, n, name)
-  end
 end
 function RandomWall(sp::AbstractVector, ep::AbstractVector,
     n::AbstractVector, name::String = "Random wall")
-
+    n = normalize(n)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall")
+    end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     return RandomWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
@@ -310,17 +282,13 @@ struct PeriodicWall{T<:AbstractFloat} <: Wall{T}
     ep::SVector{2,T}
     normal::SVector{2,T}
     name::String
-    function PeriodicWall{T}(sp, ep, normal, name) where {T<:AbstractFloat}
-        d = dot(n, ep-sp)
-        if abs(d) > 10eps(T)
-            error("Normal vector is not actually normal to the wall")
-        end
-        return new(sp, ep, normal, name)
-    end
 end
 function PeriodicWall(sp::AbstractVector, ep::AbstractVector,
     n::AbstractVector, name::String = "Periodic wall")
-
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall")
+    end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     return PeriodicWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
@@ -348,24 +316,20 @@ mutable struct SplitterWall{T<:AbstractFloat} <: Wall{T}
     normal::SVector{2,T}
     pflag::Bool
     name::String
-    function SplitterWall{T}(sp, ep, normal, pflag, name) where {T<:AbstractFloat}
-        n = normalize(normal)
-        d = dot(n, ep-sp)
-        if abs(d) > 10eps(T)
-            error("Normal vector is not actually normal to the wall")
-        end
-    return new(sp, ep, n, pflag, name)
-  end
 end
 function SplitterWall(sp::AbstractVector, ep::AbstractVector,
     normal::AbstractVector, name::String = "Splitter wall")
-
+    n = normalize(normal)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall")
+    end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     return SplitterWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
 
 #pretty print:
-show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) ($T)\n",
+show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
@@ -399,33 +363,39 @@ distance(p::AbstractParticle, bt::Vector{<:Obstacle})
 Return minimum `distance(p, obst)` for all `obst` in `bt`.
 If the `distance(p, bt)` is negative this means that the particle is outside
 the billiard table.
+
+All `distance` functions can also be given a position (Vector) instead of a particle.
 """
 function distance(
-    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::T where {T<:AbstractFloat}
+    pos::AbstractVector{T}, bt::Vector{<:Obstacle{T}})::T where {T<:AbstractFloat}
     mindist::T = T(Inf)
     for i in eachindex(bt)
-        dist::T = distance(p, bt[i])
+        dist::T = distance(pos, bt[i])
         if dist <= mindist; mindist = dist; end
     end
     return mindist
 end
 
-function distance(p::AbstractParticle, w::Wall)
-    v1 = p.pos - w.sp
-    dot(v1, normalvec(w, p.pos))
+function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
+    v1 = pos - w.sp
+    dot(v1, normalvec(w, pos))
 end
 
 # no new distance needed for SplitterWall because the `pflag` field
 # has the necessary information to give the correct dinstance,
 # since the distance is calculated throught the normalvec.
 
-distance(p::AbstractParticle, d::Circular) = norm(p.pos - d.c) - d.r
+(distance(pos::AbstractVector{T}, d::Circular{T})::T) where {T} = norm(pos - d.c) - d.r
 
-function distance(p::AbstractParticle, a::Antidot)
-    d = norm(p.pos - a.c) - a.r
-    a.pflag ? d : -d
+function distance(
+    pos::AbstractVector{T}, a::Antidot{T}, pflag::Bool = true)::T where {T}
+    d = norm(pos - a.c) - a.r
+    pflag ? d : -d
 end
 
+(distance(p::AbstractParticle{T}, b)::T) where {T} = distance(p.pos, b)
+(distance(p::AbstractParticle{T}, a::Antidot{T})::T) where {T} =
+distance(p.pos, b, p.pflag)
 
 ####################################################
 ## Initial Conditions

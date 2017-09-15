@@ -14,6 +14,9 @@ end
 if haskey(ENV, "DYNAMICALBILLIARDS_LONGTEST")
   if ENV["DYNAMICALBILLIARDS_LONGTEST"] == "false"
     longtests = false
+  elseif
+    ENV["DYNAMICALBILLIARDS_LONGTEST"] == "true"
+    longtests = true
   end
 end
 

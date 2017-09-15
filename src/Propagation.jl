@@ -6,27 +6,19 @@ periodicity!
 ## Mathetical/Convenience Functions
 ####################################################
 const sixsqrt = 6sqrt(2)
+billiardprec(::Type{T}) where {T} = eps(T)^(4/5)
 
 """
     acos1mx(x)
 Approximate arccos(1 - x) for x very close to 0.
 """
-acos1mx(x) = sqrt(2x) + sqrt(x)^3/sixsqrt
+(acos1mx(x::T)::T) where {T} = sqrt(2x) + sqrt(x)^3/sixsqrt
 
-"""
-```julia
 cross2D(a, b) = a[1]*b[2]-a[2]*b[1]
-```
-Return the 3rd element of the cross product of `a` and `b`, assuming their
-extention from 2D to 3D arrays simply pushes a 0 at their ends.
-
-Equivalent to the determinant of the matrix [a b].
-"""
-cross2D{T<:Real, P<:Real}(a::SVector{2,T}, b::SVector{2,P}) = a[1]*b[2]-a[2]*b[1]
-cross2D(a::AbstractArray, b::AbstractArray) = a[1]*b[2]-a[2]*b[1]
 
 increment_counter(::Int, t_to_write)::Int = 1
-increment_counter(::Float64, t_to_write)::Float64 = t_to_write
+increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
+
 ####################################################
 ## Resolve Collisions
 ####################################################
@@ -39,7 +31,7 @@ the normal vector of `o`, so that it is on the correct side of the obstacle.
 
 Internally takes care of problems of finite accuracy of `Float64`.
 """
-function relocate!(p::AbstractParticle, o::Obstacle, dist::Float64)::Void
+function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, dist::T) where {T}
   n = normalvec(o, p.pos)
   ex = Int(floor(exponent(dist)*0.3010299956639812))
   if ex < -15
@@ -55,35 +47,31 @@ function relocate!(p::AbstractParticle, o::Obstacle, dist::Float64)::Void
 end
 
 """
-```julia
-specular!(p::AbstractParticle, o::Obstacle)
-```
+    specular!(p::AbstractParticle, o::Obstacle)
 Perform specular reflection based on the normal vector of the Obstacle.
 
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2 to π/2 of the normal vector).
 """
 function specular!(p::AbstractParticle, o::Obstacle)
-  n = normalvec(o, p.pos)
-  p.vel = p.vel - 2*dot(n, p.vel)*n
+    n = normalvec(o, p.pos)
+    p.vel = p.vel - 2*dot(n, p.vel)*n
 end
 
-function specular!(p::AbstractParticle, r::RandomDisk)
+function specular!(p::AbstractParticle{T}, r::RandomDisk{T}) where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
-    p.vel = SVector(cos(φ), sin(φ))
+    p.vel = SVector{2,T}(cos(φ), sin(φ))
 end
 
-function specular!(p::AbstractParticle, r::RandomWall)
+function specular!(p::AbstractParticle{T}, r::RandomWall{T}) where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
-    p.vel = SVector(cos(φ), sin(φ))
+    p.vel = SVector{2,T}(cos(φ), sin(φ))
 end
 
 """
-```julia
-periodicity!(p::AbstractParticle, w::PeriodicWall)
-```
+    periodicity!(p::AbstractParticle, w::PeriodicWall)
 Perform periodicity conditions of `w` on `p`.
 """
 function periodicity!(p::AbstractParticle, w::PeriodicWall)
@@ -94,84 +82,99 @@ end
 """
     resolvecollision!(p::AbstractParticle, o::Obstacle)
 Resolve the collision between particle `p` and obstacle `o`, depending on the
-type of `o`. `resolvecollision!()` takes special care so that the particle is always
-inside the correct side of the billiard table, in order to avoid particle leakage.
+type of `o` (do `specular!` or `periodicity!`).
 
     resolvecollision!(p, o, T::Function, θ::Function, new_ω::Function)
 This is the ray-splitting implementation. The three functions given are drawn from
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-function resolvecollision!(p::AbstractParticle, o::Obstacle)::Void
-  dist = distance(p, o)
+resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
+resolvecollision!(p::AbstractParticle, o::PeriodicWall) =  periodicity!(p, o)
 
-  if dist < 0.0
-    relocate!(p, o, dist)
-  end
-  # Perform specular reflection:
-  specular!(p, o)
-  return
+
+function relocate(p::Particle{T}, o::Obstacle{T}, tmin::Real) where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    while distance(newpos, o) < 0
+        tmin -= billiardprec(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+    end
+    return newpos, tmin
 end
 
-function resolvecollision!(p::AbstractParticle, o::PeriodicWall)
-  dist = distance(p, o)
-
-  if dist > 0.0
-    relocate!(p, o, dist)
-  end
-  #perform periodicity
-  periodicity!(p, o)
-  return
+function relocate(p::Particle{T}, o::PeriodicWall{T}, tmin::Real) where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    while distance(newpos, o) > 0
+        tmin += billiardprec(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+    end
+    return newpos, tmin
 end
 
 ####################################################
 ## Straight Propagation
 ####################################################
+"""
+    propagate!(p::AbstractParticle, t)
+Propagate the particle `p` for given time `t`, changing appropriately the the
+`p.pos` and `p.vel` fields.
+
+For a `Particle` the propagation is a straight line
+(i.e. velocity vector is constant). For a `MagneticParticle` the propagation
+is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
+"""
+function propagate!(p::Particle{T}, t::Real) where {T}
+  # Set initial conditions
+  vx0=p.vel[1]
+  vy0=p.vel[2]
+  # Set current (final) values for `pos` (`vel` does not change)
+  p.pos += SVector{2,T}(vx0*t, vy0*t)
+end
+
+function propagate_pos(pos, p::Particle{T}, t::Real) where {T}
+  vx0=p.vel[1]
+  vy0=p.vel[2]
+  return SVector{2,T}(pos[1] + vx0*t, pos[2] + vy0*t)
+end
 
 """
 ```julia
 collisiontime(p::AbstractParticle, o::Obstacle)
 ```
-Calculate the collision time between given particle and obstacle.
-
-The funtion chooses the appropriate method depending on the type of particle
-(magnetic or not) as well as the type of the obstacle. Returns the time that the
-particle, given its current position and Type, must be propagated to reach the
-collision point. This time can be given directly to `propagate!(p, time)` which
-brings the particle to the collision point.
+Calculate the collision time (time-until-collision) between given
+particle and obstacle. Returns `Inf` if the collision is not possible *or* if the
+collision happens backwards in time.
 
 In the case of magnetic propagation, there are always two possible collisions.
 The function internally decides which of the two will occur first, based on the
 sign of the angular velocity of the magnetic particle.
 """
-function collisiontime(p::Particle, w::Wall)
-  n = normalvec(w, p.pos)
-  denom = dot(p.vel, n)
-  if denom >= 0; return Inf; end
-  t = dot(w.sp-p.pos, n)/denom
-  t <= 0.0 ? Inf : t
+function collisiontime(p::Particle{T}, w::Wall{T})::T where {T}
+    n = normalvec(w, p.pos)
+    denom = dot(p.vel, n)
+    denom >= 0 ? Inf : dot(w.sp-p.pos, n)/denom
 end
 
-function collisiontime(p::Particle, d::Circular)
+function collisiontime(p::Particle{T}, d::Circular{T})::T where {T}
 
-  dotp = dot(p.vel, normalvec(d, p.pos))
-  # Gotta rethink thins for ray spliting
-  dotp >=0 && return Inf
+    dotp = dot(p.vel, normalvec(d, p.pos))
+    # Gotta rethink thins for ray spliting
+    dotp >=0 && return Inf
 
-  dc = p.pos - d.c
-  B = dot(p.vel, dc)         #pointing towards circle center: B < 0
-  C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
-  Δ = B^2 - C
+    dc = p.pos - d.c
+    B = dot(p.vel, dc)         #pointing towards circle center: B < 0
+    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+    Δ = B^2 - C
 
-  Δ <= 0 && return Inf
-  sqrtD = sqrt(Δ)
+    Δ <= 0 && return Inf
+    sqrtD = sqrt(Δ)
 
-  # Closest point:
-  t = -B - sqrtD
-  t <=0 ? Inf : t
+    # Closest point:
+    t = -B - sqrtD
+    t <=0 ? Inf : t
 end
 
-function collisiontime(p::Particle, d::Antidot)
+function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
 
   dotp = dot(p.vel, normalvec(d, p.pos))
   if d.pflag == true
@@ -189,35 +192,12 @@ function collisiontime(p::Particle, d::Antidot)
   # Closest point (may be in negative time):
   if dotp < 0
     t = -B - sqrtD
-    #this makes the phi error come back:
-    # if t <= 1e-12
-    #   t = -B + sqrtD
-    # end
   else
     t = -B + sqrtD
   end
 
   # If collision time is negative, return Inf:
   t <= 0.0 ? Inf : t
-end
-
-"""
-```julia
-propagate!(p::AbstractParticle, t)
-```
-Propagate the particle `p` for given time `t`, changing appropriately the the
-`p.pos` and `p.vel` fields.
-
-For a `Particle` the propagation is a straight line
-(i.e. velocity vector is constant). For a `MagneticParticle` the propagation
-is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
-"""
-function propagate!(p::Particle, t::Real)
-  # Set initial conditions
-  vx0=p.vel[1]
-  vy0=p.vel[2]
-  # Set current (final) values for `pos` (`vel` does not change)
-  p.pos += [vx0*t, vy0*t]
 end
 
 """
@@ -231,25 +211,15 @@ Return the states of the particle between collisions.
 The evolution takes into account the particle's Type.
 E.g. if `typeof(p) == MagneticParticle` then magnetic evolution will take place.
 
-## Calling
-Call the function like:
-```julia
-t, poss, vels [, ω]* = evolve!(p, bt, t)
-```
-(see "Returns" section for more)
-
-To get the position, velocity and time timeseries from the above output,
-use the function `construct`:
-`xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, ttotal)...)`
-
 ## Returns
 As noted by the "!" at the end of the function, it changes its argument
 `p` (particle). Most importantly however, this function also returns the main output
 expected by a billiard system. This output is a tuple of 3 (or 4) vectors:
-* `ct::Vector{Float64}` : Collision times.
-* `poss::Vector{SVector{2}}` : Positions during collisions.
-* `vels::Vector{SVector{2}})` : Velocities **exactly after** the collisions.
-* `ω`, either `Float64` or `Vector{Float64}` : Angular velocity(/ies).
+
+* `ct::Vector{T}` : Collision times.
+* `poss::Vector{SVector{2,T}}` : Positions during collisions.
+* `vels::Vector{SVector{2,T}})` : Velocities **exactly after** the collisions.
+* `ω`, either `T` or `Vector{T}` : Angular velocity(/ies).
 
 In the case of straight propagation, only the first 3 are returned.
 In the case of magnetic propagation, the 4th value is returned as well.
@@ -277,66 +247,65 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle, bt::Vector{Obstacle}, t)
+function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:AbstractFloat}
 
-  if t <= 0
-    error("`evolve!()` cannot evolve backwards in time.")
-  end
-
-  rt = Float64[]
-  rpos = SVector{2,Float64}[]
-  rvel = SVector{2,Float64}[]
-  push!(rpos, p.pos)
-  push!(rvel, p.vel)
-  push!(rt, 0.0)
-
-  count = zero(t)
-
-  colobst_idx = 1
-  t_to_write = 0.0
-
-  while count < t
-    # Declare these because `bt` is of un-stable type!
-    tcol::Float64 = 0.0
-    tmin::Float64 = Inf
-
-    for i in eachindex(bt)
-      tcol = collisiontime(p, bt[i])
-      # Set minimum time:
-      if tcol < tmin
-        tmin = tcol
-        colobst_idx = i
-      end
-    end#obstacle loop
-
-    propagate!(p, tmin)
-    resolvecollision!(p, bt[colobst_idx])
-
-    t_to_write += tmin
-
-    if typeof(bt[colobst_idx]) <: PeriodicWall
-      continue
-    else
-      push!(rpos, p.pos + p.current_cell)
-      push!(rvel, p.vel)
-      push!(rt, t_to_write)
-      # set counter
-      count += increment_counter(t, t_to_write)
-      t_to_write = 0.0
+    if t <= 0
+        throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
-  end#time loop
+
+    rt = T[]
+    rpos = SVector{2,T}[]
+    rvel = SVector{2,T}[]
+    push!(rpos, p.pos)
+    push!(rvel, p.vel)
+    push!(rt, zero(T))
+
+    count = zero(T)
+
+    colobst_idx = 1
+    t_to_write = zero(T)
+
+    while count < t
+        # Declare these because `bt` is of un-stable type!
+        tcol::T = zero(T)
+        tmin::T = T(Inf)
+
+        for i in eachindex(bt)
+            tcol = collisiontime(p, bt[i])
+            # Set minimum time:
+            if tcol < tmin
+                tmin = tcol
+                colobst_idx = i
+            end
+        end#obstacle loop
+
+        newpos, tmin = relocate(p, bt[colobst_idx], tmin)
+        p.pos = newpos # this is "propagate!" for the case of Particle
+        resolvecollision!(p, bt[colobst_idx])
+
+        t_to_write += tmin
+
+        if typeof(bt[colobst_idx]) <: PeriodicWall
+            continue
+        else
+            push!(rpos, p.pos + p.current_cell)
+            push!(rvel, p.vel)
+            push!(rt, t_to_write)
+            # set counter
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+    end#time, or collision number, loop
   return (rt, rpos, rvel)
 end
 
 """
-```julia
-construct(ct, poss, vels[, ω][, dt=0.01])
-```
+    construct(ct, poss, vels[, ω][, dt=0.01])
 Given the main output of this package (see `evolve!()` function) construct the
 timeseries of the position and velocity, as well as the time vector.
 
 In case of not given ω (or ω == 0), straight construction takes place.
-In case of ω != 0 or ω::Vector{Real} magnetic construction takes place.
+In case of ω != 0 or ω::Vector magnetic construction takes place.
 
 The additional optional argument of `dt` (only valid for Magnetic construction)
 is the timestep with which the timeseries are constructed.
@@ -357,14 +326,14 @@ also returns the vector of angular velocities when necessary.
 
 ## Returns
 A tuple of the following:
-* xt::Vector{Float64} : x position time-series
-* yt::Vector{Float64} : y position time-series
-* vxt::Vector{Float64} : x velocity time-series
-* vyt::Vector{Float64} : y velocity time-series
-* ts::Vector{Float64} : Continuous time vector
+* xt::Vector{T} : x position time-series
+* yt::Vector{T} : y position time-series
+* vxt::Vector{T} : x velocity time-series
+* vyt::Vector{T} : y velocity time-series
+* ts::Vector{T} : time vector
 """
-function construct(t::Vector{Float64},
-  poss::Vector{SVector{2,Float64}}, vels::Vector{SVector{2,Float64}})
+function construct(t::Vector{T},
+  poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}) where {T}
 
   xt = [pos[1] for pos in poss]
   yt = [pos[2] for pos in poss]
