@@ -47,7 +47,7 @@ function enableplotting()
   end
 end
 
-# 
+#
 # bt, ray = billiard_raysplitting_showcase(3, 1, 0.3, 0.2)
 # p = randominside(bt)
 # p.pos = SVector{2}(0.2115211414442486, 0.3892293033199159)

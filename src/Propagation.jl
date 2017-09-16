@@ -236,7 +236,7 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:AbstractFloat}
+function evolve!(p::Particle{T}, bt, t) where {T<:AbstractFloat}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))

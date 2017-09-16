@@ -43,8 +43,8 @@ end
 function magnetic_periodic(partnum = 500; printinfo = true)
 tim = time()
 @testset "Magnetic Periodic Sinai" begin
-    for ω in [0.5, -0.3]
-        for (r, x, y) in [(0.3, 1.0, 1.0), (0.5, 1.0, 1.2)]
+    for ω in [0.4, -0.3]
+        for (r, x, y) in [(0.3, 1.0, 1.0), (0.4, 1.0, 1.2)]
             bt = billiard_sinai(r, x, y; setting="periodic")
             xmin, ymin, xmax, ymax = cellsize(bt)
             d = bt[5]
