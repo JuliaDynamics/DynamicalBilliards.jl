@@ -7,12 +7,14 @@
     `bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}` instead of
     the old `bt::Vector{Obstacle}`.
 * Positional argument `warning` of `evolve!()` has been changed to **keyword argument**.
-
+* The raysplitting functions must always accept 3 arguments, even in the case
+  of straight propagation. The best way is to hagve the third argument have a default value.
 * All `distance` functions can now take a position as an argument (giving a particle
   simply passes the position).
-* Removed functions like `magnetic2standard`.
+* Removed redundant functions like `magnetic2standard`.
+* The package is now precompiled.
 
-* Here I talk about the new way propagation is handled. `relocate!` is removed.
+* Here I talk about the new way propagation is handled. `relocate!` is super changed.
 
 ##not done yet:
 * Tests have been restructured to be faster, more efficient, and use the

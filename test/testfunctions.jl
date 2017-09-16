@@ -96,52 +96,6 @@ function check_raysplitting_periodic(partnum; printinfo = true)
   return true
 end
 
-function check_splitterwall(partnum; printinfo = true)
-  if printinfo
-    println("\nCurrently testing if...")# Test:
-    println("--ray-splitting with SplitterWall and Antidot works")
-    println("--for both straight and magnetic propagation")
-  end
-  if partnum > 10
-    partnum = 10
-  end
-  sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
-  Tp = (p) -> (θ, pflag, ω) -> begin
-    if pflag
-      abs(θ) < π/4 ? p*exp(-(θ)^2/2(π/8)^2) : 0.0
-    else
-      (1-p)*exp(-(θ)^2/2(π/4)^2)
-    end
-  end
-  newo = ((x, bool) -> bool ? -0.5x : -2.0x)
-  rayspl = Dict{Int, Vector{Function}}(
-  5 => [Tp(0.5), sa, newo],
-  6 => [Tp(0.35), sa, newo],
-  7 => [Tp(0.65), sa, newo])
-
-  bt = billiard_rectangle(2, 1)
-  sw = SplitterWall([1.0, 0.0], [1,1], [-1,0], true)
-  push!(bt, sw)
-  a1 = Antidot([0.5, 0.5], 0.3, "Left Antidot")
-  push!(bt, a1)
-  a2 = Antidot([1.5, 0.5], 0.2, "Right Antidot")
-  push!(bt, a2)
-
-  if !isphysical(rayspl)
-    error("Given ray-splitter is not physical!")
-  end
-
-  for ω in [0.0, -0.04, 0.5]
-    printinfo && println("...for ω = ", ω)
-
-    for i in 1:partnum
-      p = randominside(bt, ω)
-      xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1000.0, rayspl)...)
-    end
-  end
-  return true
-end
-
 function check_random_sinai(partnum; printinfo = true)
   if printinfo
     println("\nCurrently testing if...")# Test:

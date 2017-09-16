@@ -339,7 +339,7 @@ function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
     p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
 end
 
-function propagate_pos(pos::SVector{2,T}, p::MagneticParticle{T}, t) where {T}
+function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
     ω = p.omega
     vx0= p.vel[1]
@@ -526,6 +526,7 @@ end
 function construct(t::Vector{T},  poss::Vector{SVector{2,T}},
 vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
 
+    dt = T(dt)
     ω == 0 && return construct(t, poss, vels)
 
     xt = [poss[1][1]]

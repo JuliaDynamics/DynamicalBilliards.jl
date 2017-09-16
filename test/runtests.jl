@@ -27,13 +27,15 @@ end
 
 include("straight.jl")
 include("magnetic.jl")
+include("raysplit.jl")
 
 print("DynamicalBilliards tests started at: ")
 print(Dates.format(now(), "HH:MM:s"), "\n")
 t = time()
 
 fnames = (
-    straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic)
+    straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
+    raysplit_straight)
 for f in fnames
     f(partnum, printinfo=printinfo)
 end

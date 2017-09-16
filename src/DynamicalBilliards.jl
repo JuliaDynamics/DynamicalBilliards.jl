@@ -1,3 +1,5 @@
+__precompile__()
+
 """
 A Julia package for dynamical billiard systems in two dimensions.
 
@@ -14,8 +16,8 @@ import Base.show
 ##########################################
 include("ParticlesObstacles.jl")
 include("Propagation.jl")
-include("StandardBilliards.jl")
 include("RaySplitting.jl")
+include("StandardBilliards.jl")
 include("LyapunovSpectrum.jl")
 
 ##########################################
@@ -26,7 +28,7 @@ include("LyapunovSpectrum.jl")
 Set if you want the long version of the tests and if you want information to be
 printed during testing.
 """
-function test_options(;print_info::Bool = false, long_tests::Bool = false)
+function test_options(;print_info::Bool = true, long_tests::Bool = true)
   ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
   ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
 end
@@ -44,5 +46,17 @@ function enableplotting()
     include(joinpath(dir, f))
   end
 end
+
+# 
+# bt, ray = billiard_raysplitting_showcase(3, 1, 0.3, 0.2)
+# p = randominside(bt)
+# p.pos = SVector{2}(0.2115211414442486, 0.3892293033199159)
+# p.vel = SVector{2}(0.907742279866133, 0.4195282509479374)
+# evolve!(p, bt, 1000.0, ray)
+# println("Done")
+
+# enableplotting()
+# plot_billiard(bt)
+# animate_evolution(p, bt, 200, ray)
 
 end#module

@@ -196,11 +196,11 @@ mutable struct Antidot{T<:AbstractFloat} <: Circular{T}
     name::String
 end
 function Antidot(c::AbstractVector{T}, r::Real,
-    pflag = true, name::String = "Antidot") where {T<:Real}
+    pflag::Bool = true, name::String = "Antidot") where {T<:Real}
     S = T <: Integer ? Float64 : T
     return Antidot{S}(SVector{2,S}(c), convert(S, abs(r)), pflag, name)
 end
-
+Antidot(c, r, name::String = "Antidot") = Antidot(c, r, true, name)
 show(io::IO, w::Circular{T}) where {T} =
 print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)")
 
@@ -328,7 +328,7 @@ mutable struct SplitterWall{T<:AbstractFloat} <: Wall{T}
     name::String
 end
 function SplitterWall(sp::AbstractVector, ep::AbstractVector,
-    normal::AbstractVector, name::String = "Splitter wall")
+    normal::AbstractVector, pflag::Bool = true, name::String = "Splitter wall")
     T = eltype(sp)
     n = normalize(normal)
     d = dot(n, ep-sp)
@@ -336,9 +336,9 @@ function SplitterWall(sp::AbstractVector, ep::AbstractVector,
         error("Normal vector is not actually normal to the wall")
     end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
-    return SplitterWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
+    return SplitterWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), pflag, name)
 end
-
+SplitterWall(sp, ep, n, name::String = "Splitter wall") = SplitterWall(sp, ep, n, true, name)
 #pretty print:
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
@@ -360,17 +360,13 @@ normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a
 ## Distances
 ####################################################
 """
-```julia
-distance(p::AbstractParticle, o::Obstacle)
-```
+    distance(p::AbstractParticle, o::Obstacle)
 Return the **signed** distance between particle `p` and obstacle `o`, based on
 `p.pos`. Positive distance corresponds to the particle being on the *allowed* region
 of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
 outside of the disk, negative otherwise.
 
-```julia
-distance(p::AbstractParticle, bt::Vector{<:Obstacle})
-```
+    distance(p::AbstractParticle, bt::Vector{<:Obstacle})
 Return minimum `distance(p, obst)` for all `obst` in `bt`.
 If the `distance(p, bt)` is negative this means that the particle is outside
 the billiard table.
@@ -394,29 +390,26 @@ end
 
 # no new distance needed for SplitterWall because the `pflag` field
 # has the necessary information to give the correct dinstance,
-# since the distance is calculated throught the normalvec.
+# since the distance is calculated through the normalvec.
 
-(distance(pos::AbstractVector{T}, d::Circular{T})::T) where {T} = norm(pos - d.c) - d.r
+distance(pos::AbstractVector{T}, d::Circular{T}) where {T} = norm(pos - d.c) - d.r
 
 function distance(
-    pos::AbstractVector{T}, a::Antidot{T}, pflag::Bool = true)::T where {T}
+    pos::AbstractVector{T}, a::Antidot{T}, pflag::Bool)::T where {T}
     d = norm(pos - a.c) - a.r
-    pflag ? d : -d
+    a.pflag ? d : -d
 end
+distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} = distance(pos, a, a.pflag)
 
-(distance(p::AbstractParticle{T}, b)::T) where {T} = distance(p.pos, b)
-(distance(p::AbstractParticle{T}, a::Antidot{T})::T) where {T} =
-distance(p.pos, b, p.pflag)
+(distance(p::AbstractParticle{T}, obst)::T) where {T} = distance(p.pos, obst)
+
 
 ####################################################
 ## Initial Conditions
 ####################################################
 
 """
-```julia
-    cellsize(obst::Obstacle)
-    cellsize(bt::Vector{Obstacle})
-```
+    cellsize(bt)
 Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard table.
 
 Used in `randominside()`, error checking and plotting.
@@ -462,13 +455,11 @@ end
 
 
 """
-```julia
-randominside(bt::Vector{<:Obstacle{T}}[, omega])
-```
+    randominside(bt::Vector{<:Obstacle{T}}[, ω])
 Return a particle with correct (allowed) initial conditions inside the given
 billiard table defined by the vector `bt`. If supplied with a second argument the
-type of the returned particle is `MagneticParticle`, with angular velocity `omega`.
-Else, it is `Particle`.
+type of the returned particle is `MagneticParticle`, with angular velocity `ω` (unless
+`ω` is 0). Else, it is `Particle`.
 """
 function randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
     xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bt)
