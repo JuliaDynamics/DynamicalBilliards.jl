@@ -18,55 +18,55 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
-  bt = Obstacle{eltype(x)}[]
-  if setting == "standard"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw2 = FiniteWall(sp, ep, n, "Left wall")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw2 = FiniteWall(sp, ep, n, "Right wall")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw2 = FiniteWall(sp, ep, n, "Top wall")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw2 = FiniteWall(sp, ep, n, "Bottom wall")
-    push!(bt, leftw2, rightw2, topw2, botw2)
-  elseif setting == "periodic"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = PeriodicWall(sp, ep, n, "Top periodic boundary")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = PeriodicWall(sp, ep, n, "Bottom periodic boundary")
-    push!(bt, leftw, rightw, topw, botw)
-  elseif setting == "random"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = RandomWall(sp, ep, n, "Left random wall")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = RandomWall(sp, ep, n, "Right random wall")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = RandomWall(sp, ep, n, "Top random wall")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = RandomWall(sp, ep, n, "Bottom random wall")
-    push!(bt, leftw, rightw, topw, botw)
-  elseif setting == "ray-splitting"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = SplitterWall(sp, ep, n, "Left ray-splitting wall")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = SplitterWall(sp, ep, n, "Right ray-splitting wall")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = SplitterWall(sp, ep, n, "Top ray-splitting wall")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = SplitterWall(sp, ep, n, "Bottom ray-splitting wall")
-    push!(bt, leftw, rightw, topw, botw)
-  else
-    error("The given setting=$setting is unknown.")
-  end
-  return bt
+    bt = Obstacle{typeof(x)}[]
+    if setting == "standard"
+        o = 0.0
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw2 = FiniteWall(sp, ep, n, "Left wall")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw2 = FiniteWall(sp, ep, n, "Right wall")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw2 = FiniteWall(sp, ep, n, "Top wall")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw2 = FiniteWall(sp, ep, n, "Bottom wall")
+        push!(bt, leftw2, rightw2, topw2, botw2)
+    elseif setting == "periodic"
+        o = 0.0
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw = PeriodicWall(sp, ep, n, "Top periodic boundary")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw = PeriodicWall(sp, ep, n, "Bottom periodic boundary")
+        push!(bt, leftw, rightw, topw, botw)
+    elseif setting == "random"
+        o = 0.0
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw = RandomWall(sp, ep, n, "Left random wall")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw = RandomWall(sp, ep, n, "Right random wall")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw = RandomWall(sp, ep, n, "Top random wall")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw = RandomWall(sp, ep, n, "Bottom random wall")
+        push!(bt, leftw, rightw, topw, botw)
+    elseif setting == "ray-splitting"
+        o = 0.0
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw = SplitterWall(sp, ep, n, "Left ray-splitting wall")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw = SplitterWall(sp, ep, n, "Right ray-splitting wall")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw = SplitterWall(sp, ep, n, "Top ray-splitting wall")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw = SplitterWall(sp, ep, n, "Bottom ray-splitting wall")
+        push!(bt, leftw, rightw, topw, botw)
+    else
+        throw(ArgumentError("The given setting=$setting is unknown."))
+    end
+    return bt
 end
 
 """
@@ -123,7 +123,7 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 * "random" : The velocity is randomized upon collision.
 """
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
-  bt = Obstacle[]
+  bt = Obstacle{typeof(r)}[]
   verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
 
   if setting == "standard"

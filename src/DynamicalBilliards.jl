@@ -34,8 +34,9 @@ end
 # Plotting Routines (loaded on demand)   #
 ##########################################
 """
-    (DynamicalBilliards.) enableplotting()
-Enable plotting for the package DynamicalBilliards.jl
+    DynamicalBilliards.enableplotting()
+Enable plotting for the package DynamicalBilliards.jl. Requires
+`using PyPlot` to work properly.
 """
 function enableplotting()
   dir = joinpath(dirname(@__FILE__), "plotting")

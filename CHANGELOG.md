@@ -6,6 +6,7 @@
   * The above makes the billiard table type annotation be
     `bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}` instead of
     the old `bt::Vector{Obstacle}`.
+* Positional argument `warning` of `evolve!()` has been changed to **keyword argument**.
 
 * All `distance` functions can now take a position as an argument (giving a particle
   simply passes the position).

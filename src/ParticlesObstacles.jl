@@ -1,5 +1,5 @@
 using StaticArrays
-import Base.show
+import Base: show, eltype
 
 export AbstractParticle, Particle, MagneticParticle,
 cyclotron, Obstacle, Disk, Antidot, RandomDisk,
@@ -14,57 +14,71 @@ normalvec, randominside, distance, cellsize, Wall, Circular
 Particle supertype.
 """
 abstract type AbstractParticle{T<:AbstractFloat} end
-eltype(AbstractParticle{T}) where {T} = T
+eltype(p::AbstractParticle{T}) where {T} = T
+
+"""
+    Obstacle{<:AbstractFloat}
+Obstacle supertype.
+"""
+abstract type Obstacle{T<:AbstractFloat} end
+eltype(o::Obstacle{T}) where {T} = T
+
 """
     Particle{T<:AbstractFloat} <: AbstractParticle{T}
-Two-dimensional particle in a billiard table (numbers of type T).
-#### Fields:
+Two-dimensional particle in a billiard table (mutable type).
+### Fields:
 * `pos::SVector{2,T}` : Current position vector.
 * `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
 * `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
   (Used only in periodic billiards)
-#### Additional constructors:
+### Additional constructors:
 ```julia
 Particle(ic::Vector{T}) #where ic = [x0, y0, φ0]
 Particle(x, y, φ)
 Particle() = Particle(rand(), rand(), rand()*2π)
+Particle(bt::Vector{<:Obstacle}) = randominside(bt)
 ```
 """
 mutable struct Particle{T<:AbstractFloat} <: AbstractParticle{T}
     pos::SVector{2,T}
     vel::SVector{2,T}
     current_cell::SVector{2,T}
-    Particle{T}(pos::SVector{2,T}, vel::SVector{2,T}, cc::SVector{2,T}) where
-    {T<:AbstractFloat} = new(pos, normalize(vel), cc)
+    function Particle(
+        pos::SVector{2,T}, vel::SVector{2,T}, cc::SVector{2,T}) where{T<:AbstractFloat}
+        new{T}(pos, normalize(vel), cc)
+    end
 end
 
 function Particle(ic::AbstractVector{S}) where {S<:Real}
     T = S<:Integer ? Float64 : S
     φ0 = ic[3]
     pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-    return Particle{T}(pos, vel, SVector{2,T}(0,0))
+    return Particle(pos, vel, SVector{2,T}(0,0))
 end
 Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
 Particle() = Particle(rand(), rand(), rand()*2π)
+Particle(bt::Vector{<:Obstacle}) = randominside(bt)
 show(io::IO, p::Particle{T}) where {T} =
 print(io, "Particle {$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
 
 """
     MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
-Two-dimensional particle in a billiard table with perpendicular magnetic field.
-#### Fields:
+Two-dimensional particle in a billiard table with perpendicular magnetic field
+(mutable type).
+### Fields:
 * `pos::SVector{2,T}` : Current position vector.
 * `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
 * `current_cell::SVector{2,T}` : Current "cell" the particle is located at
   (Used only in periodic billiards).
 * `omega::T` : Angular velocity (cyclic frequency) of rotational motion.
   Radius of rotation is `r=1/omega`.
-#### Additional constructors:
+### Additional constructors:
 ```julia
 MagneticParticle(ic::AbstractVector{T}, ω::Real) #where ic = [x0, y0, φ0]
 MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
+MagneticParticle(bt::Vector{<:Obstacle}, ω) = randominside(bt, ω)
 ```
 """
 mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
@@ -72,12 +86,12 @@ mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
     vel::SVector{2,T}
     current_cell::SVector{2,T}
     omega::T
-    function MagneticParticle{T}(pos::SVector{2,T}, vel::SVector{2,T},
+    function MagneticParticle(pos::SVector{2,T}, vel::SVector{2,T},
         current_cell::SVector{2,T}, ω::T) where {T<:AbstractFloat}
         if ω==0
             throw(ArgumentError("Angular velocity of magnetic particle cannot be 0."))
         end
-        new(pos, normalize(vel), current_cell, ω)
+        new{T}(pos, normalize(vel), current_cell, ω)
     end
 end
 
@@ -92,6 +106,7 @@ function MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
     MagneticParticle(a[1:3], a[4])
 end
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
+MagneticParticle(bt::Vector{<:Obstacle}, ω) = randominside(bt, ω)
 
 show(io::IO, p::MagneticParticle{T}) where {T} =
 print(io, "Magnetic particle {$T}\n",
@@ -117,12 +132,6 @@ end
 ## Obstacles
 ####################################################
 """
-    Obstacle{<:AbstractFloat}
-Obstacle supertype.
-"""
-abstract type Obstacle{T<:AbstractFloat} end
-eltype(Obstacle{T}) where {T} = T
-"""
     Circular{T<:AbstractFloat} <: Obstacle{T}
 Circular obstacle supertype.
 """
@@ -130,8 +139,8 @@ abstract type Circular{T<:AbstractFloat} <: Obstacle{T} end
 
 """
     Disk{T<:AbstractFloat}  <: Circular{T}
-Disk-like obstacle with propagation allowed outside of the circle.
-#### Fields:
+Disk-like obstacle with propagation allowed outside of the circle (immutable type).
+### Fields:
 * `c::SVector{2,T}` : Center.
 * `r::T` : Radius.
 * `name::String` : Some name given for user convenience. Defaults to "Disk".
@@ -150,7 +159,7 @@ end
     RandomDisk{T<:AbstractFloat} <: Circular{T}
 Disk-like obstacle that randomly (and uniformly) reflects colliding particles.
 The propagation is allowed outside of the circle.
-#### Fields:
+### Fields:
 * `c::SVector{2,T}` : Center.
 * `r::T` : Radius.
 * `name::String` : Some name given for user convenience. Defaults to "Random disk".
@@ -168,8 +177,8 @@ end
 
 """
     Antidot{T<:AbstractFloat} <: Circular{T}
-Disk-like obstacle that allows propagation both inside and outside of the disk.
-Used in ray-splitting billiards.
+Disk-like obstacle that allows propagation both inside and outside of the disk
+(immutable type). Used in ray-splitting billiards.
 #### Fields:
 * `c::SVector{2,T}` : Center.
 * `r::T` : Radius.
@@ -204,8 +213,8 @@ abstract type Wall{T<:AbstractFloat} <: Obstacle{T} end
 
 """
     FiniteWall{T<:AbstractFloat} <: Wall{T}
-Wall obstacle imposing specular reflection during collision.
-#### Fields:
+Wall obstacle imposing specular reflection during collision (immutable type).
+### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
@@ -235,7 +244,7 @@ end
 
 """
     RandomWall{T<:AbstractFloat} <: Wall{T}
-Wall obstacle imposing (uniformly) random reflection during collision.
+Wall obstacle imposing (uniformly) random reflection during collision (immutable type).
 #### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
@@ -264,8 +273,8 @@ end
 
 """
     PeriodicWall{T<:AbstractFloat} <: Wall{T}
-Wall obstacle that imposes periodic boundary conditions upon collision.
-#### Fields:
+Wall obstacle that imposes periodic boundary conditions upon collision (immutable type).
+### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
@@ -285,6 +294,7 @@ struct PeriodicWall{T<:AbstractFloat} <: Wall{T}
 end
 function PeriodicWall(sp::AbstractVector, ep::AbstractVector,
     n::AbstractVector, name::String = "Periodic wall")
+    T = eltype(sp)
     d = dot(n, ep-sp)
     if abs(d) > 10eps(T)
         error("Normal vector is not actually normal to the wall")
@@ -296,8 +306,8 @@ end
 
 """
     SplitterWall{T<:AbstractFloat} <: Wall{T}
-Wall obstacle imposing allowing for ray-splitting.
-#### Fields:
+Wall obstacle imposing allowing for ray-splitting (immutable type).
+### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
@@ -319,6 +329,7 @@ mutable struct SplitterWall{T<:AbstractFloat} <: Wall{T}
 end
 function SplitterWall(sp::AbstractVector, ep::AbstractVector,
     normal::AbstractVector, name::String = "Splitter wall")
+    T = eltype(sp)
     n = normalize(normal)
     d = dot(n, ep-sp)
     if abs(d) > 10eps(T)
@@ -476,7 +487,7 @@ function randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
 
         xp = T(rand())*(xmax-xmin) + xmin
         yp = T(rand())*(ymax-ymin) + ymin
-        p.pos = [xp, yp]
+        p.pos = SVector{2,T}(xp, yp)
         dist = distance(p, bt)
     end
 

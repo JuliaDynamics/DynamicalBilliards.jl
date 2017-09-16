@@ -1,6 +1,6 @@
 p = Particle()
 
-bt = billiard_sinai()
+bt = billiard_sinai(setting="periodic")
 
 ct, poss, vels = evolve!(p, bt, 10.0)
 enableplotting()
