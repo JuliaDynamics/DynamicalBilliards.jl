@@ -1,3 +1,5 @@
+__precompile__()
+
 """
 A Julia package for dynamical billiard systems in two dimensions.
 
@@ -14,8 +16,8 @@ import Base.show
 ##########################################
 include("ParticlesObstacles.jl")
 include("Propagation.jl")
-include("StandardBilliards.jl")
 include("RaySplitting.jl")
+include("StandardBilliards.jl")
 include("LyapunovSpectrum.jl")
 
 ##########################################
@@ -26,7 +28,7 @@ include("LyapunovSpectrum.jl")
 Set if you want the long version of the tests and if you want information to be
 printed during testing.
 """
-function test_options(;print_info::Bool = false, long_tests::Bool = false)
+function test_options(;print_info::Bool = true, long_tests::Bool = true)
   ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
   ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
 end
@@ -34,8 +36,9 @@ end
 # Plotting Routines (loaded on demand)   #
 ##########################################
 """
-    (DynamicalBilliards.) enableplotting()
-Enable plotting for the package DynamicalBilliards.jl
+    DynamicalBilliards.enableplotting()
+Enable plotting for the package DynamicalBilliards.jl. Requires
+`using PyPlot` to work properly.
 """
 function enableplotting()
   dir = joinpath(dirname(@__FILE__), "plotting")
