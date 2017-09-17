@@ -1,5 +1,5 @@
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
-billiard_raysplitting_showcase
+billiard_raysplitting_showcase, billiard_hexagon
 
 ####################################################
 ## Famous/Standard Billiards
@@ -20,7 +20,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
     bt = Obstacle{typeof(convert(AbstractFloat, x))}[]
-    o = 0.0
+    o = typeof(x)(0.0)
     if setting == "standard"
         sp = [o,o]; ep = [o, y]; n = [x,o]
         leftw2 = FiniteWall(sp, ep, n, "Left wall")
@@ -121,8 +121,9 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 * "random" : The velocity is randomized upon collision.
 """
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
-    bt = Obstacle{typeof(convert(AbstractFloat, r))}[]
-    verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
+    S = typeof(convert(AbstractFloat, r))
+    bt = Obstacle{S}[]
+    verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
 
     if setting == "standard"
         T = FiniteWall
@@ -133,7 +134,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
         end
         T = PeriodicWall
         wallname = "periodic wall"
-        inr = r*cos(π/sides)
+        inr = S(r*cos(π/sides))
     elseif setting == "random"
         T = RandomWall
         wallname = "random wall"
@@ -156,6 +157,9 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     end
     return bt
 end
+
+"billiard_hexagon(args...) = billiard_polygon(6, args...)"
+billiard_hexagon(r::Real, center = [0,0]) = billiard_polygon(6, r, center)
 
 """
     billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2) -> bt, rayspl

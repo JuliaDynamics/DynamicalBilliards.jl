@@ -5,11 +5,11 @@ function magnetic_sinai(partnum=500; printinfo = true)
 tim = time()
 @testset "Magnetic Sinai" begin
     for ω in [-0.5, 1.2]
-        for (r, x, y) in [(0.4, 1.0, 1.0), (0.3, 1.5, 1.0)]
+        @testset "params: ω=$(ω), x=$(x), y=$(y), r=$(r)" for (r, x, y) in [(0.4, 1.0, 1.0), (0.3, 1.5, 1.0)]
             bt = billiard_sinai(r, x, y)
             c = bt[5].c
             tt=1000.0
-            @testset "params: ω=$(ω), x=$(x), y=$(y), r=$(r)" for i in 1:partnum
+            for i in 1:partnum
                 p = randominside(ω, bt)
 
                 t, poss, vels,  = evolve!(p, bt, tt)
@@ -33,7 +33,7 @@ if printinfo
     println("+ evolve!() works for MagneticParticle.")
     println("+ randominside(ω) returns MagneticParticle.")
     println("+ relocate(), collisiontime(), resolvecollision() work for")
-    println("  for MagneticParticle with FiniteWall and Disk.")
+    println("  MagneticParticle with FiniteWall and Disk.")
     println("+ particle never leaks the billiard table.")
     println("+ Required time: $(round(time()-tim, 3)) sec.")
 end
@@ -43,8 +43,8 @@ end
 function magnetic_periodic(partnum = 500; printinfo = true)
 tim = time()
 @testset "Magnetic Periodic Sinai" begin
-    for ω in [0.4, -0.3]
-        for (r, x, y) in [(0.3, 1.0, 1.0), (0.4, 1.0, 1.2)]
+    for ω in [0.2, -0.15]
+        @testset "params: ω=$(ω), x=$(x), y=$(y), r=$(r)" for (r, x, y) in [(0.4, 1.0, 1.0), (0.42, 1.0, 1.2)]
             bt = billiard_sinai(r, x, y; setting="periodic")
             xmin, ymin, xmax, ymax = cellsize(bt)
             d = bt[5]
@@ -53,7 +53,7 @@ tim = time()
             invalid = 0
             minddist = min(x, y)
 
-            @testset "params: ω=$(ω), x=$(x), y=$(y), r=$(r)" for i in 1:partnum
+            for i in 1:partnum
                 p = randominside(ω, bt)
                 ts, poss, vels = evolve!(p, bt, tt)
 
@@ -70,14 +70,14 @@ tim = time()
                 @test mind - d.r ≥ -error_level
                 @test mincolt ≥ minddist-2r
             end#particle loop
-        end#x,y loop
+        end#x,y loop (testset)
     end#omega loop
 end#testset
 if printinfo
     println("Results:")
     println("+ billiard_sinai(setting=\"periodic\") and randominside() work.")
     println("+ relocate(), collisiontime(), resolvecollision() work for")
-    println("  for MagneticParticle with PeriodicWall.")
+    println("  MagneticParticle with PeriodicWall.")
     println("+ collisiontime() ≤ min(x,y) - 2r.")
     println("+ Particle never invades the Disk.")
     println("+ Collision time is never Infinite (no pinned particles).")

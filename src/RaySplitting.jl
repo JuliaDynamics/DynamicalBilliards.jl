@@ -17,6 +17,19 @@ function relocate_rayspl!(
     return newt
 end
 
+function relocate_rayspl!(
+    p::MagneticParticle{T}, o::PeriodicWall{T}, trans::Bool = false)::T where {T}
+
+    ineq = (2trans - 1)
+    newpos = p.pos; newt = zero(T)
+    while ineq*distance(newpos, o) > 0
+        newt += ineq*timeprec_severe(T)
+        newpos = propagate_pos(p.pos, p, newt)
+    end
+    propagate!(p, newpos, newt)
+    return newt
+end
+
 function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
     # Raysplit Algorithm step 1: Determine incidence angle (0 < θ < π/4)
     n = normalvec(a, p.pos)
@@ -29,15 +42,18 @@ function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
     return φ
 end
 
-function istransmitted(p::AbstractParticle{T}, a::Obstacle{T}, Tr::Function) where {T}
-
+function istransmitted(p::Particle{T}, a::Obstacle{T}, Tr::Function) where {T}
     φ = incidence_angle(p, a)
     # Raysplit Algorithm step 3: check transmission probability
-    if typeof(p) <: Particle
-        return Tr(φ, a.pflag) > rand(), φ
-    elseif typeof(p) <: Magnetic Particle
-        return Tr(φ, a.pflag, p.omega) > rand(), φ
-    end
+    return Tr(φ, a.pflag) > rand(), φ
+    # comment: more accurate would be to calculate incidence angle again
+    # within relocate!(). But the angle changes so little that this must have
+    # almost zero impact.
+end
+function istransmitted(p::MagneticParticle{T}, a::Obstacle{T}, Tr::Function) where {T}
+    φ = incidence_angle(p, a)
+    # Raysplit Algorithm step 3: check transmission probability
+    return Tr(φ, a.pflag, p.omega) > rand(), φ
     # comment: more accurate would be to calculate incidence angle again
     # within relocate!(). But the angle changes so little that this must have
     # almost zero impact.
@@ -81,7 +97,7 @@ end
 ###########
 
 # evolve For Particle and Ray-Splitting:
-function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t,
+function evolve!(p::Particle{T}, bt, t,
     ray::Dict) where {T}
 
     const debug = false
@@ -98,45 +114,33 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t,
     push!(rt, 0)
 
     count = zero(t)
-    colobst_idx = 1
     t_to_write = zero(T)
 
     while count < t
-        debug && println("Current count: $count")
         # Declare these because `bt` is of un-stable type!
-        tcol::T = zero(T)
-        tmin::T = T(Inf)
+        tmin::T, i::Int = min_collision(p, bt)
 
-        for i in eachindex(bt)
-            tcol = collisiontime(p, bt[i])
-            # Set minimum time:
-            if tcol < tmin
-                tmin = tcol
-                colobst_idx = i
-            end
-        end#obstacle loop
+        debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 
-        debug && println("Min. col. t with obst $(bt[colobst_idx].name) = $tmin")
-
-        if haskey(ray, colobst_idx)
+        if haskey(ray, i)
             propagate!(p, tmin)
-            trans, φ = istransmitted(p, bt[colobst_idx], ray[colobst_idx][1])
+            trans, φ = istransmitted(p, bt[i], ray[i][1])
             debug && println("Angle of incidence: $(φ), transmitted? $trans")
             if debug
                 println("Currently, pflag is $(bt[colobst_idx].pflag)")
                 println("After collision is resolved, it will be the opposite")
             end
-            newt = relocate_rayspl!(p, bt[colobst_idx], trans)
-            resolvecollision!(p, bt[colobst_idx], φ, trans, ray[colobst_idx][2])
+            newt = relocate_rayspl!(p, bt[i], trans)
+            resolvecollision!(p, bt[i], φ, trans, ray[i][2])
             t_to_write += tmin + newt
         else
-            tmin = relocate!(p, bt[colobst_idx], tmin)
-            resolvecollision!(p, bt[colobst_idx])
+            tmin = relocate!(p, bt[i], tmin)
+            resolvecollision!(p, bt[i])
             t_to_write += tmin
         end
 
         debug && println()
-        if typeof(bt[colobst_idx]) == PeriodicWall
+        if typeof(bt[i]) <: PeriodicWall
             continue
         else
             push!(rpos, p.pos + p.current_cell)
@@ -162,6 +166,8 @@ t, ray::Dict; warning::Bool = false) where {T}
     error("`evolve!()` cannot evolve backwards in time.")
     end
 
+    const debug = false
+
     omegas = T[]
     rt = T[]
     rpos = SVector{2,T}[]
@@ -173,22 +179,12 @@ t, ray::Dict; warning::Bool = false) where {T}
 
     count = zero(t)
     t_to_write = zero(T)
-    colobst_idx = 1
 
     while count < t
-        tmin::T = T(Inf)
-        tcol::T = zero(T)
+        # Declare these because `bt` is of un-stable type!
+        tmin::T, i::Int = min_collision(p, bt)
 
-
-        for i in eachindex(bt)
-            tcol = collisiontime(p, bt[i])
-            # Set minimum time:
-            if tcol < tmin
-                tmin = tcol
-                colobst_idx = i
-            end
-        end#obstacle loop
-
+        debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 
         if tmin == Inf
             warning && warn("Pinned particle in evolve! (Inf col t)")
@@ -199,21 +195,26 @@ t, ray::Dict; warning::Bool = false) where {T}
             return (rt, rpos, rvel, omegas)
         end
 
-        if haskey(ray, colobst_idx)
+        if haskey(ray, i)
             propagate!(p, tmin)
-            trans, φ = istransmitted(p, bt[colobst_idx], ray[colobst_idx][1])
-            newt = relocate_rayspl!(p, bt[colobst_idx], trans)
-            resolvecollision!(
-            p, bt[colobst_idx], ray[colobst_idx][2], ray[colobst_idx][3])
+            trans, φ = istransmitted(p, bt[i], ray[i][1])
+            debug && println("Angle of incidence: $(φ), transmitted? $trans")
+            if debug
+                println("Currently, pflag is $(bt[colobst_idx].pflag)")
+                println("After collision is resolved, it will be the opposite")
+            end
+            newt = relocate_rayspl!(p, bt[i], trans)
+            resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
             t_to_write += tmin + newt
         else
-            tmin = relocate!(p, bt[colobst_idx], tmin)
-            resolvecollision!(p, bt[colobst_idx])
+            tmin = relocate!(p, bt[i], tmin)
+            resolvecollision!(p, bt[i])
             t_to_write += tmin
         end
 
+
         # Write output only if the collision was not made with PeriodicWall
-        if typeof(bt[colobst_idx]) == PeriodicWall
+        if typeof(bt[i]) <: PeriodicWall
             # Pinned particle:
             if t_to_write >= 2π/abs(p.omega)
             warning && warn("Pinned particle in evolve! (completed circle)")

@@ -4,14 +4,14 @@ using DynamicalBilliards
 function straight_sinai(partnum=500; printinfo=true)
 tim = time()
 @testset "Straight Sinai" begin
-    for (r, x, y) ∈ [(0.15, 1.0, 1.0), (0.3, 1.5, 1.0), (0.4, 1.4, 2.2)]
+    @testset "rectangle params: $((r, x, y))" for (r, x, y) ∈ [(0.15, 1.0, 1.0), (0.3, 1.5, 1.0), (0.4, 1.4, 2.2)]
         bt = billiard_sinai(r, x, y)
         d = bt[5]
         c = d.c
         r = d.r
         tt = 10000.0
 
-        @testset "rectangle params: $((r, x, y))" for i in 1:partnum
+        for i in 1:partnum
             p = randominside(bt)
             ts, poss, vels = evolve!(p, bt, tt)
 
@@ -45,7 +45,7 @@ end#function
 function straight_periodic(partnum = 500; printinfo = true)
 tim = time()
 @testset "Straight Periodic Sinai" begin
-    for (r, x, y) in [(0.3, 1.5, 1.0), (0.5, 1.4, 2.2), (0.2, 0.8, 2.2)]
+    @testset "rectangle dims $((r, x, y))" for (r, x, y) in [(0.3, 1.5, 1.0), (0.5, 1.4, 2.2), (0.2, 0.8, 2.2)]
         bt = billiard_sinai(r, x, y; setting="periodic")
         xmin, ymin, xmax, ymax = cellsize(bt)
         d = bt[5]
@@ -54,7 +54,7 @@ tim = time()
         invalid = 0
         minddist = min(x, y)
 
-        @testset "rectangle dims $((r, x, y))" for i in 1:partnum
+        for i in 1:partnum
             mincolt = Inf
             p = randominside(bt)
             ts, poss, vels = evolve!(p, bt, tt)

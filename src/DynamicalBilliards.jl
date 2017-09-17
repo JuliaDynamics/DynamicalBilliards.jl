@@ -47,16 +47,4 @@ function enableplotting()
   end
 end
 
-#
-# bt, ray = billiard_raysplitting_showcase(3, 1, 0.3, 0.2)
-# p = randominside(bt)
-# p.pos = SVector{2}(0.2115211414442486, 0.3892293033199159)
-# p.vel = SVector{2}(0.907742279866133, 0.4195282509479374)
-# evolve!(p, bt, 1000.0, ray)
-# println("Done")
-
-# enableplotting()
-# plot_billiard(bt)
-# animate_evolution(p, bt, 200, ray)
-
 end#module

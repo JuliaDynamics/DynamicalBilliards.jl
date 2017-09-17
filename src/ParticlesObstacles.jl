@@ -1,5 +1,5 @@
 using StaticArrays
-import Base: show, eltype
+import Base: show, eltype, getindex
 
 export AbstractParticle, Particle, MagneticParticle,
 cyclotron, Obstacle, Disk, Antidot, RandomDisk,
@@ -357,6 +357,35 @@ normalvec(disk::Circular, pos) = normalize(pos - disk.c)
 normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 
 ####################################################
+## Billiard Table
+####################################################
+immutable BilliardTable{T, BT<:Tuple}
+    bt::BT
+end
+
+function BilliardTable(bt)
+    T = eltype(bt[1])
+    if typeof(bt) <: Tuple
+        return BilliardTable{T, typeof(bt)}(bt)
+    elseif typeof(bt) <: AbstractVector
+        tup = (bt...)
+        return BilliardTable{T, typeof(tup)}(tup)
+    else
+        throw(ArgumentError("Argument given to BilliardTable is not a container"))
+    end
+end
+
+getobstacle(bt::BilliardTable{T,S}, ::Val{N}) where {T,S,N} = bt.bt[N]
+
+
+ObstInd(::Val{N}) where {N} = SVector{1, Val{N}}(Val(N))
+#This doesn't work:
+getobstacle(bt::BilliardTable{T,S}, N::Int) where {T,S} =
+getobstacle(bt, ObstInd(Val(N)))
+
+getindex(bt::BilliardTable, i) = bt.bt[i]
+
+####################################################
 ## Distances
 ####################################################
 """
@@ -373,15 +402,23 @@ the billiard table.
 
 All `distance` functions can also be given a position (Vector) instead of a particle.
 """
-function distance(
-    pos::AbstractVector{T}, bt::Vector{<:Obstacle{T}})::T where {T<:AbstractFloat}
-    mindist::T = T(Inf)
-    for i in eachindex(bt)
-        dist::T = distance(pos, bt[i])
-        if dist <= mindist; mindist = dist; end
+function distance(pos::AbstractVector{T}, v::Vector{<:Obstacle{T}})::T where {T}
+    d = T(Inf)
+    for obst in v
+        di = distance(pos, obst)
+        di < d && (d = di)
     end
-    return mindist
+    return d
 end
+
+(distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T) where {T} =
+distance(p.pos, v)
+
+(distance(pos::AbstractVector{T}, bt::Tuple)::T) where {T<:AbstractFloat} =
+min(distance(pos, obst) for obst in bt)
+
+distance(pos::AbstractVector, bt::BilliardTable) = distance(pos, bt.bt)
+distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
 
 function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
     v1 = pos - w.sp
@@ -401,7 +438,8 @@ function distance(
 end
 distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} = distance(pos, a, a.pflag)
 
-(distance(p::AbstractParticle{T}, obst)::T) where {T} = distance(p.pos, obst)
+(distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
+distance(p.pos, obst)
 
 
 ####################################################
@@ -467,7 +505,7 @@ function randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
     while f == 0 || f==1/4 || f==1/2 || f == 3/4
         f = T(rand())
     end
-    φ0 = f*2π
+    φ0 = T(f*2π)
 
     xp = T(rand())*(xmax-xmin) + xmin
     yp = T(rand())*(ymax-ymin) + ymin
@@ -496,7 +534,7 @@ function randominside(ω::Real, bt::Vector{<:Obstacle{T}}) where {T<:AbstractFlo
     while f == 0 || f==1/4 || f==1/2 || f == 3/4
         f = T(rand())
     end
-    φ0 = f*2π
+    φ0 = T(f*2π)
 
     xp = T(rand())*(xmax-xmin) + xmin
     yp = T(rand())*(ymax-ymin) + ymin

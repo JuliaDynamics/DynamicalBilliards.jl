@@ -7,7 +7,10 @@ periodicity!
 ####################################################
 const sixsqrt = 6sqrt(2)
 
+# Used in relocate:
 @inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
+@inline timeprec_severe(::Type{T}) where {T} = sqrt(eps(T))
+# Used in check of skip intersection, in `realangle`:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
 
 """
@@ -31,30 +34,34 @@ Perform specular reflection based on the normal vector of the Obstacle.
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2 to π/2 of the normal vector).
 """
-function specular!(p::AbstractParticle, o::Obstacle)
+function specular!(p::AbstractParticle, o::Obstacle)::Void
     n = normalvec(o, p.pos)
     p.vel = p.vel - 2*dot(n, p.vel)*n
+    return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomDisk{T}) where {T}
+function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
+    return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomWall{T}) where {T}
+function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
+    return nothing
 end
 
 """
     periodicity!(p::AbstractParticle, w::PeriodicWall)
 Perform periodicity conditions of `w` on `p`.
 """
-function periodicity!(p::AbstractParticle, w::PeriodicWall)
+function periodicity!(p::AbstractParticle, w::PeriodicWall)::Void
     p.pos += w.normal
     p.current_cell -= w.normal
+    return nothing
 end
 
 """
@@ -67,8 +74,8 @@ This is the ray-splitting implementation. The three functions given are drawn fr
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
-resolvecollision!(p::AbstractParticle, o::PeriodicWall) =  periodicity!(p, o)
+resolvecollision!(p::AbstractParticle, o::Obstacle)::Void = specular!(p, o)
+resolvecollision!(p::AbstractParticle, o::PeriodicWall)::Void =  periodicity!(p, o)
 
 """
     relocate(p::AbstractParticle, o::Obstacle, t) -> newt
@@ -87,10 +94,20 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin)::T where {T}
     return tmin
 end
 
-function relocate!(p::AbstractParticle{T}, o::PeriodicWall{T}, tmin)::T where {T}
+function relocate!(p::Particle{T}, o::PeriodicWall{T}, tmin)::T where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     while distance(newpos, o) > 0
         tmin += timeprec(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+    end
+    propagate!(p, newpos, tmin)
+    return tmin
+end
+
+function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin)::T where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    while distance(newpos, o) > 0
+        tmin += timeprec_severe(T)
         newpos = propagate_pos(p.pos, p, tmin)
     end
     propagate!(p, newpos, tmin)
@@ -115,10 +132,12 @@ function propagate!(p::Particle{T}, t::Real) where {T}
     vy0=p.vel[2]
     # Set current (final) values for `pos` (`vel` does not change)
     p.pos += SVector{2,T}(vx0*t, vy0*t)
+    return
 end
 
 function propagate!(p::Particle{T}, newpos::SVector{2,T}, t::Real) where {T}
     p.pos = newpos
+    return
 end
 
 function propagate_pos(pos, p::Particle{T}, t::Real) where {T}
@@ -128,9 +147,7 @@ function propagate_pos(pos, p::Particle{T}, t::Real) where {T}
 end
 
 """
-```julia
-collisiontime(p::AbstractParticle, o::Obstacle)
-```
+    collisiontime(p::AbstractParticle, o::Obstacle)
 Calculate the collision time (time-until-collision) between given
 particle and obstacle. Returns `Inf` if the collision is not possible *or* if the
 collision happens backwards in time.
@@ -190,10 +207,66 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     t <= 0.0 ? Inf : t
 end
 
+function min_collision(
+    p::AbstractParticle{T}, BT::BilliardTable{T, S})::Tuple{T,Int} where {T,S}
+    ind = 0
+    val::T = T(Inf)
+    for i in 1:length(BT.bt)
+        colt = collisiontime(p, getobstacle(BT, Val(i)))
+        if colt < val
+            val = colt
+            ind = i
+        end
+    end
+    return val, ind
+    #findmin(collisiontime(p, obst) for obst in BT.bt)
+end
+
+function min_collision(
+    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::Tuple{T,Int} where {T}
+    tmin::T = T(Inf)
+    ind::Int = 0
+    for i in eachindex(bt)
+        tcol::T = collisiontime(p, bt[i])
+        # Set minimum time:
+        if tcol < tmin
+            tmin = tcol
+            ind = i
+        end
+    end#obstacle loop
+    return tmin, ind
+end
+
+function min_collision(
+    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+    findmin(map(x -> collisiontime(p, x), bt))
+end
+
+# testing unrollled:
+# using Unrolled
+#
+# @unroll function min_colt_unrolled(p::AbstractParticle, bt::Tuple)
+#     T = eltype(p)
+#     tmin = T(Inf)
+#     ind = i = 0
+#     @unroll for obst in bt
+#         i+=1
+#         tcol::T = collisiontime(p, obst)
+#         # Set minimum time:
+#         if tcol < tmin
+#             tmin = tcol
+#             ind = i
+#         end
+#     end
+#     return tmin, ind
+# end
+
+# gives same result as min_collision when benchmarked...
+
 """
-    evolve!(p::AbstractParticle, bt::Vector{Obstacle}, t [, ray_splitter])
+    evolve!(p::AbstractParticle, bt, t [, ray_splitter])
 Evolve the given particle `p` inside the billiard table `bt`. If `t` is of type
-`Float64`, evolve for as much time as `t`. If however `t` is of type `Int`,
+`AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
 Return the states of the particle between collisions.
 
@@ -236,7 +309,7 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle{T}, bt, t) where {T<:AbstractFloat}
+function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:AbstractFloat}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
@@ -250,29 +323,19 @@ function evolve!(p::Particle{T}, bt, t) where {T<:AbstractFloat}
     push!(rt, zero(T))
 
     count = zero(T)
-
-    colobst_idx = 1
     t_to_write = zero(T)
 
     while count < t
         # Declare these because `bt` is of un-stable type!
-        tcol::T = zero(T)
-        tmin::T = T(Inf)
+        tmin::T, i::Int = min_collision(p, bt)
 
-        for i in eachindex(bt)
-            tcol = collisiontime(p, bt[i])
-            # Set minimum time:
-            if tcol < tmin
-                tmin = tcol
-                colobst_idx = i
-            end
-        end#obstacle loop
-
-        tmin = relocate!(p, bt[colobst_idx], tmin)
-        resolvecollision!(p, bt[colobst_idx])
+        tmin = relocate!(p, bt[i], tmin)
         t_to_write += tmin
 
-        if typeof(bt[colobst_idx]) <: PeriodicWall
+        resolvecollision!(p, bt[i])
+
+
+        if typeof(bt[i]) <: PeriodicWall
             continue
         else
             push!(rpos, p.pos + p.current_cell)
@@ -285,6 +348,7 @@ function evolve!(p::Particle{T}, bt, t) where {T<:AbstractFloat}
     end#time, or collision number, loop
   return (rt, rpos, rvel)
 end
+
 
 """
     construct(ct, poss, vels[, ω][, dt=0.01])
@@ -320,7 +384,7 @@ end
 ## Magnetic Propagation
 ####################################################
 
-function propagate!(p::MagneticParticle{T}, t) where {T}
+function propagate!(p::MagneticParticle{T}, t)::Void where {T}
     # "Initial" conditions
     ω = p.omega
     φ0 = atan2(p.vel[2], p.vel[1])
@@ -328,15 +392,17 @@ function propagate!(p::MagneticParticle{T}, t) where {T}
     p.pos += SVector{2, T}(sin(ω*t + φ0)/ω - sin(φ0)/ω,
     -cos(ω*t + φ0)/ω + cos(φ0)/ω)
     p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
+    return
 end
 
-function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
+function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t)::Void where {T}
     # "Initial" conditions
     ω = p.omega
     φ0 = atan2(p.vel[2], p.vel[1])
     # Propagate:
     p.pos = newpos
     p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
+    return
 end
 
 function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
@@ -365,7 +431,7 @@ close to the obstacle's boundaries, due to floating-point precision.
 have been calculated already)
 """
 function realangle(p::MagneticParticle{T}, o::Obstacle{T},
-intersections::Vector{SVector{2, T}}, pc::SVector{2, T}, pr::T) where {T}
+    intersections::Vector{SVector{2, T}}, pc::SVector{2, T}, pr::T)::T where {T}
 
     ω = p.omega
     P0 = p.pos
@@ -419,7 +485,7 @@ function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     # Check if the line is completely inside the circle:
     !cond1 && !cond2 && return Inf
     # Calculate intersection points:
-    intersections = SVector{2, Float64}[]
+    intersections = SVector{2, T}[]
     cond1 && push!(intersections, w.sp + u1*(w.ep - w.sp))
     cond2 && push!(intersections, w.sp + u2*(w.ep - w.sp))
     # Calculate real time until intersection:
@@ -471,21 +537,11 @@ t; warning::Bool = false) where {T<:AbstractFloat}
     push!(rt, zero(T))
 
     count = zero(t)
-    t_to_write = 0.0
-    colobst_idx = 1
+    t_to_write = zero(T)
 
     while count < t
-        tmin::T = Inf
-        tcol::T = 0.0
-
-        for i in eachindex(bt)
-            tcol = collisiontime(p, bt[i])
-            # Set minimum time:
-            if tcol < tmin
-                tmin = tcol
-                colobst_idx = i
-            end
-        end#obstacle loop
+        # Declare these because `bt` is of un-stable type!
+        tmin::T, i::Int = min_collision(p, bt)
 
         if tmin == Inf
             warning && warn("Pinned particle in evolve! (Inf col t)")
@@ -495,12 +551,13 @@ t; warning::Bool = false) where {T<:AbstractFloat}
             return (rt, rpos, rvel, ω)
         end
 
-        tmin = relocate!(p, bt[colobst_idx], tmin)
-        resolvecollision!(p, bt[colobst_idx])
+        tmin = relocate!(p, bt[i], tmin)
         t_to_write += tmin
 
+        resolvecollision!(p, bt[i])
+
         # Write output only if the collision was not made with PeriodicWall
-        if typeof(bt[colobst_idx]) <: PeriodicWall
+        if typeof(bt[i]) <: PeriodicWall
             # Pinned particle:
             if t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")
@@ -517,7 +574,7 @@ t; warning::Bool = false) where {T<:AbstractFloat}
             push!(rt, t_to_write)
             # set counting variable
             count += increment_counter(t, t_to_write)
-            t_to_write = 0.0
+            t_to_write = zero(T)
         end
     end#time loop
     return (rt, rpos, rvel, ω)
