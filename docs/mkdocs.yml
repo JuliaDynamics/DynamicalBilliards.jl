@@ -40,6 +40,6 @@ pages:
   - Visualizing: tutorials/visualizing.md
   - Creating your own Obstacle: tutorials/own_obstacle.md
   - Examples: tutorials/examples.md
-- Library: basic/library.md
 - Physics: physics.md
-- Lyapunov Exponents: lyapunovs.md
+#- Lyapunov Exponents: lyapunovs.md #commented out for now (until updated)
+- Library: basic/library.md

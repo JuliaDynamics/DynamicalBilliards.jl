@@ -3,11 +3,11 @@ using DynamicalBilliards
 
 function type_stability(partnum=500; printinfo=true)
 tim = time()
-@testset "Type Stability: Sinai" begin
+@testset "Type Stability: Random Sinai" begin
     Floats = [Float16, Float32, Float64, BigFloat]
     r = 0.25; x = y = 1.0
     @testset "Type: $(T), ω = $(ω)" for T ∈ Floats, ω ∈ [0, 1]
-        bt = billiard_sinai(T(r), T(x), T(y))
+        bt = billiard_sinai(T(r), T(x), T(y), setting = "random")
         for obst in bt
             @test eltype(obst) == T
         end
@@ -27,9 +27,9 @@ tim = time()
 end#testset
 @testset "Type Stability: Hexagon" begin
     Floats = [Float16, Float32, Float64, BigFloat]
-    r = 0.25; x = y = 1.0
+    r = 0.75; x = y = 1.0
     @testset "Type: $(T), ω = $(ω)" for T ∈ Floats, ω ∈ [0, 1]
-        bt = billiard_polygon(6, T(r))
+        bt = billiard_polygon(6, T(r), setting="periodic")
         for obst in bt
             @test eltype(obst) == T
         end
@@ -52,6 +52,7 @@ if printinfo
     println("+ billiard_sinai() and billiard_polygon conserve types")
     println("+ randominside() returns correct types for ω=0 and ω=1")
     println("+ evolve!() conserves type for all the combinations of the above.")
+    println("+ evolve!() works for Random sinai and Hexagonal periodic billiard.")
 end
 return
 end#function

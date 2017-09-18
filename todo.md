@@ -19,3 +19,6 @@ In raysplitting page add warning to reset billiard after use
 * Ray splitting is faster than normal (WTFFF????)
 * Iterate over a Billiard Table in a type stable manner
 * Index a billiard table in a type stable manner but with dynamic index
+* hexagonal periodic billiard doesnt work
+* raysplit magnetic is IMPOSSIBLY AND EXTREMELY slow
+TODO: PLOT PERIODIC BILLIARD TO SEE IF IT MAKES SENSE FOR MAGNETIC

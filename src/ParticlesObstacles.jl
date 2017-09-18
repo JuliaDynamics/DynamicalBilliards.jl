@@ -262,12 +262,12 @@ struct RandomWall{T<:AbstractFloat} <: Wall{T}
 end
 function RandomWall(sp::AbstractVector, ep::AbstractVector,
     n::AbstractVector, name::String = "Random wall")
+    T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     n = normalize(n)
     d = dot(n, ep-sp)
     if abs(d) > 10eps(T)
         error("Normal vector is not actually normal to the wall")
     end
-    T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     return RandomWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
 

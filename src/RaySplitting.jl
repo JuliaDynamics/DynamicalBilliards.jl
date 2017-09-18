@@ -118,7 +118,7 @@ function evolve!(p::Particle{T}, bt, t,
 
     while count < t
         # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = min_collision(p, bt)
+        tmin::T, i::Int = next_collision(p, bt)
 
         debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 
@@ -182,7 +182,7 @@ t, ray::Dict; warning::Bool = false) where {T}
 
     while count < t
         # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = min_collision(p, bt)
+        tmin::T, i::Int = next_collision(p, bt)
 
         debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 

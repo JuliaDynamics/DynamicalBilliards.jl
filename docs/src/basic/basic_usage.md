@@ -18,9 +18,9 @@ you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effo
 
 The usage of this package revolves around a single function:
 ```julia
-evolve!(p::AbstractParticle, bt::Vector{Obstacle}, t::Union{Int, Float64})
+evolve!(p::AbstractParticle, bt::Vector{Obstacle}, t::Union{Int, Float})
 ```
-which evolves a particle `p` inside a billiard table `bt`. If the given `t` is of type `Float64`, the evolution happens for `t` amount of time. If however `t` is of type `Int`, the evolution happens for `t` number of collisions (other types are not supported).
+which evolves a particle `p` inside a billiard table `bt`. If the given `t` is of type `AbstractFloat`, the evolution happens for `t` amount of time. If however `t` is of type `Int`, the evolution happens for `t` number of collisions (other types are not supported).
 
 The first step is to define the billiard table `bt`, which is the system the particle `p` will propagate in.
 A billiard table is simply a collection (`Vector`) of `Obstacle`s. The most convenient way is to use
@@ -30,7 +30,8 @@ billiard with disk radius of 0.3 and with one side of length 2 and one of length
 using DynamicalBilliards
 bt = billiard_sinai(0.3, 2.0, 1.0; setting = "periodic")
 ```
-*(for more information about defining billiard tables visit the [tutorial on defining your own billiard table](/tutorials/billiard_table))*
+For more information about defining billiard tables visit the [tutorial on defining your own billiard table](/tutorials/billiard_table)). You should definitely look up that page
+if you want to customly define a table instead of using the [predefined ones](basic/library/#standard-billiards).
 
 Afterwards, you want to create a particle inside that billiard system.
 For that, the function `randominside(bt::Vector{Obstacle})` is provided, which returns a particle with random initial conditions inside the billiard table.

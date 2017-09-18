@@ -45,7 +45,7 @@ resolvecollision!
 specular!
 periodicity!
 collisiontime
-min_collision
+next_collision
 propagate_pos
 propagate!
 evolve!

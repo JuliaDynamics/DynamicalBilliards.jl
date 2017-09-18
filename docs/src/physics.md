@@ -38,7 +38,7 @@ time is reduced by the `:::julia DynamicalBilliards.timeprec(T)` function, with 
 process is repeated until the `distance()` is "correct", which is followed by the
 real propagation of the particle for the adjusted time.
 
-??? info "Definition of time-precision functions"
+!!! info "Definition of time-precision functions"
     For `T<:AbstractFloat`, `timeprec(T) = eps(T)^(4/5)` and `timeprec_severe(T) = sqrt(eps(T))`
 
 This means that the precision of evolution cannot be greater than the respective precision
@@ -55,8 +55,8 @@ two ways:
    values will make the evolution process slower, but the resulting numbers given by
    `evolve!()` will be more precise.
 
-??? warning "Limits of numerical precision"
-    It is not advisable to lower `timeprec(T)` to `10eps(T)` or less or lower
+!!! warning "Limits of numerical precision"
+    It is not advisable to lower `timeprec(T)` to `10eps(T)` or less, or lower
     `timeprec_severe(T)` to `eps(T)^(3/4)` or less, as these choice tend to make
     the package very slow.
 
@@ -70,7 +70,7 @@ The [three key functions](/tutorials/ray-splitting/#ray-splitting-functions) giv
 In order to test if the `raysplitter` dictionary you have defined has physical meaning, the function `isphysical()` is provided:
 
 ```julia
-    isphysical(raysplitter::Dict{Int, Any}; only_mandatory = false)
+isphysical(raysplitter::Dict{Int, Any}; only_mandatory = false)
 ```
 Return `true` if the given ray-splitting dictionary has physically plausible properties.
 

@@ -45,7 +45,7 @@ tim = time()
         @test isphysical(ray)
         tt=1000.0
         for i in 1:partnum
-            p = randominside(bt, 1.0)
+            p = randominside(bt, 0.8)
             t, poss, vels = evolve!(p, bt, tt, ray)
             @test t[end] != Inf
             xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]

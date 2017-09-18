@@ -1,6 +1,6 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
 export resolvecollision!, collisiontime, propagate!, evolve!, construct, specular!,
-periodicity!
+periodicity!, propagate_pos, next_collision
 
 ####################################################
 ## Mathetical/Convenience Functions
@@ -34,20 +34,20 @@ Perform specular reflection based on the normal vector of the Obstacle.
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2+ε to π/2-ε of the normal vector).
 """
-function specular!(p::AbstractParticle, o::Obstacle)::Void
+function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Void where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     p.vel = p.vel - 2*dot(n, p.vel)*n
     return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T}
+function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T<:AbstractFloat}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
     return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T}
+function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T<:AbstractFloat}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
@@ -154,6 +154,11 @@ function propagate!(p::Particle{T}, newpos::SVector{2,T}, t::Real) where {T}
     return
 end
 
+"""
+    propagate_pos(pos, p::Particle{T}, t::Real) where {T}
+Perform a "fake" propagation, i.e. propagate a position as if it was the particle's
+position.
+"""
 function propagate_pos(pos, p::Particle{T}, t::Real) where {T}
     vx0=p.vel[1]
     vy0=p.vel[2]
@@ -222,11 +227,11 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
 end
 
 """
-    min_collision(p, bt) -> (tmin, index)
+    next_collision(p, bt) -> (tmin, index)
 Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
 as well as the `index` of the corresponding obstacle.
 """
-function min_collision(
+function next_collision(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::Tuple{T,Int} where {T}
     tmin::T = T(Inf)
     ind::Int = 0
@@ -241,7 +246,7 @@ function min_collision(
     return tmin, ind
 end
 
-function min_collision(
+function next_collision(
     p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
     findmin(map(x -> collisiontime(p, x), bt))
 end
@@ -265,7 +270,7 @@ end
 #     return tmin, ind
 # end
 
-# gives same result as min_collision when benchmarked...
+# gives same result as next_collision when benchmarked...
 
 """
     evolve!(p::AbstractParticle, bt, t [, ray_splitter])
@@ -331,7 +336,7 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
 
     while count < t
         # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = min_collision(p, bt)
+        tmin::T, i::Int = next_collision(p, bt)
 
         tmin = relocate!(p, bt[i], tmin)
         t_to_write += tmin
@@ -545,7 +550,7 @@ t; warning::Bool = false) where {T<:AbstractFloat}
 
     while count < t
         # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = min_collision(p, bt)
+        tmin::T, i::Int = next_collision(p, bt)
 
         if tmin == Inf
             warning && warn("Pinned particle in evolve! (Inf col t)")
