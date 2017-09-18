@@ -22,7 +22,7 @@ Notice that the `relocate!()` step is *very* important because it takes care tha
 ## Numerical Precision
 
 All core types of `DynamicalBilliards.jl` are parametrically constructed, with
-parameter `T<:AbstractFloat`. This means that the fields of all particles are obstacles
+parameter `#!julia T<:AbstractFloat`. This means that the fields of all particles are obstacles
 contain numbers strictly of type `T`.
 
 The main concerns during evolution are:
@@ -34,8 +34,8 @@ The main concerns during evolution are:
 3. The `relocate!()` process is always finite (and very swift!).
 
 These are solved with the following approach: after the minimum collision time has been calculated, a "test propagation" is done on the position of the particle. If the
-`distance(p, obst)` with the colliding obstacle is found to be "wrong", the collision
-time is reduced by the `DynamicalBilliards.timeprec(T)` function, with `T` being the parametric type of both the particle and the obstacle. For the case of magnetic propagation, the function `timeprec_severe(T)` is used instead. This
+`#!julia distance(p, obst)` with the colliding obstacle is found to be "wrong", the collision
+time is reduced by the `#!julia DynamicalBilliards.timeprec(T)` function, with `T` being the parametric type of both the particle and the obstacle. For the case of magnetic propagation, the function `timeprec_severe(T)` is used instead. This
 process is repeated until the `distance()` is "correct", which is followed by the
 real propagation of the particle for the adjusted time.
 
