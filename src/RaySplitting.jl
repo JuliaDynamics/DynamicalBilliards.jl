@@ -286,8 +286,8 @@ end
 
 """
     reset_billiard!(bt)
-Reset the ray-splitting obstacles of a billiard table to their initial values
-(necessary after before starting the evolution of a new particle).
+Sets the `pflag` field of all ray-splitting obstacles of a billiard table
+to `true`.
 """
 function reset_billiard!(bt::Vector{<:Obstacle})
     for obst in bt

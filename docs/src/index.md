@@ -16,9 +16,9 @@ The types that are currently offered by this package, besides the standard one, 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
 
-## Installation
-
 ---
+
+## Installation
 
 This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
 The [stable documentation](https://datseris.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
@@ -28,33 +28,31 @@ The [stable documentation](https://datseris.github.io/DynamicalBilliards.jl/stab
     simply run the commands:
     `ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
 
-The master branch of `DynamicalBilliards` is used for development purposes. Use `Pkg.checkout("DynamicalBilliards")`, if you want to contribute to the development of the package.
-
-After the first installation, it is advised to run the short tests to be sure that
-everything works as expected. This will only take about 2 minutes:
+After the first installation, it is advised to run the tests to be sure that
+everything works as expected.
 ```julia
 using DynamicalBilliards
-DynamicalBilliards.test_options(print_info = true, long_tests = false)
+DynamicalBilliards.test_options(print_info = true, long_tests = true)
 Pkg.test("DynamicalBilliards")
 ```
-If you do not want to see what tests are done, use `print_info = false`.
-If you use this package for scientific research, you should run the long tests at least once. To do this, pass the keyword argument `long_tests = true` to the `test_options` function.
-These tests take on average 10-20 minutes to complete.
-
-## Usage
+The long tests take on average 4 minutes to complete, while the shorts need some
+seconds.
 
 ---
 
-For a crash course on how to use `DynamicalBilliards.jl`, you should visit the [Basic Usage](/basic/basic_usage) section.
+## Usage
+It is highly suggested to first visit the [Basic Usage](/basic/basic_usage) section,
+for a general overview of how to use `DynamicalBilliards.jl`. The very important discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
 
-If however, you want to make the most out it, the following tutorials offer detailed descriptions:
+The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards.jl`:
+
 - [How to define your custom Billiard Table](/tutorials/billiard_table)
 - [Using Ray-Splitting billiards](/tutorials/ray-splitting)
 - [Visualizing the billiard table and animating the particle's evolution](/tutorials/visualizing)
 - [Creating your own Obstacle Type](/tutorials/own_obstacle)
 - [Examples page](/tutorials/examples)
 
-The [Library](/basic/library) section has the docstrings of all exported names in convenient groups.
+The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
 ## Julia Billiard Animation
 The animation of a particle inside a "Julia" billiard was generated with the code:

@@ -32,7 +32,7 @@ Approximate arccos(1 - x) for x very close to 0.
 Perform specular reflection based on the normal vector of the Obstacle.
 
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
-randomizes the velocity instead (within -π/2 to π/2 of the normal vector).
+randomizes the velocity instead (within -π/2+ε to π/2-ε of the normal vector).
 """
 function specular!(p::AbstractParticle, o::Obstacle)::Void
     n = normalvec(o, p.pos)
@@ -81,7 +81,7 @@ resolvecollision!(p::AbstractParticle, o::PeriodicWall)::Void =  periodicity!(p,
     relocate(p::AbstractParticle, o::Obstacle, t) -> newt
 Propagate the particle's position for time `t`, and check if it is on
 the correct side of the obstacle. If not, adjust the time `t` by ± `timeprec`
-and re-evalute until correct. When correct, propagate the particle
+and re-evalute until correct. When correct, propagate the particle itself
 to the correct position and return the final adjusted time.
 """
 function relocate!(p::Particle{T}, o::Obstacle{T}, tmin)::T where {T}
@@ -135,6 +135,10 @@ Propagate the particle `p` for given time `t`, changing appropriately the the
 For a `Particle` the propagation is a straight line
 (i.e. velocity vector is constant). For a `MagneticParticle` the propagation
 is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
+
+    propagate!(p, position, t)
+Do the same, but take advantage of the already calculated `position` that the
+particle should end up at.
 """
 function propagate!(p::Particle{T}, t::Real) where {T}
     # Set initial conditions
@@ -217,21 +221,11 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     t <= 0.0 ? Inf : t
 end
 
-function min_collision(
-    p::AbstractParticle{T}, BT::BilliardTable{T, S})::Tuple{T,Int} where {T,S}
-    ind = 0
-    val::T = T(Inf)
-    for i in 1:length(BT.bt)
-        colt = collisiontime(p, getobstacle(BT, Val(i)))
-        if colt < val
-            val = colt
-            ind = i
-        end
-    end
-    return val, ind
-    #findmin(collisiontime(p, obst) for obst in BT.bt)
-end
-
+"""
+    min_collision(p, bt) -> (tmin, index)
+Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
+as well as the `index` of the corresponding obstacle.
+"""
 function min_collision(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::Tuple{T,Int} where {T}
     tmin::T = T(Inf)
