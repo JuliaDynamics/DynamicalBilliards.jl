@@ -21,7 +21,7 @@ also no support for collision between particles.
 ## Installation
 
 This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
-The [stable documentation](https://datseris.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
+The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
 
 !!! note "Plotting"
     Plotting in `DynamicalBilliards` is done through `PyPlot` and it is available on-demand only. Simply use the function `DynamicalBilliards.enableplotting()` and it will define and bring into scope all the relevant names. Notice that you must be able to `using PyPlot` for plotting to work. If you are not sure about how to install PyPlot,

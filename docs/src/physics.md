@@ -5,8 +5,7 @@ Firstly one defines a billiard table and (if desired) the [ray-splitting diction
 
 1. Calculate the `collisiontime()` for **all** obstacles in the billiard table.
 2. Find the smallest time, and the obstacle corresponding to that.
-3. `relocate!()` the particle, so that it is on the correct side of the obstacle
-  to-be-collided with.
+3. `relocate!()` the particle, so that it is on the correct side of the obstacle to-be-collided with.
 1. Check whether there is transmission or not (only for ray-splitting): `T(φ) > rand()`
 3. `resolvecollision!()` between the particle and obstacle:
     * If transmission happens, once again `relocate!()` the particle accordingly and implement the ray-splitting algorithm (not discussed here).
@@ -22,7 +21,7 @@ Notice that the `relocate!()` step is *very* important because it takes care tha
 ## Numerical Precision
 
 All core types of `DynamicalBilliards.jl` are parametrically constructed, with
-parameter `#!julia T<:AbstractFloat`. This means that the fields of all particles are obstacles
+parameter `:::julia T<:AbstractFloat`. This means that the fields of all particles are obstacles
 contain numbers strictly of type `T`.
 
 The main concerns during evolution are:
@@ -34,13 +33,13 @@ The main concerns during evolution are:
 3. The `relocate!()` process is always finite (and very swift!).
 
 These are solved with the following approach: after the minimum collision time has been calculated, a "test propagation" is done on the position of the particle. If the
-`#!julia distance(p, obst)` with the colliding obstacle is found to be "wrong", the collision
-time is reduced by the `#!julia DynamicalBilliards.timeprec(T)` function, with `T` being the parametric type of both the particle and the obstacle. For the case of magnetic propagation, the function `timeprec_severe(T)` is used instead. This
+`:::julia distance(p, obst)` with the colliding obstacle is found to be "wrong", the collision
+time is reduced by the `:::julia DynamicalBilliards.timeprec(T)` function, with `T` being the parametric type of both the particle and the obstacle. For the case of magnetic propagation, the function `timeprec_severe(T)` is used instead. This
 process is repeated until the `distance()` is "correct", which is followed by the
 real propagation of the particle for the adjusted time.
 
 ??? info "Definition of time-precision functions"
-    `timeprec(T) = eps(T)^(4/5)` and `timeprec_severe(T) = sqrt(eps(T))`
+    For `T<:AbstractFloat`, `timeprec(T) = eps(T)^(4/5)` and `timeprec_severe(T) = sqrt(eps(T))`
 
 This means that the precision of evolution cannot be greater than the respective precision
 functions. The current values have been chosen such that the time-adjusting loop happens only once for almost all cases.

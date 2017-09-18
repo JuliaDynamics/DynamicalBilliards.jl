@@ -11,13 +11,12 @@ extra:
   social:
     - type: 'github'
       link: 'https://github.com/JuliaDynamics/DynamicalBilliards.jl'
-  logo:
-    icon: 'group work'
 
 markdown_extensions:
   - pymdownx.arithmatex
   - pymdownx.details
   - pymdownx.inlinehilite
+  - pymdownx.superfences
   - admonition
   - codehilite
   - extra
