@@ -84,7 +84,7 @@ the correct side of the obstacle. If not, adjust the time `t` by ± `timeprec`
 and re-evalute until correct. When correct, propagate the particle
 to the correct position and return the final adjusted time.
 """
-function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin)::T where {T}
+function relocate!(p::Particle{T}, o::Obstacle{T}, tmin)::T where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     while distance(newpos, o) < 0
         tmin -= timeprec(T)
@@ -98,6 +98,16 @@ function relocate!(p::Particle{T}, o::PeriodicWall{T}, tmin)::T where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     while distance(newpos, o) > 0
         tmin += timeprec(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+    end
+    propagate!(p, newpos, tmin)
+    return tmin
+end
+
+function relocate!(p::MagneticParticle{T}, o::Obstacle{T}, tmin)::T where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    while distance(newpos, o) < 0
+        tmin -= timeprec_severe(T)
         newpos = propagate_pos(p.pos, p, tmin)
     end
     propagate!(p, newpos, tmin)

@@ -1,5 +1,5 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
-export lyapunovspectrum
+# export lyapunovspectrum #commented out because not yet updated
 
 ##Auxiliar Functions ##
 """

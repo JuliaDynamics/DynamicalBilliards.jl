@@ -18,7 +18,7 @@ function relocate_rayspl!(
 end
 
 function relocate_rayspl!(
-    p::MagneticParticle{T}, o::PeriodicWall{T}, trans::Bool = false)::T where {T}
+    p::MagneticParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
 
     ineq = (2trans - 1)
     newpos = p.pos; newt = zero(T)

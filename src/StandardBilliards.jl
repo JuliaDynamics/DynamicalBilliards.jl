@@ -19,7 +19,8 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
-    bt = Obstacle{typeof(convert(AbstractFloat, x))}[]
+    x = convert(AbstractFloat, x)
+    bt = Obstacle{typeof(x)}[]
     o = typeof(x)(0.0)
     if setting == "standard"
         sp = [o,o]; ep = [o, y]; n = [x,o]
