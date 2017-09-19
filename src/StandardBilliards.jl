@@ -1,5 +1,5 @@
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
-billiard_raysplitting_showcase, billiard_hexagon
+billiard_raysplitting_showcase, billiard_hexagonal_sinai
 
 ####################################################
 ## Famous/Standard Billiards
@@ -159,8 +159,24 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     return bt
 end
 
-"billiard_hexagon(args...) = billiard_polygon(6, args...)"
-billiard_hexagon(r::Real, center = [0,0]) = billiard_polygon(6, r, center)
+"""
+    billiard_hexagonal_sinai(r, R, center = [0,0]; setting = "standard")
+Create a sinai-like billiard, which is a hexagon of outer radius `R`, containing
+at its center (given by `center`) a disk of radius `r`. The `setting` keyword
+is passed to `billiard_polygon`.
+"""
+function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
+    setting = "standard")
+    r, R = promote(r, R)
+    T = typeof(r); center = T[center...]
+    bt = billiard_polygon(6, R, center; setting = setting)
+    DT = setting == "random" ? RandomDisk : Disk
+    push!(bt, Disk(center, r))
+    return bt
+end
+
+
+
 
 """
     billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2) -> bt, rayspl

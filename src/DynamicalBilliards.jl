@@ -3,7 +3,8 @@ __precompile__()
 """
 A Julia package for dynamical billiard systems in two dimensions.
 
-The goals of the package is to provide a flexible, easy-to-use and intuitive framework for
+The goals of the package is to provide a flexible, easy-to-use
+and intuitive framework for
 fast implementation of billiard systems of arbitrary construction.
 """
 module DynamicalBilliards

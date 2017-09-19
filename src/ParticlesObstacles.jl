@@ -23,6 +23,8 @@ Obstacle supertype.
 abstract type Obstacle{T<:AbstractFloat} end
 eltype(o::Obstacle{T}) where {T} = T
 
+eltype(bt::Vector{<:Obstacle{T}}) where {T} = T
+
 """
     Particle{T<:AbstractFloat} <: AbstractParticle{T}
 Two-dimensional particle in a billiard table (mutable type).
@@ -114,9 +116,7 @@ print(io, "Magnetic particle {$T}\n",
 
 
 """
-```julia
-cyclotron(p::MagneticParticle, use_cell = false)
-```
+    cyclotron(p::MagneticParticle, use_cell = false)
 Return center and radius of circular motion performed by the particle based on
 `p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
 """
@@ -154,6 +154,7 @@ function Disk(c::AbstractVector{T}, r::Real, name::String = "Disk") where {T<:Re
     S = T <: Integer ? Float64 : T
     return Disk{S}(SVector{2,S}(c), convert(S, abs(r)), name)
 end
+Disk{T}(args...) where {T} = Disk(args...)
 
 """
     RandomDisk{T<:AbstractFloat} <: Circular{T}
@@ -174,6 +175,7 @@ function RandomDisk(
     S = T <: Integer ? Float64 : T
     return RandomDisk{S}(SVector{2,S}(c), convert(S, abs(r)), name)
 end
+RandomDisk{T}(args...) where {T} = RandomDisk(args...)
 
 """
     Antidot{T<:AbstractFloat} <: Circular{T}
@@ -201,6 +203,8 @@ function Antidot(c::AbstractVector{T}, r::Real,
     return Antidot{S}(SVector{2,S}(c), convert(S, abs(r)), pflag, name)
 end
 Antidot(c, r, name::String = "Antidot") = Antidot(c, r, true, name)
+Antidot{T}(args...) where {T} = Antidot(args...)
+
 show(io::IO, w::Circular{T}) where {T} =
 print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)")
 

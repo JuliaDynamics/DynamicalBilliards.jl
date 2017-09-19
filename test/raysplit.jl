@@ -43,7 +43,7 @@ tim = time()
         bt, ray = billiard_raysplitting_showcase(x, y, r1, r2)
 
         @test isphysical(ray)
-        tt=1000.0
+        tt=100.0
         for i in 1:partnum
             p = randominside(bt, 0.8)
             t, poss, vels = evolve!(p, bt, tt, ray)

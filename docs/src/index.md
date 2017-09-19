@@ -54,6 +54,18 @@ The following tutorials offer detailed descriptions for various aspects of `Dyna
 
 The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
+---
+## Contributing
+Everyone is welcomed to contribute to `DynamicalBilliards.jl`! If you have some new
+algorithm, types of Obstacles or anything new to add, do not hesitate!
+
+If you would like to help but do not have anything new to contribute, please go ahead
+and take a look at the [GitHub issues page](https://github.com/JuliaDynamics/DynamicalBilliards.jl/issues) of the package.
+Most of the issues are easy to solve and are there specifically for people that would
+like to contribute.
+
+---
+
 ## Julia Billiard Animation
 The animation of a particle inside a "Julia" billiard was generated with the code:
 ```julia

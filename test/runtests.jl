@@ -36,7 +36,7 @@ t = time()
 
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
-    raysplit_straight, raysplit_magnetic)
+    raysplit_straight, raysplit_magnetic, type_stability)
 for f in fnames
     println()
     f(partnum, printinfo=printinfo)
