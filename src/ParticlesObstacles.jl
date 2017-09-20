@@ -363,6 +363,15 @@ normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a
 ####################################################
 ## Billiard Table
 ####################################################
+function isperiodic(bt)::Bool
+    for obst in bt
+        if typeof(obst) <: PeriodicWall
+            return true
+        end
+    end
+    return false
+end
+
 immutable BilliardTable{T, BT<:Tuple}
     bt::BT
 end

@@ -165,6 +165,9 @@ t, ray::Dict; warning::Bool = false) where {T}
     if t <= 0
     error("`evolve!()` cannot evolve backwards in time.")
     end
+    if isperiodic(bt) && T == BigFloat
+        error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
+    end
 
     const debug = false
 

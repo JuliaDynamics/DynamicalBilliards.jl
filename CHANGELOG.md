@@ -10,8 +10,7 @@
       `bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}` instead of
       the old `bt::Vector{Obstacle}`.
 * Particle evolution algorithm has fundamentally changed.
-  The way the algorithm works now is described in the documnentation
-  (link here).
+  The way the algorithm works now is described in the documentation in the [Physics](https://juliadynamics.github.io/DynamicalBilliards.jl/latest/physics/#numerical-precision) page.
     * This point with conjuction with the above made the package **much faster**.
 * Positional argument `warning` of `evolve!()` has been changed to **keyword argument**.
 * The raysplitting functions must always accept 3 arguments, even in the case

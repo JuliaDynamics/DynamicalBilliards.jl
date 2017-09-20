@@ -19,6 +19,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
+    x, y = promote(x,y)
     x = convert(AbstractFloat, x)
     bt = Obstacle{typeof(x)}[]
     o = typeof(x)(0.0)
@@ -90,6 +91,7 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         es*= "Obstacles must not overlap with `PeriodicWall`s."
         error(es)
     end
+    r, x, y = promote(r,x,y)
     bt = billiard_rectangle(x, y; setting = setting)
     c = [x/2, y/2]
     if setting == "random"

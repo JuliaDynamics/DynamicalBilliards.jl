@@ -48,4 +48,12 @@ function enableplotting()
   end
 end
 
+# T= BigFloat
+# ω = T(0.2)
+# bt = billiard_hexagonal_sinai(T(0.4), T(0.6), setting="periodic")
+# #bt = billiard_sinai(T(0.25), setting = "periodic")
+# p = randominside(bt, T(ω))
+# tt = 10
+# ts, poss, vels = evolve!(p, bt, tt)
+
 end#module

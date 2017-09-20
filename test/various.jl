@@ -26,10 +26,10 @@ tim = time()
     end#type loop
 end#testset
 @testset "Type Stability: Hexagon" begin
-    Floats = [Float16, Float32, Float64, BigFloat]
+    Floats = [Float16, Float32, Float64]#, BigFloat]
     r = 0.75; x = y = 1.0
     @testset "Type: $(T), ω = $(ω)" for T ∈ Floats, ω ∈ [0, 0.2]
-        bt = billiard_hexagonal_sinai(T(0.2), T(0.6), setting="periodic")
+        bt = billiard_hexagonal_sinai(T(0.4), T(0.6), setting="periodic")
         for obst in bt
             @test eltype(obst) == T
         end

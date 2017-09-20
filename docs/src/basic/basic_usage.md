@@ -41,22 +41,21 @@ p = randominside(bt)
 If you want to specify the initial conditions yourself, simply pass them to the `Particle` constructor, like `p = Particle(x0, y0, φ0)`.
 Now you are ready to evolve this particle:
 ```julia
+t = 1000.0 # subtype of AbstractFloat
 ct, poss, vels = evolve!(p, bt, 1000.0)
 ```
 
-!!! note
+!!! note "Type of `t`"
     The behavior of `evolve!` depends on the type of the third argument,
-    which represents total amount. If it is `Float64`, it represents total amoount of time, but if it is `Int` it represents total amount of collisions.
+    which represents total amount. If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total numnber of collisions.
 
-The return values of the `evolve!()` function need some brief explaining: As noted by the "!" at the end of the function,
-it changes its argument `p`.
-Most importantly however, this function also returns the main output expected by a billiard
-system. This output is a tuple of three vectors:
-* `ct::Vector{Float64}` : Collision times.
-* `poss::Vector{SVector{2}}` : Positions during collisions.
-* `vels::Vector{SVector{2}})` : Velocities **exactly after** the collisions (e.g. after reflection).
+The return values of the `evolve!()` function need some brief explaining: As noted by the "!" at the end of the function, it changes its argument `p`.
+Most importantly however, this function also returns the main output expected by a billiard system. This output is a tuple of three vectors:
+* `ct::Vector{T}` : Collision times.
+* `poss::Vector{SVector{2,T}}` : Positions during collisions.
+* `vels::Vector{SVector{2,T}}` : Velocities **exactly after** the collisions (e.g. after reflection).
 
-The time `ct[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
+with `T<:AbstractFloat` (more on that on the [Numerical Precision](/physics/#numerical-precision) section). The time `ct[i]` is the time necessary to reach state `poss[i], vels[i]` starting from the
 state `poss[i-1], vels[i-1]`. That is why `ct[1]` is always 0 since `poss[1], vels[1]` are
 the initial conditions.
 
@@ -96,7 +95,7 @@ As you can see, the second difference is that the additional argument of the ang
 to the `construct()` function, in order for it to construct circular motion instead of straight motion between collisions.
 (Note: `evolve!()` returns 4 arguments for magnetic propagation, making the ellipsis syntax extremely useful!).
 
-The final optional argument `dt` is the time-step at which the timeseries are constructed
+The final *optional argument* `dt` is the time-step at which the timeseries are constructed
 (since they are made up of sines and cosines).
 
 ---

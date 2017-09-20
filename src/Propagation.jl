@@ -10,6 +10,7 @@ const sixsqrt = 6sqrt(2)
 # Used in relocate:
 @inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
 @inline timeprec_severe(::Type{T}) where {T} = sqrt(eps(T))
+@inline timeprec_bigfloatperiodic(::Type{BigFloat}) = BigFloat(1e-16)
 # Used in check of skip intersection, in `realangle`:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
 
@@ -123,6 +124,17 @@ function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin)::T where {T
     propagate!(p, newpos, tmin)
     return tmin
 end
+
+# function relocate!(
+#     p::MagneticParticle{BigFloat}, o::PeriodicWall{BigFloat}, tmin)::BigFloat
+#     newpos = propagate_pos(p.pos, p, tmin)
+#     while distance(newpos, o) > 0
+#         tmin += timeprec_bigfloatperiodic(T)
+#         newpos = propagate_pos(p.pos, p, tmin)
+#     end
+#     propagate!(p, newpos, tmin)
+#     return tmin
+# end
 
 ####################################################
 ## Straight Propagation
@@ -534,6 +546,9 @@ t; warning::Bool = false) where {T<:AbstractFloat}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
+    end
+    if isperiodic(bt) && T == BigFloat
+        error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
     end
 
     ω = p.omega
