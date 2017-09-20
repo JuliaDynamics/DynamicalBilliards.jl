@@ -35,6 +35,7 @@ billiard_rectangle
 billiard_sinai
 billiard_lorentz
 billiard_polygon
+billiard_hexagonal_sinai
 billiard_raysplitting_showcase
 ```
 
