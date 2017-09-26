@@ -97,7 +97,7 @@ also have to specify the limits of plotting. The
 methods provided are:
 ```julia
 plot_billiard(bt, xmin, ymin, xmax, ymax)
-plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64})
+plot_billiard(bt, xt::Vector{T}, yt::Vector{T})
 ```
 The last one conveniently plots the combo of particle-trajectory and
 periodic-billiard taking care of all the details internally. Give the keyword

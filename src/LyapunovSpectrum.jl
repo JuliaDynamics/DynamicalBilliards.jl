@@ -1,30 +1,30 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
-export lyapunovspectrum
-    
+# export lyapunovspectrum #commented out because not yet updated
+
 ##Auxiliar Functions ##
 """
-```julia
-gramschmidt(u::Matrix{Float64}
-```
-Apply the Gram-Schmidt procedure to a square matrix of 4  vectors 
+    gramschmidt(u::Matrix{Float64}
+Apply the Gram-Schmidt procedure to a square matrix of 4  vectors
 """
-function gramschmidt(u::Matrix)
+function gramschmidt(u::Matrix{T}) where {T}
     ##To do: use StaticArrays
-    w = eye(4)
-    w[:,1] = u[:,1];
+    w = eye(T, 4)
+    w[:,1] .= u[:,1];
     v1 = w[:,1]/norm(w[:,1])
-    w[:,2] = u[:,2] - dot(u[:,2],v1)*v1;
+    @. w[:,2] = u[:,2] - dot(u[:,2],v1)*v1;
     v2 = w[:,2]/norm(w[:,2]);
-    w[:,3] = (u[:,3] - dot(u[:,3],v2)*v2 - dot(u[:,3],v1)*v1)
+    @. w[:,3] = (u[:,3] - dot(u[:,3],v2)*v2 - dot(u[:,3],v1)*v1)
     v3 = w[:,3]/norm(w[:,3])
-    w[:,4] = u[:,4] - dot(u[:,4],v3)*v3 - dot(u[:,4],v2)*v2 - dot(u[:,4],v1)*v1 
+    @. w[:,4] = u[:,4] - dot(u[:,4],v3)*v3 - dot(u[:,4],v2)*v2 - dot(u[:,4],v1)*v1
     return w
 end
+
 """
-```julia
-specular!(p::AbstractParticle, o::Obstacle, offset::Matrix)
-```
-Perform specular reflection based on the normal vector of the Obstacle. The function updates the position and velocity of the particle together with the components of 4 offset vectors stored in the matrix  `offset` as columns.
+    specular!(p::AbstractParticle, o::Obstacle, offset::Matrix)
+Perform specular reflection based on the normal vector of the Obstacle.
+The function updates the position and velocity of the particle
+together with the components of 4 offset vectors stored in the matrix
+`offset` as columns.
 """
 function specular!(p::AbstractParticle, o::Disk, offset::Matrix)
     n = normalvec(o, p.pos)
@@ -34,9 +34,10 @@ function specular!(p::AbstractParticle, o::Disk, offset::Matrix)
     tf = [-p.vel[2], p.vel[1]]
     for k in 1:4
         x = offset[:,k]
-        ##Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (ec. 27) with norm(p) = 1
-        x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n-2./o.r*dot(x[1:2],ti)/cosa*tf 
-        x[1:2]  = x[1:2] -  2.*dot(x[1:2],n)*n
+        # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
+        # with norm(p) = 1
+        x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n-2./o.r*dot(x[1:2],ti)/cosa*tf
+        x[1:2]  = x[1:2] - 2.*dot(x[1:2],n)*n
         ###
         offset[:,k] = x
     end
@@ -48,7 +49,7 @@ function specular!(p::AbstractParticle, o::FiniteWall, offset::Matrix)
     specular!(p, o)
     for k in 1:4
         x = offset[:,k]
-        ##Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (ec. 20) 
+        # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 20)
         x[1:2]  = x[1:2] -  2.*dot(x[1:2],n)*n
         x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n
         ###
@@ -58,8 +59,8 @@ end
 
 """
     resolvecollision!(p::AbstractParticle, o::Circular, offset::Matrix)
-Resolve the collision between particle `p` and obstacle `o` of type *Circular*, updating the components of the offset vectors stored in the matrix `offset` as columns.
-
+Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
+updating the components of the offset vectors stored in the matrix `offset` as columns.
 """
 function resolvecollision!(p::AbstractParticle, o::Union{Disk, FiniteWall}, offset::Matrix)::Void
     dist = distance(p, o)
@@ -70,9 +71,8 @@ function resolvecollision!(p::AbstractParticle, o::Union{Disk, FiniteWall}, offs
     return
 end
 
-
-resolvecollision!(p::AbstractParticle, o::PeriodicWall, offset::Matrix)::Void = 
-    resolvecollision!(p, o)
+resolvecollision!(p::AbstractParticle, o::PeriodicWall, offset::Matrix)::Void =
+resolvecollision!(p, o)
 
 """
 ```julia
@@ -102,7 +102,7 @@ function lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
     if t <= 0
         error("`evolve!()` cannot evolve backwards in time.")
     end
-    
+
     count = zero(t)
     colobst_idx = 1
     t_to_write = 0.0
@@ -113,7 +113,7 @@ function lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
         # Declare these because `bt` is of un-stable type!
         tcol::Float64 = 0.0
         tmin::Float64 = Inf
-        
+
         for i in eachindex(bt)
             tcol = collisiontime(p, bt[i])
             # Set minimum time:
@@ -134,7 +134,7 @@ function lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
         propagate!(p, tmin, offset)
         resolvecollision!(p, bt[colobst_idx], offset)
         t_to_write += tmin
-        
+
         if typeof(bt[colobst_idx]) <: Wall
             continue
         else
@@ -144,12 +144,12 @@ function lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
             for j in 1:4
                 offset[:,j] = offset[:,j]/norm(offset[:,j])
             end
-            
+
             t_to_write = 0.0
         end
     end#time loop
 
-    tmin = t - count 
+    tmin = t - count
     propagate!(p, tmin, offset)
     a = [norm(offset[:,j]) for j in 1:4]
     norms = vcat(norms,a')
@@ -162,7 +162,6 @@ function lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
     for k in 1:4
         exps[k] = sum(log.(norms[:,k]))/t
    end
-    
+
     return exps
 end
-

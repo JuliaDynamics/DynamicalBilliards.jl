@@ -17,7 +17,7 @@ Plot the given (periodic) billiard `bt` on the current PyPlot figure, repeatedly
 plotting from `(xmin, ymin)` to `(xmax, ymax)`. Only works for rectangular billiards.
 
 ```julia
-plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64}; plot_orbit = true)
+plot_billiard(bt, xt::Vector, yt::Vector; plot_orbit = true)
 ```
 Plot the given (periodic) billiard `bt` along with a particle trajectory defined
 by `xt` and `yt`, on the current PyPlot figure. Only works for rectangular billiards.
@@ -25,7 +25,7 @@ by `xt` and `yt`, on the current PyPlot figure. Only works for rectangular billi
 Sets limits automatically. Set the keyword argument `plot_orbit = false` to not
 plot the orbit defined by `(xt, yt)`.
 """
-function plot_billiard(bt::Vector{Obstacle})
+function plot_billiard(bt::Vector{<:Obstacle{T}}) where {T}
   for obst in bt
     plot_obstacle(obst)
   end
@@ -43,9 +43,9 @@ function plot_billiard(bt, xmin, ymin, xmax, ymax)
   dcx = cellxmax - cellxmin
   dcy = cellymax - cellymin
   # Obstacles to plot:
-  toplot = Obstacle[]
+  toplot = Obstacle{eltype(bt)}[]
   for obst in bt
-    (typeof(obst) == PeriodicWall) && continue
+    typeof(obst) <: PeriodicWall && continue
     push!(toplot, obst)
   end
   # Find displacement vectors (they will multiply dcx, dcy)
@@ -66,9 +66,9 @@ function plot_billiard(bt, xmin, ymin, xmax, ymax)
   PyPlot.gca()[:set_aspect]("equal")
 end
 
-function plot_billiard(bt, xt::Vector{Float64}, yt::Vector{Float64}; plot_orbit = true)
-  xmin = floor(minimum(round.(xt,8))); xmax = ceil(maximum(round.(xt,8)))
-  ymin = floor(minimum(round.(yt,8))); ymax = ceil(maximum(round.(yt,8)))
+function plot_billiard(bt, xt::AbstractVector, yt::AbstractVector; plot_orbit = true)
+  xmin = floor(minimum(round.(xt,3))); xmax = ceil(maximum(round.(xt,3)))
+  ymin = floor(minimum(round.(yt,3))); ymax = ceil(maximum(round.(yt,3)))
   if plot_orbit
     plot(xt, yt, color = "blue")
   end
@@ -78,9 +78,7 @@ end
 
 
 """
-```julia
-translation(obst::Obstacle, vector)
-```
+    translation(obst::Obstacle, vector)
 Create a copy of the given obstacle with its position
 translated by `vector`.
 """
@@ -89,7 +87,7 @@ function translation(d::Circular, vec)
 end
 
 function translation(w::Wall, vec)
-  neww = typeof(w)(w.sp .+ vec, w.ep .+ vec, w.normal)
+  neww = typeof(w)(w.sp + vec, w.ep + vec, w.normal)
 end
 
 

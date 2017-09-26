@@ -1,5 +1,5 @@
 site_name:           DynamicalBilliards.jl
-repo_url:            https://github.com/Datseris/DynamicalBilliards.jl
+repo_url:            https://github.com/JuliaDynamics/DynamicalBilliards.jl
 site_description:    An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.
 site_author:         George Datseris
 theme:               'material'
@@ -10,10 +10,13 @@ extra:
     accent: 'cyan'
   social:
     - type: 'github'
-      link: 'https://github.com/Datseris/DynamicalBilliards.jl'
+      link: 'https://github.com/JuliaDynamics/DynamicalBilliards.jl'
 
 markdown_extensions:
   - pymdownx.arithmatex
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
   - admonition
   - codehilite
   - extra
@@ -37,6 +40,6 @@ pages:
   - Visualizing: tutorials/visualizing.md
   - Creating your own Obstacle: tutorials/own_obstacle.md
   - Examples: tutorials/examples.md
-- Library: basic/library.md
 - Physics: physics.md
-- Lyapunov Exponents: lyapunovs.md
+#- Lyapunov Exponents: lyapunovs.md #commented out for now (until updated)
+- Library: basic/library.md

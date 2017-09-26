@@ -35,6 +35,7 @@ using PyPlot
 t = 5000.0
 radius = 1.0
 
+spaces = 2.0:0.1:4.4 #Distances between adjacent disks
 lyap_time = zeros(spaces) #Array where the exponents will be stored
 
 i = 1

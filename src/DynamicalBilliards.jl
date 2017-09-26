@@ -1,7 +1,10 @@
+__precompile__()
+
 """
 A Julia package for dynamical billiard systems in two dimensions.
 
-The goals of the package is to provide a flexible, easy-to-use and intuitive framework for
+The goals of the package is to provide a flexible, easy-to-use
+and intuitive framework for
 fast implementation of billiard systems of arbitrary construction.
 """
 module DynamicalBilliards
@@ -14,8 +17,8 @@ import Base.show
 ##########################################
 include("ParticlesObstacles.jl")
 include("Propagation.jl")
-include("StandardBilliards.jl")
 include("RaySplitting.jl")
+include("StandardBilliards.jl")
 include("LyapunovSpectrum.jl")
 
 ##########################################
@@ -26,7 +29,7 @@ include("LyapunovSpectrum.jl")
 Set if you want the long version of the tests and if you want information to be
 printed during testing.
 """
-function test_options(;print_info::Bool = false, long_tests::Bool = false)
+function test_options(;print_info::Bool = true, long_tests::Bool = true)
   ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
   ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
 end
@@ -34,8 +37,9 @@ end
 # Plotting Routines (loaded on demand)   #
 ##########################################
 """
-    (DynamicalBilliards.) enableplotting()
-Enable plotting for the package DynamicalBilliards.jl
+    DynamicalBilliards.enableplotting()
+Enable plotting for the package DynamicalBilliards.jl. Requires
+`using PyPlot` to work properly.
 """
 function enableplotting()
   dir = joinpath(dirname(@__FILE__), "plotting")
@@ -43,5 +47,13 @@ function enableplotting()
     include(joinpath(dir, f))
   end
 end
+
+# T= BigFloat
+# ω = T(0.2)
+# bt = billiard_hexagonal_sinai(T(0.4), T(0.6), setting="periodic")
+# #bt = billiard_sinai(T(0.25), setting = "periodic")
+# p = randominside(bt, T(ω))
+# tt = 10
+# ts, poss, vels = evolve!(p, bt, tt)
 
 end#module

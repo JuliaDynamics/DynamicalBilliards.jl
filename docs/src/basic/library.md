@@ -1,20 +1,12 @@
 Below you find all the docstrings of all exported names of `DynamicalBilliards.jl` in convenient groups.
 
-## Standard Billiards
 
-```@docs
-billiard_rectangle
-billiard_sinai
-billiard_polygon
-```
 
 ## Particles
 
 ```@docs
 Particle
 MagneticParticle
-magnetic2standard
-standard2magnetic
 cyclotron
 ```
 
@@ -36,6 +28,17 @@ distance
 randominside
 ```
 
+## Standard Billiards
+
+```@docs
+billiard_rectangle
+billiard_sinai
+billiard_lorentz
+billiard_polygon
+billiard_hexagonal_sinai
+billiard_raysplitting_showcase
+```
+
 ## Propagation
 
 ```@docs
@@ -43,6 +46,8 @@ resolvecollision!
 specular!
 periodicity!
 collisiontime
+next_collision
+propagate_pos
 propagate!
 evolve!
 construct
@@ -53,7 +58,7 @@ construct
 ```@docs
 isphysical
 acceptable_raysplitter
-supports_raysplitting
+reset_billiard!
 ```
 
 ## Visualization

@@ -1,379 +1,335 @@
-export isphysical, acceptable_raysplitter, supports_raysplitting
+export isphysical, acceptable_raysplitter, reset_billiard!
 
-"""
-```julia
-supports_raysplitting(obst::Obstacle)
-```
-Return `true` if the given obstacle supports ray-splitting.
-"""
+########################
+# Resolve collisions
+########################
+
+function relocate_rayspl!(
+    p::AbstractParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+
+    ineq = (2trans - 1)
+    newpos = p.pos; newt = zero(T)
+    while ineq*distance(newpos, o) > 0
+        newt += ineq*timeprec(T)
+        newpos = propagate_pos(p.pos, p, newt)
+    end
+    propagate!(p, newpos, newt)
+    return newt
+end
+
+function relocate_rayspl!(
+    p::MagneticParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+
+    ineq = (2trans - 1)
+    newpos = p.pos; newt = zero(T)
+    while ineq*distance(newpos, o) > 0
+        newt += ineq*timeprec_severe(T)
+        newpos = propagate_pos(p.pos, p, newt)
+    end
+    propagate!(p, newpos, newt)
+    return newt
+end
+
+function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
+    # Raysplit Algorithm step 1: Determine incidence angle (0 < θ < π/4)
+    n = normalvec(a, p.pos)
+    inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
+    φ = acos(inverse_dot)
+    # Raysplit Algorithm step 2:
+    if cross2D(p.vel, n) < 0
+      φ *= -1
+    end
+    return φ
+end
+
+function istransmitted(p::Particle{T}, a::Obstacle{T}, Tr::Function) where {T}
+    φ = incidence_angle(p, a)
+    # Raysplit Algorithm step 3: check transmission probability
+    return Tr(φ, a.pflag) > rand(), φ
+    # comment: more accurate would be to calculate incidence angle again
+    # within relocate!(). But the angle changes so little that this must have
+    # almost zero impact.
+end
+function istransmitted(p::MagneticParticle{T}, a::Obstacle{T}, Tr::Function) where {T}
+    φ = incidence_angle(p, a)
+    # Raysplit Algorithm step 3: check transmission probability
+    return Tr(φ, a.pflag, p.omega) > rand(), φ
+    # comment: more accurate would be to calculate incidence angle again
+    # within relocate!(). But the angle changes so little that this must have
+    # almost zero impact.
+end
+
+
+# Resolve collision for ray-splitting with Normal
+function resolvecollision!(p::AbstractParticle{T},
+    a::Obstacle{T}, φ::T, trans::Bool,
+    θ::Function, newω::Function = (ω, bool) -> ω) where {T<:AbstractFloat}
+
+    ω = typeof(p) <: Particle ? zero(T) : p.omega
+
+    if trans #perform raysplitting
+        # Raysplit Algorithm step 4: find transmission angle in relative angles
+        theta = θ(φ, a.pflag, ω)
+        # Raysplit Algorithm step 5: reverse the Obstacle propagation flag
+        a.pflag = !a.pflag
+        # Raysplit Algorithm step 6: find transmission angle in real-space angles
+        n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
+        Θ = theta + atan2(n[2], n[1])
+        # Step 7+8: Relocation has been done already by the
+        # call of `tmin = relocate!(p, bt[colobst_idx], tmin, trans)`
+        # Sidenote: The above call must happen BEFORE flag reversal!
+
+        # Raysplit Algorithm step 9: Perform refraction
+        p.vel = SVector{2,T}(cos(Θ), sin(Θ))
+        # Raysplit Algorithm step 10: Set new angular velocity
+        if typeof(p) <: MagneticParticle
+            p.omega = newω(p.omega, !a.pflag)  # notice the exclamation mark
+        end
+    else # No ray-splitting:
+        #perform specular
+        specular!(p, a)
+        end
+    return
+end
+
+###########
+# Straight
+###########
+
+# evolve For Particle and Ray-Splitting:
+function evolve!(p::Particle{T}, bt, t,
+    ray::Dict) where {T}
+
+    const debug = false
+
+    if t <= 0
+    throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
+    end
+
+    rt = T[]
+    rpos = SVector{2,T}[]
+    rvel = SVector{2,T}[]
+    push!(rpos, p.pos)
+    push!(rvel, p.vel)
+    push!(rt, 0)
+
+    count = zero(t)
+    t_to_write = zero(T)
+
+    while count < t
+        # Declare these because `bt` is of un-stable type!
+        tmin::T, i::Int = next_collision(p, bt)
+
+        debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
+
+        if haskey(ray, i)
+            propagate!(p, tmin)
+            trans, φ = istransmitted(p, bt[i], ray[i][1])
+            debug && println("Angle of incidence: $(φ), transmitted? $trans")
+            if debug
+                println("Currently, pflag is $(bt[colobst_idx].pflag)")
+                println("After collision is resolved, it will be the opposite")
+            end
+            newt = relocate_rayspl!(p, bt[i], trans)
+            resolvecollision!(p, bt[i], φ, trans, ray[i][2])
+            t_to_write += tmin + newt
+        else
+            tmin = relocate!(p, bt[i], tmin)
+            resolvecollision!(p, bt[i])
+            t_to_write += tmin
+        end
+
+        debug && println()
+        if typeof(bt[i]) <: PeriodicWall
+            continue
+        else
+            push!(rpos, p.pos + p.current_cell)
+            push!(rvel, p.vel)
+            push!(rt, t_to_write)
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+
+    end#time loop
+    return (rt, rpos, rvel)
+end
+
+##########
+# Magnetic
+##########
+
+# evolve For MagneticParticle and Ray-Splitting
+function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
+t, ray::Dict; warning::Bool = false) where {T}
+
+    if t <= 0
+    error("`evolve!()` cannot evolve backwards in time.")
+    end
+    if isperiodic(bt) && T == BigFloat
+        error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
+    end
+
+    const debug = false
+
+    omegas = T[]
+    rt = T[]
+    rpos = SVector{2,T}[]
+    rvel = SVector{2,T}[]
+    push!(rpos, p.pos)
+    push!(rvel, p.vel)
+    push!(rt, zero(T))
+    push!(omegas, p.omega)
+
+    count = zero(t)
+    t_to_write = zero(T)
+
+    while count < t
+        # Declare these because `bt` is of un-stable type!
+        tmin::T, i::Int = next_collision(p, bt)
+
+        debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
+
+        if tmin == Inf
+            warning && warn("Pinned particle in evolve! (Inf col t)")
+            push!(rpos, rpos[end])
+            push!(rvel, rvel[end])
+            push!(rt, Inf)
+            push!(omegas, p.omega)
+            return (rt, rpos, rvel, omegas)
+        end
+
+        if haskey(ray, i)
+            propagate!(p, tmin)
+            trans, φ = istransmitted(p, bt[i], ray[i][1])
+            debug && println("Angle of incidence: $(φ), transmitted? $trans")
+            if debug
+                println("Currently, pflag is $(bt[colobst_idx].pflag)")
+                println("After collision is resolved, it will be the opposite")
+            end
+            newt = relocate_rayspl!(p, bt[i], trans)
+            resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
+            t_to_write += tmin + newt
+        else
+            tmin = relocate!(p, bt[i], tmin)
+            resolvecollision!(p, bt[i])
+            t_to_write += tmin
+        end
+
+
+        # Write output only if the collision was not made with PeriodicWall
+        if typeof(bt[i]) <: PeriodicWall
+            # Pinned particle:
+            if t_to_write >= 2π/abs(p.omega)
+            warning && warn("Pinned particle in evolve! (completed circle)")
+            push!(rpos, rpos[end])
+            push!(rvel, rvel[end])
+            push!(rt, Inf)
+            push!(omegas, p.omega)
+            return (rt, rpos, rvel, omegas)
+            end
+            #If not pinned, continue (do not write for PeriodicWall)
+            continue
+        else
+            push!(rpos, p.pos + p.current_cell)
+            push!(rvel, p.vel)
+            push!(rt, t_to_write)
+            push!(omegas, p.omega)
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+
+    end#time loop
+    return (rt, rpos, rvel, omegas)
+end
+
+function construct(t::Vector{T}, poss::Vector{SVector{2,T}},
+vels::Vector{SVector{2,T}}, omegas::Vector{T}, dt=0.01) where T
+
+    xt = [poss[1][1]]
+    yt = [poss[1][2]]
+    vxt= [vels[1][1]]
+    vyt= [vels[1][2]]
+    ts = [t[1]]
+    ct = cumsum(t)
+
+    for i in 2:length(t)
+        ω = omegas[i-1]
+        φ0 = atan2(vels[i-1][2], vels[i-1][1])
+        x0 = poss[i-1][1]; y0 = poss[i-1][2]
+        colt=t[i]
+
+        t0 = ct[i-1]
+        # Construct proper time-vector
+        if colt >= dt
+            timevec = collect(0:dt:colt)[2:end]
+            timevec[end] == colt || push!(timevec, colt)
+        else
+            timevec = colt
+        end
+
+        for td in timevec
+            push!(vxt, cos(ω*td + φ0))
+            push!(vyt, sin(ω*td + φ0))
+            push!(xt, sin(ω*td + φ0)/ω + x0 - sin(φ0)/ω)  #vy0 is sin(φ0)
+            push!(yt, -cos(ω*td + φ0)/ω + y0 + cos(φ0)/ω) #vx0 is cos(φ0)
+            push!(ts, t0 + td)
+        end#collision time
+    end#total time
+    return xt, yt, vxt, vyt, ts
+end
+
+########################
+# is physical, etc.
+########################
+
 function supports_raysplitting(obst::Obstacle)
   n = fieldnames(typeof(obst))
   in(:pflag, n)
 end
 
 """
-```julia
-acceptable_raysplitter(raysplitter, bt)
-```
-Check if the given ray-splitting dictionary `raysplitter` can be used in conjuction
-with given billiard table `bt`.
+    reset_billiard!(bt)
+Sets the `pflag` field of all ray-splitting obstacles of a billiard table
+to `true`.
+"""
+function reset_billiard!(bt::Vector{<:Obstacle})
+    for obst in bt
+        supports_raysplitting(obst) && (obst.pflag = true)
+    end
+end
+
+"""
+    acceptable_raysplitter(raysplitter, bt)
+Return `true` if the given ray-splitting dictionary `raysplitter`
+can be used in conjuction with given billiard table `bt`.
 """
 function acceptable_raysplitter(ray::Dict{Int, Any}, bt::Vector{Obstacle})
-  for i in keys(ray)
-    if !supports_raysplitting(bt[i])
-      print("Obstacle at index $i of given billiard table")
-      println("does not have a field `pflag`")
-      println("and therefore does not support ray-splitting.")
-      return false
+    for i in keys(ray)
+        if !supports_raysplitting(bt[i])
+            print("Obstacle at index $i of given billiard table")
+            println("does not have a field `pflag`")
+            println("and therefore does not support ray-splitting.")
+            return false
+        end
     end
-  end
-  true
-end
-
-
-# Resolve collision for Ray-splitting with Magnetic
-function resolvecollision!(p::MagneticParticle, a::Obstacle, T::Function,
-  θ::Function, new_ω::Function = ((x, bool) -> x))::Void
-
-  ω = p.omega
-  # Determine incidence angle (0 < θ < π/4)
-  n = normalvec(a, p.pos)
-  inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
-  φ = acos(inverse_dot)
-  # if this is wrong then my normal vec is wrong:
-  # if φ > π/2
-  #   println("in resolvecollision, the inverse_dot is")
-  #   println(inverse_dot)
-  #   println("The current distance of particle with obstacle $(a.name) is:")
-  #   println(distance(p, a))
-  #   println("notice that the pflag is not yet reversed")
-  #   println("The pflag of the obstacle is")
-  #   println(a.pflag)
-  #   if a.pflag == true
-  #     println("(so Particle should be coming from outside of disk)")
-  #   else
-  #     println("(so Particle should be coming from inside of disk)")
-  #   end
-  #   println("Current particle velocity:")
-  #   println(p.vel)
-  #   println("This inverse_dot gives insidence angle")
-  #   println("φ=$φ")
-  #   error("φ shoud be between 0 and π/2")
-  # end
-  # ray-splitting (step 2)
-  if cross2D(p.vel, n) < 0
-    φ *= -1
-  end
-  # Step 3
-  if T(φ, a.pflag, ω) > rand()
-    # Step 4: find transmission angle in relative angles
-    theta = θ(φ, a.pflag, ω)
-    # Step 5: reverse the Obstacle propagation flag
-    a.pflag = !a.pflag
-    # Step 6: find transmission angle in real-space angles
-    n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
-    Θ = theta + atan2(n[2], n[1])
-    # Step 7: Check the "new" distance between Particle and Obstacle
-    dist = distance(p, a)  #this is also reversed!
-    # Step 8: Relocate accordingly
-    if abs(dist) > 1e-9
-      println("After propagation, in resolvecollision, we got distance")
-      println("dist = $dist")
-      println("Collision is to be made with $(o.name)")
-      println("particle velocity (before reflection):")
-      println("vx = $(p.vel[1])")
-      println("vy = $(p.vel[2])")
-      error("Too big distance after propagation into resolve!")
-    end
-    if dist < 0.0
-      relocate!(p, a, dist)
-    end
-    # Step 9: Perform refraction
-    p.vel = [cos(Θ), sin(Θ)]
-    # Step 10: set new magnetic field
-    p.omega = new_ω(ω, !a.pflag)  # notice the exclamation mark !
-  # No ray-splitting:
-  else
-    dist = distance(p, a)
-    if abs(dist) > 1e-9
-      println("After propagation, in resolvecollision, we got distance")
-      println("dist = $dist")
-      println("Collision is to be made with $(o.name)")
-      println("particle velocity (before reflection):")
-      println("vx = $(p.vel[1])")
-      println("vy = $(p.vel[2])")
-      error("Too big distance after propagation into resolve!")
-    end
-    if dist < 0.0
-      relocate!(p, a, dist)
-    end
-    #perform specular
-    specular!(p, a)
-  end
-  return
-end
-
-# Resolve collision for ray-splitting with Normal
-function resolvecollision!(p::Particle, a::Obstacle, T::Function, θ::Function)::Void
-
-  ω = 0.0
-  # Determine incidence angle (0 < θ < π/4)
-  n = normalvec(a, p.pos)
-  inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
-  φ = acos(inverse_dot)
-  # if this is wrong then my normal vec is wrong:
-  # if φ > π/2
-  #   println("in resolvecollision, the inverse_dot is")
-  #   println(inverse_dot)
-  #   println("The current distance of particle with obstacle $(a.name) is:")
-  #   println(distance(p, a))
-  #   println("And the pflag of the obstacle is")
-  #   println(a.pflag)
-  #   if a.pflag == true
-  #     println("(so Particle should be coming from outside of disk)")
-  #   else
-  #     println("(so Particle should be coming from inside of disk)")
-  #   end
-  #   println("Current particle velocity:")
-  #   println(p.vel)
-  #   println("This inverse_dot gives insidence angle")
-  #   println("φ=$φ")
-  #   error("φ shoud be between 0 and π/2")
-  # end
-  # ray-splitting (step 2)
-  if cross2D(p.vel, n) < 0
-    φ *= -1
-  end
-  # Step 3: check transmission probability
-  if T(φ, a.pflag, ω) > rand()
-    # Step 4: find transmission angle in relative angles
-    theta = θ(φ, a.pflag, ω)
-    # Step 5: reverse the Obstacle propagation flag
-    a.pflag = !a.pflag
-    # Step 6: find transmission angle in real-space angles
-    n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
-    Θ = theta + atan2(n[2], n[1])
-    # Step 7: Check the "new" distance between Particle and Obstacle
-    dist = distance(p, a)  #this is also reversed!
-    if abs(dist) > 1e-9
-      println("After propagation, in resolvecollision, we got distance")
-      println("dist = $dist")
-      println("Collision is to be made with $(o.name)")
-      println("particle velocity (before reflection):")
-      println("vx = $(p.vel[1])")
-      println("vy = $(p.vel[2])")
-      error("Too big distance after propagation into resolve!")
-    end
-    # Step 8: Relocate accordingly
-    if dist < 0.0
-      relocate!(p, a, dist)
-    end
-    # Step 9: Perform refraction
-    p.vel = [cos(Θ), sin(Θ)]
-  # No ray-splitting:
-  else
-    dist = distance(p, a)
-    if abs(dist) > 1e-9
-      println("After propagation, in resolvecollision, we got distance")
-      println("dist = $dist")
-      println("Collision is to be made with $(o.name)")
-      println("particle velocity (before reflection):")
-      println("vx = $(p.vel[1])")
-      println("vy = $(p.vel[2])")
-      error("Too big distance after propagation into resolve!")
-    end
-    if dist < 0.0
-      relocate!(p, a, dist)
-    end
-    #perform specular
-    specular!(p, a)
-  end
-  return
-end
-
-# evolve For Particle and Ray-Splitting:
-function evolve!(p::Particle, bt::Vector{Obstacle}, t,
-  ray::Dict)
-
-  if t <= 0
-    error("`evolve!()` cannot evolve backwards in time.")
-  end
-
-  rt = Float64[]
-  rpos = SVector{2,Float64}[]
-  rvel = SVector{2,Float64}[]
-  push!(rpos, p.pos)
-  push!(rvel, p.vel)
-  push!(rt, 0.0)
-
-  count = zero(t)
-  colobst_idx = 1
-  t_to_write = 0.0
-
-  while count < t
-    # Declare these because `bt` is of un-stable type!
-    tcol::Float64 = 0.0
-    tmin::Float64 = Inf
-
-    for i in eachindex(bt)
-      tcol = collisiontime(p, bt[i])
-      # Set minimum time:
-      if tcol < tmin
-        tmin = tcol
-        colobst_idx = i
-      end
-    end#obstacle loop
-
-    propagate!(p, tmin)
-
-    if haskey(ray, colobst_idx)
-      resolvecollision!(p, bt[colobst_idx], ray[colobst_idx][1], ray[colobst_idx][2])
-    else
-      resolvecollision!(p, bt[colobst_idx])
-    end
-    t_to_write += tmin
-
-    if typeof(bt[colobst_idx]) == PeriodicWall
-      continue
-    else
-      push!(rpos, p.pos + p.current_cell)
-      push!(rvel, p.vel)
-      push!(rt, t_to_write)
-      count += increment_counter(t, t_to_write)
-      t_to_write = 0.0
-    end
-  end#time loop
-  return (rt, rpos, rvel)
-end
-
-# evolve For MagneticParticle and Ray-Splitting
-function evolve!(p::MagneticParticle, bt::Vector{Obstacle},
-  t, ray::Dict, warning::Bool = false)
-
-  if t <= 0
-    error("`evolve!()` cannot evolve backwards in time.")
-  end
-
-  omegas = Float64[]
-  rt = Float64[]
-  rpos = SVector{2,Float64}[]
-  rvel = SVector{2,Float64}[]
-  push!(rpos, p.pos)
-  push!(rvel, p.vel)
-  push!(rt, 0.0)
-  push!(omegas, p.omega)
-
-  count = zero(t)
-  t_to_write = 0.0
-  colobst_idx = 1
-
-  while count < t
-    tmin::Float64 = Inf
-    tcol::Float64 = 0.0
-
-    for i in eachindex(bt)
-      tcol = collisiontime(p, bt[i])
-      # Set minimum time:
-      if tcol < tmin
-        tmin = tcol
-        colobst_idx = i
-      end
-    end#obstacle loop
-
-    if tmin == Inf
-      warning && warn("Pinned particle in evolve! (Inf col t)")
-      push!(rpos, rpos[end])
-      push!(rvel, rvel[end])
-      push!(rt, Inf)
-      return (rt, rpos, rvel, omegas)
-    end
-
-    propagate!(p, tmin)
-    if haskey(ray, colobst_idx)
-      resolvecollision!(p, bt[colobst_idx], ray[colobst_idx][1],
-      ray[colobst_idx][2], ray[colobst_idx][3])
-    else
-      resolvecollision!(p, bt[colobst_idx])
-    end
-
-    t_to_write += tmin
-    # Write output only if the collision was not made with PeriodicWall
-    if typeof(bt[colobst_idx]) == PeriodicWall
-      # Pinned particle:
-      if t_to_write >= 2π/abs(p.omega)
-        warning && warn("Pinned particle in evolve! (completed circle)")
-        push!(rpos, rpos[end])
-        push!(rvel, rvel[end])
-        push!(rt, Inf)
-        push!(omegas, p.omega)
-        return (rt, rpos, rvel, omegas)
-      end
-      #If not pinned, continue (do not write for PeriodicWall)
-      continue
-    else
-      push!(rpos, p.pos + p.current_cell)
-      push!(rvel, p.vel)
-      push!(rt, t_to_write)
-      push!(omegas, p.omega)
-      count += increment_counter(t, t_to_write)
-      t_to_write = 0.0
-    end
-
-  end#time loop
-  return (rt, rpos, rvel, omegas)
-end
-
-function construct(t::Vector{Float64}, poss::Vector{SVector{2,Float64}},
-  vels::Vector{SVector{2,Float64}}, omegas::Vector{Float64}, dt=0.01)
-
-  xt = [poss[1][1]]
-  yt = [poss[1][2]]
-  vxt= [vels[1][1]]
-  vyt= [vels[1][2]]
-  ts = [t[1]]
-  ct = cumsum(t)
-
-  for i in 2:length(t)
-    ω = omegas[i-1]
-    φ0 = atan2(vels[i-1][2], vels[i-1][1])
-    x0 = poss[i-1][1]; y0 = poss[i-1][2]
-    colt=t[i]
-
-    t0 = ct[i-1]
-    # Construct proper time-vector
-    if colt >= dt
-      timevec = collect(0:dt:colt)[2:end]
-      timevec[end] == colt || push!(timevec, colt)
-    else
-      timevec = colt
-    end
-
-    for td in timevec
-      push!(vxt, cos(ω*td + φ0))
-      push!(vyt, sin(ω*td + φ0))
-      push!(xt, sin(ω*td + φ0)/ω + x0 - sin(φ0)/ω)  #vy0 is sin(φ0)
-      push!(yt, -cos(ω*td + φ0)/ω + y0 + cos(φ0)/ω) #vx0 is cos(φ0)
-      push!(ts, t0 + td)
-    end#collision time
-  end#total time
-  return xt, yt, vxt, vyt, ts
+    true
 end
 
 """
-    isphysical(raysplitter::Dict{Int, Any}; only_mandatory = false)
-Return `true` if the given ray-splitting dictionary has physically plausible properties.
+    isphysical(raysplitter::Dict; only_mandatory = false)
+Return `true` if the given ray-splitting dictionary has physically
+plausible properties.
 
 Specifically, check if (φ is the incidence angle, θ the refraction angle):
-* Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
-* Transmission probability is even function: T(φ) ≈ T(-φ) at ω = 0
+
+* Critical angle means total reflection: If θ(φ) ≥ π/2 then Tr(φ) = 0
+* Transmission probability is even function: Tr(φ) ≈ Tr(-φ) at ω = 0
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ) at ω = 0
 * Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, pflag), !pflag) ≈ ω
-The first property is mandatory and must hold for correct propagation.
-The above tests are done for all possible combinations of arguments.
 
-They keyword `only_mandatory` notes whether the rest of
-the properties should be tested or not.
+The first property is mandatory to hold for any setting and is always checked.
+The rest are checked if `only_mandatory = false`.
 """
 function isphysical(ray::Dict; only_mandatory = false)
   for i in keys(ray)

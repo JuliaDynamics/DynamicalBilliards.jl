@@ -1,4 +1,5 @@
-export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz
+export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
+billiard_raysplitting_showcase, billiard_hexagonal_sinai
 
 ####################################################
 ## Famous/Standard Billiards
@@ -18,55 +19,54 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
-  bt = Obstacle[]
-  if setting == "standard"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw2 = FiniteWall(sp, ep, n, "Left wall")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw2 = FiniteWall(sp, ep, n, "Right wall")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw2 = FiniteWall(sp, ep, n, "Top wall")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw2 = FiniteWall(sp, ep, n, "Bottom wall")
-    push!(bt, leftw2, rightw2, topw2, botw2)
-  elseif setting == "periodic"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = PeriodicWall(sp, ep, n, "Top periodic boundary")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = PeriodicWall(sp, ep, n, "Bottom periodic boundary")
-    push!(bt, leftw, rightw, topw, botw)
-  elseif setting == "random"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = RandomWall(sp, ep, n, "Left random wall")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = RandomWall(sp, ep, n, "Right random wall")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = RandomWall(sp, ep, n, "Top random wall")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = RandomWall(sp, ep, n, "Bottom random wall")
-    push!(bt, leftw, rightw, topw, botw)
-  elseif setting == "ray-splitting"
-    o = 0.0
-    sp = [o,o]; ep = [o, y]; n = [x,o]
-    leftw = SplitterWall(sp, ep, n, "Left ray-splitting wall")
-    sp = [x,o]; ep = [x, y]; n = [-x,o]
-    rightw = SplitterWall(sp, ep, n, "Right ray-splitting wall")
-    sp = [o,y]; ep = [x, y]; n = [o,-y]
-    topw = SplitterWall(sp, ep, n, "Top ray-splitting wall")
-    sp = [o,o]; ep = [x, o]; n = [o,y]
-    botw = SplitterWall(sp, ep, n, "Bottom ray-splitting wall")
-    push!(bt, leftw, rightw, topw, botw)
-  else
-    error("The given setting=$setting is unknown.")
-  end
-  return bt
+    x, y = promote(x,y)
+    x = convert(AbstractFloat, x)
+    bt = Obstacle{typeof(x)}[]
+    o = typeof(x)(0.0)
+    if setting == "standard"
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw2 = FiniteWall(sp, ep, n, "Left wall")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw2 = FiniteWall(sp, ep, n, "Right wall")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw2 = FiniteWall(sp, ep, n, "Top wall")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw2 = FiniteWall(sp, ep, n, "Bottom wall")
+        push!(bt, leftw2, rightw2, topw2, botw2)
+    elseif setting == "periodic"
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw = PeriodicWall(sp, ep, n, "Top periodic boundary")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw = PeriodicWall(sp, ep, n, "Bottom periodic boundary")
+        push!(bt, leftw, rightw, topw, botw)
+    elseif setting == "random"
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw = RandomWall(sp, ep, n, "Left random wall")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw = RandomWall(sp, ep, n, "Right random wall")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw = RandomWall(sp, ep, n, "Top random wall")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw = RandomWall(sp, ep, n, "Bottom random wall")
+        push!(bt, leftw, rightw, topw, botw)
+    elseif setting == "ray-splitting"
+        sp = [o,o]; ep = [o, y]; n = [x,o]
+        leftw = SplitterWall(sp, ep, n, "Left ray-splitting wall")
+        sp = [x,o]; ep = [x, y]; n = [-x,o]
+        rightw = SplitterWall(sp, ep, n, "Right ray-splitting wall")
+        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        topw = SplitterWall(sp, ep, n, "Top ray-splitting wall")
+        sp = [o,o]; ep = [x, o]; n = [o,y]
+        botw = SplitterWall(sp, ep, n, "Bottom ray-splitting wall")
+        push!(bt, leftw, rightw, topw, botw)
+    else
+        throw(ArgumentError("The given setting=$setting is unknown."))
+    end
+    return bt
 end
 
 """
@@ -86,21 +86,22 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "ray-splitting" : All obstacles in the billiard table allow for ray-splitting.
 """
 function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
-  if (setting == "periodic") && (r>=x/2 || r>=y/2)
-    es = "Disk radius too big for a periodic Sinai billiard.\n"
-    es*= "Obstacles must not overlap with `PeriodicWall`s."
-    error(es)
-  end
-  bt = billiard_rectangle(x, y; setting = setting)
-  c = [x/2, y/2]
-  if setting == "random"
-    centerdisk = RandomDisk(c, r, "Random disk")
-  elseif setting == "ray-splitting"
-    centerdisk = Antidot(c, r, "Antidot")
-  else
-    centerdisk = Disk(c, r, "Disk")
-  end
-  push!(bt, centerdisk)
+    if (setting == "periodic") && (r>=x/2 || r>=y/2)
+        es = "Disk radius too big for a periodic Sinai billiard.\n"
+        es*= "Obstacles must not overlap with `PeriodicWall`s."
+        error(es)
+    end
+    r, x, y = promote(r,x,y)
+    bt = billiard_rectangle(x, y; setting = setting)
+    c = [x/2, y/2]
+    if setting == "random"
+        centerdisk = RandomDisk(c, r, "Random disk")
+    elseif setting == "ray-splitting"
+        centerdisk = Antidot(c, r, "Antidot")
+    else
+        centerdisk = Disk(c, r, "Disk")
+    end
+    push!(bt, centerdisk)
 end
 
 """
@@ -123,38 +124,95 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 * "random" : The velocity is randomized upon collision.
 """
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
-  bt = Obstacle[]
-  verteces = [[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
+    S = typeof(convert(AbstractFloat, r))
+    bt = Obstacle{S}[]
+    verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
 
-  if setting == "standard"
-    T = FiniteWall
-    wallname = "wall"
-  elseif setting == "periodic"
-    if sides != 4 && sides != 6
-      error("Polygonal and periodic billiard can exist only for `n=4` or `n=6`")
+    if setting == "standard"
+        T = FiniteWall
+        wallname = "wall"
+    elseif setting == "periodic"
+        if sides != 4 && sides != 6
+            error("Polygonal and periodic billiard can exist only for `n=4` or `n=6`")
+        end
+        T = PeriodicWall
+        wallname = "periodic wall"
+        inr = S(r*cos(π/sides))
+    elseif setting == "random"
+        T = RandomWall
+        wallname = "random wall"
     end
-    T = PeriodicWall
-    wallname = "periodic wall"
-    inr = r*cos(π/sides)
-  elseif setting == "random"
-    T = RandomWall
-    wallname = "random wall"
-  end
 
-  for i in eachindex(verteces)
-    N = length(verteces)
-    starting = verteces[i]
-    ending = verteces[mod1(i+1, N)]
-    # Normal vector must look at where the particle is coming from
-    w = ending - starting
-    if setting == "periodic"
-      normal = 2inr*normalize([-w[2], w[1]])
-      wall = PeriodicWall(starting, ending, normal, wallname*" $i")
-    else
-      normal = [-w[2], w[1]]
-      wall = FiniteWall(starting, ending, normal, wallname*" $i") 
+    for i in eachindex(verteces)
+        N = length(verteces)
+        starting = verteces[i]
+        ending = verteces[mod1(i+1, N)]
+        # Normal vector must look at where the particle is coming from
+        w = ending - starting
+        if setting == "periodic"
+            normal = 2inr*normalize([-w[2], w[1]])
+            wall = PeriodicWall(starting, ending, normal, wallname*" $i")
+        else
+            normal = [-w[2], w[1]]
+            wall = FiniteWall(starting, ending, normal, wallname*" $i")
+        end
+        push!(bt, wall)
     end
-    push!(bt, wall)
-  end
-  return bt
+    return bt
+end
+
+"""
+    billiard_hexagonal_sinai(r, R, center = [0,0]; setting = "standard")
+Create a sinai-like billiard, which is a hexagon of outer radius `R`, containing
+at its center (given by `center`) a disk of radius `r`. The `setting` keyword
+is passed to `billiard_polygon`.
+"""
+function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
+    setting = "standard")
+    r, R = promote(r, R)
+    T = typeof(r); center = T[center...]
+    bt = billiard_polygon(6, R, center; setting = setting)
+    DT = setting == "random" ? RandomDisk : Disk
+    push!(bt, Disk(center, r))
+    return bt
+end
+
+
+
+
+"""
+    billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2) -> bt, rayspl
+Showcase example billiard for ray-splitting processes. A rectangle `(x,y)` with a
+SplitterWall at `x/2` and two disks at each side, with respective radii `r1`, `r2`.
+
+**Notice**: This function returns a billiard table `bt` as well as a `rayspl`
+dictionary!
+"""
+function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
+
+    r1≥x/4 || r2≥x/4 && throw(ArgumentError("Disks overlap with walls!"))
+
+    sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
+    Tp = (p) -> (θ, pflag, ω=0.0) -> begin
+        if pflag
+            abs(θ) < π/4 ? p*exp(-(θ)^2/2(π/8)^2) : 0.0
+        else
+            (1-p)*exp(-(θ)^2/2(π/4)^2)
+        end
+    end
+    newo = ((x, bool) -> bool ? -0.5x : -2.0x)
+    rayspl = Dict{Int, Vector{Function}}(
+    5 => [Tp(0.5), sa, newo],
+    6 => [Tp(0.35), sa, newo],
+    7 => [Tp(0.65), sa, newo])
+
+    bt = billiard_rectangle(x, y)
+    sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
+    push!(bt, sw)
+    a1 = Antidot([x/4, y/2], r1, "Left Antidot")
+    push!(bt, a1)
+    a2 = Antidot([3x/4, y/2], r2, "Right Antidot")
+    push!(bt, a2)
+
+    return bt, rayspl
 end
