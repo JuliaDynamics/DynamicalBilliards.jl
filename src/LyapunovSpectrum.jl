@@ -110,7 +110,7 @@ end
 ```
 Returns the finite time lyapunov exponents for a given initial condition of the particle `p` . The time `t` is asked to be of type Float64 .
 """
-function lyapunovspectrum(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T) where {T<:AbstractFloat}
+function lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T) where {T<:AbstractFloat}
     offset = eye(T, 4) #The unit vectors in the 4 directions
 
     if t <= 0

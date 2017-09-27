@@ -73,7 +73,7 @@ tim = time()
 
     @testset "partnum $i" for i in 1:partnum
         p = randominside(bt)
-        exps = lyapunovspectrum(p, bt, tt)
+        exps = lyapunovspectrum!(p, bt, tt)
         error_level = 1e-2
         sumpair = exps[1] + exps[4]
 
