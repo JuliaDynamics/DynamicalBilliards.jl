@@ -49,7 +49,7 @@ end#testset
 end#testset
 if printinfo
     println("Results:")
-    println("+ billiard_sinai() and billiard_polygon conserve types")
+    println("+ billiard_sinai() and billiard_polygon() conserve types")
     println("+ randominside() returns correct types for ω=0 and ω=1")
     println("+ evolve!() conserves type for all the combinations of the above.")
     println("+ evolve!() works for Random sinai and Hexagonal periodic billiard.")

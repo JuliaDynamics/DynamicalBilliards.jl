@@ -6,8 +6,6 @@
   in a unified code?...
 
 # ISSUES
-* Iterate over a Billiard Table in a type stable manner
-* hexagonal periodic billiard doesnt work
 * raysplit magnetic is IMPOSSIBLY AND EXTREMELY slow sometimes. There are some
   problematic orbits for sure (because sometimes its fast).
   Or maybe there is some really slow regression happening during relocate.
