@@ -6,7 +6,7 @@ export lyapunovspectrum!
 ```julia
 gramschmidt(u::MArray{Tuple{4,4}, T})
 ```
-Apply the Gram-Schmidt procedure to a 4x4 square matrix  
+Apply the Gram-Schmidt procedure to a 4x4 square matrix
 """
 function gramschmidt(u::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     w = eye(MMatrix{4,4, T})
@@ -16,7 +16,7 @@ function gramschmidt(u::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     v2 = w[:,2]/norm(w[:,2]);
     w[:,3] = (u[:,3] - dot(u[:,3],v2)*v2 - dot(u[:,3],v1)*v1)
     v3 = w[:,3]/norm(w[:,3])
-    w[:,4] = u[:,4] - dot(u[:,4],v3)*v3 - dot(u[:,4],v2)*v2 - dot(u[:,4],v1)*v1 
+    w[:,4] = u[:,4] - dot(u[:,4],v3)*v3 - dot(u[:,4],v2)*v2 - dot(u[:,4],v1)*v1
     return w
 end
 """
@@ -94,7 +94,7 @@ end
 Propagate the particle's position for time `t` (corrected) and update the components of the `offset` matrix
 """
 function relocate!(p::Particle{T}, o::Obstacle{T}, tmin, offset::MArray{Tuple{4,4}, T}) where {T <: AbstractFloat}
-    
+
     tmin = relocate!(p, o, tmin)
     for k in 1:4
         x = offset[:,k]
@@ -106,10 +106,9 @@ end
 
 
 """
-```julia
-    lyapunovspectrum(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T)
-```
-Returns the finite time lyapunov exponents for a given initial condition of the particle `p` . The time `t` is asked to be of type Float64 .
+    lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t)
+Returns the finite time lyapunov exponents (averaged over time `t`)
+for a given particle in a billiard table.
 """
 function lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T) where {T<:AbstractFloat}
     offset = eye(MMatrix{4,4, T}) #The unit vectors in the 4 directions
@@ -153,7 +152,7 @@ function lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T) where 
     end
 
     exps = zeros(4)
-    
+
     for k in 1:4
         exps[k] = sum(log.(norms[:,k]))/t
     end

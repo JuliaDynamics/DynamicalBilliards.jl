@@ -4,7 +4,7 @@ It can be shown theoretically that two of these exponents must be zero ($\lambda
 
 The function provided to calculate the FTLS is
 ```julia
- lyapunovspectrum(p::Particle, bt::Vector{Obstacle}, t::Float64)
+lyapunovspectrum!(p::Particle, bt::Vector{Obstacle}, t)
 ```
 and it returns an array with the 4 lyapunov exponents. Currently it is available
 only for `Particle`.

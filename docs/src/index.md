@@ -54,6 +54,9 @@ The following tutorials offer detailed descriptions for various aspects of `Dyna
 
 The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
+The [Lyapunov Exponents](/lyapunovs) page has info on how to compute tha Lyapunov
+spectrum of a billiard system.
+
 ---
 ## Contributing
 Everyone is welcomed to contribute to `DynamicalBilliards.jl`! If you have some new
