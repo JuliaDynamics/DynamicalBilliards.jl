@@ -53,11 +53,20 @@ end
 #     f == "runtests.jl" && continue
 #     include(joinpath(dir, f))
 # end
-#
-# for i in 1:100
-#   type_stability()
-# end
-# println("\n\n\n DONE")
 
+# ω = big(0.2)
+# (r, x, y) = big.([0.4, 1.0, 1.0])
+# bt = billiard_sinai(r, x, y; setting="periodic")
+# xmin, ymin, xmax, ymax = cellsize(bt)
+# d = bt[5]
+# c = d.c
+# tt=1000.0
+# invalid = 0
+# minddist = min(x, y)
+# p = randominside(ω, bt)
+
+#tmin, i = next_collision(p, bt)
+
+#ts, poss, vels = evolve!(p, bt, tt)
 
 end#module

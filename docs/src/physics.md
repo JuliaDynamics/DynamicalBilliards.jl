@@ -21,30 +21,40 @@ Notice that the `relocate!()` step is *very* important because it takes care tha
 ## Numerical Precision
 
 All core types of `DynamicalBilliards.jl` are parametrically constructed, with
-parameter `:::julia T<:AbstractFloat`. This means that the fields of all particles are obstacles
+parameter `T<:AbstractFloat`. This means that the fields of all particles are obstacles
 contain numbers strictly of type `T`.
 
 The main concerns during evolution are:
 
-1. The particle must neve leaks out of the billiard table. This is simply translated
+1. The particle must never leak out of the billiard table. This is simply translated
    to the `distance()` function being **always** positive **after** any collision.
 2. The collision time is never infinite, besides the cases of
    [pinned particles](physics/#pinned-particles) in a magnetic billiard.
 3. The `relocate!()` process is always finite (and very swift!).
 
 These are solved with the following approach: after the minimum collision time has been calculated, a "test propagation" is done on the position of the particle. If the
-`:::julia distance(p, obst)` with the colliding obstacle is found to be "wrong", the collision
-time is reduced by the `:::julia DynamicalBilliards.timeprec(T)` function, with `T` being the parametric type of both the particle and the obstacle. For the case of magnetic propagation, the function `timeprec_severe(T)` is used instead. This
-process is repeated until the `distance()` is "correct", which is followed by the
-real propagation of the particle for the adjusted time.
+`distance(p, obst)` with the colliding obstacle is found to be "wrong", the collision
+time is reduced by the `DynamicalBilliards.timeprec(T)` function, with `T` being the parametric type of both the particle and the obstacle. This reduction happens
+geometrically, i.e. the time adjusting increment is self-multiplied by 10 at each
+recursive relocating step.
 
-!!! info "Definition of time-precision functions"
-    For `T<:AbstractFloat`, `timeprec(T) = eps(T)^(4/5)` and `timeprec_severe(T) = sqrt(eps(T))`
+* Magnetic propagation and straight propagation both use `timeprec(T)`.
+  For both cases the maximum number of geometric iterations is 1 (for the default
+  value of `timeprec(T)`.
+* This `timeprec` cannot be used with `PeriodicWall` and RaySplitting obstacles with
+  `MagneticParticle`s because when relocating forward in time you get progressively
+  shallower and shallower angles. This mean that you need huge changes in time for even tiny changes in `distance`.
+  * For this special case the function `timeprec_forward(T)` is used instead. This
+    function results to on average 3-5 geometric relocation steps.
 
-This means that the precision of evolution cannot be greater than the respective precision
-functions. The current values have been chosen such that the time-adjusting loop happens only once for almost all cases.
+The current definition of these functions is:
+```julia
+timeprec(::Type{T}) where {T} = eps(T)^(4/5)
+timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
+timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
+```
 
-Adjusting the global accuracy of `DynamicalBilliards` is very easy and can be done in
+Adjusting the global precision of `DynamicalBilliards` is very easy and can be done in
 two ways:
 
 1. Choose the floating precision you would like, by initializing your billiard table
@@ -55,10 +65,9 @@ two ways:
    values will make the evolution process slower, but the resulting numbers given by
    `evolve!()` will be more precise.
 
-!!! warning "Limits of numerical precision"
-    It is not advisable to lower `timeprec(T)` to `10eps(T)` or less, or lower
-    `timeprec_severe(T)` to `eps(T)^(3/4)` or less, as these choice tend to make
-    the package very slow.
+!!! danger "BigFloats"
+    Evolution with `BigFloat` in `DynamicalBilliards` is at on average
+    3 orders of magnitude slower than with `Float64`.
 
 ---
 

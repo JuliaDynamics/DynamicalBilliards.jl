@@ -2,6 +2,16 @@
 * Added possibility to calculate the Lyapunov spectrum of a billiard
   system. Currently this is available only for `Particle`s.
     * use the function `lyapunovspectrum` for the computation.
+* Changed the relocating algorithm to be geometric. I.e. the time adjusting is done
+  geometrically (self-multiplying the adjustment by 10 at each repeated step).
+* Magnetic propagation and straight propagation now both use `timeprec(T)` (see below).
+  For both cases the maximum number of geometric iterations is 1 (for the default
+  value of `timeprec(T)`.
+* This `timeprec` cannot be used PeriodWall and RaySplitting obstacles with
+  MagneticParticles because when magnetic and relocating forward you get extremely
+  shallow angles and you need huge changes in time for even tiny changes in position.
+  * For this special case the function `timeprec_forward(T)` is used instead. This
+    function results to on average 3-5 geometric relocation steps.
 
 # v1.4.0
 * All major types defined by `DynamicalBilliards` have been changed to

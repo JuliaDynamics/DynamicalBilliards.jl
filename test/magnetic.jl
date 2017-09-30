@@ -73,6 +73,36 @@ tim = time()
         end#x,y loop (testset)
     end#omega loop
 end#testset
+@testset "Magnetic Periodic BigFloat" begin
+    ω = big(0.2)
+    (r, x, y) = big.([0.4, 1.0, 1.0])
+    bt = billiard_sinai(r, x, y; setting="periodic")
+    xmin, ymin, xmax, ymax = cellsize(bt)
+    d = bt[5]
+    c = d.c
+    tt=1000.0
+    invalid = 0
+    minddist = min(x, y)
+
+    for i in 1:1
+        p = randominside(ω, bt)
+        ts, poss, vels = evolve!(p, bt, tt)
+        @test eltype(poss[1]) == BigFloat
+
+        @test ts[end] != Inf
+
+        mincolt = minimum(ts[3:end])
+        error_level = 1e-8 #this huge error comes from the modulo operation
+        xt = [mod(pos[1], xmax) for pos in poss]
+        yt = [mod(pos[2], ymax) for pos in poss]
+
+        mind = minimum(
+        sqrt(((xt[i] - c[1])^2 + (yt[i] - c[2])^2)) for i in 1:length(xt))
+
+        @test mind - d.r ≥ -error_level
+        @test mincolt ≥ minddist-2r
+    end#particle loop
+end#testset
 if printinfo
     println("Results:")
     println("+ billiard_sinai(setting=\"periodic\") and randominside() work.")
@@ -81,6 +111,7 @@ if printinfo
     println("+ collisiontime() ≤ min(x,y) - 2r.")
     println("+ Particle never invades the Disk.")
     println("+ Collision time is never Infinite (no pinned particles).")
+    println("+ All the above also work for BigFloat.")
     println("+ Required time: $(round(time()-tim, 3)) sec.")
 end
 return

@@ -9,10 +9,17 @@ const sixsqrt = 6sqrt(2)
 
 # Used in relocate:
 @inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
-@inline timeprec_severe(::Type{T}) where {T} = sqrt(eps(T))
-@inline timeprec_bigfloatperiodic(::Type{BigFloat}) = BigFloat(1e-16)
+
+# This timeprec cannot be used for PeriodWall and RaySplitting obstacles with
+# MagneticParticle
+# because when mangetic and relocating forward you get extremely shallow angles
+# and you need huge changes in time for even tiny changes in position
+@inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
+@inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
+
 # Used in check of skip intersection, in `realangle`:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
+@inline distancecheck(::Type{BigFloat}) = BigFloat(1e-8)
 
 """
     acos1mx(x)
@@ -35,20 +42,20 @@ Perform specular reflection based on the normal vector of the Obstacle.
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2+ε to π/2-ε of the normal vector).
 """
-function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Void where {T<:AbstractFloat}
+function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Void where {T}
     n = normalvec(o, p.pos)
     p.vel = p.vel - 2*dot(n, p.vel)*n
     return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T<:AbstractFloat}
+function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
     return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T<:AbstractFloat}
+function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
@@ -85,45 +92,54 @@ the correct side of the obstacle. If not, adjust the time `t` by ± `timeprec`
 and re-evalute until correct. When correct, propagate the particle itself
 to the correct position and return the final adjusted time.
 """
-function relocate!(p::Particle{T}, o::Obstacle{T}, tmin)::T where {T}
+function relocate!(p::Particle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
     while distance(newpos, o) < 0
         tmin -= timeprec(T)
         newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
     end
     propagate!(p, newpos, tmin)
     return tmin
 end
 
-function relocate!(p::Particle{T}, o::PeriodicWall{T}, tmin)::T where {T}
+function relocate!(p::Particle{T}, o::PeriodicWall{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
     while distance(newpos, o) > 0
-        tmin += timeprec(T)
+        tmin += i*timeprec(T)
         newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
     end
     propagate!(p, newpos, tmin)
     return tmin
 end
 
-function relocate!(p::MagneticParticle{T}, o::Obstacle{T}, tmin)::T where {T}
+function relocate!(p::MagneticParticle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
     while distance(newpos, o) < 0
-        tmin -= timeprec_severe(T)
+        tmin -= i*timeprec(T)
         newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
     end
     propagate!(p, newpos, tmin)
     return tmin
 end
 
-function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin)::T where {T}
+function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
     while distance(newpos, o) > 0
-        tmin += timeprec_severe(T)
+        tmin += i*timeprec_forward(T)
         newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
     end
     propagate!(p, newpos, tmin)
     return tmin
 end
+
 
 # function relocate!(
 #     p::MagneticParticle{BigFloat}, o::PeriodicWall{BigFloat}, tmin)::BigFloat
@@ -355,9 +371,8 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
 
         resolvecollision!(p, bt[i])
 
-
         if typeof(bt[i]) <: PeriodicWall
-            continue
+            continue # do not write output if collision with with PeriodicWall
         else
             push!(rpos, p.pos + p.current_cell)
             push!(rvel, p.vel)
@@ -542,14 +557,15 @@ end
 
 
 function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
-t; warning::Bool = false) where {T<:AbstractFloat}
+    t; warning::Bool = false) where {T<:AbstractFloat}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
-    if isperiodic(bt) && T == BigFloat
-        error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
-    end
+
+    # if isperiodic(bt) && T == BigFloat
+    #     error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
+    # end
 
     ω = p.omega
     absω = abs(ω)
