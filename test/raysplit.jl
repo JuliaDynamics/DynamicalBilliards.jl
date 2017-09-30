@@ -24,12 +24,12 @@ tim = time()
     end#parameters
 end#testset
 if printinfo
-  println("Results:")
-  println("+ evolve!() works for Ray-splitting billiards & Particle.")
-  println("+ relocate(), collisiontime(), resolvecollision() work for")
-  println("  Particle & Ray-splitting with SplitterWall and Antidot.")
-  println("+ particle never leaks the billiard table.")
-  println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("Results:")
+    println("+ evolve!() works for Ray-splitting billiards & Particle.")
+    println("+ relocate(), collisiontime(), resolvecollision() work for")
+    println("  Particle & Ray-splitting with SplitterWall and Antidot.")
+    println("+ particle never leaks the billiard table.")
+    println("+ Required time: $(round(time()-tim, 3)) sec.")
 end
 return
 end
@@ -43,7 +43,7 @@ tim = time()
         bt, ray = billiard_raysplitting_showcase(x, y, r1, r2)
 
         @test isphysical(ray)
-        tt=100.0
+        tt=1000.0
         for i in 1:partnum
             p = randominside(bt, 0.8)
             t, poss, vels = evolve!(p, bt, tt, ray)
@@ -57,13 +57,31 @@ tim = time()
         end#particle loop
     end#parameters
 end#testset
-if printinfo
-  println("Results:")
-  println("+ evolve!() works for Ray-splitting billiards & MagneticParticle.")
-  println("+ relocate(), collisiontime(), resolvecollision() work for")
-  println("  MagneticParticle & Ray-splitting with SplitterWall and Antidot.")
-  println("+ particle never leaks the billiard table + process terminates.")
-  println("+ Required time: $(round(time()-tim, 3)) sec.")
-end
+# @testset "Raysplitting Magnetic BigFloat" begin
+#
+#     (x, y, r1, r2) = big.([3,1,0.3,0.2])
+#     bt, ray = billiard_raysplitting_showcase(x, y, r1, r2)
+#
+#     @test isphysical(ray)
+#     tt=50.0
+#     p = randominside(bt, big(0.8))
+#     t, poss, vels = evolve!(p, bt, tt, ray)
+#     @test t[end] != Inf
+#     xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
+#     @test maximum(xt) ≤ x
+#     @test minimum(xt) ≥ 0
+#     @test maximum(yt) ≤ y
+#     @test minimum(yt) ≥ 0
+#     reset_billiard!(bt)
+# end#testset
+# if printinfo
+#     println("Results:")
+#     println("+ evolve!() works for Ray-splitting billiards & MagneticParticle.")
+#     println("+ relocate(), collisiontime(), resolvecollision() work for")
+#     println("  MagneticParticle & Ray-splitting with SplitterWall and Antidot.")
+#     println("+ particle never leaks the billiard table + process terminates.")
+#     println("+ All the above also work for BigFloat.")
+#     println("+ Required time: $(round(time()-tim, 3)) sec.")
+# end
 return
 end

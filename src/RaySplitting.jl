@@ -4,14 +4,18 @@ export isphysical, acceptable_raysplitter, reset_billiard!
 # Resolve collisions
 ########################
 
-function relocate_rayspl!(
-    p::AbstractParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+±(x) = 2x - 1
 
-    ineq = (2trans - 1)
+function relocate_rayspl!(
+    p::Particle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+
+    ineq = ±(trans)
     newpos = p.pos; newt = zero(T)
+    i = 1
     while ineq*distance(newpos, o) > 0
-        newt += ineq*timeprec(T)
+        newt += i*ineq*timeprec(T)
         newpos = propagate_pos(p.pos, p, newt)
+        i *= 10
     end
     propagate!(p, newpos, newt)
     return newt
@@ -20,11 +24,13 @@ end
 function relocate_rayspl!(
     p::MagneticParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
 
-    ineq = (2trans - 1)
+    ineq = ±(trans)
     newpos = p.pos; newt = zero(T)
+    i = 1
     while ineq*distance(newpos, o) > 0
-        newt += ineq*timeprec_severe(T)
+        newt += ineq*timeprec_forward(T)
         newpos = propagate_pos(p.pos, p, newt)
+        i *= 10
     end
     propagate!(p, newpos, newt)
     return newt
@@ -37,7 +43,7 @@ function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
     φ = acos(inverse_dot)
     # Raysplit Algorithm step 2:
     if cross2D(p.vel, n) < 0
-      φ *= -1
+        φ *= -1
     end
     return φ
 end
@@ -45,7 +51,8 @@ end
 function istransmitted(p::Particle{T}, a::Obstacle{T}, Tr::Function) where {T}
     φ = incidence_angle(p, a)
     # Raysplit Algorithm step 3: check transmission probability
-    return Tr(φ, a.pflag) > rand(), φ
+    trans = Tr(φ, a.pflag) > rand()
+    return trans, φ
     # comment: more accurate would be to calculate incidence angle again
     # within relocate!(). But the angle changes so little that this must have
     # almost zero impact.
@@ -53,11 +60,13 @@ end
 function istransmitted(p::MagneticParticle{T}, a::Obstacle{T}, Tr::Function) where {T}
     φ = incidence_angle(p, a)
     # Raysplit Algorithm step 3: check transmission probability
-    return Tr(φ, a.pflag, p.omega) > rand(), φ
+    trans = Tr(φ, a.pflag, p.omega) > rand()
+    return trans, φ
     # comment: more accurate would be to calculate incidence angle again
     # within relocate!(). But the angle changes so little that this must have
     # almost zero impact.
 end
+
 
 
 # Resolve collision for ray-splitting with Normal
@@ -166,7 +175,7 @@ t, ray::Dict; warning::Bool = false) where {T}
     error("`evolve!()` cannot evolve backwards in time.")
     end
     if isperiodic(bt) && T == BigFloat
-        error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
+        error("raysplitting + magnetic + BigFloat is not supported :(")
     end
 
     const debug = false
