@@ -61,13 +61,14 @@ two ways:
    with parametric type `T`, e.g. `bt = billiard_sinai(Float16(0.3))`. This choice
    will propagate to the entire `bt`, all particles resulting from `randominside()`,
    **as well as the entire evolution process**.
-2. Re-define the functions `timeprec(T)` and `timeprec_severe(T)`. Decreasing their
+2. Re-define the functions `timeprec(T)` and `timeprec_forward(T)`. Decreasing their
    values will make the evolution process slower, but the resulting numbers given by
-   `evolve!()` will be more precise.
+   `evolve!()` will be more precise. There are no guarantees if you follow this method
+   as it may lead to breaking code if `timeprec_forward` becomes too small.
 
 !!! danger "BigFloats"
-    Evolution with `BigFloat` in `DynamicalBilliards` is at on average
-    3 orders of magnitude slower than with `Float64`.
+    Evolution with `BigFloat` in `DynamicalBilliards` is on average
+    3 to 4 orders of magnitude slower than with `Float64`.
 
 ---
 

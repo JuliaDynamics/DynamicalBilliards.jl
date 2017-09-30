@@ -67,6 +67,6 @@ end
 
 #tmin, i = next_collision(p, bt)
 
-#ts, poss, vels = evolve!(p, bt, tt)
+# lyapunov_spectrum(1)
 
 end#module
