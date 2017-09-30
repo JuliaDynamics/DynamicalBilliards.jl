@@ -30,8 +30,8 @@ Set if you want the long version of the tests and if you want information to be
 printed during testing.
 """
 function test_options(;print_info::Bool = true, long_tests::Bool = true)
-  ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
-  ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
+    ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
+    ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
 end
 ##########################################
 # Plotting Routines (loaded on demand)   #
@@ -42,13 +42,17 @@ Enable plotting for the package DynamicalBilliards.jl. Requires
 `using PyPlot` to work properly.
 """
 function enableplotting()
-  dir = joinpath(dirname(@__FILE__), "plotting")
-  for f in readdir(dir)
-    include(joinpath(dir, f))
-  end
+    dir = joinpath(dirname(@__FILE__), "plotting")
+    for f in readdir(dir)
+        include(joinpath(dir, f))
+    end
 end
 
-# include( dirname((dirname(@__FILE__)))*"/test/various.jl" )
+# dir = joinpath(dirname((dirname(@__FILE__))), "test")
+# for f in readdir(dir)
+#     f == "runtests.jl" && continue
+#     include(joinpath(dir, f))
+# end
 #
 # for i in 1:100
 #   type_stability()

@@ -4,6 +4,8 @@
 * lyapunovspectrum
 * make the billiard plotting functions take advantage of `isperiodic` to result
   in a unified code?...
+* Measure the amount of backpropagation with current settings. Is it okay?
+  Should I make it adaptive?
 
 # ISSUES
 * raysplit magnetic is IMPOSSIBLY AND EXTREMELY slow sometimes. There are some
