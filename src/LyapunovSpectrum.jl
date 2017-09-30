@@ -63,18 +63,17 @@ updating the components of the offset vectors stored in the matrix `offset` as c
 """
 function resolvecollision!(p::AbstractParticle{T}, o::Union{Disk{T}, FiniteWall{T}}, offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
     specular!(p, o, offset)
-    return
+    return nothing
 end
 
 resolvecollision!(p::AbstractParticle{T}, o::PeriodicWall{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat} =
 resolvecollision!(p, o)
 
 """
-```julia
-propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T})
-```
+    propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
-`p.pos` and `p.vel` fields together with the components of the offset vectors stored in the `offset` matrix.
+`p.pos` and `p.vel` fields together with the components of the offset vectors
+stored in the `offset` matrix.
 """
 function propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T}) where {T<: AbstractFloat}
     vx0=p.vel[1]
@@ -88,12 +87,13 @@ function propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T}) where {T
 end
 
 """
-```julia
     relocate(p::Particle, o::Obstacle, t, offset::MArray) -> newt
-```
-Propagate the particle's position for time `t` (corrected) and update the components of the `offset` matrix
+Propagate the particle's position for time `t` (corrected) and update the components
+of the `offset` matrix.
 """
-function relocate!(p::Particle{T}, o::Obstacle{T}, tmin, offset::MArray{Tuple{4,4}, T}) where {T <: AbstractFloat}
+function relocate!(
+    p::Particle{T}, o::Obstacle{T}, tmin, offset::MArray{Tuple{4,4}, T}
+    ) where {T <: AbstractFloat}
 
     tmin = relocate!(p, o, tmin)
     for k in 1:4
@@ -110,7 +110,9 @@ end
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
-function lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T) where {T<:AbstractFloat}
+function lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t::T
+    ) where {T<:AbstractFloat}
+
     offset = eye(MMatrix{4,4, T}) #The unit vectors in the 4 directions
 
     if t <= 0.0
