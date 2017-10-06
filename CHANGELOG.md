@@ -1,3 +1,8 @@
+* **[BREAKING]** Function `animate_evolution` has been renamed to `animate_evolution!`
+  to remind users that it mutates the particle.
+* `animate_evolution!` can create a new figure and plot the billiard table on
+  user input.
+
 # v1.5.0
 * Added possibility to calculate the Lyapunov spectrum of a billiard
   system. Currently this is available only for `Particle`s.

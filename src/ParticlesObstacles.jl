@@ -340,9 +340,11 @@ function SplitterWall(sp::AbstractVector, ep::AbstractVector,
         error("Normal vector is not actually normal to the wall")
     end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
-    return SplitterWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), pflag, name)
+    return SplitterWall{T}(
+    SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), pflag, name)
 end
-SplitterWall(sp, ep, n, name::String = "Splitter wall") = SplitterWall(sp, ep, n, true, name)
+SplitterWall(sp, ep, n, name::String = "Splitter wall") =
+SplitterWall(sp, ep, n, true, name)
 #pretty print:
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
@@ -365,9 +367,7 @@ normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a
 ####################################################
 function isperiodic(bt)::Bool
     for obst in bt
-        if typeof(obst) <: PeriodicWall
-            return true
-        end
+        typeof(obst) <: PeriodicWall && return true
     end
     return false
 end
