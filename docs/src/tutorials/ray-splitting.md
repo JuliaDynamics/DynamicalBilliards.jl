@@ -61,7 +61,8 @@ push!(bt, a)
 p = randominside(bt, ω)
 dt = 0.05
 xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, raysplitter)..., dt)
-using DynamicalBilliardsPlotting, PyPlot
+using PyPlot
+DynamicalBilliards.enableplotting()
 plot_billiard(bt)
 plot(xt, yt)
 ```

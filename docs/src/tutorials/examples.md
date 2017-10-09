@@ -4,7 +4,8 @@ comments.
 ## Julia-logo Billiard
 The "Julia-logo" billiard, accessed by `billiard_julia()` simply wraps this code:
 ```julia
-using DynamicalBilliards, DynamicalBilliardsPlotting, PyPlot
+using DynamicalBilliards, PyPlot
+DynamicalBilliards.enableplotting()
 
 bt = Obstacle{Float64}[]
 bt = billiard_rectangle()
