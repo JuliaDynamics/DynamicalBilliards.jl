@@ -105,7 +105,8 @@ periodic-billiard taking care of all the details internally. Give the keyword
 
 For example, the following code
 ```julia
-using DynamicalBilliards, DynamicalBilliardsPlotting
+using DynamicalBilliards
+DynamicalBilliards.enableplotting()
 r = 0.25
 bt = billiard_rectangle(2, 1; setting = "periodic")
 d = Disk([0.5, 0.5], r)
