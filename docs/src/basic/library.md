@@ -19,7 +19,7 @@ Disk
 RandomDisk
 Antidot
 Wall
-FiniteWall
+InfiniteWall
 RandomWall
 PeriodicWall
 SplitterWall

@@ -143,7 +143,7 @@ bt = billiard_rectangle(1.5, 1.0)
 d1 = Disk([0.45, 0.6], 0.3, "Upper-left Disk")
 d2 = Disk([1.1, 0.3], 0.15, "Lower-right Disk")
 d3 = Disk([1.2, 0.8], 0.1, "Small Disk")
-w1 = FiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
+w1 = InfiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
 push!(bt, d1, d2, d3, w1)
 ω = 2.0
 p = randominside(bt, ω)

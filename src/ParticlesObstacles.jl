@@ -3,7 +3,7 @@ import Base: show, eltype, getindex
 
 export AbstractParticle, Particle, MagneticParticle,
 cyclotron, Obstacle, Disk, Antidot, RandomDisk,
-FiniteWall, PeriodicWall, RandomWall, SplitterWall,
+InfiniteWall, PeriodicWall, RandomWall, SplitterWall,
 normalvec, randominside, distance, cellsize, Wall, Circular
 
 ####################################################
@@ -216,8 +216,41 @@ Wall obstacle supertype.
 abstract type Wall{T<:AbstractFloat} <: Obstacle{T} end
 
 """
+    InfiniteWall{T<:AbstractFloat} <: Wall{T}
+Wall obstacle imposing specular reflection during collision (immutable type).
+Faster than [`FiniteWall`](@ref), meant to be used for convex billiards.
+### Fields:
+* `sp::SVector{2,T}` : Starting point of the Wall.
+* `ep::SVector{2,T}` : Ending point of the Wall.
+* `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
+  particle *will come from before a collision* (pointing towards the inside of the
+  billiard table). The size of the vector is irrelevant
+  since it is internally normalized.
+* `name::String` : Name of the obstacle, given for user convenience.
+  Defaults to "Wall".
+"""
+struct InfiniteWall{T<:AbstractFloat} <: Wall{T}
+    sp::SVector{2,T}
+    ep::SVector{2,T}
+    normal::SVector{2,T}
+    name::String
+end
+function InfiniteWall(sp::AbstractVector, ep::AbstractVector,
+    n::AbstractVector, name::String = "Wall")
+    T = eltype(sp)
+    n = normalize(n)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall")
+    end
+    T = eltype(sp) <: Integer ? Float64 : eltype(sp)
+    return InfiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
+end
+
+"""
     FiniteWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle imposing specular reflection during collision (immutable type).
+Slower than [`InfiniteWall`](@ref), meant to be used for non-convex billiards.
 ### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
@@ -232,6 +265,7 @@ struct FiniteWall{T<:AbstractFloat} <: Wall{T}
     sp::SVector{2,T}
     ep::SVector{2,T}
     normal::SVector{2,T}
+    width::T
     name::String
 end
 function FiniteWall(sp::AbstractVector, ep::AbstractVector,
@@ -243,13 +277,15 @@ function FiniteWall(sp::AbstractVector, ep::AbstractVector,
         error("Normal vector is not actually normal to the wall")
     end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
-    return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
+    w = norm(ep - sp)
+    return FiniteWall{T}(
+    SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), w, name)
 end
 
 """
     RandomWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle imposing (uniformly) random reflection during collision (immutable type).
-#### Fields:
+### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
@@ -350,9 +386,7 @@ show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
-```julia
-normalvec(obst::Obstacle, position)
-```
+    normalvec(obst::Obstacle, position)
 Return the vector normal to the obstacle's boundary at the given position (which is
 assumed to be very close to the obstacle's boundary).
 """

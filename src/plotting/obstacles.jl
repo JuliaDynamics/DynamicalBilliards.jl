@@ -36,7 +36,7 @@ function plot_obstacle(d::Antidot; kwargs...)
   PyPlot.show()
 end
 
-function plot_obstacle(w::FiniteWall; kwargs...)
+function plot_obstacle(w::InfiniteWall; kwargs...)
   PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
   color=(0,0.6,0), linewidth = 2.0, ms=0, kwargs...)
   PyPlot.show()

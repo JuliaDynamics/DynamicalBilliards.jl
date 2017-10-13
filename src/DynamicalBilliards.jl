@@ -51,4 +51,6 @@ end
 bt = billiard_sinai()
 p = randominside(bt)
 
+enableplotting()
+
 end#module

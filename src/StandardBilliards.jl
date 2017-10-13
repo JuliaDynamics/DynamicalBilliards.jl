@@ -25,13 +25,13 @@ function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
     o = typeof(x)(0.0)
     if setting == "standard"
         sp = [o,o]; ep = [o, y]; n = [x,o]
-        leftw2 = FiniteWall(sp, ep, n, "Left wall")
+        leftw2 = InfiniteWall(sp, ep, n, "Left wall")
         sp = [x,o]; ep = [x, y]; n = [-x,o]
-        rightw2 = FiniteWall(sp, ep, n, "Right wall")
+        rightw2 = InfiniteWall(sp, ep, n, "Right wall")
         sp = [o,y]; ep = [x, y]; n = [o,-y]
-        topw2 = FiniteWall(sp, ep, n, "Top wall")
+        topw2 = InfiniteWall(sp, ep, n, "Top wall")
         sp = [o,o]; ep = [x, o]; n = [o,y]
-        botw2 = FiniteWall(sp, ep, n, "Bottom wall")
+        botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
         push!(bt, leftw2, rightw2, topw2, botw2)
     elseif setting == "periodic"
         sp = [o,o]; ep = [o, y]; n = [x,o]
@@ -129,7 +129,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
 
     if setting == "standard"
-        T = FiniteWall
+        T = InfiniteWall
         wallname = "wall"
     elseif setting == "periodic"
         if sides != 4 && sides != 6
@@ -154,7 +154,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
             wall = PeriodicWall(starting, ending, normal, wallname*" $i")
         else
             normal = [-w[2], w[1]]
-            wall = FiniteWall(starting, ending, normal, wallname*" $i")
+            wall = InfiniteWall(starting, ending, normal, wallname*" $i")
         end
         push!(bt, wall)
     end

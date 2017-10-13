@@ -58,7 +58,7 @@ which should give you something like this (notice that the particle position and
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:
 * Particles are black.
 * Particle orbits/trajectories are blue.
-* Reflecting obstacles (e.g. `Disk` or `FiniteWall`) are green.
+* Reflecting obstacles (e.g. `Disk` or `InfiniteWall`) are green.
 * Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are yellow.
 * Ray-splitting obstacles are red with dashed linestyle.
 * Periodicity enforcing obstacles are purple with dotted linestyle (if and when plotted).

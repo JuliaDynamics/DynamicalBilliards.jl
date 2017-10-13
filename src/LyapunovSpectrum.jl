@@ -44,7 +44,7 @@ function specular!(p::Particle{T}, o::Disk{T}, offset::MArray{Tuple{4,4}, T}) wh
 end
 
 
-function specular!(p::Particle{T}, o::FiniteWall{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+function specular!(p::Particle{T}, o::InfiniteWall{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     specular!(p, o)
     for k in 1:4
@@ -57,11 +57,11 @@ function specular!(p::Particle{T}, o::FiniteWall{T}, offset::MArray{Tuple{4,4}, 
     end
 end
 """
-    resolvecollision!(p::Particle, o::Union{Disk, FiniteWall}, offset::MArray)
+    resolvecollision!(p::Particle, o::Union{Disk, InfiniteWall}, offset::MArray)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
 """
-function resolvecollision!(p::AbstractParticle{T}, o::Union{Disk{T}, FiniteWall{T}}, offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
+function resolvecollision!(p::AbstractParticle{T}, o::Union{Disk{T}, InfiniteWall{T}}, offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
     specular!(p, o, offset)
     return nothing
 end

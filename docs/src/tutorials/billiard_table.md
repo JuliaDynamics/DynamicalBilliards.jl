@@ -12,10 +12,10 @@ and then you create your obstacles one by one and add them to it. All obstacles 
 can be found at the [Obstacles page](/basic/library/#obstacles) of the library. The function `billiard_polygon` creates a polygonal billiard table.
 However, for the example of this page, we will create a hexagonal billiard with a disk in the middle step-by-step.
 
-The first step is to define the six walls of the billiard table. A `FiniteWall` object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name.
+The first step is to define the six walls of the billiard table. A `InfiniteWall` object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name.
 
 !!! danger "Convex Polygons"
-    Notice that even though all walls are "finite" (e.g. `FiniteWall`), they are considered infinite when calculating the collision time. This means that the only billiard tables allowed for this package are [*convex* polygons](https://en.wikipedia.org/wiki/Convex_polygon). **Do not** create a non-convex billiard table as it will silently error during evolution.
+    Notice that even though all walls are "finite" (e.g. `InfiniteWall`), they are considered infinite when calculating the collision time. This means that the only billiard tables allowed for this package are [*convex* polygons](https://en.wikipedia.org/wiki/Convex_polygon). **Do not** create a non-convex billiard table as it will silently error during evolution.
 
 The vertex points of a regular hexagon of radius `r` are given by the formula:
 ```math
@@ -32,7 +32,7 @@ for i in eachindex(hexver)
   ending = hexver[mod1(i+1, length(hexver))]
   w = ending - starting
   normal = [-w[2], w[1]]
-  wall = FiniteWall(starting, ending, normal, "wall $i")
+  wall = InfiniteWall(starting, ending, normal, "wall $i")
   push!(bt, wall)
 end
 ```

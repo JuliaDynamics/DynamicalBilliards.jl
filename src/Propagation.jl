@@ -209,6 +209,12 @@ function collisiontime(p::Particle{T}, w::Wall{T})::T where {T}
     denom >= 0 ? Inf : dot(w.sp-p.pos, n)/denom
 end
 
+function collisiontime(p::Particle{T}, w::FiniteWall{T})::T where {T}
+    n = normalvec(w, p.pos)
+    denom = dot(p.vel, n)
+    denom >= 0 ? Inf : dot(w.sp-p.pos, n)/denom
+end
+
 function collisiontime(p::Particle{T}, d::Circular{T})::T where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))

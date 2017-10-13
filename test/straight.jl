@@ -34,7 +34,7 @@ if printinfo
     println("+ evolve!() works for Particle and has finite collision time.")
     println("+ billiard_sinai() and randominside() work.")
     println("+ relocate(), collisiontime(), resolvecollision() work for")
-    println("  for Particle with FiniteWall and Disk.")
+    println("  for Particle with InfiniteWall and Disk.")
     println("+ particle never leaks the billiard table.")
     println("+ Required time: $(round(time()-tim, 3)) sec.")
 end
