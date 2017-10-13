@@ -258,6 +258,7 @@ Slower than [`InfiniteWall`](@ref), meant to be used for non-convex billiards.
   particle *will come from before a collision* (pointing towards the inside of the
   billiard table). The size of the vector is irrelevant
   since it is internally normalized.
+* `isdoor::Bool` : Flag of whether this `FiniteWall` instance is a "Door".
 * `name::String` : Name of the obstacle, given for user convenience.
   Defaults to "Wall".
 """
@@ -266,10 +267,11 @@ struct FiniteWall{T<:AbstractFloat} <: Wall{T}
     ep::SVector{2,T}
     normal::SVector{2,T}
     width::T
+    isdoor::Bool
     name::String
 end
 function FiniteWall(sp::AbstractVector, ep::AbstractVector,
-    n::AbstractVector, name::String = "Wall")
+    n::AbstractVector, isdoor::Bool = false, name::String = "Wall")
     T = eltype(sp)
     n = normalize(n)
     d = dot(n, ep-sp)
@@ -279,7 +281,7 @@ function FiniteWall(sp::AbstractVector, ep::AbstractVector,
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     w = norm(ep - sp)
     return FiniteWall{T}(
-    SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), w, name)
+    SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), w, isdoor, name)
 end
 
 """
