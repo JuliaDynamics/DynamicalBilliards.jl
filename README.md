@@ -38,7 +38,7 @@ Pkg.add("PyPlot"); using PyPlot;
 ## Acknowledgements
 This package is mainly developed by George Datseris. However, this development would not have been possible without significant help from other people:
 
-1. [David. P. Sanders](https://github.com/dpsanders) (@dpsanders) contributed in fruitful discussions about the programming and physics of Billiard systems all-around, as well as provided some reference code for the "straight-propagation" billiards.
+1. [Diego Tapias](https://github.com/dapias) (@dapias) Contributed the lyapunov spectrum calculation methods.
+1. [David. P. Sanders](https://github.com/dpsanders) (@dpsanders) and [Ragnar Fleischmann](https://www.ds.mpg.de/person/20199/118124) contributed in fruitful discussions about the programming and physics of Billiard systems all-around.
 2. [Christopher Rackauckas](https://github.com/ChrisRackauckas) (@ChrisRackauckas) helped set-up the continuous integration, testing, documentation publishing and all around package development-related concepts.
 3. [Tony Kelman](https://github.com/tkelman) (@tkelman) helped significantly in the package publication process, especially in making it work correctly without destroying METADATA.jl.
-4. [Diego Tapias](https://github.com/dapias) (@dapias) Contributed the lyapunov spectrum calculation methods.
