@@ -1,6 +1,9 @@
+using StaticArrays
+
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai
 
+const SV = SVector{2}
 ####################################################
 ## Famous/Standard Billiards
 ####################################################
@@ -215,4 +218,39 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     push!(bt, a2)
 
     return bt, rayspl
+end
+
+function billiard_square_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0)
+
+    sl = 1.0; sw = 0.2; cr =1.0
+    leftcorn = SV(-sw/2, 0)
+    rightcorn = SV(sw/2, 0)
+    upleftcorn = SV(-sw/2, sl)
+    uprightcorn = SV(sw/2, sl)
+
+    S = typeof(convert(AbstractFloat, sl))
+    bt = Obstacle{S}[]
+
+    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), false, "Stem bottom")
+    stemleft = FiniteWall(leftcorn, upleftcorn, SV(sw, 0), false, "Stem left")
+    stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
+
+    push!(bt, stembot, stemleft, stemright)
+
+    plot_billiard(bt)
+
+    farleft = SV(-cr, sl)
+    farright = SV(cr, sl)
+    upfarleft = SV(-cr, sl+cr)
+    upfarright = SV(cr, sl+cr)
+
+    capbotleft = FiniteWall(upleftcorn, farleft, SV(0, sw), false)
+    capleft = FiniteWall(farleft, upfarleft, SV(sw, 0), false)
+    toptop = FiniteWall(upfarleft, upfarright, SV(0, -sw), false)
+    capright = FiniteWall(farright, upfarright, SV(-sw, 0))
+    capbotright = FiniteWall(uprightcorn, farright, SV(0, sw), false)
+
+    push!(bt, capbotleft, capleft, toptop, capright, capbotright)
+
+    return bt
 end

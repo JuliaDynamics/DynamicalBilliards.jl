@@ -212,7 +212,19 @@ end
 function collisiontime(p::Particle{T}, w::FiniteWall{T})::T where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
-    denom >= 0 ? Inf : dot(w.sp-p.pos, n)/denom
+    # case of velocity pointing away of wall:
+    denom ≥ 0 && return Inf
+    posdot = dot(w.sp-p.pos, n)
+    # Case of particle starting behind finite wall:
+    posdot ≥ 0 && return Inf
+    colt = posdot/denom
+    intersection = p.pos .+ colt .* p.vel
+    dfc = norm(intersection - w.center)
+    if dfc > w.width/2
+        return Inf
+    else
+        return colt
+    end
 end
 
 function collisiontime(p::Particle{T}, d::Circular{T})::T where {T}

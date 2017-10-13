@@ -267,22 +267,26 @@ struct FiniteWall{T<:AbstractFloat} <: Wall{T}
     ep::SVector{2,T}
     normal::SVector{2,T}
     width::T
+    center::SVector{2,T}
     isdoor::Bool
     name::String
 end
 function FiniteWall(sp::AbstractVector, ep::AbstractVector,
-    n::AbstractVector, isdoor::Bool = false, name::String = "Wall")
+    n::AbstractVector, isdoor::Bool = false, name::String = "Finite Wall")
     T = eltype(sp)
     n = normalize(n)
     d = dot(n, ep-sp)
     if abs(d) > 10eps(T)
-        error("Normal vector is not actually normal to the wall")
+        error("Normal vector is not actually normal to the wall: dot = $d")
     end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     w = norm(ep - sp)
-    return FiniteWall{T}(
-    SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), w, isdoor, name)
+    center = @. (ep+sp)/2
+    return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
+    w, SVector{2,T}(center), isdoor, name)
 end
+
+isdoor(w) = w.isdoor
 
 """
     RandomWall{T<:AbstractFloat} <: Wall{T}
