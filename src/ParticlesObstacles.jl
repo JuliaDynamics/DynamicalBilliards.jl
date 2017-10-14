@@ -251,6 +251,12 @@ end
     FiniteWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle imposing specular reflection during collision (immutable type).
 Slower than [`InfiniteWall`](@ref), meant to be used for non-convex billiards.
+
+Giving a `true` value to the field `isdoor` designates this obstacle to be a `Door`.
+This is used in [`escapetime`](@ref) function. A `Door` is a obstacle of the
+billiard table that the particle can escape from, thus enabling calculations
+of escape times.
+
 ### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
@@ -260,7 +266,7 @@ Slower than [`InfiniteWall`](@ref), meant to be used for non-convex billiards.
   since it is internally normalized.
 * `isdoor::Bool` : Flag of whether this `FiniteWall` instance is a "Door".
 * `name::String` : Name of the obstacle, given for user convenience.
-  Defaults to "Wall".
+  Defaults to "Finite Wall".
 """
 struct FiniteWall{T<:AbstractFloat} <: Wall{T}
     sp::SVector{2,T}

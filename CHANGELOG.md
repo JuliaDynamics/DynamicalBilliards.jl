@@ -1,7 +1,17 @@
 * **[BREAKING]** Function `animate_evolution` has been renamed to `animate_evolution!`
   to remind users that it mutates the particle.
+* **[BREAKING]** `FiniteWall` has been renamed to `InfiniteWall` and works as before
+  for convex billiards. A new type `FiniteWall` is introduced that can work for
+  non-convex billiards.
+  * `FiniteWall` has some extra fields for enabling this.
+  * `FiniteWall` has a boolean field `isdoor`, that designates the given wall to be
+    `Door`. This is used in `escapetime`.
+* Added function `escapetime(p, bt)` which calculates the escape time of a particle
+  from a billiard table. The escape time is the time until the particle collides
+  with a `Door` (any `Door`).
 * `animate_evolution!` can create a new figure and plot the billiard table on
   user input.
+
 
 # v1.5.0
 * Added possibility to calculate the Lyapunov spectrum of a billiard
