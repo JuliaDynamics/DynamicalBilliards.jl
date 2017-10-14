@@ -509,11 +509,12 @@ end
 function distance_init(p::AbstractParticle{T}, w::FiniteWall{T})::T where {T}
 
     n = normalvec(w, p.pos)
-    denom = dot(p.vel, n)
+    fakevel = n
+    denom = dot(fakevel, n)
     posdot = dot(w.sp - p.pos, n)
     if posdot ≥ 0 # I am behind wall
         colt = posdot/denom
-        intersection = p.pos .+ colt .* p.vel
+        intersection = p.pos .+ colt .* fakevel
         dfc = norm(intersection - w.center)
         if dfc > w.width/2
             return +1 # but not directly behind
@@ -524,9 +525,6 @@ function distance_init(p::AbstractParticle{T}, w::FiniteWall{T})::T where {T}
     v1 = p.pos - w.sp
     dot(v1, n)
 end
-
-lineequation(w::Wall) = ...
-# I really need to find projection of point into wall.
 
 
 ####################################################
