@@ -691,9 +691,21 @@ function escapeind(bt)
     return j
 end
 
+
+"""
+    escapetime(p, bt, maxiter = 1000000; warning = true)
+Calculate the escape time of a particle `p` in the billiard table `bt`, which
+is the time until exiting through any `Door` in `bt`.
+As `Door` is considered any `FiniteWall` with
+field `isdoor=true`.
+
+If the particle performs more than `maxiter` collisions without colliding with the
+`Door` (i.e. escaping) the returned result is `Inf` and a warning is thrown (disable
+this by using `warning=false`).
+"""
 function escapetime(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
-    t::Int = 1000000) where {T<:AbstractFloat}
+    t::Int = 1000000; warning=true) where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)
@@ -740,7 +752,7 @@ function escapetime(
     end#time, or collision number, loop
     p.pos = ipos; p.vel = ivel
     if count ≥ t
-        error("Particle did not escape within max-iter window.")
+        warn("Particle did not escape within max-iter window.")
     end
     # return (rt, rpos, rvel)
     return totalt

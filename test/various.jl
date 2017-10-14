@@ -68,10 +68,10 @@ function escape_times(partnum=500; printinfo=true)
             @test et < Inf
         end#particle loop
     end
-    @testset "Straight Escape Time" begin
+    @testset "Magnetic Escape Time" begin
         bt = DynamicalBilliards.billiard_square_mushroom()
         for i in 1:partnum
-            p = randominside(bt, 2.0)
+            p = randominside(bt, 0.2)
 
             et = escapetime(p, bt)
             @test et < Inf
@@ -83,7 +83,7 @@ function escape_times(partnum=500; printinfo=true)
         println("  and understands Doors.")
         println("+ The escape time is always finite.")
         println("+ randominside() work for FiniteWall and gives i.c.")
-        println("+ inside mushroom cap.")
+        println("  inside mushroom cap.")
         println("+ Required time: $(round(time()-tim, 3)) sec.")
     end
     return

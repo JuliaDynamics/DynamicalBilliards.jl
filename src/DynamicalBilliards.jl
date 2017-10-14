@@ -48,13 +48,5 @@ function enableplotting()
     end
 end
 
-enableplotting()
-
-bt = billiard_square_mushroom(    )
-plot_billiard(bt)
-for i in 1:100
-p = randominside(bt)
-plot_particle(p)
-end
 
 end#module
