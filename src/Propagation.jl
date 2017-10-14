@@ -705,7 +705,7 @@ this by using `warning=false`).
 """
 function escapetime(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
-    t::Int = 1000000; warning=true) where {T<:AbstractFloat}
+    t::Int = 1000000; warning=true)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)
@@ -752,7 +752,8 @@ function escapetime(
     end#time, or collision number, loop
     p.pos = ipos; p.vel = ivel
     if count ≥ t
-        warn("Particle did not escape within max-iter window.")
+        warning && warn("Particle did not escape within max-iter window.")
+        return Inf
     end
     # return (rt, rpos, rvel)
     return totalt
