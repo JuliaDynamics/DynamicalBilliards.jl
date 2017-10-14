@@ -1,6 +1,6 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
 export resolvecollision!, collisiontime, propagate!, evolve!, construct, specular!,
-periodicity!, propagate_pos, next_collision
+periodicity!, propagate_pos, next_collision, escapetime
 
 ####################################################
 ## Mathetical/Convenience Functions
@@ -674,4 +674,74 @@ vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
         end#collision time
     end#total time
     return xt, yt, vxt, vyt, ts
+end
+
+
+
+####################################################
+## Escape Times
+####################################################
+function escapeind(bt)
+    j = Int[]
+    for (i, obst) in enumerate(bt)
+        if typeof(obst) <: FiniteWall && obst.isdoor == true
+            push!(j, i)
+        end
+    end
+    return j
+end
+
+function escapetime(
+    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
+    t::Int = 1000000) where {T<:AbstractFloat}
+
+    ipos = p.pos; ivel = p.vel
+    ei = escapeind(bt)
+    if length(ei) == 0
+        error("Billiard table does not have any Doors!")
+    end
+
+    # Uncomment these to have timeseries outputs
+    # rt = T[]
+    # rpos = SVector{2,T}[]
+    # rvel = SVector{2,T}[]
+    # push!(rpos, p.pos)
+    # push!(rvel, p.vel)
+    # push!(rt, zero(T))
+
+    totalt = zero(T)
+    count = zero(t)
+    t_to_write = zero(T)
+
+    while count < t
+        # Declare these because `bt` is of un-stable type!
+        tmin::T, i::Int = next_collision(p, bt)
+
+        tmin = relocate!(p, bt[i], tmin)
+        t_to_write += tmin
+
+        resolvecollision!(p, bt[i])
+
+        if typeof(bt[i]) <: PeriodicWall
+            continue # do not write output if collision with with PeriodicWall
+        else
+            # Uncomment these to have timeseries outputs
+            # push!(rpos, p.pos + p.current_cell)
+            # push!(rvel, p.vel)
+            # push!(rt, t_to_write)
+
+            totalt += t_to_write
+            i ∈ ei &&  break # the collision happens with a Door!
+
+            # set counter
+            count += 1
+            t_to_write = zero(T)
+        end
+    end#time, or collision number, loop
+    p.pos = ipos; p.vel = ivel
+    if count ≥ t
+        error("Particle did not escape within max-iter window.")
+    end
+    # return (rt, rpos, rvel)
+    return totalt
 end

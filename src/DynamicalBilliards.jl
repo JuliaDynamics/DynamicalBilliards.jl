@@ -48,9 +48,13 @@ function enableplotting()
     end
 end
 
-bt = billiard_sinai()
-p = randominside(bt)
-
-enableplotting()
+# enableplotting()
+#
+# bt = billiard_square_mushroom()
+# plot_billiard(bt)
+# for i in 1:100
+# p = randominside(bt)
+# plot_particle(p)
+# end
 
 end#module
