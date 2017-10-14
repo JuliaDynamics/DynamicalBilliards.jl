@@ -231,13 +231,11 @@ function billiard_square_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious
     S = typeof(convert(AbstractFloat, sl))
     bt = Obstacle{S}[]
 
-    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), false, "Stem bottom")
+    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), true, "Stem bottom")
     stemleft = FiniteWall(leftcorn, upleftcorn, SV(sw, 0), false, "Stem left")
     stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
 
     push!(bt, stembot, stemleft, stemright)
-
-    plot_billiard(bt)
 
     farleft = SV(-cr, sl)
     farright = SV(cr, sl)

@@ -455,23 +455,26 @@ the billiard table.
 
 All `distance` functions can also be given a position (Vector) instead of a particle.
 """
-function distance(pos::AbstractVector{T}, v::Vector{<:Obstacle{T}})::T where {T}
+function distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T where {T}
     d = T(Inf)
     for obst in v
-        di = distance(pos, obst)
+        di = distance(p, obst)
         di < d && (d = di)
     end
     return d
 end
 
-(distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T) where {T} =
-distance(p.pos, v)
+(distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
+distance(p.pos, obst)
 
-(distance(pos::AbstractVector{T}, bt::Tuple)::T) where {T<:AbstractFloat} =
-min(distance(pos, obst) for obst in bt)
+# (distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T) where {T} =
+# distance(p.pos, v)
 
-distance(pos::AbstractVector, bt::BilliardTable) = distance(pos, bt.bt)
-distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
+# (distance(pos::AbstractVector{T}, bt::Tuple)::T) where {T<:AbstractFloat} =
+# min(distance(pos, obst) for obst in bt)
+#
+# distance(pos::AbstractVector, bt::BilliardTable) = distance(pos, bt.bt)
+# distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
 
 function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
     v1 = pos - w.sp
@@ -491,8 +494,39 @@ function distance(
 end
 distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} = distance(pos, a, a.pflag)
 
-(distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
-distance(p.pos, obst)
+# Distances for randominside:
+distance_init(p, a) = distance(p, a)
+
+function distance_init(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T where {T}
+    d = T(Inf)
+    for obst in v
+        di = distance_init(p, obst)
+        di < d && (d = di)
+    end
+    return d
+end
+
+function distance_init(p::AbstractParticle{T}, w::FiniteWall{T})::T where {T}
+
+    n = normalvec(w, p.pos)
+    denom = dot(p.vel, n)
+    posdot = dot(w.sp - p.pos, n)
+    if posdot ≥ 0 # I am behind wall
+        colt = posdot/denom
+        intersection = p.pos .+ colt .* p.vel
+        dfc = norm(intersection - w.center)
+        if dfc > w.width/2
+            return +1 # but not directly behind
+        else
+            return -1
+        end
+    end
+    v1 = p.pos - w.sp
+    dot(v1, n)
+end
+
+lineequation(w::Wall) = ...
+# I really need to find projection of point into wall.
 
 
 ####################################################
@@ -564,13 +598,13 @@ function randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
     yp = T(rand())*(ymax-ymin) + ymin
     p = Particle([xp, yp, φ0])
 
-    dist = distance(p, bt)
+    dist = distance_init(p, bt)
     while dist <= sqrt(eps(T))
 
         xp = T(rand())*(xmax-xmin) + xmin
         yp = T(rand())*(ymax-ymin) + ymin
         p.pos = SVector{2,T}(xp, yp)
-        dist = distance(p, bt)
+        dist = distance_init(p, bt)
     end
 
     return p
@@ -593,13 +627,13 @@ function randominside(ω::Real, bt::Vector{<:Obstacle{T}}) where {T<:AbstractFlo
     yp = T(rand())*(ymax-ymin) + ymin
     p = MagneticParticle([xp, yp, φ0], ω)
 
-    dist = distance(p, bt)
+    dist = distance_init(p, bt)
     while dist <= sqrt(eps(T))
 
         xp = rand()*(xmax-xmin) + xmin
         yp = rand()*(ymax-ymin) + ymin
         p.pos = [xp, yp]
-        dist = distance(p, bt)
+        dist = distance_init(p, bt)
     end
 
     return p
