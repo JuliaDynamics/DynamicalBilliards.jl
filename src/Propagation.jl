@@ -695,7 +695,7 @@ function escapetime(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
     t::Int = 1000000) where {T<:AbstractFloat}
 
-    ipos = p.pos; ivel = p.vel
+    ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)
     if length(ei) == 0
         error("Billiard table does not have any Doors!")
