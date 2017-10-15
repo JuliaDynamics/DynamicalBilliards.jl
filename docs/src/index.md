@@ -42,7 +42,11 @@ seconds.
 
 ## Usage
 It is highly suggested to first visit the [Basic Usage](/basic/basic_usage) section,
-for a general overview of how to use `DynamicalBilliards.jl`. The very important discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
+for a general overview of how to use `DynamicalBilliards.jl` as well as a short
+description of available features. The very important discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
+
+The [Lyapunov Exponents](/lyapunovs) page has info on how to compute the Lyapunov
+spectrum of a billiard system.
 
 The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards.jl`:
 
@@ -54,8 +58,7 @@ The following tutorials offer detailed descriptions for various aspects of `Dyna
 
 The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
-The [Lyapunov Exponents](/lyapunovs) page has info on how to compute tha Lyapunov
-spectrum of a billiard system.
+
 
 ---
 ## Contributing

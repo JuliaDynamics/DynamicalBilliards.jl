@@ -1,6 +1,6 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
 export resolvecollision!, collisiontime, propagate!, evolve!, construct, specular!,
-periodicity!, propagate_pos, next_collision, escapetime
+periodicity!, propagate_pos, next_collision, escapetime, relocate!
 
 ####################################################
 ## Mathetical/Convenience Functions
@@ -86,11 +86,15 @@ resolvecollision!(p::AbstractParticle, o::Obstacle)::Void = specular!(p, o)
 resolvecollision!(p::AbstractParticle, o::PeriodicWall)::Void =  periodicity!(p, o)
 
 """
-    relocate(p::AbstractParticle, o::Obstacle, t) -> newt
+    relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
 Propagate the particle's position for time `t`, and check if it is on
-the correct side of the obstacle. If not, adjust the time `t` by ± `timeprec`
+the correct side of the obstacle. If not, adjust the time `t` by `timeprec`
 and re-evalute until correct. When correct, propagate the particle itself
 to the correct position and return the final adjusted time.
+
+Notice that the adjustment is increased geometrically; if one adjustment is not
+enough, the adjusted time is multiplied by a factor of 10. This happens as many
+times as necessary.
 """
 function relocate!(p::Particle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
@@ -705,7 +709,7 @@ the warning by using `warning=false`).
 """
 function escapetime(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
-    t::Int = 1000000; warning=true)::T where {T<:AbstractFloat}
+    t::Int = 1000000; warning::Bool=true)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)

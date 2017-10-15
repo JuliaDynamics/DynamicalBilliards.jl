@@ -1,4 +1,6 @@
-using Documenter, DynamicalBilliards
+using DynamicalBilliards
+
+using Documenter
 
 makedocs(modules=[DynamicalBilliards], doctest=false)
 

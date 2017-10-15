@@ -1,7 +1,18 @@
 All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
-These functions are nicely grouped in this [library section](/basic/library/#visualization).
 
 *Remember to use* `DynamicalBilliards.enableplotting()` *to bring the plotting functions into scope!*
+
+The functions are:
+```julia
+plot_obstacle(obst::Obstacle; kwargs...)
+plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
+plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
+plot_billiard(bt::Vector{Obstacle})
+plot_billiard(bt, xt::Vector, yt::Vector; plot_orbit = true)
+billiard_julia(; plotit = true)
+animate_evolution!(p, bt, colnumber[, ray-splitter]; kwargs)
+```
+
 
 ## Plotting the Billiard Table
 
@@ -58,18 +69,48 @@ which should give you something like this (notice that the particle position and
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:
 * Particles are black.
 * Particle orbits/trajectories are blue.
-* Reflecting obstacles (e.g. `Disk` or `InfiniteWall`) are green.
+* Reflecting obstacles (e.g. `Disk`, `FiniteWall` or `InfiniteWall`) are green.
 * Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are yellow.
 * Ray-splitting obstacles are red with dashed linestyle.
-* Periodicity enforcing obstacles are purple with dotted linestyle (if and when plotted).
+* Periodicity enforcing obstacles are purple with dotted linestyle
+  (if and when plotted).
+* Doors (`InfiniteWall` with `isdoor=true`) are plotted with alternating black and
+  cyan dashed lines.
 
 ## Animating the motion of a particle
 
-The function `animate_evolution` is provided to animate the evolution of a particle from collision to collision, using the default arguments.
-Its [documentation string](/basic/library/#DynamicalBilliards.animate_evolution) contains all the information necessary for its usage.
+The function `animate_evolution!` is provided to animate the evolution of a particle from collision to collision:
 
-Automatic output into an animated image (e.g. ".gif" format) is not yet supported. However, `animate_evolution` gives users the possibility
-to save each produce figure in order to merge as an animation using an external tool.
+```julia
+animate_evolution!(p, bt, colnumber[, ray-splitter]; kwargs...)
+```
+Animate the evolution of the particle, plotting the orbit from collision to collision.
+
+### Arguments
+  * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
+  * `bt::Vector{Obstacle}` : The billiard table.
+  * `colnumber::Int` : Number of collisions to evolve the particle for.
+  * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
+      that enables ray-splitting processes during evolution.
+### Keyword Arguments
+  * `newfig = true` : Creates a new figure at the function call, and plots
+    the billiard table in that figure.
+  * `sleeptime` : Time passed to `sleep()` between each collision.
+  * `col_to_plot` : How many previous collisions are shown during the animation.
+  * `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.
+    Keywords passed into `plot_particle()`.
+  * `orbit_kwargs` : Either a Dict{Symbol, Any} or a Vector of Tuple{Symbol, Any}.
+    Keywords passed into `PyPlot.plot()` which plots the orbit of the particle
+    (`line` object).
+  * `savefigs::Bool` : If `true` save .png figures of each frame of the animation
+    A direct movie (like creating a .mp4) of the animation cannot be made automatically,
+    since the animation process mutates the particle.
+  * `savename` : Name (*including path*) of the figures to be produced. The ending
+    "\_i.png" will be attached to all figures.
+
+Automatic output into an animated image (e.g. ".gif" format) is not possible, because
+the function mutates its argument. However, `animate_evolution` gives users the possibility
+to save each produced figure in order to merge as an animation using an external tool.
 
 Let's animate a particle inside a simple pentagon with magnetic field:
 
@@ -77,16 +118,13 @@ Let's animate a particle inside a simple pentagon with magnetic field:
 bt = billiard_polygon(5, 1)
 a = Disk([0.0,0.0], 0.4)
 push!(bt, a)
-plot_billiard(bt)
+p = randominside(bt, 1.0)
 
-p = randominside(bt, 1.0) # second argument is magnetic field strength
-savedir = "C:\\some_path\\anim1"
-animate_evolution(p, bt, 50; savefigs = true, savename = savedir)
+savedir = tempdir()
+animate_evolution!(p, bt, 50; savefigs = true, savename = savedir)
 ```
 
-This code produced 50 ".png" images which were later mixed (using e.g. [gifmaker](www.gifmaker.me)) into a single ".gif" animation.
-The output figures have a dpi=60 and therefore take only a dozen kb of space.
-The animation produced should look like:
+This code produced 50 ".png" images which were later mixed (using e.g. [gifmaker](www.gifmaker.me)) into a single ".gif" animation:
 
 ![Visualizing Animation 1](http://i.imgur.com/UyiW2N2.gif)
 
