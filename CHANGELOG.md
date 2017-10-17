@@ -12,6 +12,7 @@
   with a `Door` (any `Door`).
 * `animate_evolution!` can create a new figure and plot the billiard table on
   user input.
+* Bugfix: relocation in magnetic case was not adaptive (for the backwards method).
 
 
 # v1.5.0
