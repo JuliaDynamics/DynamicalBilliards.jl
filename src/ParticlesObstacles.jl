@@ -3,7 +3,7 @@ import Base: show, eltype, getindex
 
 export AbstractParticle, Particle, MagneticParticle,
 cyclotron, Obstacle, Disk, Antidot, RandomDisk,
-FiniteWall, PeriodicWall, RandomWall, SplitterWall,
+InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
 normalvec, randominside, distance, cellsize, Wall, Circular
 
 ####################################################
@@ -216,8 +216,9 @@ Wall obstacle supertype.
 abstract type Wall{T<:AbstractFloat} <: Obstacle{T} end
 
 """
-    FiniteWall{T<:AbstractFloat} <: Wall{T}
+    InfiniteWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle imposing specular reflection during collision (immutable type).
+Faster than [`FiniteWall`](@ref), meant to be used for convex billiards.
 ### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
@@ -228,13 +229,13 @@ Wall obstacle imposing specular reflection during collision (immutable type).
 * `name::String` : Name of the obstacle, given for user convenience.
   Defaults to "Wall".
 """
-struct FiniteWall{T<:AbstractFloat} <: Wall{T}
+struct InfiniteWall{T<:AbstractFloat} <: Wall{T}
     sp::SVector{2,T}
     ep::SVector{2,T}
     normal::SVector{2,T}
     name::String
 end
-function FiniteWall(sp::AbstractVector, ep::AbstractVector,
+function InfiniteWall(sp::AbstractVector, ep::AbstractVector,
     n::AbstractVector, name::String = "Wall")
     T = eltype(sp)
     n = normalize(n)
@@ -243,13 +244,60 @@ function FiniteWall(sp::AbstractVector, ep::AbstractVector,
         error("Normal vector is not actually normal to the wall")
     end
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
-    return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
+    return InfiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
+
+"""
+    FiniteWall{T<:AbstractFloat} <: Wall{T}
+Wall obstacle imposing specular reflection during collision (immutable type).
+Slower than [`InfiniteWall`](@ref), meant to be used for non-convex billiards.
+
+Giving a `true` value to the field `isdoor` designates this obstacle to be a `Door`.
+This is used in [`escapetime`](@ref) function. A `Door` is a obstacle of the
+billiard table that the particle can escape from, thus enabling calculations
+of escape times.
+
+### Fields:
+* `sp::SVector{2,T}` : Starting point of the Wall.
+* `ep::SVector{2,T}` : Ending point of the Wall.
+* `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
+  particle *will come from before a collision* (pointing towards the inside of the
+  billiard table). The size of the vector is irrelevant
+  since it is internally normalized.
+* `isdoor::Bool` : Flag of whether this `FiniteWall` instance is a "Door".
+* `name::String` : Name of the obstacle, given for user convenience.
+  Defaults to "Finite Wall".
+"""
+struct FiniteWall{T<:AbstractFloat} <: Wall{T}
+    sp::SVector{2,T}
+    ep::SVector{2,T}
+    normal::SVector{2,T}
+    width::T
+    center::SVector{2,T}
+    isdoor::Bool
+    name::String
+end
+function FiniteWall(sp::AbstractVector, ep::AbstractVector,
+    n::AbstractVector, isdoor::Bool = false, name::String = "Finite Wall")
+    T = eltype(sp)
+    n = normalize(n)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall: dot = $d")
+    end
+    T = eltype(sp) <: Integer ? Float64 : eltype(sp)
+    w = norm(ep - sp)
+    center = @. (ep+sp)/2
+    return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
+    w, SVector{2,T}(center), isdoor, name)
+end
+
+isdoor(w) = w.isdoor
 
 """
     RandomWall{T<:AbstractFloat} <: Wall{T}
 Wall obstacle imposing (uniformly) random reflection during collision (immutable type).
-#### Fields:
+### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
 * `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
@@ -350,9 +398,7 @@ show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 """
-```julia
-normalvec(obst::Obstacle, position)
-```
+    normalvec(obst::Obstacle, position)
 Return the vector normal to the obstacle's boundary at the given position (which is
 assumed to be very close to the obstacle's boundary).
 """
@@ -415,23 +461,26 @@ the billiard table.
 
 All `distance` functions can also be given a position (Vector) instead of a particle.
 """
-function distance(pos::AbstractVector{T}, v::Vector{<:Obstacle{T}})::T where {T}
+function distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T where {T}
     d = T(Inf)
     for obst in v
-        di = distance(pos, obst)
+        di = distance(p, obst)
         di < d && (d = di)
     end
     return d
 end
 
-(distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T) where {T} =
-distance(p.pos, v)
+(distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
+distance(p.pos, obst)
 
-(distance(pos::AbstractVector{T}, bt::Tuple)::T) where {T<:AbstractFloat} =
-min(distance(pos, obst) for obst in bt)
+# (distance(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T) where {T} =
+# distance(p.pos, v)
 
-distance(pos::AbstractVector, bt::BilliardTable) = distance(pos, bt.bt)
-distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
+# (distance(pos::AbstractVector{T}, bt::Tuple)::T) where {T<:AbstractFloat} =
+# min(distance(pos, obst) for obst in bt)
+#
+# distance(pos::AbstractVector, bt::BilliardTable) = distance(pos, bt.bt)
+# distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
 
 function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
     v1 = pos - w.sp
@@ -451,8 +500,37 @@ function distance(
 end
 distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} = distance(pos, a, a.pflag)
 
-(distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
-distance(p.pos, obst)
+# Distances for randominside:
+distance_init(p, a) = distance(p, a)
+
+function distance_init(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T where {T}
+    d = T(Inf)
+    for obst in v
+        di = distance_init(p, obst)
+        di < d && (d = di)
+    end
+    return d
+end
+
+function distance_init(p::AbstractParticle{T}, w::FiniteWall{T})::T where {T}
+
+    n = normalvec(w, p.pos)
+    fakevel = n
+    denom = dot(fakevel, n)
+    posdot = dot(w.sp - p.pos, n)
+    if posdot ≥ 0 # I am behind wall
+        colt = posdot/denom
+        intersection = p.pos .+ colt .* fakevel
+        dfc = norm(intersection - w.center)
+        if dfc > w.width/2
+            return +1 # but not directly behind
+        else
+            return -1
+        end
+    end
+    v1 = p.pos - w.sp
+    dot(v1, n)
+end
 
 
 ####################################################
@@ -524,13 +602,13 @@ function randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
     yp = T(rand())*(ymax-ymin) + ymin
     p = Particle([xp, yp, φ0])
 
-    dist = distance(p, bt)
+    dist = distance_init(p, bt)
     while dist <= sqrt(eps(T))
 
         xp = T(rand())*(xmax-xmin) + xmin
         yp = T(rand())*(ymax-ymin) + ymin
         p.pos = SVector{2,T}(xp, yp)
-        dist = distance(p, bt)
+        dist = distance_init(p, bt)
     end
 
     return p
@@ -553,13 +631,13 @@ function randominside(ω::Real, bt::Vector{<:Obstacle{T}}) where {T<:AbstractFlo
     yp = T(rand())*(ymax-ymin) + ymin
     p = MagneticParticle([xp, yp, φ0], ω)
 
-    dist = distance(p, bt)
+    dist = distance_init(p, bt)
     while dist <= sqrt(eps(T))
 
         xp = rand()*(xmax-xmin) + xmin
         yp = rand()*(ymax-ymin) + ymin
         p.pos = [xp, yp]
-        dist = distance(p, bt)
+        dist = distance_init(p, bt)
     end
 
     return p

@@ -127,6 +127,19 @@ For more information and instructions on defining the "ray_splitter" dictionary 
 
 ---
 
+## Escape Times
+Escape time measures the time that a particle requires to escape a billiard table.
+This can be calculated with the function [`escapetime`](@ref). The function requires
+the billiard table to have at least one [`FiniteWall`](@ref) object with field
+`isdoor=true`.
+
+The way the function works is very simple: a particle is evolved until it collides with a `FiniteWall` that has `isdoor=true`. This is considered as the particle escaping the billiard, pretending like this `FiniteWall` is an "open door".
+
+If you want to know the reason behind the existence of both
+`FiniteWall` and `InfiniteWall`, see this [page on convex billiards](/tutorials/billiard_table/#convex-billiards).
+
+
+---
 ## Visualizing
 
 The functions `plot_obstacle(obst::Obstacle; kwargs...)`, `plot_billiard(bt::Vector{Obstacle})` and `plot_particle(p::AbstractParticle; kwargs...)` are provided in order to plot the respective elements **on the current PyPlot figure**. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
@@ -143,7 +156,7 @@ bt = billiard_rectangle(1.5, 1.0)
 d1 = Disk([0.45, 0.6], 0.3, "Upper-left Disk")
 d2 = Disk([1.1, 0.3], 0.15, "Lower-right Disk")
 d3 = Disk([1.2, 0.8], 0.1, "Small Disk")
-w1 = FiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
+w1 = InfiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
 push!(bt, d1, d2, d3, w1)
 ω = 2.0
 p = randominside(bt, ω)

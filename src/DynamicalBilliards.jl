@@ -48,7 +48,5 @@ function enableplotting()
     end
 end
 
-bt = billiard_sinai()
-p = randominside(bt)
 
 end#module

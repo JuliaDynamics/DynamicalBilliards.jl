@@ -43,9 +43,10 @@ partnum= min(10, partnum)
 end
 if printinfo
     println("Results:")
-    println("+ lyapunovspectrum() call works hexagonal lorentz and sinai billiard.")
-    println("+ λ1 + λ4 ≈ 0.")
-    println("+ λ2 ≈ λ3 ≈ 0.")
+    println("+ lyapunovspectrum() call works on")
+    println("  hexagonal lorentz and sinai billiard.")
+    println("+ λ₁ + λ₄ ≈ 0.")
+    println("+ λ₂ ≈ λ₃ ≈ 0.")
     println("+ Required time: $(round(time()-tim, 3)) sec.")
 end
 return

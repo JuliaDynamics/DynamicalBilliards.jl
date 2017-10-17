@@ -1,6 +1,6 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
 export resolvecollision!, collisiontime, propagate!, evolve!, construct, specular!,
-periodicity!, propagate_pos, next_collision
+periodicity!, propagate_pos, next_collision, escapetime, relocate!
 
 ####################################################
 ## Mathetical/Convenience Functions
@@ -86,11 +86,15 @@ resolvecollision!(p::AbstractParticle, o::Obstacle)::Void = specular!(p, o)
 resolvecollision!(p::AbstractParticle, o::PeriodicWall)::Void =  periodicity!(p, o)
 
 """
-    relocate(p::AbstractParticle, o::Obstacle, t) -> newt
+    relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
 Propagate the particle's position for time `t`, and check if it is on
-the correct side of the obstacle. If not, adjust the time `t` by ± `timeprec`
+the correct side of the obstacle. If not, adjust the time `t` by `timeprec`
 and re-evalute until correct. When correct, propagate the particle itself
 to the correct position and return the final adjusted time.
+
+Notice that the adjustment is increased geometrically; if one adjustment is not
+enough, the adjusted time is multiplied by a factor of 10. This happens as many
+times as necessary.
 """
 function relocate!(p::Particle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
@@ -207,6 +211,24 @@ function collisiontime(p::Particle{T}, w::Wall{T})::T where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     denom >= 0 ? Inf : dot(w.sp-p.pos, n)/denom
+end
+
+function collisiontime(p::Particle{T}, w::FiniteWall{T})::T where {T}
+    n = normalvec(w, p.pos)
+    denom = dot(p.vel, n)
+    # case of velocity pointing away of wall:
+    denom ≥ 0 && return Inf
+    posdot = dot(w.sp-p.pos, n)
+    # Case of particle starting behind finite wall:
+    posdot ≥ 0 && return Inf
+    colt = posdot/denom
+    intersection = p.pos .+ colt .* p.vel
+    dfc = norm(intersection - w.center)
+    if dfc > w.width/2
+        return Inf
+    else
+        return colt
+    end
 end
 
 function collisiontime(p::Particle{T}, d::Circular{T})::T where {T}
@@ -656,4 +678,87 @@ vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
         end#collision time
     end#total time
     return xt, yt, vxt, vyt, ts
+end
+
+
+
+####################################################
+## Escape Times
+####################################################
+function escapeind(bt)
+    j = Int[]
+    for (i, obst) in enumerate(bt)
+        if typeof(obst) <: FiniteWall && obst.isdoor == true
+            push!(j, i)
+        end
+    end
+    return j
+end
+
+
+"""
+    escapetime(p, bt, maxiter = 1000000; warning = true)
+Calculate the escape time of a particle `p` in the billiard table `bt`, which
+is the time until colliding with any `Door` in `bt`.
+As `Door` is considered any [`FiniteWall`](@ref) with
+field `isdoor=true`.
+
+If the particle performs more than `maxiter` collisions without colliding with the
+`Door` (i.e. escaping) the returned result is `Inf` and a warning is thrown (disable
+the warning by using `warning=false`).
+"""
+function escapetime(
+    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
+    t::Int = 1000000; warning::Bool=true)::T where {T<:AbstractFloat}
+
+    ipos = copy(p.pos); ivel = copy(p.vel)
+    ei = escapeind(bt)
+    if length(ei) == 0
+        error("Billiard table does not have any Doors!")
+    end
+
+    # Uncomment these to have timeseries outputs
+    # rt = T[]
+    # rpos = SVector{2,T}[]
+    # rvel = SVector{2,T}[]
+    # push!(rpos, p.pos)
+    # push!(rvel, p.vel)
+    # push!(rt, zero(T))
+
+    totalt = zero(T)
+    count = zero(t)
+    t_to_write = zero(T)
+
+    while count < t
+        # Declare these because `bt` is of un-stable type!
+        tmin::T, i::Int = next_collision(p, bt)
+
+        tmin = relocate!(p, bt[i], tmin)
+        t_to_write += tmin
+
+        resolvecollision!(p, bt[i])
+
+        if typeof(bt[i]) <: PeriodicWall
+            continue # do not write output if collision with with PeriodicWall
+        else
+            # Uncomment these to have timeseries outputs
+            # push!(rpos, p.pos + p.current_cell)
+            # push!(rvel, p.vel)
+            # push!(rt, t_to_write)
+
+            totalt += t_to_write
+            i ∈ ei &&  break # the collision happens with a Door!
+
+            # set counter
+            count += 1
+            t_to_write = zero(T)
+        end
+    end#time, or collision number, loop
+    p.pos = ipos; p.vel = ivel
+    if count ≥ t
+        warning && warn("Particle did not escape within max-iter window.")
+        return Inf
+    end
+    # return (rt, rpos, rvel)
+    return totalt
 end

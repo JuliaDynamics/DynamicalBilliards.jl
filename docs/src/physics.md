@@ -21,10 +21,11 @@ Notice that the `relocate!()` step is *very* important because it takes care tha
 ## Numerical Precision
 
 All core types of `DynamicalBilliards.jl` are parametrically constructed, with
-parameter `T<:AbstractFloat`. This means that the fields of all particles are obstacles
-contain numbers strictly of type `T`.
+parameter `T<:AbstractFloat`. This means that the fields of all particles and obstacles
+contain numbers strictly of type `T`. You will understand why this choice happened
+as you continue reading this paragraph.
 
-The main concerns during evolution are:
+The main concerns during evolution in a billiard table are:
 
 1. The particle must never leak out of the billiard table. This is simply translated
    to the `distance()` function being **always** positive **after** any collision.

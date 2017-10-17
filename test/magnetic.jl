@@ -33,7 +33,7 @@ if printinfo
     println("+ evolve!() works for MagneticParticle.")
     println("+ randominside(ω) returns MagneticParticle.")
     println("+ relocate(), collisiontime(), resolvecollision() work for")
-    println("  MagneticParticle with FiniteWall and Disk.")
+    println("  MagneticParticle with InfiniteWall and Disk.")
     println("+ particle never leaks the billiard table.")
     println("+ Required time: $(round(time()-tim, 3)) sec.")
 end

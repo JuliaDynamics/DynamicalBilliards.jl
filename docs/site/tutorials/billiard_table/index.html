@@ -324,7 +324,7 @@
 
 
 <p>and then you create your obstacles one by one and add them to it. All obstacles that are already defined in the package can be found at the <a href="../../basic/library/#obstacles">Obstacles page</a> of the library. The function <code>billiard_polygon</code> creates a polygonal billiard table.  However, for the example of this page, we will create a hexagonal billiard with a disk in the middle step-by-step.</p>
-<p>The first step is to define the six walls of the billiard table. A <code>FiniteWall</code> object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name. The vertex points of a regular hexagon of radius <code>r</code> are given by the formula:</p>
+<p>The first step is to define the six walls of the billiard table. A <code>InfiniteWall</code> object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name. The vertex points of a regular hexagon of radius <code>r</code> are given by the formula:</p>
 <p>$$
 (x,y) = \left( r\cos\left(\frac{2\pi i}{6}\right), r\cos\left(\frac{2\pi i}{6}\right) \right)\,, \quad \text{for i $\in$ {1,...,6}}
 $$</p>
@@ -338,7 +338,7 @@ $$</p>
   <span class="n">ending</span> <span class="o">=</span> <span class="n">hexver</span><span class="p">[</span><span class="n">mod1</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">(</span><span class="n">hexver</span><span class="p">))]</span>
   <span class="n">w</span> <span class="o">=</span> <span class="n">ending</span> <span class="o">-</span> <span class="n">starting</span>
   <span class="n">normal</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-  <span class="n">wall</span> <span class="o">=</span> <span class="n">FiniteWall</span><span class="p">(</span><span class="n">starting</span><span class="p">,</span> <span class="n">ending</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="s">&quot;wall </span><span class="si">$i</span><span class="s">&quot;</span><span class="p">)</span>
+  <span class="n">wall</span> <span class="o">=</span> <span class="n">InfiniteWall</span><span class="p">(</span><span class="n">starting</span><span class="p">,</span> <span class="n">ending</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="s">&quot;wall </span><span class="si">$i</span><span class="s">&quot;</span><span class="p">)</span>
   <span class="n">push!</span><span class="p">(</span><span class="n">bt</span><span class="p">,</span> <span class="n">wall</span><span class="p">)</span>
 <span class="k">end</span>
 </pre></div>

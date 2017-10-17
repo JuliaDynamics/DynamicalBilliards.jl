@@ -90,9 +90,9 @@ sp = [x,o]; ep = [x, y]; n = [-x,o]
 rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
 
 sp = [o,y]; ep = [x, y]; n = [o,-y]
-topw2 = FiniteWall(sp, ep, n, "Top wall")
+topw2 = InfiniteWall(sp, ep, n, "Top wall")
 sp = [o,o]; ep = [x, o]; n = [o,y]
-botw2 = FiniteWall(sp, ep, n, "Bottom wall")
+botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
 push!(bt, leftw, rightw, topw2, botw2)
 
 r = 0.25
