@@ -48,5 +48,20 @@ function enableplotting()
     end
 end
 
+# using PyPlot
+# close("all")
+#
+# enableplotting()
+#
+# bt = billiard_bunimovich()
+
+# plot_billiard(bt)
+# for i in 1:500
+#     p = randominside(bt)
+#     plot_particle(p)
+# end
+
+# p = randominside(bt)
+# animate_evolution!(p, bt, 100, sleeptime = 0.1)
 
 end#module

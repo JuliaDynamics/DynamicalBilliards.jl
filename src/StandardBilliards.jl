@@ -1,7 +1,7 @@
 using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
-billiard_raysplitting_showcase, billiard_hexagonal_sinai
+billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich
 
 const SV = SVector{2}
 ####################################################
@@ -22,8 +22,8 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
-    x, y = promote(x,y)
     x = convert(AbstractFloat, x)
+    x, y = promote(x,y)
     bt = Obstacle{typeof(x)}[]
     o = typeof(x)(0.0)
     if setting == "standard"
@@ -250,5 +250,19 @@ function billiard_square_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious
 
     push!(bt, capbotleft, capleft, toptop, capright, capbotright)
 
+    return bt
+end
+
+function billiard_bunimovich(l=1.0, w=1.0)
+
+    l = convert(AbstractFloat, l)
+    l, w = promote(l,w)
+    bt = Obstacle{typeof(l)}[]
+    o = typeof(l)(0.0)
+    bw = InfiniteWall([o,o], [l,o], [o,  w], "Bottom wall")
+    tw = InfiniteWall([o,w], [l,w], [o, -w], "Top wall")
+    leftc = Semicircle([o, w/2], w/2, [l, o], "Left semicircle")
+    rightc = Semicircle([l, w/2], w/2, [-l, o], "Right semicircle")
+    push!(bt, bw, tw, leftc, rightc)
     return bt
 end
