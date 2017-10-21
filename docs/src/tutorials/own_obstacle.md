@@ -51,15 +51,15 @@ The first method is very simple, just do:
 ```julia
 normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 ```
-Since the function is only used during collision time estimation, `distance` and
-`resolvecollision!`, and since we will be writing explicit methods for the first two,
+Since the function is only used during `distance` and
+`resolvecollision!` and since we will be writing explicit methods for the first,
 we don't have to care about
 what happens when the particle is far away from the boundary.
 
 The `distance` method is a bit tricky. Since the type already subtypes `Circular`,
 the following definition from `DynamicalBilliards` applies:
 ```julia
-distance(pos::AbstractVector{T}, d::Circular{T}) where {T} = norm(pos - d.c) - d.r
+distance(pos::AbstractVector, d::Circular) = norm(pos - d.c) - d.r
 ```
 However, the method must be
 expanded. That is because when the particle is on the "open" half of the

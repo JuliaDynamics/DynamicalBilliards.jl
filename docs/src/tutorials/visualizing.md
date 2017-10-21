@@ -9,10 +9,10 @@ plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
 plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
 plot_billiard(bt::Vector{Obstacle})
 plot_billiard(bt, xt::Vector, yt::Vector; plot_orbit = true)
-billiard_julia(; plotit = true)
 animate_evolution!(p, bt, colnumber[, ray-splitter]; kwargs)
+billiard_julia(; plotit = true)
 ```
-
+and each has a detailed documentation string.
 
 ## Plotting the Billiard Table
 

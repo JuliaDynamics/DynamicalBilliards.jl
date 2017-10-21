@@ -133,10 +133,31 @@ This can be calculated with the function [`escapetime`](@ref). The function requ
 the billiard table to have at least one [`FiniteWall`](@ref) object with field
 `isdoor=true`.
 
-The way the function works is very simple: a particle is evolved until it collides with a `FiniteWall` that has `isdoor=true`. This is considered as the particle escaping the billiard, pretending like this `FiniteWall` is an "open door".
+The way the function works is very simple: a particle is evolved until it collides with a `FiniteWall` that has a field `isdoor=true`. This is considered as the particle escaping the billiard, pretending like this `FiniteWall` is an open `Door`.
 
-If you want to know the reason behind the existence of both
-`FiniteWall` and `InfiniteWall`, see this [page on convex billiards](/tutorials/billiard_table/#convex-billiards).
+Let's set up an example:
+```julia
+using DynamicalBilliards
+DynamicalBilliards.enableplotting()
+bt = billiard_mushroom() # By default this billiard has a Door
+plot_billiard(bt)
+```
+![Mushroom billiard](https://i.imgur.com/zQgWg2a.png)
+You can see that a `Door` has cyan-black alternating colors.
+
+To get the escape time:
+```julia
+p = randominside(bt, 0.5) # works with Straight and Magnetic !
+t = escapetime(p, bt)
+```
+Depending on the `p`, `t` could also be `Inf`, if the particle did not escape
+within the maximum amount of iterations. You can increase those with a third argument:
+```julia
+p = randominside(bt, 0.5) # works with Straight and Magnetic !
+t = escapetime(p, bt, 10000000, warning = true)
+```
+Now, a warning message will be thrown if the particle does not escape within the given
+amount of maximum iterations. (The returned value is still `Inf` if that happens)
 
 
 ---
