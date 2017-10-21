@@ -608,6 +608,43 @@ function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
     return θ*rc
 end
 
+function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+    ω = p.omega
+    pc, rc = cyclotron(p)
+    p1 = o.c
+    r1 = o.r
+    d = norm(p1-pc)
+    if (d >= rc + r1) || (d <= abs(rc-r1))
+        return Inf
+    end
+    # Solve quadratic:
+    a = (rc^2 - r1^2 + d^2)/2d
+    h = sqrt(rc^2 - a^2)
+    # Collision points (always 2):
+    I1 = SVector{2, T}(
+    pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+    pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+    I2 = SVector{2, T}(
+    pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+    pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+    # Only consider intersections on the "correct" side of Semicircle:
+    II = SVector{2,T}[]
+    if dot(I1-o.c, o.facedir) < 0 #intersection 1 is OUT
+        push!(II, I1)
+    end
+    if dot(I2-o.c, o.facedir) < 0
+        push!(II, I2)
+    end
+    if length(II) == 0
+        return Inf
+    end
+    # Calculate real time until intersection:
+    θ = realangle(p, o, II, pc, rc)
+    # Collision time, equiv. to arc-length until collision point:
+    return θ*rc
+end
+
+
 
 function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
     t; warning::Bool = false) where {T<:AbstractFloat}

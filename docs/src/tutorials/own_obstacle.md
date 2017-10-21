@@ -116,7 +116,7 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
 end
 ```
 
-And this is everything. The obstacle now works perfectly fine for straight propagation
+And that is all. The obstacle now works perfectly fine for straight propagation
 and properly initializes particles with `randominside`!
 
 
@@ -125,3 +125,17 @@ and properly initializes particles with `randominside`!
 
 1. [`collisiontime`](@ref) with `MagneticParticle` : enables magnetic propagation
 2. `plot_obstacle` : enables plotting (used in `plot_billiard`)
+
+
+for 2:
+```julia
+Arc = PyPlot.matplotlib[:patches][:Arc]
+function plot_obstacle(d::Semicircle; kwargs...)
+  theta1 = atan2(d.facedir[2], d.facedir[1])*180/π + 90
+  theta2 = theta1 + 180
+  s1 = Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2,
+  edgecolor = (0,0.6,0), linewidth = 2.0, kwargs...)
+  PyPlot.gca()[:add_artist](s1)
+  PyPlot.show()
+end
+```

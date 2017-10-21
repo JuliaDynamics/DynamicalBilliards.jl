@@ -16,6 +16,8 @@ The types that are currently offered by this package, besides the standard one, 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
 
+*The [stable](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable) documentation refers to the version of the package installed with `Pkg.add()`. The [latest](https://JuliaDynamics.github.io/DynamicalBilliards.jl/latest) documentation refers to the version under development, obtained with `Pkg.checkout("DynamicalBilliards")`.*
+
 ---
 
 ## Installation

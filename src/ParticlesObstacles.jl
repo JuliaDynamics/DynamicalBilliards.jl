@@ -4,7 +4,7 @@ import Base: show, eltype, getindex
 export AbstractParticle, Particle, MagneticParticle,
 cyclotron, Obstacle, Disk, Antidot, RandomDisk,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, randominside, distance, cellsize, Wall, Circular
+normalvec, randominside, distance, cellsize, Wall, Circular, Semicircle
 
 ####################################################
 ## Particles
