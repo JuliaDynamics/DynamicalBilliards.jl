@@ -17,7 +17,7 @@ const sixsqrt = 6sqrt(2)
 @inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
 
-# Used in check of skip intersection, in `realangle`:
+# Used in check of skip intersection, in `realangle` and collision with Semicircle:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
 @inline distancecheck(::Type{BigFloat}) = BigFloat(1e-8)
 
@@ -292,7 +292,7 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
     else # I am inside semicircle:
         # these lines make sure that the code works for ANY starting position:
         t = -B - sqrtD
-        if t ≤ 0
+        if t ≤ 0 || distance(p, d) ≤ distancecheck(T)
             t = -B + sqrtD
         end
     end
@@ -302,7 +302,7 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
         return Inf
     end
     # If collision time is negative, return Inf:
-    t <= 0.0 ? Inf : t
+    t ≤ 0.0 ? Inf : t
 end
 
 
@@ -765,7 +765,7 @@ end
 
 
 """
-    escapetime(p, bt, maxiter = 1000000; warning = true)
+    escapetime(p, bt, maxiter = 1000; warning = true)
 Calculate the escape time of a particle `p` in the billiard table `bt`, which
 is the time until colliding with any `Door` in `bt`.
 As `Door` is considered any [`FiniteWall`](@ref) with
@@ -777,7 +777,7 @@ the warning by using `warning=false`).
 """
 function escapetime(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
-    t::Int = 1000000; warning::Bool=true)::T where {T<:AbstractFloat}
+    t::Int = 1000; warning::Bool=true)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)

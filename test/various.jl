@@ -59,23 +59,32 @@ end#function
 
 function escape_times(partnum=500; printinfo=true)
     tim = time()
+    bt = billiard_mushroom()
     @testset "Straight Escape Time" begin
-        bt = DynamicalBilliards.billiard_mushroom()
+        port = 0
         for i in 1:partnum
             p = randominside(bt)
 
-            et = escapetime(p, bt)
-            @test et < Inf
+            et = escapetime(p, bt, warning=false)
+            @test typeof(et)==Float64
+            if et == Inf
+                port +=1
+            end
         end#particle loop
+        @test port < partnum
     end
     @testset "Magnetic Escape Time" begin
-        bt = DynamicalBilliards.billiard_mushroom()
+        port = 0
         for i in 1:partnum
             p = randominside(bt, 0.1)
 
-            et = escapetime(p, bt)
-            @test et < Inf
+            et = escapetime(p, bt, warning=false)
+            @test typeof(et)==Float64
+            if et == Inf
+                port +=1
+            end
         end#particle loop
+        @test port < partnum
     end
     if printinfo
         println("Results:")
