@@ -17,7 +17,7 @@ const sixsqrt = 6sqrt(2)
 @inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
 
-# Used in check of skip intersection, in `realangle`:
+# Used in check of skip intersection, in `realangle` and collision with Semicircle:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
 @inline distancecheck(::Type{BigFloat}) = BigFloat(1e-8)
 
@@ -96,11 +96,11 @@ Notice that the adjustment is increased geometrically; if one adjustment is not
 enough, the adjusted time is multiplied by a factor of 10. This happens as many
 times as necessary.
 """
-function relocate!(p::Particle{T}, o::Obstacle{T}, tmin) where {T}
+function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
     while distance(newpos, o) < 0
-        tmin -= timeprec(T)
+        tmin -= i*timeprec(T)
         newpos = propagate_pos(p.pos, p, tmin)
         i *= 10
     end
@@ -108,7 +108,7 @@ function relocate!(p::Particle{T}, o::Obstacle{T}, tmin) where {T}
     return tmin
 end
 
-function relocate!(p::Particle{T}, o::PeriodicWall{T}, tmin) where {T}
+function relocate!(p::AbstractParticle{T}, o::PeriodicWall{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
     while distance(newpos, o) > 0
@@ -234,7 +234,6 @@ end
 function collisiontime(p::Particle{T}, d::Circular{T})::T where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
-    # Gotta rethink thins for ray spliting
     dotp >=0 && return Inf
 
     dc = p.pos - d.c
@@ -275,6 +274,38 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     # If collision time is negative, return Inf:
     t <= 0.0 ? Inf : t
 end
+
+function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
+
+    dc = p.pos - d.c
+    B = dot(p.vel, dc)         #velocity towards circle center: B > 0
+    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+    Δ = B^2 - C
+
+    Δ <= 0 && return Inf
+    sqrtD = sqrt(Δ)
+
+    nn = dot(dc, d.facedir)
+    if nn ≥ 0 # I am NOT inside semicircle
+        # Return most positive time
+        t = -B + sqrtD
+    else # I am inside semicircle:
+        # these lines make sure that the code works for ANY starting position:
+        t = -B - sqrtD
+        if t ≤ 0 || distance(p, d) ≤ distancecheck(T)
+            t = -B + sqrtD
+        end
+    end
+    # This check is necessary to not collide with the non-existing side
+    newpos = p.pos + p.vel .* t
+    if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
+        return Inf
+    end
+    # If collision time is negative, return Inf:
+    t ≤ 0.0 ? Inf : t
+end
+
+
 
 """
     next_collision(p, bt) -> (tmin, index)
@@ -577,6 +608,43 @@ function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
     return θ*rc
 end
 
+function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+    ω = p.omega
+    pc, rc = cyclotron(p)
+    p1 = o.c
+    r1 = o.r
+    d = norm(p1-pc)
+    if (d >= rc + r1) || (d <= abs(rc-r1))
+        return Inf
+    end
+    # Solve quadratic:
+    a = (rc^2 - r1^2 + d^2)/2d
+    h = sqrt(rc^2 - a^2)
+    # Collision points (always 2):
+    I1 = SVector{2, T}(
+    pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+    pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+    I2 = SVector{2, T}(
+    pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+    pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+    # Only consider intersections on the "correct" side of Semicircle:
+    II = SVector{2,T}[]
+    if dot(I1-o.c, o.facedir) < 0 #intersection 1 is OUT
+        push!(II, I1)
+    end
+    if dot(I2-o.c, o.facedir) < 0
+        push!(II, I2)
+    end
+    if length(II) == 0
+        return Inf
+    end
+    # Calculate real time until intersection:
+    θ = realangle(p, o, II, pc, rc)
+    # Collision time, equiv. to arc-length until collision point:
+    return θ*rc
+end
+
+
 
 function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
     t; warning::Bool = false) where {T<:AbstractFloat}
@@ -697,19 +765,21 @@ end
 
 
 """
-    escapetime(p, bt, maxiter = 1000000; warning = true)
+    escapetime(p, bt, maxiter = 1000; warning = false)
 Calculate the escape time of a particle `p` in the billiard table `bt`, which
 is the time until colliding with any `Door` in `bt`.
 As `Door` is considered any [`FiniteWall`](@ref) with
 field `isdoor=true`.
 
 If the particle performs more than `maxiter` collisions without colliding with the
-`Door` (i.e. escaping) the returned result is `Inf` and a warning is thrown (disable
-the warning by using `warning=false`).
+`Door` (i.e. escaping) the returned result is `Inf`.
+
+A warning can be thrown if the result is `Inf`. Enable this using the keyword
+`warning = true`.
 """
 function escapetime(
     p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
-    t::Int = 1000000; warning::Bool=true)::T where {T<:AbstractFloat}
+    t::Int = 1000; warning::Bool=false)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)

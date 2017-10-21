@@ -7,11 +7,15 @@
   * `FiniteWall` has some extra fields for enabling this.
   * `FiniteWall` has a boolean field `isdoor`, that designates the given wall to be
     `Door`. This is used in `escapetime`.
-* Added function `escapetime(p, bt)` which calculates the escape time of a particle
+* *MASSIVE*: Added function `escapetime(p, bt)` which calculates the escape time of a particle
   from a billiard table. The escape time is the time until the particle collides
   with a `Door` (any `Door`).
 * `animate_evolution!` can create a new figure and plot the billiard table on
-  user input.
+  user input. This happens by default.
+* Bugfix: relocation in magnetic case was not adaptive (for the backwards method).
+* *MASSIVE*: Added a `Semicircle` type! For both types of evolution!
+    * added Bunimovich  billiard `billiard_bunimovich`
+    * added mushroom billiard `billiard_mushroom`
 
 
 # v1.5.0
