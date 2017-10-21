@@ -1,7 +1,8 @@
 using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
-billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich
+billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
+billiard_mushroom
 
 const SV = SVector{2}
 ####################################################
@@ -220,9 +221,9 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     return bt, rayspl
 end
 
-function billiard_square_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0)
+function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
 
-    sl = 1.0; sw = 0.2; cr =1.0
+
     leftcorn = SV(-sw/2, 0)
     rightcorn = SV(sw/2, 0)
     upleftcorn = SV(-sw/2, sl)
@@ -252,6 +253,50 @@ function billiard_square_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious
 
     return bt
 end
+
+"""
+    billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
+    stem_location = 0.0)
+Create a mushroom billiard. The center of the cap (which is Semicircle) is always
+at [0, stem_length]. The bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
+"""
+function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
+    stem_location = 0.0)
+
+    stloc = stem_location
+    sl = stem_length; sw = stem_width; cr = cap_radious
+
+    abs(stloc) + sw/2 > cr && error("Stem is outside the mushroom cap!")
+
+    leftcorn = SV(-sw/2 + stloc, 0)
+    rightcorn = SV(sw/2 + stloc, 0)
+    upleftcorn = SV(-sw/2 + stloc, sl)
+    uprightcorn = SV(sw/2 + stloc, sl)
+
+    S = typeof(convert(AbstractFloat, sl))
+    bt = Obstacle{S}[]
+
+    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), true, "Stem bottom")
+    stemleft = FiniteWall(leftcorn, upleftcorn, SV(sw, 0), false, "Stem left")
+    stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
+
+    push!(bt, stembot, stemleft, stemright)
+
+    farleft = SV(-cr, sl)
+    farright = SV(cr, sl)
+
+    capbotleft = FiniteWall(
+    upleftcorn, farleft, SV(0, sw), false, "Cap bottom left")
+    capbotright = FiniteWall(
+    uprightcorn, farright, SV(0, sw), false, "Cap bottom right")
+
+    cap = Semicircle([0.0, sl], cap_radious, [0.0, -1.0], "Mushroom cap")
+
+    push!(bt, capbotleft, capbotright, cap)
+
+    return bt
+end
+
 
 function billiard_bunimovich(l=1.0, w=1.0)
 
