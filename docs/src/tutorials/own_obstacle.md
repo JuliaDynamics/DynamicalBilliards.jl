@@ -83,13 +83,13 @@ Notice that this definition always returns positive distance when the particle i
 the "other side".
 
 Finally, the method for [`collisiontime`](@ref) is by far the most *trickiest*. But,
-with pen, paper and some patience, one can find a way:
+with pen, paper and a significant amount of patience, one can find a way:
 ```julia
 function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
 
     dc = p.pos - d.c
-    B = dot(p.vel, dc)         
-    C = dot(dc, dc) - d.r^2    
+    B = dot(p.vel, dc)         #velocity towards circle center: B > 0
+    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
     Δ = B^2 - C
 
     Δ <= 0 && return Inf
@@ -102,7 +102,7 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
     else # I am inside semicircle:
         # these lines make sure that the code works for ANY starting position:
         t = -B - sqrtD
-        if t ≤ 0
+        if t ≤ 0 || distance(p, d) ≤ distancecheck(T)
             t = -B + sqrtD
         end
     end
@@ -112,7 +112,7 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
         return Inf
     end
     # If collision time is negative, return Inf:
-    t <= 0.0 ? Inf : t
+    t ≤ 0.0 ? Inf : t
 end
 ```
 
@@ -126,8 +126,47 @@ and properly initializes particles with `randominside`!
 1. [`collisiontime`](@ref) with `MagneticParticle` : enables magnetic propagation
 2. `plot_obstacle` : enables plotting (used in `plot_billiard`)
 
+The `collisiontime` method for `MagneticParticle` is very easy in this case, because
+it is almost identical with the method for the general `Circular` obstacle:
+```julia
+function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+    ω = p.omega
+    pc, rc = cyclotron(p)
+    p1 = o.c
+    r1 = o.r
+    d = norm(p1-pc)
+    if (d >= rc + r1) || (d <= abs(rc-r1))
+        return Inf
+    end
+    # Solve quadratic:
+    a = (rc^2 - r1^2 + d^2)/2d
+    h = sqrt(rc^2 - a^2)
+    # Collision points (always 2):
+    I1 = SVector{2, T}(
+    pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+    pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+    I2 = SVector{2, T}(
+    pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+    pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+    # Only consider intersections on the "correct" side of Semicircle:
+    II = SVector{2,T}[]
+    if dot(I1-o.c, o.facedir) < 0 #intersection 1 is OUT
+        push!(II, I1)
+    end
+    if dot(I2-o.c, o.facedir) < 0
+        push!(II, I2)
+    end
+    if length(II) == 0
+        return Inf
+    end
+    # Calculate real time until intersection:
+    θ = realangle(p, o, II, pc, rc)
+    # Collision time, equiv. to arc-length until collision point:
+    return θ*rc
+end
+```
 
-for 2:
+Then, we add swag by writing a method for `plot_obstacle`:
 ```julia
 Arc = PyPlot.matplotlib[:patches][:Arc]
 function plot_obstacle(d::Semicircle; kwargs...)
@@ -139,3 +178,5 @@ function plot_obstacle(d::Semicircle; kwargs...)
   PyPlot.show()
 end
 ```
+(this method is in the `/plotting/obstacles.jl` file and is loaded on-demand
+through the command `DynamicalBilliards.enableplotting()`)
