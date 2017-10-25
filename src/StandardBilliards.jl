@@ -2,7 +2,7 @@ using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
-billiard_mushroom
+billiard_mushroom, billiard_bunimovich
 
 const SV = SVector{2}
 ####################################################
@@ -317,3 +317,9 @@ function billiard_bunimovich(l=1.0, w=1.0)
     push!(bt, bw, tw, leftc, rightc)
     return bt
 end
+
+"""
+    billiard_stadium
+Alias for [`billiard_bunimovich`](@ref).
+"""
+billiard_stadium = billiard_bunimovich

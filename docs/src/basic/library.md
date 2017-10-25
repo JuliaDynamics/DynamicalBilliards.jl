@@ -49,6 +49,7 @@ randominside
 billiard_rectangle
 billiard_sinai
 billiard_bunimovich
+billiard_stadium
 billiard_mushroom
 billiard_lorentz
 billiard_polygon
