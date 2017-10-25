@@ -32,6 +32,7 @@ Obstacle
 Disk
 RandomDisk
 Antidot
+Semicircle
 InfiniteWall
 RandomWall
 PeriodicWall
@@ -47,6 +48,8 @@ randominside
 ```@docs
 billiard_rectangle
 billiard_sinai
+billiard_bunimovich
+billiard_mushroom
 billiard_lorentz
 billiard_polygon
 billiard_hexagonal_sinai
