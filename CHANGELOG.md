@@ -1,4 +1,7 @@
-# v1.6.0
+# v1.6.1
+Updated the documentation to reflect the new changes of v1.6.0
+
+# v1.6.0 - WARNING: DOCUMENTATION NOT UPDATED. SEE v1.6.1
 * **[BREAKING]** Function `animate_evolution` has been renamed to `animate_evolution!`
   to remind users that it mutates the particle.
 * **[BREAKING]** `FiniteWall` has been renamed to `InfiniteWall` and works as before
