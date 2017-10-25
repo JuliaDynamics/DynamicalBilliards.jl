@@ -181,7 +181,7 @@ RandomDisk{T}(args...) where {T} = RandomDisk(args...)
     Antidot{T<:AbstractFloat} <: Circular{T}
 Disk-like obstacle that allows propagation both inside and outside of the disk
 (immutable type). Used in ray-splitting billiards.
-#### Fields:
+### Fields:
 * `c::SVector{2,T}` : Center.
 * `r::T` : Radius.
 * `pflag::Bool` : Flag that keeps track of where the particle is currently
@@ -205,6 +205,16 @@ end
 Antidot(c, r, name::String = "Antidot") = Antidot(c, r, true, name)
 Antidot{T}(args...) where {T} = Antidot(args...)
 
+"""
+    Semicircle{T<:AbstractFloat} <: Circular{T}
+Obstacle that represents half a circle.
+### Fields:
+* `c::SVector{2,T}` : Center.
+* `r::T` : Radius.
+* `facedir::SVector{2,T}` : Direction where the open face of the Semicircle is facing.
+* `name::String` : Name of the obstacle given for user convenience.
+  Defaults to "Semicircle".
+"""
 struct Semicircle{T<:AbstractFloat} <: Circular{T}
     c::SVector{2,T}
     r::T

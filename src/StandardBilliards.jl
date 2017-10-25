@@ -297,7 +297,13 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     return bt
 end
 
-
+"""
+    billiard_bunimovich(l=1.0, w=1.0)
+Return a vector of `Obstacle`s that define a Buminovich billiard, also called a
+stadium. The length is considered *without* the attached semicircles, meaning that the
+full length of the billiard is `l + w`. The left and right edges of the stadium
+are [`Semicircle`](@ref)s.
+"""
 function billiard_bunimovich(l=1.0, w=1.0)
 
     l = convert(AbstractFloat, l)
