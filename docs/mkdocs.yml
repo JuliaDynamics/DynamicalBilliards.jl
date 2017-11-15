@@ -15,19 +15,19 @@ extra:
 
 markdown_extensions:
   - pymdownx.arithmatex
-  - pymdownx.details
-  - pymdownx.inlinehilite
-  - pymdownx.superfences
   - admonition
+  - mdx_math
   - codehilite
   - extra
   - tables
   - fenced_code
 
 extra_css:
-  - assets/Documenter.css
+  - assets\Documenter.css
+
 
 extra_javascript:
+  - assets\mathjaxhelper.js
   - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
 
 docs_dir: 'build'

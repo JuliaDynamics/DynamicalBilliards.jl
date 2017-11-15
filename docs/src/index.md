@@ -60,16 +60,23 @@ The following tutorials offer detailed descriptions for various aspects of `Dyna
 
 The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
+---
+## Support
+If you are having problems with `DynamicalBilliards.jl` do not hesitate to seek for support! There are numerous ways to do that:
 
+1. Visit our official chatroom on Gitter: https://gitter.im/JuliaDynamics/Lobby
+2. Open a new issue at our [GitHub issues page](https://github.com/JuliaDynamics/DynamicalBilliards.jl/issues).
 
 ---
 ## Contributing
 Everyone is welcomed to contribute to `DynamicalBilliards.jl`! If you have some new
-algorithm, types of Obstacles or anything new to add, do not hesitate!
+algorithm, types of Obstacles or anything new to add, do not hesitate! For formal
+questions about e.g. structuring of code it is best to contact us through the [gitter
+chatroom](https://gitter.im/JuliaDynamics/Lobby) or by opening a new Pull Request and asking for a review of your code.
 
 If you would like to help but do not have anything new to contribute, please go ahead
 and take a look at the [GitHub issues page](https://github.com/JuliaDynamics/DynamicalBilliards.jl/issues) of the package.
-Most of the issues are easy to solve and are there specifically for people that would
+Some of the existing issues are easy to solve and are there specifically for people that would
 like to contribute.
 
 ---
