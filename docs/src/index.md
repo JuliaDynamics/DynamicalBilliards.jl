@@ -64,7 +64,7 @@ The [Library](/basic/library) section has the docstrings of all exported names i
 ## Support
 If you are having problems with `DynamicalBilliards.jl` do not hesitate to seek for support! There are numerous ways to do that:
 
-1. Visit our official chatroom on Gitter: https://gitter.im/JuliaDynamics/Lobby
+1. Visit our [official chatroom](https://gitter.im/JuliaDynamics/Lobby) on Gitter: https://gitter.im/JuliaDynamics/Lobby
 2. Open a new issue at our [GitHub issues page](https://github.com/JuliaDynamics/DynamicalBilliards.jl/issues).
 
 ---
