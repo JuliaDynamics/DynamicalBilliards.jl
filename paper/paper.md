@@ -74,12 +74,12 @@ We would like to bring into attention another new billiard package, called "Bill
 
 # References
 
-[1] : Yakov G. Sinai, Russian Mathematical Surveys **25**, page 137 (1970)
+[1] : Yakov G. Sinai, Russian Mathematical Surveys **25**, page 137 (1970), DOI: 10.1070/RM1970v025n02ABEH003794
 
-[2] : L. Buminovic & L. Vela-Arevalo, Chaos **25**, page 097614 (2015)
+[2] : L. Bunimovich & L. Vela-Arevalo, Chaos **25**, page 097614 (2015), DOI: 10.1063/1.4916330
 
-[3] : https://julialang.org/
+[3] : https://julialang.org/, DOI: 10.1137/141000671
 
 [4] : https://juliadynamics.github.io/DynamicalBilliards.jl/latest/tutorials/own_obstacle/
 
-[5] : J. Solanpääa, P. J. J. Luukkob & E. Räsänena, Computer Physics Communications **199**, page 133 (2016)
+[5] : J. Solanpääa, P. J. J. Luukkob & E. Räsänena, Computer Physics Communications **199**, page 133 (2016), DOI: 10.1016/j.cpc.2015.10.006
