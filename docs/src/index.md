@@ -95,7 +95,7 @@ lightblue = (102/255, 130/255, 223/255)
 okwargs = Dict(:linewidth => 2.0, :color => lightblue)
 pkwargs = Dict(:color => darkblue, :s => 150.0)
 
-sname = "C:\\****\\anim"
+sname = tempdir()
 
 animate_evolution(p, bt, 200; col_to_plot = 7,
 particle_kwargs = pkwargs, orbit_kwargs = okwargs,
