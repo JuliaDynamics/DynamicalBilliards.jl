@@ -14,7 +14,7 @@ affiliations:
  - name: Max Planck Institute for Dynamics and Self-Organization
    index: 1
 date: 26 October 2017
-bibliography: none
+bibliography: paper.bib
 ---
 
 # Summary
