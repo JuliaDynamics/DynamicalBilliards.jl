@@ -21,12 +21,12 @@ bibliography: none
 
 [DynamicalBilliards.jl](http://orcid.org/0000-0002-6427-2385) is a package about
 two-dimensional (dynamical) billiard systems written in its entirety in Julia. It is easy to use, and easy to
-be extended. It is accompanied by a detailed documentation archive with a lot of tutorials, example code as well as information about the physical algorithms at play.
+be extended. It is accompanied by a [detailed documentation archive](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) with a lot of tutorials, example code as well as information about the physical algorithms at play.
 
 The package is mainly used to simulate any kind of 2 dimensional system where particle motion is interrupted by collisions, like e.g. a gas infused with big molecules.
 
 # Features
-The features of the DynamicalSystems.jl, as of version v1.6.1, are:
+The features of the DynamicalBilliards.jl, as of version v1.6.1, are:
 
 * Modular creation of a billiard table by putting together well-defined obstacles.
 * Creation of random initial conditions in any user-created billiard table.
