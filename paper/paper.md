@@ -23,7 +23,7 @@ bibliography: paper.bib
 two-dimensional (dynamical) billiard systems written in its entirety in Julia. It is easy to use, and easy to
 be extended. It is accompanied by a [detailed documentation archive](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) with a lot of tutorials, example code as well as information about the physical algorithms at play.
 
-The package is mainly used to simulate any kind of 2 dimensional system where particle motion is interrupted by collisions, like e.g. a gas infused with big molecules.
+The package is mainly used to simulate any kind of two-dimensional system where particle motion is interrupted by collisions, e.g., a gas infused with big molecules.
 
 # Features
 The features of the DynamicalBilliards.jl, as of version v1.6.1, are:
