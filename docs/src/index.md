@@ -29,6 +29,23 @@ https://doi.org/10.21105/joss.00458 and you can cite as:
 
 >Datseris, (2017). DynamicalBilliards.jl: An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.. Journal of Open Source Software, 2(19), 458, doi:10.21105/joss.00458
 
+or if you use BibTeX:
+```
+@article{Datseris2017,
+  doi = {10.21105/joss.00458},
+  url = {https://doi.org/10.21105/joss.00458},
+  year  = {2017},
+  month = {nov},
+  publisher = {The Open Journal},
+  volume = {2},
+  number = {19},
+  pages = {458},
+  author = {George Datseris},
+  title = {{DynamicalBilliards}.jl: An easy-to-use,  modular and extendable Julia package for Dynamical Billiard systems in two dimensions.},
+  journal = {The Journal of Open Source Software}
+}
+```
+
 ## Installation
 
 This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
