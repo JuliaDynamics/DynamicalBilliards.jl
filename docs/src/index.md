@@ -7,6 +7,8 @@ Dynamical Billiard systems in two dimensions.
     Checkout the [Julia billiard animation](#julia-billiard-animation)
     code to see how to create the animated billiard of our logo.
 
+## Description
+
 A dynamical billiard is a system where a particle is propagating as a straight line from obstacle to obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
 
 The above will be referred to as the "standard" billiard. The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. Also, the [scholarpedia](http://www.scholarpedia.org/article/Dynamical_billiards) entry is a good read on the subject. In general, the standard billiard can be extended in many ways.
@@ -19,6 +21,13 @@ also no support for collision between particles.
 *The [stable](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable) documentation refers to the version of the package installed with `Pkg.add()`. The [latest](https://JuliaDynamics.github.io/DynamicalBilliards.jl/latest) documentation refers to the version under development, obtained with `Pkg.checkout("DynamicalBilliards")`.*
 
 ---
+
+## Citing
+If you have used this package for research that resulted in a publication, please be
+kind enough to cite the paper associated with DynamicalBilliards.jl. The DOI is
+https://doi.org/10.21105/joss.00458 and you can cite as:
+
+>Datseris, (2017). DynamicalBilliards.jl: An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.. Journal of Open Source Software, 2(19), 458, doi:10.21105/joss.00458
 
 ## Installation
 

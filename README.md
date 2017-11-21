@@ -7,6 +7,13 @@ The goals of the package is to provide a flexible and intuitive framework for fa
 |:--------:|:--------:|:---------------:|:-----:|:-----:|
 |[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/latest), [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable)| [![status](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd/status.svg)](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd) | [![Build Status](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl) | [![Build status](https://ci.appveyor.com/api/projects/status/ksgb8pv5xl0j315y?svg=true)](https://ci.appveyor.com/project/JuliaDynamics/dynamicalbilliards-jl-wt09b) | [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/JuliaDynamics/Lobby)
 
+If you have used this package for research that resulted in a publication, please be
+kind enough to cite the paper associated with DynamicalBilliards.jl. The DOI is
+https://doi.org/10.21105/joss.00458 and you can cite as:
+
+>Datseris, (2017). DynamicalBilliards.jl: An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.. Journal of Open Source Software, 2(19), 458, doi:10.21105/joss.00458
+
+## Features
 
 The core of `DynamicalBilliards.jl` is separated in simple and cohesive modular structures:
 
