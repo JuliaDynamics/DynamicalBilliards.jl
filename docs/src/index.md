@@ -27,7 +27,8 @@ If you have used this package for research that resulted in a publication, pleas
 kind enough to cite the paper associated with DynamicalBilliards.jl. The DOI is
 https://doi.org/10.21105/joss.00458 and you can cite as:
 
->Datseris, (2017). DynamicalBilliards.jl: An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.. Journal of Open Source Software, 2(19), 458, doi:10.21105/joss.00458
+>G. Datseris, [The Journal of Open Source Software **2**, 458
+(2017)](https://doi.org/10.21105/joss.00458).
 
 or if you use BibTeX:
 ```
