@@ -1,3 +1,8 @@
+# v2.0
+
+* Plotting is now available the moment the user does `using PyPlot`. Done through
+  the `Requires` module.
+
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0
 

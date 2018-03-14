@@ -15,11 +15,11 @@ import Base.show
 ##########################################
 # Core                                   #
 ##########################################
-include("ParticlesObstacles.jl")
-include("Propagation.jl")
-include("RaySplitting.jl")
-include("StandardBilliards.jl")
-include("LyapunovSpectrum.jl")
+include("particles_obstacles.jl")
+include("propagation.jl")
+include("raysplitting.jl")
+include("standard_billiards.jl")
+include("lyapunov_spectrum.jl")
 
 ##########################################
 # Test Options                           #
@@ -33,25 +33,17 @@ function test_options(;print_info::Bool = true, long_tests::Bool = true)
     ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
     ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
 end
-##########################################
-# Plotting Routines (loaded on demand)   #
-##########################################
-"""
-    DynamicalBilliards.enableplotting()
-Enable plotting for the package DynamicalBilliards.jl. Requires
-`using PyPlot` to work properly.
-"""
-function enableplotting()
+
+####################################################
+# Plotting Routines (loaded when `Using PyPlot`)   #
+####################################################
+using Requires
+@require PyPlot begin
     dir = joinpath(dirname(@__FILE__), "plotting")
     for f in readdir(dir)
         include(joinpath(dir, f))
     end
 end
-
-
-
-
-
 
 
 
