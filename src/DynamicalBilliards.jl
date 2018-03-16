@@ -19,13 +19,13 @@ const SV = SVector{2}
 ##########################################
 include("geometry.jl")
 
-include("billiards/obstacles.jl")
 include("billiards/particles.jl")
+include("billiards/obstacles.jl")
 include("billiards/billiardtable.jl")
 include("billiards/standard_billiards.jl")
 
-include("evolve/collisiontimes.jl")
-include("evolve/propagation.jl")
+include("timeevolution/collisiontimes.jl")
+include("timeevolution/propagation.jl")
 
 include("raysplitting.jl")
 

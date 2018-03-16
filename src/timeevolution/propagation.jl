@@ -8,14 +8,15 @@ periodicity!, propagate_pos, next_collision, escapetime, relocate!
 const sixsqrt = 6sqrt(2)
 
 # Used in relocate:
-@inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
-
+@inline timeprec(::AbstractParticle{T} ::Obstacle{T}) where {T} = eps(T)^(4/5)
 # This timeprec cannot be used for PeriodWall and RaySplitting obstacles with
-# MagneticParticle
-# because when mangetic and relocating forward you get extremely shallow angles
+# MagneticParticle because when mangetic and relocating forward you get
+# extremely shallow angles
 # and you need huge changes in time for even tiny changes in position
-@inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
-@inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
+@inline timeprec(::MagneticParticle{T}, ::PeriodicWall{T}) where {T} = eps(T)^(3/4)
+@inline timeprec(::MagneticParticle{BigFloat}, ::PeriodicWall{BigFloat}) =
+    BigFloat(1e-12)
+
 
 # Used in check of skip intersection, in `realangle` and collision with Semicircle:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
@@ -100,7 +101,7 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
     while distance(newpos, o) < 0
-        tmin -= i*timeprec(T)
+        tmin -= i*timeprec_sign(o)*timeprec(p, o)
         newpos = propagate_pos(p.pos, p, tmin)
         i *= 10
     end
@@ -108,41 +109,9 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
     return tmin
 end
 
-function relocate!(p::AbstractParticle{T}, o::PeriodicWall{T}, tmin) where {T}
-    newpos = propagate_pos(p.pos, p, tmin)
-    i = 1
-    while distance(newpos, o) > 0
-        tmin += i*timeprec(T)
-        newpos = propagate_pos(p.pos, p, tmin)
-        i *= 10
-    end
-    propagate!(p, newpos, tmin)
-    return tmin
-end
+timeprec_sign(::Obstacle) = +1
+timeprec_sign(::PeriodicWall) = -1
 
-function relocate!(p::MagneticParticle{T}, o::Obstacle{T}, tmin) where {T}
-    newpos = propagate_pos(p.pos, p, tmin)
-    i = 1
-    while distance(newpos, o) < 0
-        tmin -= i*timeprec(T)
-        newpos = propagate_pos(p.pos, p, tmin)
-        i *= 10
-    end
-    propagate!(p, newpos, tmin)
-    return tmin
-end
-
-function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin) where {T}
-    newpos = propagate_pos(p.pos, p, tmin)
-    i = 1
-    while distance(newpos, o) > 0
-        tmin += i*timeprec_forward(T)
-        newpos = propagate_pos(p.pos, p, tmin)
-        i *= 10
-    end
-    propagate!(p, newpos, tmin)
-    return tmin
-end
 
 
 #######################################################################################

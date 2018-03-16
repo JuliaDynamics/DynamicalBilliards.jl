@@ -2,11 +2,18 @@
 
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module.
+* Re-organized all source code into a much more readable state, and as a result
+  significantly reduced the total lines of code.
+* Fixed many instances of broadcasting with static vectors (which is bad).
+* Reduced a lot of allocations done all over the place (currently WIP).
+* Now have a quite useful geometry file.
 
 ## Syntax changes
 
 * `resolvecollision` for ray-splitting changed.
-
+* `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
+  multiple dispatch and reduce code repetition.
+  
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0
 

@@ -2,9 +2,9 @@ export Obstacle, Disk, Antidot, RandomDisk,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
 normalvec, distance, cellsize, Wall, Circular, Semicircle
 
-####################################################
-## Obstacles
-####################################################
+#######################################################################################
+## Circles
+#######################################################################################
 """
     Obstacle{<:AbstractFloat}
 Obstacle supertype.
@@ -63,7 +63,7 @@ RandomDisk{T}(args...) where {T} = RandomDisk(args...)
 """
     Antidot{T<:AbstractFloat} <: Circular{T}
 Disk-like obstacle that allows propagation both inside and outside of the disk
-(immutable type). Used in ray-splitting billiards.
+(mutable type). Used in ray-splitting billiards.
 ### Fields:
 * `c::SVector{2,T}` : Center.
 * `r::T` : Radius.
@@ -117,6 +117,11 @@ print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)")
 show(io::IO, w::Semicircle{T}) where {T} =
 print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)\nfacedir: $(w.facedir)")
 
+
+
+#######################################################################################
+## Walls
+#######################################################################################
 """
     Wall{T<:AbstractFloat} <: Obstacle{T}
 Wall obstacle supertype.
@@ -263,10 +268,9 @@ function PeriodicWall(sp::AbstractVector, ep::AbstractVector,
     return PeriodicWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n), name)
 end
 
-
 """
     SplitterWall{T<:AbstractFloat} <: Wall{T}
-Wall obstacle imposing allowing for ray-splitting (immutable type).
+Wall obstacle imposing allowing for ray-splitting (mutable type).
 ### Fields:
 * `sp::SVector{2,T}` : Starting point of the Wall.
 * `ep::SVector{2,T}` : Ending point of the Wall.
@@ -305,6 +309,10 @@ SplitterWall(sp, ep, n, true, name)
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
+
+#######################################################################################
+## Normal vectors
+#######################################################################################
 """
     normalvec(obst::Obstacle, position)
 Return the vector normal to the obstacle's boundary at the given position (which is
@@ -317,9 +325,9 @@ normalvec(disk::Circular, pos) = normalize(pos - disk.c)
 normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
-####################################################
+#######################################################################################
 ## Distances
-####################################################
+#######################################################################################
 """
     distance(p::AbstractParticle, o::Obstacle)
 Return the **signed** distance between particle `p` and obstacle `o`, based on
@@ -345,12 +353,6 @@ end
 
 (distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
 distance(p.pos, obst)
-
-# (distance(pos::AbstractVector{T}, bt::Tuple)::T) where {T<:AbstractFloat} =
-# min(distance(pos, obst) for obst in bt)
-#
-# distance(pos::AbstractVector, bt::BilliardTable) = distance(pos, bt.bt)
-# distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
 
 function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
     v1 = pos - w.sp
@@ -386,12 +388,13 @@ end
 
 
 # Distances for randominside:
-distance_init(p::AbstractParticle, a) = distance(p.pos, a)
+distance_init(p::AbstractParticle, a) = distance_init(p.pos, a)
+distance_init(pos::SVector, a) = distance(pos, a)
 
-function distance_init(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T where {T}
+function distance_init(pos::SVector, v::Vector{<:Obstacle{T}})::T where {T}
     d = T(Inf)
     for obst in v
-        di = distance_init(p.pos, obst)
+        di = distance_init(pos, obst)
         di < d && (d = di)
     end
     return d
@@ -405,9 +408,9 @@ function distance_init(pos, w::FiniteWall{T})::T where {T}
         intersection = project_to_line(pos, w.center, n)
         dfc = norm(intersection - w.center)
         if dfc > w.width/2
-            return +1 # but not directly behind
+            return +1.0 # but not directly behind
         else
-            return -1
+            return -1.0
         end
     end
     v1 = pos - w.sp
