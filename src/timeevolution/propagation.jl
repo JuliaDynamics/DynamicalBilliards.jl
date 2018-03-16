@@ -115,7 +115,7 @@ timeprec_sign(::PeriodicWall) = -1
 
 
 #######################################################################################
-## Propagate!
+## Propagate & Bounce
 #######################################################################################
 """
     propagate!(p::AbstractParticle, t)
@@ -130,17 +130,19 @@ is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
 Do the same, but take advantage of the already calculated `position` that the
 particle should end up at.
 """
-function propagate!(p::Particle{T}, t::Real) where {T}
-    # Set initial conditions
-    vx0=p.vel[1]
-    vy0=p.vel[2]
-    # Set current (final) values for `pos` (`vel` does not change)
-    p.pos += SVector{2,T}(vx0*t, vy0*t)
+propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
+propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
+
+function propagate!(p::MagneticParticle{T}, t)::Void where {T}
+    ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
+    p.pos += SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
+    p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
     return
 end
-
-function propagate!(p::Particle{T}, newpos::SVector{2,T}, t::Real) where {T}
+function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t)::Void where {T}
+    ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
     p.pos = newpos
+    p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
     return
 end
 
@@ -149,10 +151,16 @@ end
 Perform a "fake" propagation, i.e. propagate a position as if it was the particle's
 position.
 """
-function propagate_pos(pos, p::Particle{T}, t::Real) where {T}
-    vx0=p.vel[1]
-    vy0=p.vel[2]
-    return SVector{2,T}(pos[1] + vx0*t, pos[2] + vy0*t)
+propagate_pos(pos, p::Particle{T}, t::Real) where {T} =
+    SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t)
+
+function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
+    # "Initial" conditions
+    ω = p.omega
+    φ0 = atan2(p.vel[2], p.vel[1])
+    # Propagate:
+    ppos = SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
+    return pos + ppos
 end
 
 """
@@ -165,7 +173,6 @@ Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
-Notice that `pos == p.pos` and `vel == p.vel`.
 Notice that `pos, vel` are the values
 *after* the collision has been resolved (including ray-splitting).
 """
@@ -185,6 +192,10 @@ function bounce!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}}) where {T}
     return i, tmin, p.pos, p.vel
 end
 
+
+#######################################################################################
+## Evolve & Construct
+#######################################################################################
 """
     evolve!(p::AbstractParticle, bt, t [, ray_splitter])
 Evolve the given particle `p` inside the billiard table `bt`. If `t` is of type
@@ -233,7 +244,7 @@ please visit the official documentation.
 """
 function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:AbstractFloat}
 
-    if t <= 0
+    if t ≤ 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
 
@@ -267,132 +278,12 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
     return rt, rpos, rvel
 end
 
-
-"""
-    construct(ct, poss, vels[, ω][, dt=0.01])
-Given the main output of the `evolve!()` function, construct the
-timeseries of the position and velocity, as well as the time vector.
-
-In case of not given ω (or ω == 0), straight construction takes place.
-In case of ω != 0 or ω::Vector magnetic construction takes place.
-
-The additional optional argument of `dt` (only valid for Magnetic construction)
-is the timestep with which the timeseries are constructed.
-
-### Return
-A tuple of the following:
-* xt::Vector{T} : x position time-series
-* yt::Vector{T} : y position time-series
-* vxt::Vector{T} : x velocity time-series
-* vyt::Vector{T} : y velocity time-series
-* ts::Vector{T} : time vector
-"""
-function construct(t::Vector{T},
-    poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}) where {T}
-
-    xt = [pos[1] for pos in poss]
-    yt = [pos[2] for pos in poss]
-    vxt = [vel[1] for vel in vels]
-    vyt = [vel[2] for vel in vels]
-    ct = cumsum(t)
-    return xt, yt, vxt, vyt, ct
-end
-
-####################################################
-## Magnetic Propagation
-####################################################
-
-function propagate!(p::MagneticParticle{T}, t)::Void where {T}
-    # "Initial" conditions
-    ω = p.omega
-    φ0 = atan2(p.vel[2], p.vel[1])
-    # Propagate:
-    p.pos += SVector{2, T}(sin(ω*t + φ0)/ω - sin(φ0)/ω,
-    -cos(ω*t + φ0)/ω + cos(φ0)/ω)
-    p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
-    return
-end
-
-function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t)::Void where {T}
-    # "Initial" conditions
-    ω = p.omega
-    φ0 = atan2(p.vel[2], p.vel[1])
-    # Propagate:
-    p.pos = newpos
-    p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
-    return
-end
-
-function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
-    # "Initial" conditions
-    ω = p.omega
-    vx0= p.vel[1]
-    vy0= p.vel[2]
-    φ0 = atan2(vy0, vx0)
-    # Propagate:
-    ppos = SVector{2, T}(sin(ω*t + φ0)/ω - sin(φ0)/ω,
-    -cos(ω*t + φ0)/ω + cos(φ0)/ω)
-    return pos + ppos
-end
-
-"""
-    realangle(p::MagneticParticle, o::Obstacle, inter::Vector{SVector}, pc, pr)
-Given the intersections `inter` of the trajectory of a magnetic particle `p` with
-some obstacle `o`, find which of the two is the "real" one, i.e. occurs first.
-Returns the angle of first collision, which is equal to the time to first
-collision divided by ω.
-
-The function also takes care of problems that may arise when particles are very
-close to the obstacle's boundaries, due to floating-point precision.
-
-(the cyclotron center `pc` and radius `pr` are suplimented for efficiency, since they
-have been calculated already)
-"""
-function realangle(p::MagneticParticle{T}, o::Obstacle{T},
-    intersections::Vector{SVector{2, T}}, pc::SVector{2, T}, pr::T)::T where {T}
-
-    ω = p.omega
-    P0 = p.pos
-    PC = pc - P0
-    θ::T = Inf
-    for i in intersections
-        d2 = dot(i-P0,i-P0) #distance of particle from intersection point
-        # Check dot product for close points:
-        if d2 ≤ distancecheck(T)
-            dotp = dot(p.vel, normalvec(o,  p.pos))
-            # Case where velocity points away from obstacle:
-            dotp ≥ 0 && continue
-        end
-
-        d2r = (d2/(2pr^2))
-        d2r > 2 && (d2r = T(2.0))
-        # Correct angle value for small arguments (between 0 and π/2):
-        θprime = d2r < 1e-3 ? acos1mx(d2r) : acos(1.0 - d2r)
-
-        # Get "side" of i:
-        PI = i - P0
-        side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
-        # Get angle until i (positive number between 0 and 2π)
-        side < 0 && (θprime = T(2π-θprime))
-        # Set minimum angle (first collision)
-        if θprime < θ
-            θ = θprime
-        end
-    end
-    return θ
-end
-
-
 function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
     t; warning::Bool = false) where {T<:AbstractFloat}
 
-    if t <= 0
+    if t ≤ 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
-
-    # if isperiodic(bt) && T == BigFloat
-    #     error("Currently periodic+magnetic+BigFloat propagation is not supported :(")
-    # end
 
     ω = p.omega
     absω = abs(ω)
@@ -443,6 +334,42 @@ function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
     return (rt, rpos, rvel, ω)
 end
 
+"""
+    evolve(p, args...)
+Same as [`evolve!`](@ref) but deep-copies the particle instead.
+"""
+evolve(p, args...) = evolve!(deepcopy(p), args...)
+
+"""
+    construct(ct, poss, vels[, ω][, dt=0.01])
+Given the main output of the `evolve!()` function, construct the
+timeseries of the position and velocity, as well as the time vector.
+
+In case of not given ω (or ω == 0), straight construction takes place.
+In case of ω != 0 or ω::Vector magnetic construction takes place.
+
+The additional optional argument of `dt` (only valid for Magnetic construction)
+is the timestep with which the timeseries are constructed.
+
+### Return
+A tuple of the following:
+* xt::Vector{T} : x position time-series
+* yt::Vector{T} : y position time-series
+* vxt::Vector{T} : x velocity time-series
+* vyt::Vector{T} : y velocity time-series
+* ts::Vector{T} : time vector
+"""
+function construct(t::Vector{T},
+    poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}) where {T}
+
+    xt = [pos[1] for pos in poss]
+    yt = [pos[2] for pos in poss]
+    vxt = [vel[1] for vel in vels]
+    vyt = [vel[2] for vel in vels]
+    ct = cumsum(t)
+    return xt, yt, vxt, vyt, ct
+end
+
 function construct(t::Vector{T},  poss::Vector{SVector{2,T}},
 vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
 
@@ -483,9 +410,9 @@ end
 
 
 
-####################################################
-## Escape Times
-####################################################
+#######################################################################################
+## Escape times
+#######################################################################################
 function escapeind(bt)
     j = Int[]
     for (i, obst) in enumerate(bt)
@@ -520,35 +447,18 @@ function escapetime(
         error("Billiard table does not have any Doors!")
     end
 
-    # Uncomment these to have timeseries outputs
-    # rt = T[]
-    # rpos = SVector{2,T}[]
-    # rvel = SVector{2,T}[]
-    # push!(rpos, p.pos)
-    # push!(rvel, p.vel)
-    # push!(rt, zero(T))
-
     totalt = zero(T)
     count = zero(t)
     t_to_write = zero(T)
 
     while count < t
-        # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = next_collision(p, bt)
 
-        tmin = relocate!(p, bt[i], tmin)
+        i, tmin, pos, vel = bounce!(p, bt)
         t_to_write += tmin
-
-        resolvecollision!(p, bt[i])
 
         if typeof(bt[i]) <: PeriodicWall
             continue # do not write output if collision with with PeriodicWall
         else
-            # Uncomment these to have timeseries outputs
-            # push!(rpos, p.pos + p.current_cell)
-            # push!(rvel, p.vel)
-            # push!(rt, t_to_write)
-
             totalt += t_to_write
             i ∈ ei &&  break # the collision happens with a Door!
 
@@ -560,8 +470,7 @@ function escapetime(
     p.pos = ipos; p.vel = ivel
     if count ≥ t
         warning && warn("Particle did not escape within max-iter window.")
-        return Inf
+        return T(Inf)
     end
-    # return (rt, rpos, rvel)
     return totalt
 end

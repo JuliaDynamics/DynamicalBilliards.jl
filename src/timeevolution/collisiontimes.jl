@@ -201,3 +201,50 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     # Collision time, equiv. to arc-length until collision point:
     return θ*rc
 end
+
+"""
+    realangle(p::MagneticParticle, o::Obstacle, inter::Vector{SVector}, pc, pr)
+Given the intersections `inter` of the trajectory of a magnetic particle `p` with
+some obstacle `o`, find which of the two is the "real" one, i.e. occurs first.
+Returns the angle of first collision, which is equal to the time to first
+collision divided by ω.
+
+The function also takes care of problems that may arise when particles are very
+close to the obstacle's boundaries, due to floating-point precision.
+
+(the cyclotron center `pc` and radius `pr` are suplimented for efficiency, since they
+have been calculated already)
+"""
+function realangle(p::MagneticParticle{T}, o::Obstacle{T},
+    intersections::Vector{SVector{2, T}}, pc::SVector{2, T}, pr::T)::T where {T}
+
+    ω = p.omega
+    P0 = p.pos
+    PC = pc - P0
+    θ::T = Inf
+    for i in intersections
+        d2 = dot(i-P0,i-P0) #distance of particle from intersection point
+        # Check dot product for close points:
+        if d2 ≤ distancecheck(T)
+            dotp = dot(p.vel, normalvec(o,  p.pos))
+            # Case where velocity points away from obstacle:
+            dotp ≥ 0 && continue
+        end
+
+        d2r = (d2/(2pr^2))
+        d2r > 2 && (d2r = T(2.0))
+        # Correct angle value for small arguments (between 0 and π/2):
+        θprime = d2r < 1e-3 ? acos1mx(d2r) : acos(1.0 - d2r)
+
+        # Get "side" of i:
+        PI = i - P0
+        side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
+        # Get angle until i (positive number between 0 and 2π)
+        side < 0 && (θprime = T(2π-θprime))
+        # Set minimum angle (first collision)
+        if θprime < θ
+            θ = θprime
+        end
+    end
+    return θ
+end
