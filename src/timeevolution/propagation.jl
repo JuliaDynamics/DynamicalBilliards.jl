@@ -1,10 +1,10 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
-export resolvecollision!, collisiontime, propagate!, evolve!, construct, specular!,
+export resolvecollision!, propagate!, evolve!, construct, specular!,
 periodicity!, propagate_pos, next_collision, escapetime, relocate!
 
-####################################################
+#######################################################################################
 ## Mathetical/Convenience Functions
-####################################################
+#######################################################################################
 const sixsqrt = 6sqrt(2)
 
 # Used in relocate:
@@ -32,9 +32,9 @@ Approximate arccos(1 - x) for x very close to 0.
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
 
-####################################################
+#######################################################################################
 ## Resolve Collisions
-####################################################
+#######################################################################################
 """
     specular!(p::AbstractParticle, o::Obstacle)
 Perform specular reflection based on the normal vector of the Obstacle.
@@ -145,20 +145,9 @@ function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin) where {T}
 end
 
 
-# function relocate!(
-#     p::MagneticParticle{BigFloat}, o::PeriodicWall{BigFloat}, tmin)::BigFloat
-#     newpos = propagate_pos(p.pos, p, tmin)
-#     while distance(newpos, o) > 0
-#         tmin += timeprec_bigfloatperiodic(T)
-#         newpos = propagate_pos(p.pos, p, tmin)
-#     end
-#     propagate!(p, newpos, tmin)
-#     return tmin
-# end
-
-####################################################
-## Straight Propagation
-####################################################
+#######################################################################################
+## Propagate!
+#######################################################################################
 """
     propagate!(p::AbstractParticle, t)
 Propagate the particle `p` for given time `t`, changing appropriately the the
@@ -195,32 +184,6 @@ function propagate_pos(pos, p::Particle{T}, t::Real) where {T}
     vx0=p.vel[1]
     vy0=p.vel[2]
     return SVector{2,T}(pos[1] + vx0*t, pos[2] + vy0*t)
-end
-
-
-"""
-    next_collision(p, bt) -> (tmin, index)
-Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
-as well as the `index` of the corresponding obstacle.
-"""
-function next_collision(
-    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::Tuple{T,Int} where {T}
-    tmin::T = T(Inf)
-    ind::Int = 0
-    for i in eachindex(bt)
-        tcol::T = collisiontime(p, bt[i])
-        # Set minimum time:
-        if tcol < tmin
-            tmin = tcol
-            ind = i
-        end
-    end#obstacle loop
-    return tmin, ind
-end
-
-function next_collision(
-    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
-    findmin(map(x -> collisiontime(p, x), bt))
 end
 
 """

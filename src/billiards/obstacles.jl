@@ -386,23 +386,23 @@ end
 
 
 # Distances for randominside:
-distance_init(p, a) = distance(p, a)
+distance_init(p::AbstractParticle, a) = distance(p.pos, a)
 
 function distance_init(p::AbstractParticle{T}, v::Vector{<:Obstacle{T}})::T where {T}
     d = T(Inf)
     for obst in v
-        di = distance_init(p, obst)
+        di = distance_init(p.pos, obst)
         di < d && (d = di)
     end
     return d
 end
 
-function distance_init(p::AbstractParticle{T}, w::FiniteWall{T})::T where {T}
+function distance_init(pos, w::FiniteWall{T})::T where {T}
 
-    n = normalvec(w, p.pos)
-    posdot = dot(w.sp - p.pos, n)
+    n = normalvec(w, pos)
+    posdot = dot(w.sp - pos, n)
     if posdot ≥ 0 # I am behind wall
-        intersection = project_to_line(p.pos, w.center, n)
+        intersection = project_to_line(pos, w.center, n)
         dfc = norm(intersection - w.center)
         if dfc > w.width/2
             return +1 # but not directly behind
@@ -410,25 +410,10 @@ function distance_init(p::AbstractParticle{T}, w::FiniteWall{T})::T where {T}
             return -1
         end
     end
-    v1 = p.pos - w.sp
+    v1 = pos - w.sp
     dot(v1, n)
 end
 
-"""
-    project_to_line(point, c, n)
-Project given `point` to line that contains point `c` and has **normal vector** `n`.
-Return the projected point.
-"""
-function project_to_line(point, c, n)
-    posdot = dot(c - point, n)
-    intersection = point .+ posdot.* n
-end
-# function project_to_line(point, c, n)
-#     posdot = dot(c - point, n)
-#     denom = dot(n, n)
-#     colt = posdot/denom
-#     intersection = point .+ colt .* n
-# end
 ####################################################
 ## Initial Conditions
 ####################################################
@@ -467,19 +452,5 @@ end
 function cellsize(a::Semicircle{T}) where {T}
     xmin, ymin = a.c .- a.r
     xmax, ymax = a.c .+ a.r
-    return xmin, ymin, xmax, ymax
-end
-
-function cellsize(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
-
-    xmin::T = ymin::T = T(Inf)
-    xmax::T = ymax::T = T(-Inf)
-    for i in eachindex(bt)
-        xs::T, ys::T, xm::T, ym::T = cellsize(bt[i])
-        xmin = xmin > xs ? xs : xmin
-        ymin = ymin > ys ? ys : ymin
-        xmax = xmax < xm ? xm : xmax
-        ymax = ymax < ym ? ym : ymax
-    end
     return xmin, ymin, xmax, ymax
 end
