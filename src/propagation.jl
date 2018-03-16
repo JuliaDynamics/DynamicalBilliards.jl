@@ -339,14 +339,26 @@ Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
 * index of the obstacle that the particle collided with
 * the time from the previous collision until the current collision `t`
 * position and velocity of the particle at the current collision (*after* the
-  collision has been resolved!)
+  collision has been resolved!). The position is given in the unit cell of
+  periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
 Notice that `pos == p.pos` and `vel == p.vel`.
+Notice that `pos, vel` are the values
+*after* the collision has been resolved (including ray-splitting).
 """
 function bounce!(p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
-    tmin::T = relocate!(p, bt[i], tmin)
+    tmin = relocate!(p, bt[i], tmin)
     resolvecollision!(p, bt[i])
+    return i, tmin, p.pos, p.vel
+end
+
+function bounce!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}}) where {T}
+    tmin::T, i::Int = next_collision(p, bt)
+    if tmin != Inf
+        tmin = relocate!(p, bt[i], tmin)
+        resolvecollision!(p, bt[i])
+    end
     return i, tmin, p.pos, p.vel
 end
 
@@ -419,7 +431,7 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
         t_to_write += tmin
 
         if typeof(bt[i]) <: PeriodicWall
-            continue # do not write output if collision with with PeriodicWall
+            continue # do not write output if collision with PeriodicWall
         else
             push!(rpos, pos + p.current_cell)
             push!(rvel, vel)
@@ -429,7 +441,7 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
             t_to_write = zero(T)
         end
     end#time, or collision number, loop
-  return (rt, rpos, rvel)
+    return rt, rpos, rvel
 end
 
 
@@ -665,20 +677,16 @@ function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
 
     while count < t
         # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = next_collision(p, bt)
+        i, tmin, pos, vel = bounce!(p, bt)
+        t_to_write += tmin
 
         if tmin == Inf
             warning && warn("Pinned particle in evolve! (Inf col t)")
-            push!(rpos, rpos[end])
-            push!(rvel, rvel[end])
-            push!(rt, Inf)
-            return (rt, rpos, rvel, ω)
+            push!(rpos, pos)
+            push!(rvel, vel)
+            push!(rt, tmin)
+            return rt, rpos, rvel, ω
         end
-
-        tmin = relocate!(p, bt[i], tmin)
-        t_to_write += tmin
-
-        resolvecollision!(p, bt[i])
 
         # Write output only if the collision was not made with PeriodicWall
         if typeof(bt[i]) <: PeriodicWall
