@@ -43,8 +43,25 @@ function specular!(p::Particle{T}, o::Disk{T}, offset::MArray{Tuple{4,4}, T}) wh
     end
 end
 
+function specular!(p::Particle{T}, o::Semicircle{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+    n = normalvec(o, p.pos)
+    ti = [-p.vel[2],p.vel[1]]
+    cosa = dot(n, -p.vel)
+    p.vel = p.vel - 2*dot(n, p.vel)*n
+    tf = [-p.vel[2], p.vel[1]]
+    for k in 1:4
+        x = [offset[:,k]...]
+        # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
+        # with norm(p) = 1
+        x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n+2./o.r*dot(x[1:2],ti)/cosa*tf
+        x[1:2]  = x[1:2] - 2.*dot(x[1:2],n)*n
+        ###
+        offset[:,k] = x
+    end
+end
 
-function specular!(p::Particle{T}, o::InfiniteWall{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+
+function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     specular!(p, o)
     for k in 1:4
@@ -61,7 +78,7 @@ end
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
 """
-function resolvecollision!(p::AbstractParticle{T}, o::Union{Disk{T}, InfiniteWall{T}}, offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
+function resolvecollision!(p::AbstractParticle{T}, o::Union{Disk{T}, InfiniteWall{T}, FiniteWall{T}, Semicircle{T}}, offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
     specular!(p, o, offset)
     return nothing
 end
