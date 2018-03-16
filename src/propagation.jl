@@ -332,26 +332,23 @@ function next_collision(
     findmin(map(x -> collisiontime(p, x), bt))
 end
 
-# testing unrollled:
-# using Unrolled
-#
-# @unroll function min_colt_unrolled(p::AbstractParticle, bt::Tuple)
-#     T = eltype(p)
-#     tmin = T(Inf)
-#     ind = i = 0
-#     @unroll for obst in bt
-#         i+=1
-#         tcol::T = collisiontime(p, obst)
-#         # Set minimum time:
-#         if tcol < tmin
-#             tmin = tcol
-#             ind = i
-#         end
-#     end
-#     return tmin, ind
-# end
+"""
+    bounce!(p, bt) -> i, t, pos, vel
+Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
+`resolvecollision!` with the colliding obstacle and finally return:
+* index of the obstacle that the particle collided with
+* the time from the previous collision until the current collision `t`
+* position and velocity of the particle at the current collision (*after* the
+  collision has been resolved!)
 
-# gives same result as next_collision when benchmarked...
+Notice that `pos == p.pos` and `vel == p.vel`.
+"""
+function bounce!(p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}}) where {T}
+    tmin::T, i::Int = next_collision(p, bt)
+    tmin::T = relocate!(p, bt[i], tmin)
+    resolvecollision!(p, bt[i])
+    return i, tmin, p.pos, p.vel
+end
 
 """
     evolve!(p::AbstractParticle, bt, t [, ray_splitter])
@@ -416,19 +413,16 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
     t_to_write = zero(T)
 
     while count < t
+
         # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = next_collision(p, bt)
-
-        tmin = relocate!(p, bt[i], tmin)
+        i, tmin, pos, vel = bounce!(p, bt)
         t_to_write += tmin
-
-        resolvecollision!(p, bt[i])
 
         if typeof(bt[i]) <: PeriodicWall
             continue # do not write output if collision with with PeriodicWall
         else
-            push!(rpos, p.pos + p.current_cell)
-            push!(rvel, p.vel)
+            push!(rpos, pos + p.current_cell)
+            push!(rvel, vel)
             push!(rt, t_to_write)
             # set counter
             count += increment_counter(t, t_to_write)
@@ -441,7 +435,7 @@ end
 
 """
     construct(ct, poss, vels[, ω][, dt=0.01])
-Given the main output of this package (see `evolve!()` function) construct the
+Given the main output of the `evolve!()` function, construct the
 timeseries of the position and velocity, as well as the time vector.
 
 In case of not given ω (or ω == 0), straight construction takes place.

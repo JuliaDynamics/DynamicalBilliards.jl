@@ -12,6 +12,8 @@ module DynamicalBilliards
 using StaticArrays
 import Base.show
 
+const SV = StaticVector{2}
+
 ##########################################
 # Core                                   #
 ##########################################

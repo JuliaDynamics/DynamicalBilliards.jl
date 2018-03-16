@@ -3,6 +3,10 @@
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module.
 
+## Syntax changes
+
+* `resolvecollision` for ray-splitting changed.
+
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0
 
