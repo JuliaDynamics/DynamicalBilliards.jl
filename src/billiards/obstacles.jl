@@ -1,21 +1,10 @@
-using StaticArrays
-import Base: show, eltype, getindex
-
-export AbstractParticle, Particle, MagneticParticle,
-cyclotron, Obstacle, Disk, Antidot, RandomDisk,
+export Obstacle, Disk, Antidot, RandomDisk,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, randominside, distance, cellsize, Wall, Circular, Semicircle
+normalvec, distance, cellsize, Wall, Circular, Semicircle
 
 ####################################################
-## Particles
+## Obstacles
 ####################################################
-"""
-    AbstractParticle
-Particle supertype.
-"""
-abstract type AbstractParticle{T<:AbstractFloat} end
-eltype(p::AbstractParticle{T}) where {T} = T
-
 """
     Obstacle{<:AbstractFloat}
 Obstacle supertype.
@@ -25,112 +14,6 @@ eltype(o::Obstacle{T}) where {T} = T
 
 eltype(bt::Vector{<:Obstacle{T}}) where {T} = T
 
-"""
-    Particle{T<:AbstractFloat} <: AbstractParticle{T}
-Two-dimensional particle in a billiard table (mutable type).
-### Fields:
-* `pos::SVector{2,T}` : Current position vector.
-* `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
-* `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
-  (Used only in periodic billiards)
-### Additional constructors:
-```julia
-Particle(ic::Vector{T}) #where ic = [x0, y0, φ0]
-Particle(x, y, φ)
-Particle() = Particle(rand(), rand(), rand()*2π)
-Particle(bt::Vector{<:Obstacle}) = randominside(bt)
-```
-"""
-mutable struct Particle{T<:AbstractFloat} <: AbstractParticle{T}
-    pos::SVector{2,T}
-    vel::SVector{2,T}
-    current_cell::SVector{2,T}
-    function Particle(
-        pos::SVector{2,T}, vel::SVector{2,T}, cc::SVector{2,T}) where{T<:AbstractFloat}
-        new{T}(pos, normalize(vel), cc)
-    end
-end
-
-function Particle(ic::AbstractVector{S}) where {S<:Real}
-    T = S<:Integer ? Float64 : S
-    φ0 = ic[3]
-    pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
-    return Particle(pos, vel, SVector{2,T}(0,0))
-end
-Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
-Particle() = Particle(rand(), rand(), rand()*2π)
-Particle(bt::Vector{<:Obstacle}) = randominside(bt)
-show(io::IO, p::Particle{T}) where {T} =
-print(io, "Particle {$T}\n",
-"position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
-
-"""
-    MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
-Two-dimensional particle in a billiard table with perpendicular magnetic field
-(mutable type).
-### Fields:
-* `pos::SVector{2,T}` : Current position vector.
-* `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
-* `current_cell::SVector{2,T}` : Current "cell" the particle is located at
-  (Used only in periodic billiards).
-* `omega::T` : Angular velocity (cyclic frequency) of rotational motion.
-  Radius of rotation is `r=1/omega`.
-### Additional constructors:
-```julia
-MagneticParticle(ic::AbstractVector{T}, ω::Real) #where ic = [x0, y0, φ0]
-MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
-MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
-MagneticParticle(bt::Vector{<:Obstacle}, ω) = randominside(bt, ω)
-```
-"""
-mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
-    pos::SVector{2,T}
-    vel::SVector{2,T}
-    current_cell::SVector{2,T}
-    omega::T
-    function MagneticParticle(pos::SVector{2,T}, vel::SVector{2,T},
-        current_cell::SVector{2,T}, ω::T) where {T<:AbstractFloat}
-        if ω==0
-            throw(ArgumentError("Angular velocity of magnetic particle cannot be 0."))
-        end
-        new{T}(pos, normalize(vel), current_cell, ω)
-    end
-end
-
-function MagneticParticle(ic::AbstractVector{T}, ω::Real) where {T<:Real}
-    φ0 = ic[3]
-    S = T<:Integer ? Float64 : T
-    pos = SVector{2,S}(ic[1:2]); vel = SVector{2,S}(cos(φ0), sin(φ0))
-    return MagneticParticle(pos, vel, SVector{2,S}(0,0), convert(S,ω))
-end
-function MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
-    a = collect(promote(x0, y0, φ0, ω))
-    MagneticParticle(a[1:3], a[4])
-end
-MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
-MagneticParticle(bt::Vector{<:Obstacle}, ω) = randominside(bt, ω)
-
-show(io::IO, p::MagneticParticle{T}) where {T} =
-print(io, "Magnetic particle {$T}\n",
-"position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)\nang. velocity: $(p.omega)")
-
-
-"""
-    cyclotron(p::MagneticParticle, use_cell = false)
-Return center and radius of circular motion performed by the particle based on
-`p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
-"""
-function cyclotron(p::MagneticParticle{T}, use_cell = false) where {T}
-    ω = p.omega
-    pos = use_cell ? p.pos + p.current_cell : p.pos
-    c::SVector{2, T} = pos - (1/ω)*[p.vel[2], -p.vel[1]]
-    r = abs(1/ω)
-    return c, r
-end
-
-####################################################
-## Obstacles
-####################################################
 """
     Circular{T<:AbstractFloat} <: Obstacle{T}
 Circular obstacle supertype.
@@ -435,42 +318,6 @@ normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a
 normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
 ####################################################
-## Billiard Table
-####################################################
-function isperiodic(bt)::Bool
-    for obst in bt
-        typeof(obst) <: PeriodicWall && return true
-    end
-    return false
-end
-
-immutable BilliardTable{T, BT<:Tuple}
-    bt::BT
-end
-
-function BilliardTable(bt)
-    T = eltype(bt[1])
-    if typeof(bt) <: Tuple
-        return BilliardTable{T, typeof(bt)}(bt)
-    elseif typeof(bt) <: AbstractVector
-        tup = (bt...)
-        return BilliardTable{T, typeof(tup)}(tup)
-    else
-        throw(ArgumentError("Argument given to BilliardTable is not a container"))
-    end
-end
-
-getobstacle(bt::BilliardTable{T,S}, ::Val{N}) where {T,S,N} = bt.bt[N]
-
-
-ObstInd(::Val{N}) where {N} = SVector{1, Val{N}}(Val(N))
-#This doesn't work:
-getobstacle(bt::BilliardTable{T,S}, N::Int) where {T,S} =
-getobstacle(bt, ObstInd(Val(N)))
-
-getindex(bt::BilliardTable, i) = bt.bt[i]
-
-####################################################
 ## Distances
 ####################################################
 """
@@ -636,65 +483,3 @@ function cellsize(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
     end
     return xmin, ymin, xmax, ymax
 end
-
-
-"""
-    randominside(bt::Vector{<:Obstacle{T}}[, ω])
-Return a particle with correct (allowed) initial conditions inside the given
-billiard table defined by the vector `bt`. If supplied with a second argument the
-type of the returned particle is `MagneticParticle`, with angular velocity `ω` (unless
-`ω` is 0). Else, it is `Particle`.
-"""
-function randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
-    xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bt)
-    f = T(rand())
-    while f == 0 || f==1/4 || f==1/2 || f == 3/4
-        f = T(rand())
-    end
-    φ0 = T(f*2π)
-
-    xp = T(rand())*(xmax-xmin) + xmin
-    yp = T(rand())*(ymax-ymin) + ymin
-    p = Particle([xp, yp, φ0])
-
-    dist = distance_init(p, bt)
-    while dist <= sqrt(eps(T))
-
-        xp = T(rand())*(xmax-xmin) + xmin
-        yp = T(rand())*(ymax-ymin) + ymin
-        p.pos = SVector{2,T}(xp, yp)
-        dist = distance_init(p, bt)
-    end
-
-    return p
-end
-
-function randominside(ω::Real, bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
-    ω = convert(T, ω)
-    if ω == 0
-        return randominside(bt)
-    end
-
-    xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bt)
-    f = T(rand())
-    while f == 0 || f==1/4 || f==1/2 || f == 3/4
-        f = T(rand())
-    end
-    φ0 = T(f*2π)
-
-    xp = T(rand())*(xmax-xmin) + xmin
-    yp = T(rand())*(ymax-ymin) + ymin
-    p = MagneticParticle([xp, yp, φ0], ω)
-
-    dist = distance_init(p, bt)
-    while dist <= sqrt(eps(T))
-
-        xp = rand()*(xmax-xmin) + xmin
-        yp = rand()*(ymax-ymin) + ymin
-        p.pos = [xp, yp]
-        dist = distance_init(p, bt)
-    end
-
-    return p
-end
-randominside(bt::Vector{<:Obstacle{T}}, ω::Real) where {T} = randominside(ω, bt)
