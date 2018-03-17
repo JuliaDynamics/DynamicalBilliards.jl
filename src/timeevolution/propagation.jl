@@ -333,7 +333,7 @@ function evolve!(p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}}, t;
                 push!(rpos, rpos[end])
                 push!(rvel, rvel[end])
                 push!(rt, Inf)
-                return (rt, rpos, rvel, ω)
+                return (rt, rpos, rvel, p.omega)
             end
             #If not pinned, continue (do not write for PeriodicWall)
             continue

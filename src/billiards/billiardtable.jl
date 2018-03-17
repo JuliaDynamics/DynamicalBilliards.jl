@@ -81,8 +81,10 @@ Return a particle with allowed initial conditions inside the given
 billiard table. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
 """
-randominside(bt) = Particle(_randominside(bt)..., 2π*rand())
-randominside(bt, ω) = MagneticParticle(_randominside(bt)..., 2π*rand(), ω)
+randominside(bt::Vector{<:Obstacle{T}}) where {T} =
+    Particle(_randominside(bt)..., T(2π*rand()))
+randominside(bt::Vector{<:Obstacle{T}}, ω) where {T} =
+    MagneticParticle(_randominside(bt)..., T(2π*rand()), T(ω))
 
 function _randominside(bt::Vector{<:Obstacle{T}}) where {T<:AbstractFloat}
     xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bt)

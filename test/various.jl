@@ -6,12 +6,12 @@ tim = time()
 @testset "Type Stability: Random Sinai" begin
     Floats = [Float16, Float32, Float64, BigFloat]
     r = 0.25; x = y = 1.0
-    @testset "Type: $(T), ω = $(ω)" for T ∈ Floats, ω ∈ [0, 1]
+    @testset "Type: $(T), ω = $(ω)" for T ∈ Floats, ω ∈ [0.0, 1.0]
         bt = billiard_sinai(T(r), T(x), T(y), setting = "random")
         for obst in bt
             @test eltype(obst) == T
         end
-        p = randominside(bt, T(ω))
+        p = ω == 0 ? randominside(bt) : randominside(bt, T(ω))
         if ω == 0
             @test typeof(p) <: Particle
         else
@@ -33,7 +33,7 @@ end#testset
         for obst in bt
             @test eltype(obst) == T
         end
-        p = randominside(bt, T(ω))
+        p = ω == 0 ? randominside(bt) : randominside(bt, T(ω))
         if ω == 0
             @test typeof(p) <: Particle
         else
