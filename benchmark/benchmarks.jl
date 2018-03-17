@@ -6,7 +6,7 @@ bt = billiard_mushroom()
 bt2 = billiard_sinai(;setting="periodic")
 particles = [Particle(0.05, 0.05, -0.1), MagneticParticle(0.05,0.05,-0.1,1.0)]
 ptypes = ["straight", "magnetic"]
-colf = (collisiontime, next_collision, DynamicalBilliards.bounce!)
+colf = (collisiontime, next_collision, DynamicalBilliards.bounce!, resolvecollision!)
 name = (f) -> split(string(f), '.')[end]
 
 for f in colf
@@ -35,5 +35,14 @@ for (f, p) in zip(["straight", "magnetic"], particles)
         ploc = deepcopy(p) #location mutation screws up tests for different bts
         SUITE["bounce!"][f][bname] =
             @benchmarkable DynamicalBilliards.bounce!($ploc, $bil)
+    end
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    #this is slightly redundant as resolvecollision! is indepent of particle type
+    for o in chain(bt, bt2)
+        ploc = deepcopy(p)
+        SUITE["resolvecollision!"][f][o.name] =
+            @benchmarkable resolvecollision!($ploc, $o)
     end
 end
