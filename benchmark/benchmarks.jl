@@ -5,8 +5,13 @@ const SUITE = BenchmarkGroup(["DynamicalBilliards"])
 bt = billiard_mushroom()
 bt2 = billiard_sinai(;setting="periodic")
 particles = [Particle(0.05, 0.05, -0.1), MagneticParticle(0.05,0.05,-0.1,1.0)]
+proptime = 4.2
 ptypes = ["straight", "magnetic"]
-colf = (collisiontime, next_collision, DynamicalBilliards.bounce!, resolvecollision!)
+colf = (collisiontime,
+        next_collision,
+        DynamicalBilliards.bounce!, #not exported
+        resolvecollision!,
+        propagate!)
 name = (f) -> split(string(f), '.')[end]
 
 for f in colf
@@ -38,11 +43,17 @@ for (f, p) in zip(["straight", "magnetic"], particles)
     end
 end
 
-for (f, p) in zip(["straight", "magnetic"], particles)
-    #this is slightly redundant as resolvecollision! is indepent of particle type
+let (f, p) = ("straight", particles[1])
+    #resolvecollision! is indepent of particle type
     for o in chain(bt, bt2)
         ploc = deepcopy(p)
         SUITE["resolvecollision!"][f][o.name] =
             @benchmarkable resolvecollision!($ploc, $o)
     end
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    ploc = deepcopy(p)
+    SUITE["propagate!"][f] =
+        @benchmarkable propagate!($ploc, $proptime)
 end
