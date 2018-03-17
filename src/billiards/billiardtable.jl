@@ -2,7 +2,7 @@ export BilliardTable, randominside, isperiodic
 #######################################################################################
 ## Billiard Table
 #######################################################################################
-immutable BilliardTable{T, BT<:Tuple}
+struct BilliardTable{T, BT<:Tuple}
     bt::BT
 end
 
