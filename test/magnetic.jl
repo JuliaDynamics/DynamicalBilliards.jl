@@ -10,7 +10,7 @@ tim = time()
             c = bt[5].c
             tt=1000.0
             for i in 1:partnum
-                p = randominside(ω, bt)
+                p = randominside(bt, ω)
 
                 t, poss, vels,  = evolve!(p, bt, tt)
                 @test t[end] != Inf
@@ -54,7 +54,7 @@ tim = time()
             minddist = min(x, y)
 
             for i in 1:partnum
-                p = randominside(ω, bt)
+                p = randominside(bt, ω)
                 ts, poss, vels = evolve!(p, bt, tt)
 
                 @test ts[end] != Inf
@@ -85,7 +85,7 @@ end#testset
     minddist = min(x, y)
 
     for i in 1:1
-        p = randominside(ω, bt)
+        p = randominside(bt, ω)
         ts, poss, vels = evolve!(p, bt, tt)
         @test eltype(poss[1]) == BigFloat
 

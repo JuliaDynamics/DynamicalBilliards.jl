@@ -4,7 +4,6 @@ export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
 billiard_mushroom, billiard_bunimovich
 
-const SV = SVector{2}
 ####################################################
 ## Famous/Standard Billiards
 ####################################################

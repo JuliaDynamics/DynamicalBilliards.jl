@@ -1,7 +1,25 @@
 # v2.0
 
+## Currently WIP
+* Fixed many instances of broadcasting with static vectors (which is bad).
+* Reduced a lot of allocations done all over the place (currently WIP).
+* Now have a quite useful geometry file.
+
+## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module.
+* Re-organized all source code into a much more readable state, and as a result
+  significantly reduced the total lines of code.
+* added `evolve` function that simply deepcopies particle.
+* new function `bounce!` that propagates a particle from one collision to the
+  next. In essense does what `evolve!` does with `t=1`, but without creating a bunch
+  of saving stuff.
+
+## Syntax changes
+
+* `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
+  multiple dispatch and reduce code repetition.
+
 
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0

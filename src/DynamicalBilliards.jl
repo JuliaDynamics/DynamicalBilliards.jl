@@ -10,15 +10,25 @@ fast implementation of billiard systems of arbitrary construction.
 module DynamicalBilliards
 
 using StaticArrays
-import Base.show
+import Base: show, eltype, getindex
+
+const SV = SVector{2}
 
 ##########################################
 # Core                                   #
 ##########################################
-include("particles_obstacles.jl")
-include("propagation.jl")
+include("geometry.jl")
+
+include("billiards/particles.jl")
+include("billiards/obstacles.jl")
+include("billiards/billiardtable.jl")
+include("billiards/standard_billiards.jl")
+
+include("timeevolution/collisiontimes.jl")
+include("timeevolution/propagation.jl")
+
 include("raysplitting.jl")
-include("standard_billiards.jl")
+
 include("lyapunov_spectrum.jl")
 
 ##########################################
