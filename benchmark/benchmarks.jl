@@ -10,7 +10,7 @@ proptime = 4.2
 ptypes = ["straight", "magnetic"]
 colf = (collisiontime,
         next_collision,
-        DynamicalBilliards.bounce!, #not exported
+        bounce!, #not exported
         resolvecollision!,
         propagate!)
 name = (f) -> split(string(f), '.')[end]
@@ -40,7 +40,7 @@ for (f, p) in zip(["straight", "magnetic"], particles)
     for (bname, bil) in zip(["mushroom", "psinai"], (bt, bt2))
         ploc = deepcopy(p) #location mutation screws up tests for different bts
         SUITE["bounce!"][f][bname] =
-            @benchmarkable DynamicalBilliards.bounce!($ploc, $bil)
+            @benchmarkable bounce!($ploc, $bil)
     end
 end
 
