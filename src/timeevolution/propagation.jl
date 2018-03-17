@@ -8,14 +8,24 @@ periodicity!, propagate_pos, next_collision, escapetime, relocate!
 const sixsqrt = 6sqrt(2)
 
 # Used in relocate:
-@inline timeprec(::AbstractParticle{T} ::Obstacle{T}) where {T} = eps(T)^(4/5)
+# @inline timeprec(::AbstractParticle{T}, ::Obstacle{T}) where {T} = eps(T)^(4/5)
+# # This timeprec cannot be used for PeriodWall and RaySplitting obstacles with
+# # MagneticParticle because when mangetic and relocating forward you get
+# # extremely shallow angles
+# # and you need huge changes in time for even tiny changes in position
+# @inline timeprec(p::MagneticParticle, o::PeriodicWall) = timeprec_forward(p, o)
+# @inline timeprec_forward(::MagneticParticle{T}, ::Obstacle{T}) where {T} = eps(T)^(3/4)
+# @inline timeprec_forward(::MagneticParticle{BigFloat}, ::Obstacle) = BigFloat(1e-12)
+
+# Used in relocate:
+@inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
+
 # This timeprec cannot be used for PeriodWall and RaySplitting obstacles with
-# MagneticParticle because when mangetic and relocating forward you get
-# extremely shallow angles
+# MagneticParticle
+# because when mangetic and relocating forward you get extremely shallow angles
 # and you need huge changes in time for even tiny changes in position
-@inline timeprec(::MagneticParticle{T}, ::PeriodicWall{T}) where {T} = eps(T)^(3/4)
-@inline timeprec(::MagneticParticle{BigFloat}, ::PeriodicWall{BigFloat}) =
-    BigFloat(1e-12)
+@inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
+@inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
 
 
 # Used in check of skip intersection, in `realangle` and collision with Semicircle:
@@ -83,8 +93,8 @@ This is the ray-splitting implementation. The three functions given are drawn fr
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-resolvecollision!(p::AbstractParticle, o::Obstacle)::Void = specular!(p, o)
-resolvecollision!(p::AbstractParticle, o::PeriodicWall)::Void =  periodicity!(p, o)
+resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
+resolvecollision!(p::AbstractParticle, o::PeriodicWall) = periodicity!(p, o)
 
 """
     relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
@@ -101,7 +111,7 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
     while distance(newpos, o) < 0
-        tmin -= i*timeprec_sign(o)*timeprec(p, o)
+        tmin -= i*timeprec(T)
         newpos = propagate_pos(p.pos, p, tmin)
         i *= 10
     end
@@ -109,8 +119,55 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
     return tmin
 end
 
-timeprec_sign(::Obstacle) = +1
-timeprec_sign(::PeriodicWall) = -1
+function relocate!(p::AbstractParticle{T}, o::PeriodicWall{T}, tmin) where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
+    while distance(newpos, o) > 0
+        tmin += i*timeprec(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
+    end
+    propagate!(p, newpos, tmin)
+    return tmin
+end
+
+function relocate!(p::MagneticParticle{T}, o::Obstacle{T}, tmin) where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
+    while distance(newpos, o) < 0
+        tmin -= i*timeprec(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
+    end
+    propagate!(p, newpos, tmin)
+    return tmin
+end
+
+function relocate!(p::MagneticParticle{T}, o::PeriodicWall{T}, tmin) where {T}
+    newpos = propagate_pos(p.pos, p, tmin)
+    i = 1
+    while distance(newpos, o) > 0
+        tmin += i*timeprec_forward(T)
+        newpos = propagate_pos(p.pos, p, tmin)
+        i *= 10
+    end
+    propagate!(p, newpos, tmin)
+    return tmin
+end
+# function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
+#     newpos = propagate_pos(p.pos, p, tmin)
+#     i = 1
+#     while distance(newpos, o) < 0
+#         tmin -= i*timeprec_sign(o)*timeprec(p, o)
+#         newpos = propagate_pos(p.pos, p, tmin)
+#         i *= 10
+#     end
+#     propagate!(p, newpos, tmin)
+#     return tmin
+# end
+#
+# timeprec_sign(::Obstacle) = +1
+# timeprec_sign(::PeriodicWall) = -1
 
 
 
@@ -133,7 +190,7 @@ particle should end up at.
 propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
 propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
-function propagate!(p::MagneticParticle{T}, t)::Void where {T}
+function propagate!(p::MagneticParticle{T}, t::Real)::Void where {T}
     ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
     p.pos += SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
     p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
@@ -206,29 +263,23 @@ Return the states of the particle between collisions.
 The evolution takes into account the particle's Type.
 E.g. if `typeof(p) <: MagneticParticle` then magnetic evolution will take place.
 
-### Return
-As noted by the "!" at the end of the function, the call changes
-`p` (particle). Most importantly however, this function also returns the main output
-expected by a billiard system. This output is a tuple of 3 (or 4) vectors:
+This function mutates the particle, use [`evolve`](@ref) otherwise.
+
+### Returns
 
 * `ct::Vector{T}` : Collision times.
 * `poss::Vector{SVector{2,T}}` : Positions during collisions.
 * `vels::Vector{SVector{2,T}})` : Velocities **exactly after** the collisions.
-* `ω`, either `T` or `Vector{T}` : Angular velocity/ies.
+* `ω`, either `T` or `Vector{T}` : Angular velocity/ies (returned only for magnetic).
 
-In the case of straight propagation, only the first 3 are returned.
-In the case of magnetic propagation, the 4th value is returned as well.
-This is either the angular velocity of the particle, or in the case of
-ray-splitting it is a vector of the angular velocities at each time step.
-
-The time `ct[i]` is the time necessary to reach state `poss[i+1], vels[i+1]` starting
+The time `ct[i+1]` is the time necessary to reach state `poss[i+1], vels[i+1]` starting
 from the state `poss[i], vels[i]`. That is why `ct[1]` is always 0 since
 `poss[1], vels[1]` are the initial conditions. The angular velocity `ω[i]` is the one
 the particle has while propagating from state `poss[i], vels[i]` to `i+1`.
 
 Notice that at any point, the velocity vector `vels[i]` is the one obtained **after**
-the specular reflection of the (i-1)th collision.
-The function `construct` takes that into account.
+the specular reflection of the `i-1`th collision.
+The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
 To implement ray-splitting, the `evolve!()` function is supplemented with a
@@ -242,12 +293,15 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:AbstractFloat}
+function evolve!(p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}}, t;
+    warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
 
+    ismagnetic = typeof(p) <: MagneticParticle
+    ismagnetic && (absω = abs(p.omega))
     rt = T[]
     rpos = SVector{2,T}[]
     rvel = SVector{2,T}[]
@@ -264,56 +318,17 @@ function evolve!(p::Particle{T}, bt::Vector{<:Obstacle{T}}, t) where {T<:Abstrac
         i, tmin, pos, vel = bounce!(p, bt)
         t_to_write += tmin
 
-        if typeof(bt[i]) <: PeriodicWall
-            continue # do not write output if collision with PeriodicWall
-        else
-            push!(rpos, pos + p.current_cell)
-            push!(rvel, vel)
-            push!(rt, t_to_write)
-            # set counter
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
-        end
-    end#time, or collision number, loop
-    return rt, rpos, rvel
-end
-
-function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
-    t; warning::Bool = false) where {T<:AbstractFloat}
-
-    if t ≤ 0
-        throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
-    end
-
-    ω = p.omega
-    absω = abs(ω)
-    rt = T[]
-    rpos = SVector{2,T}[]
-    rvel = SVector{2,T}[]
-    push!(rpos, p.pos)
-    push!(rvel, p.vel)
-    push!(rt, zero(T))
-
-    count = zero(t)
-    t_to_write = zero(T)
-
-    while count < t
-        # Declare these because `bt` is of un-stable type!
-        i, tmin, pos, vel = bounce!(p, bt)
-        t_to_write += tmin
-
-        if tmin == Inf
-            warning && warn("Pinned particle in evolve! (Inf col t)")
+        if ismagnetic && tmin == Inf
+            warning && warn("Pinned particle in evolve! (Inf. col. t)")
             push!(rpos, pos)
             push!(rvel, vel)
             push!(rt, tmin)
-            return rt, rpos, rvel, ω
+            return (rt, rpos, rvel, p.omega)
         end
 
-        # Write output only if the collision was not made with PeriodicWall
         if typeof(bt[i]) <: PeriodicWall
             # Pinned particle:
-            if t_to_write ≥ 2π/absω
+            if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")
                 push!(rpos, rpos[end])
                 push!(rvel, rvel[end])
@@ -323,15 +338,16 @@ function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
             #If not pinned, continue (do not write for PeriodicWall)
             continue
         else
-            push!(rpos, p.pos + p.current_cell)
-            push!(rvel, p.vel)
+            push!(rpos, pos + p.current_cell)
+            push!(rvel, vel)
             push!(rt, t_to_write)
-            # set counting variable
+            # set counter
             count += increment_counter(t, t_to_write)
             t_to_write = zero(T)
         end
-    end#time loop
-    return (rt, rpos, rvel, ω)
+    end#time, or collision number, loop
+
+    return ismagnetic ? (rt, rpos, rvel, p.omega) : (rt, rpos, rvel)
 end
 
 """
@@ -341,7 +357,7 @@ Same as [`evolve!`](@ref) but deep-copies the particle instead.
 evolve(p, args...) = evolve!(deepcopy(p), args...)
 
 """
-    construct(ct, poss, vels[, ω][, dt=0.01])
+    construct(ct, poss, vels[, ω][, dt=0.01]) -> xt, yt, vxt, vyt, t
 Given the main output of the `evolve!()` function, construct the
 timeseries of the position and velocity, as well as the time vector.
 
