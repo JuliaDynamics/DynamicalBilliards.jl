@@ -5,6 +5,7 @@ const SUITE = BenchmarkGroup(["DynamicalBilliards"])
 bt = billiard_mushroom()
 bt2 = billiard_sinai(;setting="periodic")
 particles = [Particle(0.05, 0.05, -0.1), MagneticParticle(0.05,0.05,-0.1,1.0)]
+obstacles = [bt[1], bt[6], bt2[1], bt2[5]] #distinct obstacles for resolvecollision! tests
 proptime = 4.2
 ptypes = ["straight", "magnetic"]
 colf = (collisiontime,
@@ -45,7 +46,7 @@ end
 
 let (f, p) = ("straight", particles[1])
     #resolvecollision! is indepent of particle type
-    for o in chain(bt, bt2)
+    for o in obstacles
         ploc = deepcopy(p)
         SUITE["resolvecollision!"][f][o.name] =
             @benchmarkable resolvecollision!($ploc, $o)
