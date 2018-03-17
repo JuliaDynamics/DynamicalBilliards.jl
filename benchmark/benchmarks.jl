@@ -1,0 +1,60 @@
+using BenchmarkTools, DynamicalBilliards, IterTools
+
+
+const SUITE = BenchmarkGroup(["DynamicalBilliards"])
+bt = billiard_mushroom()
+bt2 = billiard_sinai(;setting="periodic")
+particles = [Particle(0.05, 0.05, -0.1), MagneticParticle(0.05,0.05,-0.1,1.0)]
+obstacles = [bt[1], bt[6], bt2[1], bt2[5]] #distinct obstacles for resolvecollision! tests
+proptime = 4.2
+ptypes = ["straight", "magnetic"]
+colf = (collisiontime,
+        next_collision,
+        bounce!, #not exported
+        resolvecollision!,
+        propagate!)
+name = (f) -> split(string(f), '.')[end]
+
+for f in colf
+    SUITE[name(f)] = BenchmarkGroup(["propagation", "collision"])
+    for ptype ∈ ptypes
+        SUITE[name(f)][ptype] = BenchmarkGroup(["propagation", "collision", ptype])
+    end
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    for o in chain(bt, bt2)
+        SUITE["collisiontime"][f][o.name] =
+            @benchmarkable collisiontime($p, $o)
+    end
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    for (bname, bil) in zip(["mushroom", "psinai"], (bt, bt2))
+        SUITE["next_collision"][f][bname] =
+            @benchmarkable next_collision($p, $bil)
+    end
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    for (bname, bil) in zip(["mushroom", "psinai"], (bt, bt2))
+        ploc = deepcopy(p) #location mutation screws up tests for different bts
+        SUITE["bounce!"][f][bname] =
+            @benchmarkable bounce!($ploc, $bil)
+    end
+end
+
+let (f, p) = ("straight", particles[1])
+    #resolvecollision! is indepent of particle type
+    for o in obstacles
+        ploc = deepcopy(p)
+        SUITE["resolvecollision!"][f][o.name] =
+            @benchmarkable resolvecollision!($ploc, $o)
+    end
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    ploc = deepcopy(p)
+    SUITE["propagate!"][f] =
+        @benchmarkable propagate!($ploc, $proptime)
+end
