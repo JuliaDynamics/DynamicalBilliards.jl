@@ -220,7 +220,6 @@ close to the obstacle's boundaries, due to floating-point precision.
 (the cyclotron center `pc` and radius `pr` are suplimented for efficiency, since they
 have been calculated already)
 """
-realangle(p, o, I1, I2) = realangle(p, o, I1, I2, cyclotron(p)...)
 function realangle(p::MagneticParticle{T}, o::Obstacle{T},
     pc::SVector{2, T}, pr::T, Ii::Vararg{SV{T}})::T where {T}
 
