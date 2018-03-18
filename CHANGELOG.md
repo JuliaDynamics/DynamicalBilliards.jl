@@ -7,6 +7,9 @@
   * Utilized the `Unrolled` package and other kind of stability features that
     make most of the functions of `DynamicalBilliards` non-allocating!
 
+* `animate_evolution` now does not have `!` at the end, because it deepcopies the
+  particle.
+
 ## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module.
@@ -14,7 +17,7 @@
   significantly reduced the total lines of code.
 * added `evolve` function that simply deepcopies particle.
 * new function `bounce!` that propagates a particle from one collision to the
-  next. In essense does what `evolve!` does with `t=1`, but without creating a bunch
+  next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
   of saving stuff.
 
 ## Syntax changes
