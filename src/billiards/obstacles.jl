@@ -330,6 +330,15 @@ assumed to be very close to the obstacle's boundary).
 ## Distances
 #######################################################################################
 """
+    project_to_line(point, c, n)
+Project given `point` to line that contains point `c` and has **normal vector** `n`.
+"""
+@inline function project_to_line(point, c, n)
+    posdot = dot(c - point, n)
+    intersection = point + posdot*n
+end
+
+"""
     distance(p::AbstractParticle, o::Obstacle)
 Return the **signed** distance between particle `p` and obstacle `o`, based on
 `p.pos`. Positive distance corresponds to the particle being on the *allowed* region

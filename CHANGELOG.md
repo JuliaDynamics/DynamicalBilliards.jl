@@ -1,9 +1,11 @@
 # v2.0
 
 ## Currently WIP
-* Fixed many instances of broadcasting with static vectors (which is bad).
-* Reduced a lot of allocations done all over the place (currently WIP).
-* Now have a quite useful geometry file.
+* **2 to 3 orders of magnitude performance gains on all functions!!!**
+  * Reduced a lot of allocations done all over the place.
+  * Fixed many instances of broadcasting with static vectors (which is bad).
+  * Utilized the `Unrolled` package and other kind of stability features that
+    make most of the functions of `DynamicalBilliards` non-allocating!
 
 ## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through

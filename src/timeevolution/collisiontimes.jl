@@ -195,8 +195,8 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     cond2 = dot(I2-o.c, o.facedir) < 0
     if cond1 || cond2
         # Calculate real angle until intersection:
-        θ1 = cond1 ? realangle(p, o, rc, pr, I1) : T(Inf)
-        θ2 = cond2 ? realangle(p, o, rc, pr, I2) : T(Inf)
+        θ1 = cond1 ? realangle(p, o, pc, rc, I1) : T(Inf)
+        θ2 = cond2 ? realangle(p, o, pc, rc, I2) : T(Inf)
         # Collision time, equiv. to arc-length until collision point:
         return min(θ1, θ2)*rc
     else
