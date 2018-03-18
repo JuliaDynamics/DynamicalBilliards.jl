@@ -1,5 +1,7 @@
 export collisiontime
-
+#######################################################################################
+## Particle
+#######################################################################################
 """
     collisiontime(p::AbstractParticle, o::Obstacle)
 Calculate the collision time (time-until-collision) between given
@@ -110,7 +112,9 @@ end
 
 
 
-
+#######################################################################################
+## Magnetic particle
+#######################################################################################
 function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     ω = p.omega
     pc, pr = cyclotron(p)
@@ -130,13 +134,16 @@ function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     cond1 = (0.0 ≤ u1 ≤ 1.0)
     cond2 = (0.0 ≤ u2 ≤ 1.0)
     # Check if the line is completely inside the circle:
-    !cond1 && !cond2 && return Inf
-    # Calculate intersection points:
-    intersections = SVector{2, T}[]
-    cond1 && push!(intersections, w.sp + u1*(w.ep - w.sp))
-    cond2 && push!(intersections, w.sp + u2*(w.ep - w.sp))
-    # Calculate real time until intersection:
-    θ = realangle(p, w, intersections, pc, pr)
+    if cond1 || cond2
+        I1 = w.sp + u1*(w.ep - w.sp)
+        I2 = w.sp + u2*(w.ep - w.sp)
+        # Calculate real time until intersection:
+        θ = cond1 ? (
+            cond2 ? realangle(p, w, pc, pr, I1, I2) : realangle(p, w, pc, pr, I1)
+            ) : realangle(p, w, pc, pr, I2)
+    else
+        return Inf
+    end
     # Collision time, equiv. to arc-length until collision point:
     return θ*pr
 end
@@ -161,7 +168,7 @@ function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
     pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
     pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
     # Calculate real time until intersection:
-    θ = realangle(p, o, [I1, I2], pc, rc)
+    θ = realangle(p, o, pc, rc, I1, I2)
     # Collision time, equiv. to arc-length until collision point:
     return θ*rc
 end
@@ -186,28 +193,26 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
     pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
     # Only consider intersections on the "correct" side of Semicircle:
-    II = SVector{2,T}[]
-    if dot(I1-o.c, o.facedir) < 0 #intersection 1 is OUT
-        push!(II, I1)
-    end
-    if dot(I2-o.c, o.facedir) < 0
-        push!(II, I2)
-    end
-    if length(II) == 0
+    cond1 = dot(I1-o.c, o.facedir) < 0
+    cond2 = dot(I2-o.c, o.facedir) < 0
+    if cond1 || cond2
+        # Calculate real time until intersection:
+        θ = cond1 ? (
+            cond2 ? realangle(p, o, pc, rc, I1, I2) : realangle(p, o, pc, rc, I1)
+            ) : realangle(p, o, pc, rc, I2)
+    else
         return Inf
     end
-    # Calculate real time until intersection:
-    θ = realangle(p, o, II, pc, rc)
     # Collision time, equiv. to arc-length until collision point:
     return θ*rc
 end
 
 """
-    realangle(p::MagneticParticle, o::Obstacle, inter::Vector{SVector}, pc, pr)
-Given the intersections `inter` of the trajectory of a magnetic particle `p` with
-some obstacle `o`, find which of the two is the "real" one, i.e. occurs first.
+    realangle(p::MagneticParticle, o::Obstacle, pc, pr, Ii...)
+Given the intersections `Ii...` of the trajectory of a magnetic particle `p` with
+some obstacle `o`, find which of them is the the "real" one, i.e. occurs first.
 Returns the angle of first collision, which is equal to the time to first
-collision divided by ω.
+collision divided by ω (or multiplied by r).
 
 The function also takes care of problems that may arise when particles are very
 close to the obstacle's boundaries, due to floating-point precision.
@@ -215,14 +220,15 @@ close to the obstacle's boundaries, due to floating-point precision.
 (the cyclotron center `pc` and radius `pr` are suplimented for efficiency, since they
 have been calculated already)
 """
+realangle(p, o, I1, I2) = realangle(p, o, I1, I2, cyclotron(p)...)
 function realangle(p::MagneticParticle{T}, o::Obstacle{T},
-    intersections::Vector{SVector{2, T}}, pc::SVector{2, T}, pr::T)::T where {T}
+    pc::SVector{2, T}, pr::T, Ii::Vararg{SV{T}})::T where {T}
 
     ω = p.omega
     P0 = p.pos
     PC = pc - P0
     θ::T = Inf
-    for i in intersections
+    for i in Ii
         d2 = dot(i-P0,i-P0) #distance of particle from intersection point
         # Check dot product for close points:
         if d2 ≤ distancecheck(T)
