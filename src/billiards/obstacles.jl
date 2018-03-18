@@ -387,10 +387,10 @@ end
 
 
 
-# Distances for randominside:
-distance_init(p::AbstractParticle, a) = distance_init(p.pos, a)
-distance_init(pos::SVector, a) = distance(pos, a)
-
+# The entire functionality of `distance_init` is necessary only for
+# FiniteWall !!!
+distance_init(p::AbstractParticle, a::Obstacle) = distance_init(p.pos, a)
+distance_init(pos::SVector, a::Obstacle) = distance(pos, a)
 function distance_init(pos::SVector, v::Vector{<:Obstacle{T}})::T where {T}
     d = T(Inf)
     for obst in v
@@ -420,7 +420,6 @@ end
 ####################################################
 ## Initial Conditions
 ####################################################
-
 """
     cellsize(bt)
 Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard table.

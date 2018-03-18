@@ -10,6 +10,7 @@ fast implementation of billiard systems of arbitrary construction.
 module DynamicalBilliards
 
 using StaticArrays
+using Unrolled
 import Base: show, eltype, getindex
 
 const SV = SVector{2}
@@ -49,7 +50,7 @@ end
 ####################################################
 using Requires
 @require PyPlot begin
-    dir = joinpath(dirname(@__FILE__), "plotting")
+    dir = joinpath(@__DIR__, "plotting")
     for f in readdir(dir)
         include(joinpath(dir, f))
     end

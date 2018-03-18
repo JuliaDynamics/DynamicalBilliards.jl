@@ -248,3 +248,58 @@ function realangle(p::MagneticParticle{T}, o::Obstacle{T},
     end
     return θ
 end
+
+
+
+#######################################################################################
+## next_collision
+#######################################################################################
+"""
+    next_collision(p, bt) -> (tmin, index)
+Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
+as well as the `index` of the corresponding obstacle.
+"""
+function next_collision(
+    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+    findmin(Unrolled.unrolled_map(x -> collisiontime(p, x), bt))
+end
+
+next_collision(p::AbstractParticle, bt::BilliardTable) = next_collision(p, bt.bt)
+
+function next_collision(
+    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::Tuple{T,Int} where {T}
+    tmin::T = T(Inf)
+    ind::Int = 0
+    for i in eachindex(bt)
+        tcol::T = collisiontime(p, bt[i])
+        # Set minimum time:
+        if tcol < tmin
+            tmin = tcol
+            ind = i
+        end
+    end#obstacle loop
+    return tmin, ind
+end
+
+### OTher attempts:
+# function next_collision(
+#     p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+#     findmin(map(x -> collisiontime(p, x), bt))
+# end
+#
+# using Unrolled
+# @unroll function next_collision2(p::AbstractParticle{T}, bt::Tuple) where {T}
+#     tmin::T = T(Inf)
+#     ind::Int = 0
+#     i::Int = 0
+#     @unroll for obst in bt
+#         tcol::T = collisiontime(p, obst)
+#         i+=1
+#         # Set minimum time:
+#         if tcol < tmin
+#             tmin = tcol
+#             ind = i
+#         end
+#     end#obstacle loop
+#     return tmin, ind
+# end
