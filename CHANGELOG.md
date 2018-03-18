@@ -19,7 +19,7 @@
 
 * `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
   multiple dispatch and reduce code repetition.
-
+* `realangle` now only takes one intersection and simply returns the real angle.
 
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0
