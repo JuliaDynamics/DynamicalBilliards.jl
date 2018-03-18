@@ -28,26 +28,22 @@ isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)
 #######################################################################################
 ## Distances
 #######################################################################################
-distance(p::AbstractParticle, bt::BilliardTable) = distance(p.pos, bt.bt)
-distance_init(p::AbstractParticle, bt::BilliardTable) = distance_init(p.pos, bt.bt)
-
-@unroll function distance_init(p::SV{T}, bt::Tuple)::T where {T}
-    dmin::T = T(Inf)
-    @unroll for obst in bt
-        d::T = distance_init(p, obst)
-        d < dmin && (dmin = d)
-    end#obstacle loop
-    return dmin
-end
-@unroll function distance(p::SV{T}, bt::Tuple)::T where {T}
-    dmin::T = T(Inf)
-    @unroll for obst in bt
-        d::T = distance(p, obst)
-        d < dmin && (dmin = d)
-    end#obstacle loop
-    return dmin
+for f in (:distance, :distance_init)
+    @eval $(f)(p::AbstractParticle, bt::BilliardTable) = $(f)(p.pos, bt.bt)
 end
 
+for f in (:distance, :distance_init)
+    @eval begin
+        @unroll function ($f)(p::SV{T}, bt::Tuple)::T where {T}
+            dmin::T = T(Inf)
+            @unroll for obst in bt
+                d::T = distance(p, obst)
+                d < dmin && (dmin = d)
+            end#obstacle loop
+            return dmin
+        end
+    end
+end
 
 #######################################################################################
 ## randominside
