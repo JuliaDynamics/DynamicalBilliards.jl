@@ -104,10 +104,9 @@ print(io, "Magnetic particle {$T}\n",
 Return center and radius of circular motion performed by the particle based on
 `p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
 """
-function cyclotron(p::MagneticParticle{T}, use_cell = false) where {T}
-    ω = p.omega
+@inline function cyclotron(p::MagneticParticle{T}, use_cell = false) where {T}
+    ω = p.omega; r = 1/ω
     pos = use_cell ? p.pos + p.current_cell : p.pos
-    c::SVector{2, T} = pos - (1/ω)*[p.vel[2], -p.vel[1]]
-    r = abs(1/ω)
-    return c, r
+    c::SV{T} = pos - r*SV{T}(p.vel[2], -p.vel[1])
+    return c, abs(r)
 end

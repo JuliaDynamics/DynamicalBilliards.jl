@@ -49,20 +49,20 @@ Perform specular reflection based on the normal vector of the Obstacle.
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2+ε to π/2-ε of the normal vector).
 """
-function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Void where {T}
+@inline function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Void where {T}
     n = normalvec(o, p.pos)
     p.vel = p.vel - 2*dot(n, p.vel)*n
     return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T}
+@inline function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
     return nothing
 end
 
-function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T}
+@inline function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
@@ -73,7 +73,7 @@ end
     periodicity!(p::AbstractParticle, w::PeriodicWall)
 Perform periodicity conditions of `w` on `p`.
 """
-function periodicity!(p::AbstractParticle, w::PeriodicWall)::Void
+@inline function periodicity!(p::AbstractParticle, w::PeriodicWall)::Void
     p.pos += w.normal
     p.current_cell -= w.normal
     return nothing
@@ -89,8 +89,8 @@ This is the ray-splitting implementation. The three functions given are drawn fr
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
-resolvecollision!(p::AbstractParticle, o::PeriodicWall) = periodicity!(p, o)
+@inline resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
+@inline resolvecollision!(p::AbstractParticle, o::PeriodicWall) = periodicity!(p, o)
 
 """
     relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
@@ -137,16 +137,17 @@ is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
 Do the same, but take advantage of the already calculated `position` that the
 particle should end up at.
 """
-propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
-propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
+@inline propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
+@inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
-function propagate!(p::MagneticParticle{T}, t::Real)::Void where {T}
+@inline function propagate!(p::MagneticParticle{T}, t::Real)::Void where {T}
     ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
-    p.pos += SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
-    p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
+    sinωtφ = sin(ω*t + φ0); cosωtφ = cos(ω*t + φ0)
+    p.pos += SV{T}(sinωtφ/ω - sin(φ0)/ω, -cosωtφ/ω + cos(φ0)/ω)
+    p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
 end
-function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t)::Void where {T}
+@inline function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
     ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
     p.pos = newpos
     p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
@@ -158,10 +159,10 @@ end
 Perform a "fake" propagation, i.e. propagate a position as if it was the particle's
 position.
 """
-propagate_pos(pos, p::Particle{T}, t::Real) where {T} =
+@inline propagate_pos(pos, p::Particle{T}, t::Real) where {T} =
     SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t)
 
-function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
+@inline function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
     ω = p.omega
     φ0 = atan2(p.vel[2], p.vel[1])

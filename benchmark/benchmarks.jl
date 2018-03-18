@@ -10,9 +10,10 @@ proptime = 4.2
 ptypes = ["straight", "magnetic"]
 colf = (collisiontime,
         next_collision,
-        bounce!, #not exported
+        bounce!,
         resolvecollision!,
         propagate!)
+        
 name = (f) -> split(string(f), '.')[end]
 
 for f in colf

@@ -1,9 +1,14 @@
 # v2.0
 
 ## Currently WIP
-* Fixed many instances of broadcasting with static vectors (which is bad).
-* Reduced a lot of allocations done all over the place (currently WIP).
-* Now have a quite useful geometry file.
+* **2 to 3 orders of magnitude performance gains on all functions!!!**
+  * Reduced a lot of allocations done all over the place.
+  * Fixed many instances of broadcasting with static vectors (which is bad).
+  * Utilized the `Unrolled` package and other kind of stability features that
+    make most of the functions of `DynamicalBilliards` non-allocating!
+
+* `animate_evolution` now does not have `!` at the end, because it deepcopies the
+  particle.
 
 ## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through
@@ -12,14 +17,14 @@
   significantly reduced the total lines of code.
 * added `evolve` function that simply deepcopies particle.
 * new function `bounce!` that propagates a particle from one collision to the
-  next. In essense does what `evolve!` does with `t=1`, but without creating a bunch
+  next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
   of saving stuff.
 
 ## Syntax changes
 
 * `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
   multiple dispatch and reduce code repetition.
-
+* `realangle` now only takes one intersection and simply returns the real angle.
 
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0

@@ -18,8 +18,6 @@ const SV = SVector{2}
 ##########################################
 # Core                                   #
 ##########################################
-include("geometry.jl")
-
 include("billiards/particles.jl")
 include("billiards/obstacles.jl")
 include("billiards/billiardtable.jl")

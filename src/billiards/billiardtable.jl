@@ -11,15 +11,12 @@ function BilliardTable(bt)
     if typeof(bt) <: Tuple
         return BilliardTable{T, typeof(bt)}(bt)
     else
-        tup = (bt...)
+        tup = (bt...,)
         return BilliardTable{T, typeof(tup)}(tup)
     end
 end
 
 # Need to define iteration in billiard table (for obst in bt...)
-
-getobstacle(bt::BilliardTable{T,S}, ::Val{N}) where {T,S,N} = bt.bt[N]
-
 getindex(bt::BilliardTable, i) = bt.bt[i]
 
 isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)

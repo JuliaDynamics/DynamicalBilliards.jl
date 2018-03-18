@@ -318,16 +318,26 @@ show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 Return the vector normal to the obstacle's boundary at the given position (which is
 assumed to be very close to the obstacle's boundary).
 """
-normalvec(wall::Wall, pos) = wall.normal
-normalvec(w::PeriodicWall, pos) = normalize(w.normal)
-normalvec(w::SplitterWall, pos) = w.pflag ? w.normal : -w.normal
-normalvec(disk::Circular, pos) = normalize(pos - disk.c)
-normalvec(a::Antidot, pos) = a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
-normalvec(d::Semicircle, pos) = normalize(d.c - pos)
+@inline normalvec(wall::Wall, pos) = wall.normal
+@inline normalvec(w::PeriodicWall, pos) = normalize(w.normal)
+@inline normalvec(w::SplitterWall, pos) = w.pflag ? w.normal : -w.normal
+@inline normalvec(disk::Circular, pos) = normalize(pos - disk.c)
+@inline normalvec(a::Antidot, pos) =
+    a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
+@inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
 #######################################################################################
 ## Distances
 #######################################################################################
+"""
+    project_to_line(point, c, n)
+Project given `point` to line that contains point `c` and has **normal vector** `n`.
+"""
+@inline function project_to_line(point, c, n)
+    posdot = dot(c - point, n)
+    intersection = point + posdot*n
+end
+
 """
     distance(p::AbstractParticle, o::Obstacle)
 Return the **signed** distance between particle `p` and obstacle `o`, based on
@@ -354,7 +364,7 @@ end
 (distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
 distance(p.pos, obst)
 
-function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
+@inline function distance(pos::AbstractVector{T}, w::Wall{T})::T where {T}
     v1 = pos - w.sp
     dot(v1, normalvec(w, pos))
 end
@@ -363,20 +373,22 @@ end
 # has the necessary information to give the correct dinstance,
 # since the distance is calculated through the normalvec.
 
-distance(pos::AbstractVector{T}, d::Circular{T}) where {T} = norm(pos - d.c) - d.r
+@inline distance(pos::AbstractVector{T}, d::Circular{T}) where {T} =
+    norm(pos - d.c) - d.r
 
-function distance(
+@inline function distance(
     pos::AbstractVector{T}, a::Antidot{T}, pflag::Bool)::T where {T}
     d = norm(pos - a.c) - a.r
     a.pflag ? d : -d
 end
-distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} = distance(pos, a, a.pflag)
+@inline distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} =
+    distance(pos, a, a.pflag)
 
 function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     # Check on which half of circle is the particle
     v1 = pos .- s.c
     nn = dot(v1, s.facedir)
-    if nn ≤ 0 # I am "inside semicircle
+    if nn ≤ 0 # I am "inside" semicircle
         return s.r - norm(pos - s.c)
     else # I am on the "other side"
         end1 = SV(s.c[1] + s.r*s.facedir[2], s.c[2] - s.r*s.facedir[1])
