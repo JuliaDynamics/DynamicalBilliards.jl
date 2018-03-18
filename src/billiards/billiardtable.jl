@@ -17,9 +17,6 @@ function BilliardTable(bt)
 end
 
 # Need to define iteration in billiard table (for obst in bt...)
-
-getobstacle(bt::BilliardTable{T,S}, ::Val{N}) where {T,S,N} = bt.bt[N]
-
 getindex(bt::BilliardTable, i) = bt.bt[i]
 
 isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)
