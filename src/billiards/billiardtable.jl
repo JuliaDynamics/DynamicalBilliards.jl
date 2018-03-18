@@ -11,7 +11,7 @@ function BilliardTable(bt)
     if typeof(bt) <: Tuple
         return BilliardTable{T, typeof(bt)}(bt)
     else
-        tup = (bt...)
+        tup = (bt...,)
         return BilliardTable{T, typeof(tup)}(tup)
     end
 end
