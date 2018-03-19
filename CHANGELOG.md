@@ -7,9 +7,6 @@
   * Utilized the `Unrolled` package and other kind of stability features that
     make most of the functions of `DynamicalBilliards` non-allocating!
 
-* `animate_evolution` now does not have `!` at the end, because it deepcopies the
-  particle.
-
 ## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module.
@@ -25,7 +22,9 @@
 * `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
   multiple dispatch and reduce code repetition.
 * `realangle` now only takes one intersection and simply returns the real angle.
-
+* `animate_evolution` now does not have `!` at the end, because it deepcopies the
+  particle.
+  
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0
 

@@ -1,9 +1,9 @@
 using PyPlot
-export animate_evolution!
+export animate_evolution
 
 """
 ```julia
-animate_evolution!(p, bt, colnumber[, ray-splitter]; kwargs...)
+animate_evolution(p, bt, colnumber[, ray-splitter]; kwargs...)
 ```
 Animate the evolution of the particle, plotting the orbit from collision to collision.
 
@@ -29,10 +29,11 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
   * `savename` : Name (*including path*) of the figures to be produced. The ending
     "\_i.png" will be attached to all figures.
 """
-function animate_evolution!(p::AbstractParticle, bt, colnumber, raysplit = Dict();
+function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict();
     sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
     particle_kwargs = nothing, orbit_kwargs = nothing, newfig = true)
 
+    p = deepcopy(par)
     if newfig == true
         fig = figure()
         plot_billiard(bt)
