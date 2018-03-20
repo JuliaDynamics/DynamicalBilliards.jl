@@ -69,7 +69,7 @@ function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
     else
         throw(ArgumentError("The given setting=$setting is unknown."))
     end
-    return bt
+    return BilliardTable(bt)
 end
 
 """
@@ -88,6 +88,7 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "random" : The velocity is randomized upon collision.
 * "ray-splitting" : All obstacles in the billiard table allow for ray-splitting.
 """
+
 function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
     if (setting == "periodic") && (r>=x/2 || r>=y/2)
         es = "Disk radius too big for a periodic Sinai billiard.\n"
@@ -95,7 +96,8 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         error(es)
     end
     r, x, y = promote(r,x,y)
-    bt = billiard_rectangle(x, y; setting = setting)
+    bt = Vector{Obstacle}()
+    append!(bt,billiard_rectangle(x, y; setting = setting).bt)
     c = [x/2, y/2]
     if setting == "random"
         centerdisk = RandomDisk(c, r, "Random disk")
@@ -104,7 +106,8 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
     else
         centerdisk = Disk(c, r, "Disk")
     end
-    push!(bt, centerdisk)
+
+    return BilliardTable(push!(bt, centerdisk))
 end
 
 """
@@ -161,7 +164,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
         end
         push!(bt, wall)
     end
-    return bt
+    return BilliardTable(bt)
 end
 
 """
@@ -174,10 +177,11 @@ function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
     setting = "standard")
     r, R = promote(r, R)
     T = typeof(r); center = T[center...]
-    bt = billiard_polygon(6, R, center; setting = setting)
+    bt = Vector{Obstacle}()
+    append!(bt,billiard_polygon(6, R, center; setting = setting).bt)
     DT = setting == "random" ? RandomDisk : Disk
     push!(bt, Disk(center, r))
-    return bt
+    return BilliardTable(bt)
 end
 
 
@@ -209,7 +213,8 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     6 => [Tp(0.35), sa, newo],
     7 => [Tp(0.65), sa, newo])
 
-    bt = billiard_rectangle(x, y)
+    bt = Vector{Obstacle}()
+    append!(bt, billiard_rectangle(x, y).bt)
     sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
     push!(bt, sw)
     a1 = Antidot([x/4, y/2], r1, "Left Antidot")
@@ -217,7 +222,7 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     a2 = Antidot([3x/4, y/2], r2, "Right Antidot")
     push!(bt, a2)
 
-    return bt, rayspl
+    return BilliardTable(bt), rayspl
 end
 
 function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
@@ -250,7 +255,7 @@ function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
 
     push!(bt, capbotleft, capleft, toptop, capright, capbotright)
 
-    return bt
+    return BilliardTable(bt)
 end
 
 """
@@ -293,7 +298,7 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
 
     push!(bt, capbotleft, capbotright, cap)
 
-    return bt
+    return BilliardTable(bt)
 end
 
 """
@@ -316,7 +321,7 @@ function billiard_bunimovich(l=1.0, w=1.0)
     leftc = Semicircle([o, w/2], w/2, [l, o], "Left semicircle")
     rightc = Semicircle([l, w/2], w/2, [-l, o], "Right semicircle")
     push!(bt, bw, tw, leftc, rightc)
-    return bt
+    return BilliardTable(bt)
 end
 
 billiard_stadium = billiard_bunimovich

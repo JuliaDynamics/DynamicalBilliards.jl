@@ -12,7 +12,6 @@ Obstacle supertype.
 abstract type Obstacle{T<:AbstractFloat} end
 eltype(o::Obstacle{T}) where {T} = T
 
-eltype(bt::BilliardTable{T}) where {T} = T
 
 """
     Circular{T<:AbstractFloat} <: Obstacle{T}
@@ -352,14 +351,6 @@ the billiard table.
 
 All `distance` functions can also be given a position (Vector) instead of a particle.
 """
-function distance(p::AbstractParticle{T}, v::BilliardTable{T})::T where {T}
-    d = T(Inf)
-    for obst in v
-        di = distance(p, obst)
-        di < d && (d = di)
-    end
-    return d
-end
 
 (distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
 distance(p.pos, obst)
@@ -403,16 +394,8 @@ end
 # FiniteWall !!!
 distance_init(p::AbstractParticle, a::Obstacle) = distance_init(p.pos, a)
 distance_init(pos::SVector, a::Obstacle) = distance(pos, a)
-function distance_init(pos::SVector, v::BilliardTable{T})::T where {T}
-    d = T(Inf)
-    for obst in v
-        di = distance_init(pos, obst)
-        di < d && (d = di)
-    end
-    return d
-end
 
-function distance_init(pos, w::FiniteWall{T})::T where {T}
+function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
 
     n = normalvec(w, pos)
     posdot = dot(w.sp - pos, n)

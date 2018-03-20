@@ -1,4 +1,5 @@
 export BilliardTable, randominside, isperiodic
+import Base:start, next, done
 #######################################################################################
 ## Billiard Table
 #######################################################################################
@@ -18,6 +19,13 @@ end
 
 # Need to define iteration in billiard table (for obst in bt...)
 getindex(bt::BilliardTable, i) = bt.bt[i]
+
+start(bt::BilliardTable) = start(bt.bt)
+next(bt::BilliardTable, state) = next(bt.bt, state)
+done(bt::BilliardTable, state) = done(bt.bt, state)
+
+eltype(bt::BilliardTable{T}) where {T} = T
+
 
 isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)
 
@@ -41,6 +49,25 @@ for f in (:distance, :distance_init)
         end
     end
 end
+
+function distance(p::AbstractParticle{T}, bt::BilliardTable{T})::T where {T}
+    d = T(Inf)
+    for obst ∈ bt
+        di = distance(p, obst)
+        di < d && (d = di)
+    end
+    return d
+end
+
+function distance_init(pos::SVector, bt::BilliardTable{T})::T where {T}
+    d = T(Inf)
+    for obst ∈ bt
+        di = distance_init(pos, obst)
+        di < d && (d = di)
+    end
+    return d
+end
+
 
 #######################################################################################
 ## randominside

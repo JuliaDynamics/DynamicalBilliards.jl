@@ -301,7 +301,7 @@ end
 Sets the `pflag` field of all ray-splitting obstacles of a billiard table
 to `true`.
 """
-function reset_billiard!(bt::Vector{<:Obstacle})
+function reset_billiard!(bt::BilliardTable)
     for obst in bt
         supports_raysplitting(obst) && (obst.pflag = true)
     end
@@ -312,7 +312,7 @@ end
 Return `true` if the given ray-splitting dictionary `raysplitter`
 can be used in conjuction with given billiard table `bt`.
 """
-function acceptable_raysplitter(ray::Dict{Int, Any}, bt::Vector{Obstacle})
+function acceptable_raysplitter(ray::Dict{Int, Any}, bt::BilliardTable)
     for i in keys(ray)
         if !supports_raysplitting(bt[i])
             print("Obstacle at index $i of given billiard table")
