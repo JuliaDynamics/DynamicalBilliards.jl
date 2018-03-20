@@ -168,7 +168,7 @@ end
 ##########
 
 # evolve For MagneticParticle and Ray-Splitting
-function evolve!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}},
+function evolve!(p::MagneticParticle{T}, bt::BilliardTable{T},
 t, ray::Dict; warning::Bool = false) where {T}
 
     if t <= 0

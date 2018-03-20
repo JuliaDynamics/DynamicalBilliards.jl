@@ -262,7 +262,7 @@ end
     next_collision(p, bt.bt)
 
 function next_collision(
-    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}})::Tuple{T,Int} where {T}
+    p::AbstractParticle{T}, bt::BilliardTable{T})::Tuple{T,Int} where {T}
     tmin::T = T(Inf)
     ind::Int = 0
     for i in eachindex(bt)
