@@ -10,9 +10,9 @@ partnum= min(10, partnum)
         l = 2.0
         r = 1.0
         sides = 6
-        bt = billiard_polygon(6,l; setting = "periodic")
-        disc = Disk([0., 0.], r)
-        push!(bt, disc)
+        bt = billiard_hexagonal_sinai(r,l; setting = "periodic")
+        #disc = Disk([0., 0.], r)
+        #push!(bt, disc)
         tt=10000.0
 
         for i in 1:partnum

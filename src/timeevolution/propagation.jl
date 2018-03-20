@@ -184,14 +184,14 @@ Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
 Notice that `pos, vel` are the values
 *after* the collision has been resolved (including ray-splitting).
 """
-function bounce!(p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}}) where {T}
+function bounce!(p::AbstractParticle{T}, bt::BilliardTable{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
     tmin = relocate!(p, bt[i], tmin)
     resolvecollision!(p, bt[i])
     return i, tmin, p.pos, p.vel
 end
 
-function bounce!(p::MagneticParticle{T}, bt::Vector{<:Obstacle{T}}) where {T}
+function bounce!(p::MagneticParticle{T}, bt::BilliardTable{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
     if tmin != Inf
         tmin = relocate!(p, bt[i], tmin)
@@ -244,7 +244,7 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}}, t;
+function evolve!(p::AbstractParticle{T}, bt::BilliardTable{T}, t;
     warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
@@ -405,7 +405,7 @@ A warning can be thrown if the result is `Inf`. Enable this using the keyword
 `warning = true`.
 """
 function escapetime(
-    p::AbstractParticle{T}, bt::Vector{<:Obstacle{T}},
+    p::AbstractParticle{T}, bt::BilliardTable{T},
     t::Int = 1000; warning::Bool=false)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
