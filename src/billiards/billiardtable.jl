@@ -1,4 +1,4 @@
-export BilliardTable, randominside, isperiodic
+export BilliardTable, randominside, isperiodic, start, next, done
 import Base:start, next, done
 #######################################################################################
 ## Billiard Table
