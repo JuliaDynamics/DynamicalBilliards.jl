@@ -1,6 +1,7 @@
 export Obstacle, Disk, Antidot, RandomDisk,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Wall, Circular, Semicircle
+normalvec, distance, cellsize, Wall, Circular, Semicircle,
+arclength, totallength
 
 #######################################################################################
 ## Circles
@@ -326,6 +327,59 @@ assumed to be very close to the obstacle's boundary).
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
 #######################################################################################
+## Arclengths
+#######################################################################################
+
+"""
+```julia
+function arclength(p::AbstractParticle, o::Obstacle)
+```
+Returns the position of a particle on an obstacle in boundary coordinates relative to the obstacle
+assuming th particle is on the obstacle.
+Boundary coordinates are chosen
+* as the distance from the start point in `Wall`s
+* as the arc length measured counterclockwise from the open face in `Semicircle`s
+* as the arc length measured counterclockwise from the rightmost point in `Disk`s
+
+"""
+function arclength(p::AbstractParticle, o::Wall)
+    #assuming pos is *on* the Wall, i.e between sp and ep
+    return norm(p.pos - o.sp)
+end
+
+function arclength(p::AbstractParticle, o::Semicircle)
+    #assuming pos is *on* the Semicircle
+    #project pos on open face
+    chrd = [-o.facedir[2],o.facedir[1]] #tangent to open face
+    d = (p.pos - o.c)/o.r
+    x = dot(d, chrd )
+    r =  acos(clamp(x, -1, 1))*o.r
+    return r
+end
+
+function arclength(p::AbstractParticle{T}, o::Disk{T}) where {T<:AbstractFloat}
+    #assuming pos is *on* disk
+    #projecting pos to x Axis
+    d = (p.pos - o.c)/o.r
+    r = acos(clamp(d[1], -1, 1))*o.r
+    return r
+end
+
+#return total arc length of obstacles
+"""
+```julia
+function totallength(o::Obstacle)
+```
+Returns the total length of `o`, i.e. the maximum value `arclength(…, o)` should
+ever return
+"""
+@inline totallength(o::Wall) = norm(o.ep - o.sp)
+@inline totallength(o::Semicircle) = π*o.r
+@inline totallength(o::Disk) = 2π*o.r
+
+
+
+#######################################################################################
 ## Distances
 #######################################################################################
 """
@@ -387,7 +441,6 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
         return min(norm(pos - end1), norm(pos - end2))
     end
 end
-
 
 
 # The entire functionality of `distance_init` is necessary only for
