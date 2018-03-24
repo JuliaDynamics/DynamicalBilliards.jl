@@ -331,51 +331,43 @@ assumed to be very close to the obstacle's boundary).
 #######################################################################################
 
 """
-```julia
-function arclength(p::AbstractParticle, o::Obstacle)
-```
-Returns the position of a particle on an obstacle in boundary coordinates relative to the obstacle
-assuming th particle is on the obstacle.
+    function arclength(p::AbstractParticle, o::Obstacle)
+Returns the position of a particle on an obstacle in boundary coordinates
+assuming that the particle is on the obstacle.
+
 Boundary coordinates are chosen
 * as the distance from the start point in `Wall`s
 * as the arc length measured counterclockwise from the open face in `Semicircle`s
-* as the arc length measured counterclockwise from the rightmost point in `Disk`s
-
+* as the arc length measured counterclockwise from the rightmost point in `Circular`s
 """
-function arclength(p::AbstractParticle, o::Wall)
-    #assuming pos is *on* the Wall, i.e between sp and ep
-    return norm(p.pos - o.sp)
-end
+arclength(p::AbstractParticle, o::Wall) = norm(p.pos - o.sp)
 
 function arclength(p::AbstractParticle, o::Semicircle)
-    #assuming pos is *on* the Semicircle
     #project pos on open face
-    chrd = [-o.facedir[2],o.facedir[1]] #tangent to open face
+    chrd = SV(-o.facedir[2],o.facedir[1]) #tangent to open face
     d = (p.pos - o.c)/o.r
-    x = dot(d, chrd )
+    x = dot(d, chrd)
     r =  acos(clamp(x, -1, 1))*o.r
     return r
 end
 
-function arclength(p::AbstractParticle{T}, o::Disk{T}) where {T<:AbstractFloat}
-    #assuming pos is *on* disk
+function arclength(p::AbstractParticle{T}, o::Circular{T}) where {T<:AbstractFloat}
     #projecting pos to x Axis
     d = (p.pos - o.c)/o.r
     r = acos(clamp(d[1], -1, 1))*o.r
     return r
 end
 
-#return total arc length of obstacles
+
+
 """
-```julia
-function totallength(o::Obstacle)
-```
-Returns the total length of `o`, i.e. the maximum value `arclength(…, o)` should
-ever return
+    function totallength(o::Obstacle)
+Returns the total length of `o`, i.e. the maximum value `arclength(…, o)` can
+return.
 """
 @inline totallength(o::Wall) = norm(o.ep - o.sp)
 @inline totallength(o::Semicircle) = π*o.r
-@inline totallength(o::Disk) = 2π*o.r
+@inline totallength(o::Circular) = 2π*o.r
 
 
 
@@ -398,12 +390,12 @@ Return the **signed** distance between particle `p` and obstacle `o`, based on
 of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
 outside of the disk, negative otherwise.
 
-    distance(p::AbstractParticle, bt::Vector{<:Obstacle})
+    distance(p::AbstractParticle, bt::BilliardTable)
 Return minimum `distance(p, obst)` for all `obst` in `bt`.
 If the `distance(p, bt)` is negative this means that the particle is outside
 the billiard table.
 
-All `distance` functions can also be given a position (Vector) instead of a particle.
+All `distance` functions can also be given a position (vector) instead of a particle.
 """
 
 (distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
