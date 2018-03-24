@@ -7,7 +7,13 @@ struct BilliardTable{T, BT<:Tuple}
     bt::BT
 end
 
-function BilliardTable(bt)
+"""
+    BilliardTable(obstacles...)
+Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs).
+
+Some description of billiard table will be put here.
+"""
+function BilliardTable(bt::Union{AbstractVector, Tuple})
     T = eltype(bt[1])
     if typeof(bt) <: Tuple
         return BilliardTable{T, typeof(bt)}(bt)
@@ -15,6 +21,12 @@ function BilliardTable(bt)
         tup = (bt...,)
         return BilliardTable{T, typeof(tup)}(tup)
     end
+end
+
+function BilliardTable(bt::Vararg{Obstacle})
+    T = eltype(bt[1])
+    tup = (bt...,)
+    return BilliardTable{T, typeof(tup)}(tup)
 end
 
 # Need to define iteration in billiard table (for obst in bt...)

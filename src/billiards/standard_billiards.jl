@@ -96,8 +96,8 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         error(es)
     end
     r, x, y = promote(r,x,y)
-    bt = Vector{Obstacle}()
-    append!(bt,billiard_rectangle(x, y; setting = setting).bt)
+    btr = billiard_rectangle(x, y; setting = setting)
+
     c = [x/2, y/2]
     if setting == "random"
         centerdisk = RandomDisk(c, r, "Random disk")
@@ -107,7 +107,7 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         centerdisk = Disk(c, r, "Disk")
     end
 
-    return BilliardTable(push!(bt, centerdisk))
+    return BilliardTable(btr..., centerdisk)
 end
 
 """
