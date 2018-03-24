@@ -21,7 +21,7 @@ end
 
 """
 ```julia
-function evolve_boundary!(p::Particle, bt::Vector{Obstacle}, t)
+function evolve_boundary!(p::Particle, bt::BilliardTable, t)
 ```
 """
 function evolve_boundary!(p::Particle{T},  bt::BilliardTable{T}, t) where {T<:AbstractFloat}
