@@ -9,7 +9,7 @@
 
 ## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through
-  the `Requires` module.
+  the `Requires` module. The function `enableplotting()` does not exist anymore!
 * Re-organized all source code into a much more readable state, and as a result
   significantly reduced the total lines of code.
 * added `evolve` function that simply deepcopies particle.
@@ -24,7 +24,9 @@
 * `realangle` now only takes one intersection and simply returns the real angle.
 * `animate_evolution` now does not have `!` at the end, because it deepcopies the
   particle.
-  
+
+---
+
 # v1.6.1
 Updated the documentation to reflect the new changes of v1.6.0
 

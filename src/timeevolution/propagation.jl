@@ -172,7 +172,7 @@ position.
 end
 
 """
-    bounce!(p, bt) -> i, t, pos, vel
+    bounce!(p::AbstractParticle, bt::BilliardTable) -> i, t, pos, vel
 Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
 `resolvecollision!` with the colliding obstacle and finally return:
 * index of the obstacle that the particle collided with
@@ -180,9 +180,6 @@ Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
 * position and velocity of the particle at the current collision (*after* the
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
-
-Notice that `pos, vel` are the values
-*after* the collision has been resolved (including ray-splitting).
 """
 function bounce!(p::AbstractParticle{T}, bt::BilliardTable{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
