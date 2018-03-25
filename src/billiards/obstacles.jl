@@ -340,20 +340,21 @@ Boundary coordinates are chosen
 * as the arc length measured counterclockwise from the open face in `Semicircle`s
 * as the arc length measured counterclockwise from the rightmost point in `Circular`s
 """
-arclength(p::AbstractParticle, o::Wall) = norm(p.pos - o.sp)
+arclength(p::AbstractParticle, o) = arclength(p.pos, o)
+arclength(pos::SV, o::Wall) = norm(pos - o.sp)
 
-function arclength(p::AbstractParticle, o::Semicircle)
+function arclength(pos::SV, o::Semicircle)
     #project pos on open face
     chrd = SV(-o.facedir[2],o.facedir[1]) #tangent to open face
-    d = (p.pos - o.c)/o.r
+    d = (pos - o.c)/o.r
     x = dot(d, chrd)
     r =  acos(clamp(x, -1, 1))*o.r
     return r
 end
 
-function arclength(p::AbstractParticle{T}, o::Circular{T}) where {T<:AbstractFloat}
+function arclength(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
     #projecting pos to x Axis
-    d = (p.pos - o.c)/o.r
+    d = (pos - o.c)/o.r
     r = acos(clamp(d[1], -1, 1))*o.r
     return r
 end

@@ -173,9 +173,13 @@ end
 
 """
     bounce!(p::AbstractParticle, bt::BilliardTable) -> i, t, pos, vel
-Find the `next_collision` of `p` with `bt`, `relocate!` the particle there,
-`resolvecollision!` with the colliding obstacle and finally return:
-* index of the obstacle that the particle collided with
+"Bounce" the particle (perform a collision advance) in the billiard table.
+
+Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
+[`relocate!`](@ref) the particle correctly,
+[`resolvecollision!`](@ref) with the colliding obstacle and finally return:
+
+* index of the obstacle that the particle just collided with
 * the time from the previous collision until the current collision `t`
 * position and velocity of the particle at the current collision (*after* the
   collision has been resolved!). The position is given in the unit cell of
