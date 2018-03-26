@@ -343,19 +343,19 @@ Boundary coordinates are chosen
 arclength(p::AbstractParticle, o) = arclength(p.pos, o)
 arclength(pos::SV, o::Wall) = norm(pos - o.sp)
 
-function arclength(pos::SV, o::Semicircle)
+function arclength(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
+    #projecting pos to x Axis
+    d = (pos - o.c)/o.r
+    r = acos(clamp(d[1], -1, 1))*o.r
+    return r
+end
+
+function arclength(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
     #project pos on open face
     chrd = SV(-o.facedir[2],o.facedir[1]) #tangent to open face
     d = (pos - o.c)/o.r
     x = dot(d, chrd)
     r =  acos(clamp(x, -1, 1))*o.r
-    return r
-end
-
-function arclength(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
-    #projecting pos to x Axis
-    d = (pos - o.c)/o.r
-    r = acos(clamp(d[1], -1, 1))*o.r
     return r
 end
 
