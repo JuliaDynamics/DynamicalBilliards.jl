@@ -14,55 +14,6 @@ function reflection_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
     return φ
 end
 
-#######################################################################################
-## Main evolve-like functions
-#######################################################################################
-
-
-"""
-```julia
-function evolve_boundary!(p::Particle, bt::BilliardTable, t)
-```
-"""
-function evolve_boundary!(p::Particle{T},  bt::BilliardTable{T}, t) where {T<:AbstractFloat}
-    if t <= 0
-        throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
-    end
-
-    rt = T[]
-    rparam = T[]
-    rangle = T[]
-    rindex = Int[]
-
-    count = zero(T)
-    t_to_write = zero(T)
-
-    while count < t
-        i, tmin = bounce!(p,bt)
-        t_to_write += tmin
-
-        if typeof(bt[i]) <: PeriodicWall
-            continue # do not write output if collision with with PeriodicWall
-        else
-            push!(rparam, arclength(p, bt[i]))
-            push!(rangle, reflection_angle(p, bt[i]))
-            push!(rindex, i)
-            push!(rt, t_to_write)
-            # set counter
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
-        end
-    end #time, or collision number, loop
-
-  return rt, rindex, rparam, rangle
-end
-
-
-#non-mutating version
-function evolve_boundary(p::Particle{T}, bt::BilliardTable{T}, t) where {T<:AbstractFloat}
-    p2 = deepcopy(p)
-    return evolve_boundary!(p2, bt, t)
-end
 
 #######################################################################################
 ## Helper functions to rearrange output of evolve_boundary
@@ -85,6 +36,11 @@ function shiftconstruct(bt::BilliardTable{T}, sortorder::Array{Int}) where {T}
     return intervals, signs
 end
 
+#######################################################################################
+## Main psos function
+#######################################################################################
+
+
 
 """
 ```julia
@@ -95,7 +51,7 @@ function psos(n::Int, bt::BilliardTable, t, sortorder::Vector{Int})
 This function calls [`evolve_boundary'](@ref) and rearranges its output using the
     information provided in `sortorder`. `sortorder`should contain the indices of
     the `Obstacle`s in `bt` in the correct order, with the signs signifying the
-    sign with which the individual `arclength`s are supposed to added up.
+    sign with which the individual `arclength`s are supposed to be added up.
 
 If `n` is given instead of ps, generates `n` random particles inside bt and
     evolves them.
@@ -103,29 +59,46 @@ If `n` is given instead of ps, generates `n` random particles inside bt and
 Returns
 * an array of arc length parameters
 * an array of incidence angles
+* an array of collision times
 * an array of intervals corresponding to the obstacle arc lengths
 
 """
 function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t,
                      sortorder::Vector{Int}) where {T}
-    plotξs = T[]
-    plotφs = T[]
+    params = T[]
+    angles = T[]
+    intervals = T[]
+    times = T[]
 
     intervals, signs = shiftconstruct(bt, sortorder)
     for p ∈ ps
-        ts, index, params, angles = evolve_boundary(p, bt, t)
+        count = zero(T)
+        t_to_write = zero(T)
 
-        for (j,i) ∈ enumerate(index)
-            if signs[i] > 0
-                push!(plotξs, params[j] + intervals[i][1])
+        while count < t
+            i, tmin = bounce!(p,bt)
+            t_to_write += tmin
+
+            if typeof(bt[i]) <: PeriodicWall
+                continue # do not write output if collision with with PeriodicWall
             else
-                push!(plotξs, intervals[i][2] - params[j])
+                if signs[i] > 0
+                    push!(params, arclength(p, bt[i]) + intervals[i][1])
+                else
+                    push!(params, intervals[i][2] - arclength(p, bt[i]))
+                end
+                push!(angles, reflection_angle(p, bt[i]))
+                #push!(rindex, i)
+                push!(times, t_to_write)
+                # set counter
+                count += increment_counter(t, t_to_write)
+                t_to_write = zero(T)
             end
-            push!(plotφs,angles[j])
-        end
-    end
+        end #time, or collision number, loop
 
-    return plotξs, plotφs, intervals
+        end
+
+    return params, angles, intervals, times
 end
 
 function psos(n::Int, bt::BilliardTable, t, sortorder::Vector{Int})
