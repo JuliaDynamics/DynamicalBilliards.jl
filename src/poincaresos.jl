@@ -21,7 +21,14 @@ end
 
 
 #WARNING: This code is ugly.
+"""
+    function shiftconstruct(bt::BilliardTable, sortorder::Array{Int})
+Uses the `sortorder` array (see [`psos`](@ref)) and [`totallength`](@ref) to
+generate an array of `SVector`s, with the `i`th `SVector` containing the arc
+length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
+Used by [`psos`](@ref) to compute arc lengths.
+"""
 function shiftconstruct(bt::BilliardTable{T}, sortorder::Array{Int}) where {T}
     intervals = Array{SVector{2,T}}(length(sortorder))
     signs = Array{Int}(length(sortorder))
@@ -44,8 +51,7 @@ end
 
 """
 ```julia
-function psos(ps::Vector{Particle}, bt::BilliardTable, t,
-                     sortorder::Vector{Int})
+function psos(ps::Vector{Particle}, bt::BilliardTable, t, sortorder::Vector{Int})
 function psos(n::Int, bt::BilliardTable, t, sortorder::Vector{Int})
 ```
 This function calls [`evolve_boundary'](@ref) and rearranges its output using the
@@ -96,7 +102,7 @@ function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t,
             end
         end #time, or collision number, loop
 
-        end
+    end
 
     return params, angles, intervals, times
 end
