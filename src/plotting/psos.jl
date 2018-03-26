@@ -1,4 +1,5 @@
 using PyPlot
+export plot_psos
 
 """
     function plot_psos(ps::Vector{<:AbstractParticle}, bt::BilliardTable, t)

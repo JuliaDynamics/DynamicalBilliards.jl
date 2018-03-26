@@ -3,10 +3,22 @@ import Base:start, next, done
 #######################################################################################
 ## Billiard Table
 #######################################################################################
-struct BilliardTable{T, BT<:Tuple}
+struct BilliardTable{T, D, BT<:Tuple}
     bt::BT
-    sortorder::SVector
+    sortorder::SVector{D, Int}
 end
+
+#pretty print:
+function Base.show(io::IO, bt::BilliardTable{T,D,BT}) where {T, D, BT}
+    s = "BilliardTable{$T} with $D obstacles:\n"
+    for o in bt
+        s*="  $(o.name)\n"
+    end
+    s*="ordering: $(bt.sortorder)"
+    print(io, s)
+end
+
+
 
 """
     BilliardTable(obstacles...; sortorder)
@@ -16,42 +28,44 @@ Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs) and
 Some description of billiard table will be put here.
 """
 function BilliardTable(bt::Union{AbstractVector, Tuple};
-            sortorder::AbstractVector{Int} = collect(1:length(bt)))
-            #default sortorder is 1,2,3,4...
+    sortorder::AbstractVector{Int} = collect(1:length(bt)))
+    #default sortorder is 1,2,3,4...
 
     if length(bt) != length(sortorder)
-        throw(ArgumentError)("`sortorder` must have the same number of elements as the
-         BilliardTable!") #replace with @warn for julia v0.7
-     end
+        throw(ArgumentError(
+        "`sortorder` must have the same number of elements as the BilliardTable!"
+        )) #replace with @warn for julia v0.7???? Why?
+    end
     T = eltype(bt[1])
+    D = length(bt)
+    sortorder = SVector{D, Int}(sortorder...)
 
-    if !(typeof(sortorder) <: SVector)
-        sortorder = SVector{length(sortorder),Int}(sortorder...)
+    # Assert that all elements of `bt` are of same type:
+    for i in 2:D
+        eltype(bt[i]) != T && throw(ArgumentError(
+        "All obstacles of the billiard table must have same type of
+        numbers. Found $T and $(eltype(bt[i])) instead."
+        ))
     end
 
     if typeof(bt) <: Tuple
-        return BilliardTable{T, typeof(bt)}(bt, sortorder)
+        return BilliardTable{T, D, typeof(bt)}(bt, sortorder)
     else
         tup = (bt...,)
-        return BilliardTable{T, typeof(tup)}(tup, sortorder)
+        return BilliardTable{T, D, typeof(tup)}(tup, sortorder)
     end
 end
 
 function BilliardTable(bt::Vararg{Obstacle};
-            sortorder::AbstractVector{Int} = collect(1:length(bt)))
+    sortorder::AbstractVector{Int} = collect(1:length(bt)))
 
     T = eltype(bt[1])
-    tup = (bt...,)
-    if !(typeof(sortorder) <: SVector)
-        sortorder = SVector{length(sortorder),Int}(sortorder...)
-    end
-    return BilliardTable{T, typeof(tup)}(tup,sortorder)
+    return BilliardTable(tup; sortorder = sortorder)
 end
 
 
-# Need to define iteration in billiard table (for obst in bt...)
 getindex(bt::BilliardTable, i) = bt.bt[i]
-
+# Iteration:
 start(bt::BilliardTable) = start(bt.bt)
 next(bt::BilliardTable, state) = next(bt.bt, state)
 done(bt::BilliardTable, state) = done(bt.bt, state)
