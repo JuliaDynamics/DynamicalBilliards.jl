@@ -73,7 +73,7 @@ Returns
 * an array of intervals corresponding to the obstacle arc lengths
 
 """
-function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t) where {T}
+function psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) where {T}
     params = T[]
     angles = T[]
     intervals = T[]
@@ -110,7 +110,5 @@ function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t) where {T}
     return params, angles, intervals, times
 end
 
-function psos(n::Int, bt::BilliardTable, t)
-    ps = [randominside(bt) for i ∈ 1:n]
-    return psos(ps, bt, t)
-end
+psos(n::Int, bt::BilliardTable, t) = psos([randominside(bt) for i ∈ 1:n], bt, t)
+psos(n::Int, ω::AbstractFloat, bt::BilliardTable, t) = psos([randominside(bt, ω) for i ∈ 1:n], bt, t)
