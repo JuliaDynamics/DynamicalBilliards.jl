@@ -2,17 +2,17 @@ using PyPlot
 export plot_psos
 
 """
-    function plot_psos(ps::Vector{<:AbstractParticle}, bt::BilliardTable, t)
+    plot_psos(ps::Vector{<:AbstractParticle}, bt::BilliardTable, t)
 
 Plots the Poincaré surface of section (see [`psos`](@ref)) in boundary coordinates
 by evolving the given particles `ps` for  `t` collisions if `t` is an integer or for
 `t` units of time else.
 
-    function plot_psos(n::Int, bt::BilliardTable, t)
+    plot_psos(n::Int, bt::BilliardTable, t)
 
 Generates `n` random `Particles` inside `bt` and plots their PSOS
 
-    function plot_psos(n::Int, ω::AbstractFloat, bt::BilliardTable, t)
+    plot_psos(n::Int, ω::AbstractFloat, bt::BilliardTable, t)
 
 Generates `n` random `MagneticParticles` with cyclotron frequency ω inside `bt` and
  plots their PSOS

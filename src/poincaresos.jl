@@ -69,9 +69,8 @@ If `n` is given instead of ps, generates `n` random particles inside bt and
 Returns
 * an array of arc length parameters
 * an array of incidence angles
-* an array of collision times
 * an array of intervals corresponding to the obstacle arc lengths
-
+* an array of collision times
 """
 function psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) where {T}
     params = T[]
@@ -97,7 +96,6 @@ function psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) where 
                     push!(params, intervals[i][2] - arclength(p, bt[i]))
                 end
                 push!(angles, reflection_angle(p, bt[i]))
-                #push!(rindex, i)
                 push!(times, t_to_write)
                 # set counter
                 count += increment_counter(t, t_to_write)

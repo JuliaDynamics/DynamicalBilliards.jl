@@ -14,7 +14,7 @@ function Base.show(io::IO, bt::BilliardTable{T,D,BT}) where {T, D, BT}
     for o in bt
         s*="  $(o.name)\n"
     end
-    s*="ordering: $(bt.sortorder)"
+    s*="sortorder: $(bt.sortorder)"
     print(io, s)
 end
 
@@ -23,7 +23,8 @@ end
 """
     BilliardTable(obstacles...; sortorder)
 Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs) and
-(optionally) an abstract array containing a PSOS `sortorder` (see [`psos`](@ref)).
+(optionally) an abstract array of integers
+that orders the obstacles in boundary coordinates with respect to [`arclength`](@ref).
 
 Some description of billiard table will be put here.
 """
@@ -34,7 +35,7 @@ function BilliardTable(bt::Union{AbstractVector, Tuple};
     if length(bt) != length(sortorder)
         throw(ArgumentError(
         "`sortorder` must have the same number of elements as the BilliardTable!"
-        )) #replace with @warn for julia v0.7???? Why?
+        ))
     end
     T = eltype(bt[1])
     D = length(bt)
@@ -135,7 +136,7 @@ function cellsize(
 end
 
 """
-    randominside(bt::BilliardTable{T} [, ω])
+    randominside(bt::BilliardTable [, ω])
 Return a particle with allowed initial conditions inside the given
 billiard table. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
