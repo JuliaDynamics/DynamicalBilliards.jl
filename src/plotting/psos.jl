@@ -2,28 +2,17 @@ using PyPlot
 export plot_psos
 
 """
-    plot_psos(ps::Vector{<:AbstractParticle}, bt::BilliardTable, t)
+    plot_psos(ξs, φs, ints)
 
-Plots the Poincaré surface of section (see [`psos`](@ref)) in boundary coordinates
-by evolving the given particles `ps` for  `t` collisions if `t` is an integer or for
-`t` units of time else.
+Plots the Poincaré surface of section (see [`psos`](@ref)) in boundary coordinates.
 
-    plot_psos(n::Int, bt::BilliardTable, t)
-
-Generates `n` random `Particles` inside `bt` and plots their PSOS
-
-    plot_psos(n::Int, ω::AbstractFloat, bt::BilliardTable, t)
-
-Generates `n` random `MagneticParticles` with cyclotron frequency ω inside `bt` and
- plots their PSOS
-
+Do `ξs,φs,ints = poincaresection(...)` for the arguments.
 """
-function plot_psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) where {T}
+function plot_psos(ξs,φs,ints)
     ax = gca()
 
-    ξs,φs,ints = psos(ps,bt,t)
-
-    ax[:plot](ξs, φs, marker="o", ms = 1, color = "b", linestyle="None", mew=0.0,alpha=0.1)
+    ax[:plot](ξs, φs, marker="o", ms = 2.0, color = "b", linestyle="None",
+    mew=0.0,alpha=0.1)
 
     xmax = 0.0
     for intv ∈ ints
@@ -37,6 +26,3 @@ function plot_psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) w
     ax[:set_xlabel](L"arc length parameter $\xi$")
     ax[:set_ylabel](L"angle of incidence $\phi$")
 end
-
-plot_psos(n::Int, bt::BilliardTable, t) = plot_psos([randominside(bt) for i ∈ 1:n], bt, t)
-plot_psos(n::Int, ω::AbstractFloat, bt::BilliardTable, t) = plot_psos([randominside(bt,ω) for i ∈ 1:n], bt, t)

@@ -1,6 +1,6 @@
 using StaticArrays
 
-export evolve_boundary!, evolve_boundary, psos
+export evolve_boundary!, evolve_boundary, poincaresection
 
 #this function only exists because incidence_angle from raysplitting.jl only works
 #if you pass the particle *before* collision, which I cannot do because of bounce!
@@ -23,11 +23,12 @@ end
 #WARNING: This code is ugly.
 """
     function shiftconstruct(bt::BilliardTable)
-Uses the `sortorder` field (see [`BilliardTable`](@ref) and [`psos`](@ref)) and [`totallength`](@ref) to
+Use the `sortorder` field (see [`BilliardTable`](@ref)
+and [`poincaresection`](@ref)) and [`totallength`](@ref) to
 generate an array of `SVector`s, with the `i`th `SVector` containing the arc
 length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
-Used by [`psos`](@ref) to compute arc lengths.
+Used by [`poincaresection`](@ref) to compute arc lengths.
 """
 function shiftconstruct(bt::BilliardTable{T}) where {T}
     len = length(bt.sortorder)
@@ -45,40 +46,42 @@ function shiftconstruct(bt::BilliardTable{T}) where {T}
 end
 
 #######################################################################################
-## Main psos function
+## Main poincaresection function
 #######################################################################################
 
 
 #TODO:rewrite docstring
 """
 ```julia
-function psos(ps::Vector{Particle}, bt::BilliardTable, t, sortorder::Vector{Int})
-function psos(n::Int, bt::BilliardTable, t)
+poincaresection(bt::BilliardTable, t, ps::Vector{<:AbstractParticle})
+poincaresection(bt::BilliardTable, t, n::Int [, ω])
 ```
-This function calls [`bounce'](@ref), uses [`arclength`](@ref) on its output to
-    transform it to obstacle coordinates.
-    These are transformed into global boundary coordinates using the information
-    provided in the `BilliardTable`'s `sortorder` field.
-    `sortorder` contains the indices of the `Obstacle`s in `bt` in the
-    correct order, with the signs signifying the sign with which the individual
-    `arclength`s are supposed to be added up.
+Compute the poincare section (also called boundary map) of the
+billiard table `bt` by evolving each particle for total amount `t` (either float for
+time or integer for collision number).
 
-If `n` is given instead of ps, generates `n` random particles inside bt and
-    evolves them.
+If `n::Int` is given instead of `ps`,
+then `n` random particles are produced in the billiard table. If `ω` is also
+given, then the particles are magnetic.
+
+The sorting of the arclengths of the individual obstacles is dictated by
+the `sortorder` field of `bt`, see [`BilliardTable`](@ref) for more.
+
+# HERE GOES PROPER DESCRIPTION OF THE RETURNED STUFF AND / OR WHAT THE METHOD DOES
 
 Returns
-* an array of arc length parameters
-* an array of incidence angles
-* an array of intervals corresponding to the obstacle arc lengths
-* an array of collision times
+* a vector of the arclengths at the collisions
+* a vector of incidence angles at the collisions
+* an array of intervals corresponding to the obstacle arc lengths ???
 """
-function psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) where {T}
+function poincaresection(bt::BilliardTable{T}, t,
+                         ps::Vector{<:AbstractParticle{T}}) where {T}
+
     params = T[]
     angles = T[]
-    intervals = T[]
-    times = T[]
 
     intervals, signs = shiftconstruct(bt)
+
     for p ∈ ps
         count = zero(T)
         t_to_write = zero(T)
@@ -96,17 +99,18 @@ function psos(ps::Vector{<:AbstractParticle{T}}, bt::BilliardTable{T}, t) where 
                     push!(params, intervals[i][2] - arclength(p, bt[i]))
                 end
                 push!(angles, reflection_angle(p, bt[i]))
-                push!(times, t_to_write)
                 # set counter
                 count += increment_counter(t, t_to_write)
                 t_to_write = zero(T)
             end
         end #time, or collision number, loop
-
     end
 
-    return params, angles, intervals, times
+    return params, angles, intervals
 end
 
-psos(n::Int, bt::BilliardTable, t) = psos([randominside(bt) for i ∈ 1:n], bt, t)
-psos(n::Int, ω::AbstractFloat, bt::BilliardTable, t) = psos([randominside(bt, ω) for i ∈ 1:n], bt, t)
+poincaresection(bt::BilliardTable, t, n::Int) =
+    poincaresection(bt, t, [randominside(bt) for i ∈ 1:n])
+
+poincaresection(bt::BilliardTable, t, n::Int, ω::AbstractFloat) =
+    poincaresection(bt, t, [randominside(bt, ω) for i ∈ 1:n])

@@ -26,6 +26,8 @@ Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs) and
 (optionally) an abstract array of integers
 that orders the obstacles in boundary coordinates with respect to [`arclength`](@ref).
 
+The description of `sortorder` goes here HEREEEEEE
+
 Some description of billiard table will be put here.
 """
 function BilliardTable(bt::Union{AbstractVector, Tuple};
