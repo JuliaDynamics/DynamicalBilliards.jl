@@ -60,6 +60,7 @@ function BilliardTable(bt::Vararg{Obstacle};
     sortorder::AbstractVector{Int} = collect(1:length(bt)))
 
     T = eltype(bt[1])
+    tup = (bt...,)
     return BilliardTable(tup; sortorder = sortorder)
 end
 

@@ -1,13 +1,15 @@
 # v2.0
 
 ## Currently WIP
+* Poincaresos.
+
+## Done changes
 * **2 to 3 orders of magnitude performance gains on all functions!!!**
   * Reduced a lot of allocations done all over the place.
   * Fixed many instances of broadcasting with static vectors (which is bad).
   * Utilized the `Unrolled` package and other kind of stability features that
     make most of the functions of `DynamicalBilliards` non-allocating!
 
-## Done changes
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module. The function `enableplotting()` does not exist anymore!
 * Re-organized all source code into a much more readable state, and as a result
