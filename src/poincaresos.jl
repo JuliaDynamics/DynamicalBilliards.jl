@@ -112,5 +112,5 @@ end
 
 function psos(n::Int, bt::BilliardTable, t)
     ps = [randominside(bt) for i ∈ 1:n]
-    return psos(ps, bt, t, sortorder)
+    return psos(ps, bt, t)
 end
