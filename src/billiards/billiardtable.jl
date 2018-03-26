@@ -5,29 +5,49 @@ import Base:start, next, done
 #######################################################################################
 struct BilliardTable{T, BT<:Tuple}
     bt::BT
+    sortorder::SVector
 end
 
 """
-    BilliardTable(obstacles...)
-Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs).
+    BilliardTable(obstacles...; sortorder)
+Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs) and
+(optionally) an abstract array containing a PSOS `sortorder` (see [`psos`](@ref)).
 
 Some description of billiard table will be put here.
 """
-function BilliardTable(bt::Union{AbstractVector, Tuple})
+function BilliardTable(bt::Union{AbstractVector, Tuple};
+            sortorder::AbstractVector{Int} = collect(1:length(bt)))
+            #default sortorder is 1,2,3,4...
+
+    if length(bt) != length(sortorder)
+        throw(ArgumentError)("`sortorder` must have the same number of elements as the
+         BilliardTable!") #replace with @warn for julia v0.7
+     end
     T = eltype(bt[1])
+
+    if !(typeof(sortorder) <: SVector)
+        sortorder = SVector{length(sortorder),Int}(sortorder...)
+    end
+
     if typeof(bt) <: Tuple
-        return BilliardTable{T, typeof(bt)}(bt)
+        return BilliardTable{T, typeof(bt)}(bt, sortorder)
     else
         tup = (bt...,)
-        return BilliardTable{T, typeof(tup)}(tup)
+        return BilliardTable{T, typeof(tup)}(tup, sortorder)
     end
 end
 
-function BilliardTable(bt::Vararg{Obstacle})
-    T = eltype(bt[1])
+function BilliardTable(bt::Vararg{Obstacle};
+            sortorder::AbstractVector{Int} = collect(1:length(bt)))
+
+    T = eltype(bt)
     tup = (bt...,)
-    return BilliardTable{T, typeof(tup)}(tup)
+    if !(typeof(sortorder) <: SVector)
+        sortorder = SVector{length(sortorder),Int}(sortorder...)
+    end
+    return BilliardTable{T, typeof(tup)}(tup,sortorder)
 end
+
 
 # Need to define iteration in billiard table (for obst in bt...)
 getindex(bt::BilliardTable, i) = bt.bt[i]

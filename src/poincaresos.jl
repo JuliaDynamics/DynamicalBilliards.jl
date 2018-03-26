@@ -22,18 +22,19 @@ end
 
 #WARNING: This code is ugly.
 """
-    function shiftconstruct(bt::BilliardTable, sortorder::Array{Int})
-Uses the `sortorder` array (see [`psos`](@ref)) and [`totallength`](@ref) to
+    function shiftconstruct(bt::BilliardTable)
+Uses the `sortorder` field (see [`BilliardTable`](@ref) and [`psos`](@ref)) and [`totallength`](@ref) to
 generate an array of `SVector`s, with the `i`th `SVector` containing the arc
 length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
 Used by [`psos`](@ref) to compute arc lengths.
 """
-function shiftconstruct(bt::BilliardTable{T}, sortorder::Array{Int}) where {T}
-    intervals = Array{SVector{2,T}}(length(sortorder))
-    signs = Array{Int}(length(sortorder))
+function shiftconstruct(bt::BilliardTable{T}) where {T}
+    len = length(bt.sortorder)
+    intervals = Array{SVector{2,T}}(len)
+    signs = Array{Int}(len)
     current = zero(T)
-    for i ∈ sortorder
+    for i ∈ bt.sortorder
         absi = abs(i)
         l = totallength(bt[absi]) + current
         intervals[absi] = SVector{2,T}(current, l)
@@ -48,16 +49,19 @@ end
 #######################################################################################
 
 
-
+#TODO:rewrite docstring
 """
 ```julia
 function psos(ps::Vector{Particle}, bt::BilliardTable, t, sortorder::Vector{Int})
-function psos(n::Int, bt::BilliardTable, t, sortorder::Vector{Int})
+function psos(n::Int, bt::BilliardTable, t)
 ```
-This function calls [`evolve_boundary'](@ref) and rearranges its output using the
-    information provided in `sortorder`. `sortorder`should contain the indices of
-    the `Obstacle`s in `bt` in the correct order, with the signs signifying the
-    sign with which the individual `arclength`s are supposed to be added up.
+This function calls [`bounce'](@ref), uses [`arclength`](@ref) on its output to
+    transform it to obstacle coordinates.
+    These are transformed into global boundary coordinates using the information
+    provided in the `BilliardTable`'s `sortorder` field.
+    `sortorder` contains the indices of the `Obstacle`s in `bt` in the
+    correct order, with the signs signifying the sign with which the individual
+    `arclength`s are supposed to be added up.
 
 If `n` is given instead of ps, generates `n` random particles inside bt and
     evolves them.
@@ -69,14 +73,13 @@ Returns
 * an array of intervals corresponding to the obstacle arc lengths
 
 """
-function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t,
-                     sortorder::Vector{Int}) where {T}
+function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t) where {T}
     params = T[]
     angles = T[]
     intervals = T[]
     times = T[]
 
-    intervals, signs = shiftconstruct(bt, sortorder)
+    intervals, signs = shiftconstruct(bt)
     for p ∈ ps
         count = zero(T)
         t_to_write = zero(T)
@@ -107,7 +110,7 @@ function psos(ps::Vector{Particle{T}}, bt::BilliardTable{T}, t,
     return params, angles, intervals, times
 end
 
-function psos(n::Int, bt::BilliardTable, t, sortorder::Vector{Int})
+function psos(n::Int, bt::BilliardTable, t)
     ps = [randominside(bt) for i ∈ 1:n]
     return psos(ps, bt, t, sortorder)
 end
