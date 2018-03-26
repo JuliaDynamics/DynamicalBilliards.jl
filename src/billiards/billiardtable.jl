@@ -40,7 +40,7 @@ end
 function BilliardTable(bt::Vararg{Obstacle};
             sortorder::AbstractVector{Int} = collect(1:length(bt)))
 
-    T = eltype(bt)
+    T = eltype(bt[1])
     tup = (bt...,)
     if !(typeof(sortorder) <: SVector)
         sortorder = SVector{length(sortorder),Int}(sortorder...)
