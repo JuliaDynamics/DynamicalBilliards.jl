@@ -332,13 +332,13 @@ assumed to be very close to the obstacle's boundary).
 
 """
     function arclength(p::AbstractParticle, o::Obstacle)
-Returns the position of a particle on an obstacle in boundary coordinates
-assuming that the particle is on the obstacle.
+Returns the boundary coordinate of the particle on the obstacle,
+assuming that the particle position is on the obstacle.
 
-Boundary coordinates are chosen
-* as the distance from the start point in `Wall`s
-* as the arc length measured counterclockwise from the open face in `Semicircle`s
-* as the arc length measured counterclockwise from the rightmost point in `Circular`s
+The boundary coordinate is measured as:
+* the distance from start point to end point in `Wall`s
+* the arc length measured counterclockwise from the open face in `Semicircle`s
+* the arc length measured counterclockwise from the rightmost point in `Circular`s
 """
 arclength(p::AbstractParticle, o) = arclength(p.pos, o)
 arclength(pos::SV, o::Wall) = norm(pos - o.sp)

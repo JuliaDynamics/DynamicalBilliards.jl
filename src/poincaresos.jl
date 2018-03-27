@@ -1,6 +1,4 @@
-using StaticArrays
-
-export evolve_boundary!, evolve_boundary, poincaresection
+export poincaresection
 
 #this function only exists because incidence_angle from raysplitting.jl only works
 #if you pass the particle *before* collision, which I cannot do because of bounce!
@@ -15,42 +13,27 @@ function reflection_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
 end
 
 
-#######################################################################################
-## Helper functions to rearrange output of evolve_boundary
-#######################################################################################
 
-
-#WARNING: This code is ugly.
 """
     arcintervals(bt::BilliardTable)
-Use the `sortorder` field (see [`BilliardTable`](@ref)
-and [`poincaresection`](@ref)) and [`totallength`](@ref) to
-generate an array of `SVector`s, with the `i`th `SVector` containing the arc
+Generate an array of `SVector`s, with the `i`th `SVector` containing the arc
 length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
 Used by [`poincaresection`](@ref) to compute arc lengths.
 """
-function arcintervals(bt::BilliardTable{T}) where {T}
-    len = length(bt.sortorder)
-    intervals = Array{SVector{2,T}}(len)
-    signs = Array{Int}(len)
+function arcintervals(bt::BilliardTable{T, D}) where {T, D}
+    intervals = Vector{SVector{2,T}}(D)
     current = zero(T)
-    for i ∈ bt.sortorder
-        absi = abs(i)
-        l = totallength(bt[absi]) + current
-        intervals[absi] = SVector{2,T}(current, l)
-        signs[absi] = sign(i)
+    for i ∈ 1:D
+        l = totallength(bt[i]) + current
+        intervals[i] = SVector{2,T}(current, l)
         current = l
     end
-    return intervals, signs
+    return intervals
 end
 
-#######################################################################################
-## Main poincaresection function
-#######################################################################################
 
 
-#TODO:rewrite docstring
 """
 ```julia
 poincaresection(bt::BilliardTable, t, ps::Vector{<:AbstractParticle})
@@ -67,7 +50,7 @@ given, then the particles are magnetic.
 The sorting and measurement direction of the arclengths of the individual obstacles
 is dictated by the `sortorder` field of `bt`, see [`BilliardTable`](@ref) for more.
 
-## Return
+## Returns
 * the arclengths at the collisions `ξs`
 * the incidence angles at the collisions `φs`
 * obstacle arclength `intervals`
@@ -86,7 +69,7 @@ function poincaresection(bt::BilliardTable{T}, t,
     params = Vector{T}[]
     angles = Vector{T}[]
 
-    intervals, signs = arcintervals(bt)
+    intervals = arcintervals(bt)
 
     for p ∈ ps
         pparams = T[]
@@ -101,7 +84,7 @@ function poincaresection(bt::BilliardTable{T}, t,
             if typeof(bt[i]) <: PeriodicWall
                 continue # do not write output if collision with with PeriodicWall
             else
-                if signs[i] > 0
+                if !bt.inverted[i]
                     push!(pparams, arclength(p, bt[i]) + intervals[i][1])
                 else
                     push!(pparams, intervals[i][2] - arclength(p, bt[i]))
