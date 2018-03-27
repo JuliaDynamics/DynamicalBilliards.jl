@@ -61,21 +61,27 @@ poincaresection(bt::BilliardTable, t, n::Int [, ω])
 ```
 Compute the poincare section (also called boundary map) of the
 billiard table `bt` by evolving each particle for total amount `t` (either float for
-time or integer for collision number).
+time or integer for collision number). See below for the returned values.
 
 If `n::Int` is given instead of `ps`,
 then `n` random particles are produced in the billiard table. If `ω` is also
 given, then the particles are magnetic.
 
-The sorting of the arclengths of the individual obstacles is dictated by
-the `sortorder` field of `bt`, see [`BilliardTable`](@ref) for more.
+The sorting and measurement direction of the arclengths of the individual obstacles
+is dictated by the `sortorder` field of `bt`, see [`BilliardTable`](@ref) for more.
 
-# HERE GOES PROPER DESCRIPTION OF THE RETURNED STUFF AND / OR WHAT THE METHOD DOES
+## Return
+* the arclengths at the collisions `ξs`
+* the incidence angles at the collisions `φs`
+* obstacle arclength `intervals`
 
-Returns
-* a vector of the arclengths at the collisions
-* a vector of incidence angles at the collisions
-* an array of intervals corresponding to the obstacle arc lengths ???
+Both `ξs` and `φs` are vectors of `Vector`.
+The `i` inner vectors correspond to the results of the `i` initial condition/particle.
+
+The `intervals` is a vector of `SVector`. The `i` entry of `intervals` is the
+arclength spanned by the `i` obstacle of the billiard table. The direction
+of the measurement of the arclength is dictated by `bt.sortorder`, see
+[`BilliardTable`](@ref) for more.
 """
 function poincaresection(bt::BilliardTable{T}, t,
                          ps::Vector{<:AbstractParticle{T}}) where {T}
