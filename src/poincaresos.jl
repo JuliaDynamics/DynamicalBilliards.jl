@@ -30,6 +30,9 @@ length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
 Used by [`poincaresection`](@ref) to compute arc lengths.
 """
+#TODO: use simpler name that shows what the function does
+# arcintervals
+#TODO: Remove signs, use bt.sortorder
 function shiftconstruct(bt::BilliardTable{T}) where {T}
     len = length(bt.sortorder)
     intervals = Array{SVector{2,T}}(len)
