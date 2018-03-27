@@ -22,7 +22,7 @@ end
 
 #WARNING: This code is ugly.
 """
-    function shiftconstruct(bt::BilliardTable)
+    arcintervals(bt::BilliardTable)
 Use the `sortorder` field (see [`BilliardTable`](@ref)
 and [`poincaresection`](@ref)) and [`totallength`](@ref) to
 generate an array of `SVector`s, with the `i`th `SVector` containing the arc
@@ -30,10 +30,7 @@ length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
 Used by [`poincaresection`](@ref) to compute arc lengths.
 """
-#TODO: use simpler name that shows what the function does
-# arcintervals
-#TODO: Remove signs, use bt.sortorder
-function shiftconstruct(bt::BilliardTable{T}) where {T}
+function arcintervals(bt::BilliardTable{T}) where {T}
     len = length(bt.sortorder)
     intervals = Array{SVector{2,T}}(len)
     signs = Array{Int}(len)
@@ -86,12 +83,14 @@ of the measurement of the arclength is dictated by `bt.sortorder`, see
 function poincaresection(bt::BilliardTable{T}, t,
                          ps::Vector{<:AbstractParticle{T}}) where {T}
 
-    params = T[]
-    angles = T[]
+    params = Vector{T}[]
+    angles = Vector{T}[]
 
-    intervals, signs = shiftconstruct(bt)
+    intervals, signs = arcintervals(bt)
 
     for p ∈ ps
+        pparams = T[]
+        pangles = T[]
         count = zero(T)
         t_to_write = zero(T)
 
@@ -103,16 +102,19 @@ function poincaresection(bt::BilliardTable{T}, t,
                 continue # do not write output if collision with with PeriodicWall
             else
                 if signs[i] > 0
-                    push!(params, arclength(p, bt[i]) + intervals[i][1])
+                    push!(pparams, arclength(p, bt[i]) + intervals[i][1])
                 else
-                    push!(params, intervals[i][2] - arclength(p, bt[i]))
+                    push!(pparams, intervals[i][2] - arclength(p, bt[i]))
                 end
-                push!(angles, reflection_angle(p, bt[i]))
+                push!(pangles, reflection_angle(p, bt[i]))
                 # set counter
                 count += increment_counter(t, t_to_write)
                 t_to_write = zero(T)
             end
         end #time, or collision number, loop
+
+        push!(params, pparams)
+        push!(angles, pangles)
     end
 
     return params, angles, intervals
