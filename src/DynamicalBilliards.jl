@@ -28,6 +28,8 @@ include("timeevolution/propagation.jl")
 
 include("raysplitting.jl")
 
+include("poincaresos.jl")
+
 include("lyapunov_spectrum.jl")
 
 ##########################################

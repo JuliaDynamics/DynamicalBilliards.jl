@@ -7,7 +7,7 @@ tim = time()
     for ω in [-0.5, 1.2]
         @testset "params: ω=$(ω), x=$(x), y=$(y), r=$(r)" for (r, x, y) in [(0.4, 1.0, 1.0), (0.3, 1.5, 1.0)]
             bt = billiard_sinai(r, x, y)
-            c = bt[5].c
+            c = bt[1].c
             tt=1000.0
             for i in 1:partnum
                 p = randominside(bt, ω)
@@ -47,7 +47,7 @@ tim = time()
         @testset "params: ω=$(ω), x=$(x), y=$(y), r=$(r)" for (r, x, y) in [(0.4, 1.0, 1.0), (0.42, 1.0, 1.2)]
             bt = billiard_sinai(r, x, y; setting="periodic")
             xmin, ymin, xmax, ymax = cellsize(bt)
-            d = bt[5]
+            d = bt[1]
             c = d.c
             tt=1000.0
             invalid = 0
@@ -78,7 +78,7 @@ end#testset
     (r, x, y) = big.([0.4, 1.0, 1.0])
     bt = billiard_sinai(r, x, y; setting="periodic")
     xmin, ymin, xmax, ymax = cellsize(bt)
-    d = bt[5]
+    d = bt[1]
     c = d.c
     tt=1000.0
     invalid = 0

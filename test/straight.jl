@@ -6,7 +6,7 @@ tim = time()
 @testset "Straight Sinai" begin
     @testset "rectangle params: $((r, x, y))" for (r, x, y) ∈ [(0.15, 1.0, 1.0), (0.3, 1.5, 1.0), (0.4, 1.4, 2.2)]
         bt = billiard_sinai(r, x, y)
-        d = bt[5]
+        d = bt[1]
         c = d.c
         r = d.r
         tt = 10000.0
@@ -48,7 +48,7 @@ tim = time()
     @testset "rectangle dims $((r, x, y))" for (r, x, y) in [(0.3, 1.5, 1.0), (0.5, 1.4, 2.2), (0.2, 0.8, 2.2)]
         bt = billiard_sinai(r, x, y; setting="periodic")
         xmin, ymin, xmax, ymax = cellsize(bt)
-        d = bt[5]
+        d = bt[1]
         c = d.c
         tt=10000.0
         invalid = 0

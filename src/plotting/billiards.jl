@@ -4,7 +4,7 @@ export plot_billiard, billiard_julia
 
 """
 ```julia
-plot_billiard(bt::Vector{Obstacle})
+plot_billiard(bt::BilliardTable)
 ```
 Plot all obstacles in `bt` using the default arguments, set
 `xlim` and `ylim` to be 10% larger than `cellsize` and

@@ -1,6 +1,7 @@
 export Obstacle, Disk, Antidot, RandomDisk,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Wall, Circular, Semicircle
+normalvec, distance, cellsize, Wall, Circular, Semicircle,
+arclength, totallength
 
 #######################################################################################
 ## Circles
@@ -326,6 +327,52 @@ assumed to be very close to the obstacle's boundary).
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
 #######################################################################################
+## Arclengths
+#######################################################################################
+
+"""
+    function arclength(p::AbstractParticle, o::Obstacle)
+Returns the boundary coordinate of the particle on the obstacle,
+assuming that the particle position is on the obstacle.
+
+The boundary coordinate is measured as:
+* the distance from start point to end point in `Wall`s
+* the arc length measured counterclockwise from the open face in `Semicircle`s
+* the arc length measured counterclockwise from the rightmost point in `Circular`s
+"""
+arclength(p::AbstractParticle, o) = arclength(p.pos, o)
+arclength(pos::SV, o::Wall) = norm(pos - o.sp)
+
+function arclength(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
+    #projecting pos to x Axis
+    d = (pos - o.c)/o.r
+    r = acos(clamp(d[1], -1, 1))*o.r
+    return r
+end
+
+function arclength(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
+    #project pos on open face
+    chrd = SV(-o.facedir[2],o.facedir[1]) #tangent to open face
+    d = (pos - o.c)/o.r
+    x = dot(d, chrd)
+    r =  acos(clamp(x, -1, 1))*o.r
+    return r
+end
+
+
+
+"""
+    function totallength(o::Obstacle)
+Returns the total length of `o`, i.e. the maximum value `arclength(…, o)` can
+return.
+"""
+@inline totallength(o::Wall) = norm(o.ep - o.sp)
+@inline totallength(o::Semicircle) = π*o.r
+@inline totallength(o::Circular) = 2π*o.r
+
+
+
+#######################################################################################
 ## Distances
 #######################################################################################
 """
@@ -344,12 +391,12 @@ Return the **signed** distance between particle `p` and obstacle `o`, based on
 of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
 outside of the disk, negative otherwise.
 
-    distance(p::AbstractParticle, bt::Vector{<:Obstacle})
+    distance(p::AbstractParticle, bt::BilliardTable)
 Return minimum `distance(p, obst)` for all `obst` in `bt`.
 If the `distance(p, bt)` is negative this means that the particle is outside
 the billiard table.
 
-All `distance` functions can also be given a position (Vector) instead of a particle.
+All `distance` functions can also be given a position (vector) instead of a particle.
 """
 
 (distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
@@ -387,7 +434,6 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
         return min(norm(pos - end1), norm(pos - end2))
     end
 end
-
 
 
 # The entire functionality of `distance_init` is necessary only for

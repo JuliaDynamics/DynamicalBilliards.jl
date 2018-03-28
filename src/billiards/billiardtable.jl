@@ -3,23 +3,97 @@ import Base:start, next, done
 #######################################################################################
 ## Billiard Table
 #######################################################################################
-struct BilliardTable{T, BT<:Tuple}
+struct BilliardTable{T, D, BT<:Tuple}
     bt::BT
+    # if an entry of inverted is true, measure arclength the opposite way
+    inverted::SVector{D, Bool}
 end
 
-function BilliardTable(bt)
-    T = eltype(bt[1])
-    if typeof(bt) <: Tuple
-        return BilliardTable{T, typeof(bt)}(bt)
-    else
-        tup = (bt...,)
-        return BilliardTable{T, typeof(tup)}(tup)
+#pretty print:
+function Base.show(io::IO, bt::BilliardTable{T,D,BT}) where {T, D, BT}
+    s = "BilliardTable{$T} with $D obstacles:\n"
+    for o in bt
+        s*="  $(o.name)\n"
     end
+    s*="inverted: $(find(bt.inverted))"
+    print(io, s)
 end
 
-# Need to define iteration in billiard table (for obst in bt...)
-getindex(bt::BilliardTable, i) = bt.bt[i]
 
+
+"""
+    BilliardTable(obstacles...; sortorder = 1:length(obstacles))
+Construct a `BilliardTable` from given `obstacles` (tuple, vector, varargs).
+
+The keyword argument `sortorder` is a container of **singed** integers,
+like for example `[1, 3, 5, 6, -4, -2]`.
+
+`sortorder` dictates how the obstacles
+of the billiard table should be ordered such that the boundary coordinate
+(computed using the [`arclength`](@ref) function) goes around the billiard from
+obstacle to obstacle. Even if the order that the obstacles are given in is
+the "correct" one, the sign of the `sortorder` is still meaningful.
+
+The boundary coordinate is measured as:
+* the distance from start point to end point in `Wall`s
+* the arc length measured counterclockwise from the open face in `Semicircle`s
+* the arc length measured counterclockwise from the rightmost point in `Circular`s
+
+If the *sign*
+of an entry of `sortorder` is negative, then the arclength of the specific obstacle
+should be measured in the *opposite direction*.
+
+In the example of `[1, 3, 5, 6, -4, -2]` this means that:
+1. From the order that `obstacles` where given, sort them differently:
+   first use the 1st entry, then the 3rd entry, then the 5th entry, then the
+   6th entry, then the 4th entry and lastly the 2nd entry.
+2. The obstacles originally in the 2nd and 4th entry should have their arclengths
+   measured in the *inverted* direction than the default.
+"""
+function BilliardTable(bt::Union{AbstractVector, Tuple};
+    sortorder::AbstractVector{Int} = collect(1:length(bt)))
+    #default sortorder is 1,2,3,4...
+
+    if length(bt) != length(sortorder)
+        throw(ArgumentError(
+        "`sortorder` must have the same number of elements as the BilliardTable!"
+        ))
+    end
+    if 0 ∈ sortorder
+        throw(ArgumentError(
+        "0 cannot be in `sortorder`, because it has no sign!"
+        ))
+    end
+
+    T = eltype(bt[1])
+    D = length(bt)
+    sortorder = SVector{D, Int}(sortorder...)
+
+    # Assert that all elements of `bt` are of same type:
+    for i in 2:D
+        eltype(bt[i]) != T && throw(ArgumentError(
+        "All obstacles of the billiard table must have same type of
+        numbers. Found $T and $(eltype(bt[i])) instead."
+        ))
+    end
+
+    idxs = abs.(sortorder)
+    tup = (bt[idxs]...,)
+    s = SVector{D, Bool}([a < 0 for a in sortorder])
+    return BilliardTable{T, D, typeof(tup)}(tup, s)
+end
+
+function BilliardTable(bt::Vararg{Obstacle};
+    sortorder::AbstractVector{Int} = collect(1:length(bt)))
+
+    T = eltype(bt[1])
+    tup = (bt...,)
+    return BilliardTable(tup; sortorder = sortorder)
+end
+
+
+getindex(bt::BilliardTable, i) = bt.bt[i]
+# Iteration:
 start(bt::BilliardTable) = start(bt.bt)
 next(bt::BilliardTable, state) = next(bt.bt, state)
 done(bt::BilliardTable, state) = done(bt.bt, state)
@@ -88,7 +162,7 @@ function cellsize(
 end
 
 """
-    randominside(bt::BilliardTable{T} [, ω])
+    randominside(bt::BilliardTable [, ω])
 Return a particle with allowed initial conditions inside the given
 billiard table. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
