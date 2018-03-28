@@ -14,7 +14,7 @@ function stadium_psos(partnum=10; printinfo = true)
         A = zeros(Bool, p)
         c = 0
         ε = ( (2*l + w*π)/p[1], π/p[2] )
-        for point ∈ zip(ξs, φs)
+        for point ∈ zip(vcat(ξs...), vcat(φs...))
             id = clamp.(ceil.(Int, (point .- (0, -π/2))./ε), (1,1), p)
             if !A[id...]
                 A[id...] = true
