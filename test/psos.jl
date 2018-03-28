@@ -28,7 +28,7 @@ function stadium_psos(partnum=10; printinfo = true)
         if printinfo
             println("""
             Results:
-            + billiard_bunimovich is fills its PSOS
+            + billiard_bunimovich fills its PSOS
             + Required time: $(round(time()-tim, 3)) sec
             """)
         end
