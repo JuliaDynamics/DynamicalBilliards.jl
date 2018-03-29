@@ -25,8 +25,10 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 * Ray-splitting implementation: a particle may propagate
   through an obstacle given arbitrary transmission and refraction
   laws. This is also known as a "semiclassical billiard"
-* Computation of poincare surfaces of section (also known as boundary maps) for any table and any particle.
+* Computation of poincare surfaces of section (also known as boundary maps) for any table and any particle
 * Escape times
+* Easy to use low-level interface
+* Full support for visualizing and animating billiards and motion in billiards
 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
@@ -111,7 +113,7 @@ like to contribute.
 ## Julia Billiard Animation
 The animation of a particle inside a "Julia" billiard, which accompanies the logo of the package, was generated with the code:
 ```julia
-using DynamicalBilliards
+using DynamicalBilliards, PyPlot
 DynamicalBilliards.enableplotting()
 
 bt = billiard_julia(plotit = true)
@@ -131,3 +133,28 @@ savefigs = true, savename = sname)
 # use gifmaker.me to merge all figures into one .gif
 # in a future update, automatic support will be added!
 ```
+
+## Introduction animation
+
+The example .gif shown in the introduction, was generated simply with the code:
+```julia
+using DynamicalBilliards, PyPlot
+
+bt = billiard_rectangle(1.5, 1.0)
+d1 = Disk([0.45, 0.6], 0.3, "Upper-left Disk")
+d2 = Disk([1.1, 0.3], 0.15, "Lower-right Disk")
+d3 = Disk([1.2, 0.8], 0.1, "Small Disk")
+w1 = InfiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
+push!(bt, d1, d2, d3, w1)
+ω = 2.0
+p = randominside(bt, ω)
+
+plot_billiard(bt)
+axis("off")
+tight_layout()
+
+sname = "C:\\***\\example"
+animate_evolution(p, bt, 200;
+col_to_plot = 4, savefigs = true, savename = sname)
+```
+Afterwards the outputed .png files where merged into a single .gif externally using for example the website gifmaker.me.

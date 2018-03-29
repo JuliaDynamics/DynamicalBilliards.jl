@@ -18,7 +18,7 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 * "periodic" : The walls are `PeriodicWall` type,
   enforcing periodicity at the boundaries
 * "random" : The velocity is randomized upon collision.
-* "ray-splitting" : All obstacles in the billiard table allow for ray-splitting.
+* "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
@@ -86,7 +86,7 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "periodic" : The walls are `PeriodicWall` type,
   enforcing periodicity at the boundaries
 * "random" : The velocity is randomized upon collision.
-* "ray-splitting" : All obstacles in the billiard table allow for ray-splitting.
+* "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
 
 function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
@@ -118,7 +118,7 @@ billiard_lorentz(r=0.25, x=1.0, y=1.0) = billiard_sinai(r,x,y; setting = "period
 
 """
     billiard_polygon(n::Int, R, center = [0,0]; setting = "standard")
-Return a vector of obstacles that defines a regular-polygonal billiard table
+Return a vector of obstacles that defines a regular-polygonal billiard
 with `n` sides, radius `r` and given `center`.
 
 Note: `R` denotes the so-called outer radius, not the inner one.
@@ -192,7 +192,7 @@ end
 Showcase example billiard for ray-splitting processes. A rectangle `(x,y)` with a
 SplitterWall at `x/2` and two disks at each side, with respective radii `r1`, `r2`.
 
-**Notice**: This function returns a billiard table `bt` as well as a `rayspl`
+**Notice**: This function returns a billiard `bt` as well as a `rayspl`
 dictionary!
 """
 function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)

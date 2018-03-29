@@ -35,7 +35,7 @@ will plot something like this:
 
 ![Visualizing tutorial 1](http://i.imgur.com/lrDStnP.png)
 
-If you want to quickly plot the entire billiard table without changing the settings, simply use the function  `plot_billiard(bt)`:
+If you want to quickly plot the entire billiard without changing the settings, simply use the function  `plot_billiard(bt)`:
 ```julia
 bt = billiard_polygon(6, 1)
 a = Antidot([0.0,0.0], 0.5)
@@ -88,13 +88,13 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
 
 ### Arguments
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bt::Vector{Obstacle}` : The billiard table.
+  * `bt::Vector{Obstacle}` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
       that enables ray-splitting processes during evolution.
 ### Keyword Arguments
   * `newfig = true` : Creates a new figure at the function call, and plots
-    the billiard table in that figure.
+    the billiard in that figure.
   * `sleeptime` : Time passed to `sleep()` between each collision.
   * `col_to_plot` : How many previous collisions are shown during the animation.
   * `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.

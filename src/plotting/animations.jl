@@ -9,13 +9,13 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
 
 ### Arguments
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bt::Billiard` : The billiard table.
+  * `bt::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
       that enables ray-splitting processes during evolution.
 ### Keyword Arguments
   * `newfig = true` : Creates a new figure at the function call, and plots
-    the billiard table in that figure.
+    the billiard in that figure.
   * `sleeptime` : Time passed to `sleep()` between each collision.
   * `col_to_plot` : How many previous collisions are shown during the animation.
   * `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.

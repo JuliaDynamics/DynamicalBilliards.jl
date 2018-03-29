@@ -12,19 +12,15 @@ eltype(p::AbstractParticle{T}) where {T} = T
 
 
 """
-    Particle{T<:AbstractFloat} <: AbstractParticle{T}
-Two-dimensional particle in a billiard table (mutable type).
-### Fields:
-* `pos::SVector{2,T}` : Current position vector.
-* `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
-* `current_cell::SVector{2,T}` : Current "cell" the particle is located at.
-  (Used only in periodic billiards)
-### Additional constructors:
 ```julia
 Particle(ic::Vector{T}) #where ic = [x0, y0, φ0]
-Particle(x, y, φ)
-Particle() = Particle(rand(), rand(), rand()*2π)
+Particle(x0, y0, φ0)
 ```
+Create a particle with initial conditions `x0, y0, φ0`. It propagates as
+a straight line.
+
+The field `current_cell` shows at which cell of a periodic billiard is the particle
+currently located.
 """
 mutable struct Particle{T<:AbstractFloat} <: AbstractParticle{T}
     pos::SVector{2,T}
@@ -45,28 +41,21 @@ end
 Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
 Particle() = Particle(rand(), rand(), rand()*2π)
 show(io::IO, p::Particle{T}) where {T} =
-print(io, "Particle {$T}\n",
+print(io, "Particle{$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
 
 
 
 """
-    MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
-Two-dimensional particle in a billiard table with perpendicular magnetic field
-(mutable type).
-### Fields:
-* `pos::SVector{2,T}` : Current position vector.
-* `vel::SVector{2,T}` : Current velocity vector (always of measure 1).
-* `current_cell::SVector{2,T}` : Current "cell" the particle is located at
-  (Used only in periodic billiards).
-* `omega::T` : Angular velocity (cyclic frequency) of rotational motion.
-  Radius of rotation is `r=1/omega`.
-### Additional constructors:
 ```julia
 MagneticParticle(ic::AbstractVector{T}, ω::Real) #where ic = [x0, y0, φ0]
-MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
-MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
+MagneticParticle(x0, y0, φ0, ω)
 ```
+Create a *magnetic* particle with initial conditions `x0, y0, φ0` and angular
+velocity `ω`. It propagates as a circle instead of a line.
+
+The field `current_cell` shows at which cell of a periodic billiard is the particle
+currently located.
 """
 mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
     pos::SVector{2,T}
@@ -95,7 +84,7 @@ end
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
 
 show(io::IO, p::MagneticParticle{T}) where {T} =
-print(io, "Magnetic particle {$T}\n",
+print(io, "MagneticParticle{$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)\nang. velocity: $(p.omega)")
 
 

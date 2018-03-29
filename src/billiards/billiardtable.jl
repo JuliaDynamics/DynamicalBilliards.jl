@@ -29,7 +29,7 @@ The keyword argument `sortorder` is a container of **singed** integers,
 like for example `[1, 3, 5, 6, -4, -2]`.
 
 `sortorder` dictates how the obstacles
-of the billiard table should be ordered such that the boundary coordinate
+of the billiard should be ordered such that the boundary coordinate
 (computed using the [`arclength`](@ref) function) goes around the billiard from
 obstacle to obstacle. Even if the order that the obstacles are given in is
 the "correct" one, the sign of the `sortorder` is still meaningful.
@@ -72,7 +72,7 @@ function Billiard(bt::Union{AbstractVector, Tuple};
     # Assert that all elements of `bt` are of same type:
     for i in 2:D
         eltype(bt[i]) != T && throw(ArgumentError(
-        "All obstacles of the billiard table must have same type of
+        "All obstacles of the billiard must have same type of
         numbers. Found $T and $(eltype(bt[i])) instead."
         ))
     end
@@ -163,8 +163,8 @@ end
 
 """
     randominside(bt::Billiard [, ω])
-Return a particle with allowed initial conditions inside the given
-billiard table. If supplied with a second argument the
+Return a particle with random allowed initial conditions inside the given
+billiard. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
 """
 randominside(bt::Billiard{T}) where {T} =
