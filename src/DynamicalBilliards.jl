@@ -14,6 +14,7 @@ using Unrolled
 import Base: show, eltype, getindex
 
 const SV = SVector{2}
+export SVector
 
 ##########################################
 # Core                                   #

@@ -1,18 +1,46 @@
-#Basic Usage
+# High Level API
 
-`DynamicalBilliards.jl` was created with easy-of-use as its main cornerstone.
-With 3 simple steps, the user can fully initalize, evolve, and get the output of the propagation of a particle in a billiard system.
+`DynamicalBilliards` was created with easy-of-use as its main cornerstone.
+With 3 simple steps, the user can get the output of the propagation of a particle in a billiard.
 
-In general, the workflow of `DynamicalBilliards.jl` follows these simple steps:
-1. Create a billiard table, a `Vector{Obstacle}`.
+In general, the workflow of `DynamicalBilliards` follows these simple steps:
+1. Create a [`BilliardTable`](@ref).
 2. Create a particle inside that billiard table.
-3. Get the output by evolving the particle.
+3. Get the output you want by using one of the high level functions.
 
 Adding more complexity in your billiard table does not add complexity in your code. For example, to implement a ray-splitting billiard
-you only need to define one additional variable, a dictionary `Dict{Int, Vector{Function}}`. After reading through this basic usage page,
+you only need to define one additional variable, a dictionary `Dict{Int, Vector{Function}}`.
+
+After reading through this basic usage page,
 you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effort.
 
 ---
+## Billiard
+A [`BilliardTable`](@ref) is a collection of [`Obstacle`](@ref) subtypes. There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined tables that can be found in the [library page](library).
+
+In this page we will be using some of the predefined ones. For example
+```julia
+using DynamicalBilliards
+bt = billiard_bunimovich() # using default arguments
+```
+```
+PUT HERE THE OUTPUT
+```
+
+## Particle
+A `Particle` is the thing that moves around in the billiard. There
+are two ways to create one:
+1. you can use the constructor, or you can
+use the function [`randominside`](@ref).
+
+```@docs
+Particle
+randominside
+```
+---
+!!! info "Particle must be inside the Billiard!"
+    Keep in mind that the particle must be initialized **inside the billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you can check out the low-level API page, and specifically the [`distance`](@ref) function.
+
 
 ## Straight Propagation
 

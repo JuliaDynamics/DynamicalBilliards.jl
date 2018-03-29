@@ -1,24 +1,56 @@
 ![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
 
-`DynamicalBilliards.jl` is an easy-to-use, modular and extendable Julia package for
-Dynamical Billiard systems in two dimensions.
+`DynamicalBilliards` is an easy-to-use, modular and extendable Julia package for
+dynamical billiards in two dimensions.
 
-!!! tip "Logo billiard"
-    Checkout the [Julia billiard animation](#julia-billiard-animation)
-    code to see how to create the animated billiard of our logo.
 
-## Description
+# REWORK BASIC USAGE TO HIGH LEVEL INTERFACE AND ALSO
+# HA VE A LOW LEVEL INTERFACE
+# file basic usage is high level interface
+
+## Introduction
 
 A dynamical billiard is a system where a particle is propagating as a straight line from obstacle to obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
 
-The above will be referred to as the "standard" billiard. The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. Also, the [scholarpedia](http://www.scholarpedia.org/article/Dynamical_billiards) entry is a good read on the subject. In general, the standard billiard can be extended in many ways.
+The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. Also, the [scholarpedia](http://www.scholarpedia.org/article/Dynamical_billiards) entry is a good read on the subject.
 
-The types that are currently offered by this package, besides the standard one, are magnetic and ray-splitting billiards. In a magnetic billiard the particle's orbit is a circle (like electrons in a perpendicular magnetic field). In ray-splitting (a.k.a. semiclassical) billiards the particle may propagate *through* an obstacle, given some arbitrary transmission and refraction law.
+## Features
+
+* Modular creation of a billiard table from well defined obstacles
+* Straight propagation of a particle in a billiard table
+* Support for creating random initial conditions in an arbitrary
+  billiard table
+* Magnetic propagation, where the particle moves in a circle instead
+  of a straight line (works with *any* billiard table)
+* Ray-splitting implementation: a particle may propagate
+  through an obstacle given arbitrary transmission and refraction
+  laws. This is also known as a "semiclassical billiard"
+* Computation of poincare surfaces of section (also known as boundary maps) for any table and any particle.
+* Escape times
 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
 
-*The [stable](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable) documentation refers to the version of the package installed with `Pkg.add()`. The [latest](https://JuliaDynamics.github.io/DynamicalBilliards.jl/latest) documentation refers to the version under development, obtained with `Pkg.checkout("DynamicalBilliards")`.*
+---
+
+
+## Usage
+It is highly suggested to first read the [Basic Usage](/basic/basic_usage) section,
+for a general overview of how to use `DynamicalBilliards` as well as a short
+description of available features. The discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
+
+The [Lyapunov Exponents](/lyapunovs) page has info on how to compute the Lyapunov
+spectrum of a billiard system.
+
+The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards`:
+
+- [How to define your custom Billiard Table](/tutorials/billiard_table)
+- [Using Ray-Splitting billiards](/tutorials/ray-splitting)
+- [Visualizing the billiard table and animating the particle's evolution](/tutorials/visualizing)
+- [Creating your own Obstacle Type](/tutorials/own_obstacle)
+- [Examples page](/tutorials/examples)
+
+The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
 ---
 
@@ -37,7 +69,6 @@ or if you use BibTeX:
   url = {https://doi.org/10.21105/joss.00458},
   year  = {2017},
   month = {nov},
-  publisher = {The Open Journal},
   volume = {2},
   number = {19},
   pages = {458},
@@ -52,40 +83,9 @@ or if you use BibTeX:
 This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
 The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
 
-!!! note "Plotting"
-    Plotting in `DynamicalBilliards` is done through `PyPlot` and it is available on-demand only. Simply use the function `DynamicalBilliards.enableplotting()` and it will define and bring into scope all the relevant names. Notice that you must be able to `using PyPlot` for plotting to work. If you are not sure about how to install PyPlot,
-    simply run the commands:
-    `ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.add("PyPlot"); using PyPlot;`
-
-After the first installation, it is advised to run the tests to be sure that
-everything works as expected.
-```julia
-using DynamicalBilliards
-DynamicalBilliards.test_options(print_info = true, long_tests = true)
-Pkg.test("DynamicalBilliards")
-```
-The long tests take on average 4 minutes to complete, while the shorts need some
-seconds.
-
+Plotting is done through the `PyPlot` module. All plotting functions are brought
+into scope when `using PyPlot` is done.
 ---
-
-## Usage
-It is highly suggested to first visit the [Basic Usage](/basic/basic_usage) section,
-for a general overview of how to use `DynamicalBilliards.jl` as well as a short
-description of available features. The very important discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
-
-The [Lyapunov Exponents](/lyapunovs) page has info on how to compute the Lyapunov
-spectrum of a billiard system.
-
-The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards.jl`:
-
-- [How to define your custom Billiard Table](/tutorials/billiard_table)
-- [Using Ray-Splitting billiards](/tutorials/ray-splitting)
-- [Visualizing the billiard table and animating the particle's evolution](/tutorials/visualizing)
-- [Creating your own Obstacle Type](/tutorials/own_obstacle)
-- [Examples page](/tutorials/examples)
-
-The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
 
 ---
 ## Support
@@ -109,7 +109,7 @@ like to contribute.
 ---
 
 ## Julia Billiard Animation
-The animation of a particle inside a "Julia" billiard was generated with the code:
+The animation of a particle inside a "Julia" billiard, which accompanies the logo of the package, was generated with the code:
 ```julia
 using DynamicalBilliards
 DynamicalBilliards.enableplotting()
