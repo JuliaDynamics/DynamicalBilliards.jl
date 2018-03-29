@@ -391,7 +391,7 @@ Return the **signed** distance between particle `p` and obstacle `o`, based on
 of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
 outside of the disk, negative otherwise.
 
-    distance(p::AbstractParticle, bt::BilliardTable)
+    distance(p::AbstractParticle, bt::Billiard)
 Return minimum `distance(p, obst)` for all `obst` in `bt`.
 If the `distance(p, bt)` is negative this means that the particle is outside
 the billiard table.

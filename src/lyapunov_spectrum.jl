@@ -110,7 +110,7 @@ end
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
-function lyapunovspectrum!(p::Particle{T}, bt::BilliardTable{T}, t::T
+function lyapunovspectrum!(p::Particle{T}, bt::Billiard{T}, t::T
     ) where {T<:AbstractFloat}
 
     offset = eye(MMatrix{4,4, T}) #The unit vectors in the 4 directions

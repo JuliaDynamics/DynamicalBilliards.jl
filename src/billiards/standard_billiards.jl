@@ -69,7 +69,7 @@ function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
     else
         throw(ArgumentError("The given setting=$setting is unknown."))
     end
-    return BilliardTable(bt, sortorder = SVector{4,Int}(4, 2, -3, -1))
+    return Billiard(bt, sortorder = SVector{4,Int}(4, 2, -3, -1))
 end
 
 """
@@ -107,7 +107,7 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         centerdisk = Disk(c, r, "Disk")
     end
 
-    return BilliardTable(btr..., centerdisk, sortorder = SVector{5,Int}(5, 4, 2, -3, -1))
+    return Billiard(btr..., centerdisk, sortorder = SVector{5,Int}(5, 4, 2, -3, -1))
 end
 
 """
@@ -164,7 +164,7 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
         end
         push!(bt, wall)
     end
-    return BilliardTable(bt)
+    return Billiard(bt)
 end
 
 """
@@ -181,7 +181,7 @@ function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
     append!(bt,billiard_polygon(6, R, center; setting = setting).bt)
     DT = setting == "random" ? RandomDisk : Disk
     push!(bt, Disk(center, r))
-    return BilliardTable(bt, sortorder = SVector{7,Int}(7,1,2,3,4,5,6))
+    return Billiard(bt, sortorder = SVector{7,Int}(7,1,2,3,4,5,6))
 end
 
 
@@ -222,7 +222,7 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     a2 = Antidot([3x/4, y/2], r2, "Right Antidot")
     push!(bt, a2)
 
-    return BilliardTable(bt), rayspl
+    return Billiard(bt), rayspl
 end
 
 function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
@@ -255,7 +255,7 @@ function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
 
     push!(bt, capbotleft, capleft, toptop, capright, capbotright)
 
-    return BilliardTable(bt, sortorder = SVector{8,Int}(1,3,8,7,-6,-5,-4,-2,))
+    return Billiard(bt, sortorder = SVector{8,Int}(1,3,8,7,-6,-5,-4,-2,))
 end
 
 """
@@ -298,7 +298,7 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
 
     push!(bt, capbotleft, capbotright, cap)
 
-    return BilliardTable(bt, sortorder = SVector{6,Int}(1, 3, 5, 6, -4, -2))
+    return Billiard(bt, sortorder = SVector{6,Int}(1, 3, 5, 6, -4, -2))
 end
 
 """
@@ -321,7 +321,7 @@ function billiard_bunimovich(l=1.0, w=1.0)
     leftc = Semicircle([o, w/2], w/2, [l, o], "Left semicircle")
     rightc = Semicircle([l, w/2], w/2, [-l, o], "Right semicircle")
     push!(bt, bw, tw, leftc, rightc)
-    return BilliardTable(bt, sortorder = SVector{4, Int}(1,3,-2,4))
+    return Billiard(bt, sortorder = SVector{4, Int}(1,3,-2,4))
 end
 
 billiard_stadium = billiard_bunimovich

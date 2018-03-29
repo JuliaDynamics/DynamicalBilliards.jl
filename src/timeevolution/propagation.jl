@@ -172,7 +172,7 @@ position.
 end
 
 """
-    bounce!(p::AbstractParticle, bt::BilliardTable) -> i, t, pos, vel
+    bounce!(p::AbstractParticle, bt::Billiard) -> i, t, pos, vel
 "Bounce" the particle (perform a collision advance) in the billiard table.
 
 Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
@@ -185,14 +185,14 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 """
-function bounce!(p::AbstractParticle{T}, bt::BilliardTable{T}) where {T}
+function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
     tmin = relocate!(p, bt[i], tmin)
     resolvecollision!(p, bt[i])
     return i, tmin, p.pos, p.vel
 end
 
-function bounce!(p::MagneticParticle{T}, bt::BilliardTable{T}) where {T}
+function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
     if tmin != Inf
         tmin = relocate!(p, bt[i], tmin)
@@ -245,7 +245,7 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::AbstractParticle{T}, bt::BilliardTable{T}, t;
+function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
     warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
@@ -406,7 +406,7 @@ A warning can be thrown if the result is `Inf`. Enable this using the keyword
 `warning = true`.
 """
 function escapetime(
-    p::AbstractParticle{T}, bt::BilliardTable{T},
+    p::AbstractParticle{T}, bt::Billiard{T},
     t::Int = 1000; warning::Bool=false)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)

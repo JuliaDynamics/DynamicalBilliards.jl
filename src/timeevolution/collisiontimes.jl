@@ -258,11 +258,11 @@ function next_collision(
     findmin(Unrolled.unrolled_map(x -> collisiontime(p, x), bt))
 end
 
-@inline next_collision(p::AbstractParticle, bt::BilliardTable) =
+@inline next_collision(p::AbstractParticle, bt::Billiard) =
     next_collision(p, bt.bt)
 
 function next_collision(
-    p::AbstractParticle{T}, bt::BilliardTable{T})::Tuple{T,Int} where {T}
+    p::AbstractParticle{T}, bt::Billiard{T})::Tuple{T,Int} where {T}
     tmin::T = T(Inf)
     ind::Int = 0
     for i in eachindex(bt)

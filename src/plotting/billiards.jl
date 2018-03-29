@@ -4,7 +4,7 @@ export plot_billiard, billiard_julia
 
 """
 ```julia
-plot_billiard(bt::BilliardTable)
+plot_billiard(bt::Billiard)
 ```
 Plot all obstacles in `bt` using the default arguments, set
 `xlim` and `ylim` to be 10% larger than `cellsize` and
@@ -25,7 +25,7 @@ by `xt` and `yt`, on the current PyPlot figure. Only works for rectangular billi
 Sets limits automatically. Set the keyword argument `plot_orbit = false` to not
 plot the orbit defined by `(xt, yt)`.
 """
-function plot_billiard(bt::BilliardTable{T}) where {T}
+function plot_billiard(bt::Billiard{T}) where {T}
   for obst in bt
     plot_obstacle(obst)
   end

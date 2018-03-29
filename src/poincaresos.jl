@@ -15,13 +15,13 @@ end
 
 
 """
-    arcintervals(bt::BilliardTable)
+    arcintervals(bt::Billiard)
 Generate an array of `SVector`s, with the `i`th `SVector` containing the arc
 length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
 Used by [`poincaresection`](@ref) to compute arc lengths.
 """
-function arcintervals(bt::BilliardTable{T, D}) where {T, D}
+function arcintervals(bt::Billiard{T, D}) where {T, D}
     intervals = Vector{SVector{2,T}}(D)
     current = zero(T)
     for i ∈ 1:D
@@ -36,8 +36,8 @@ end
 
 """
 ```julia
-poincaresection(bt::BilliardTable, t, ps::Vector{<:AbstractParticle})
-poincaresection(bt::BilliardTable, t, n::Int [, ω])
+poincaresection(bt::Billiard, t, ps::Vector{<:AbstractParticle})
+poincaresection(bt::Billiard, t, n::Int [, ω])
 ```
 Compute the poincare section (also called boundary map) of the
 billiard table `bt` by evolving each particle for total amount `t` (either float for
@@ -48,7 +48,7 @@ then `n` random particles are produced in the billiard table. If `ω` is also
 given, then the particles are magnetic.
 
 The sorting and measurement direction of the arclengths of the individual obstacles
-is dictated by the `sortorder` field of `bt`, see [`BilliardTable`](@ref) for more.
+is dictated by the `sortorder` field of `bt`, see [`Billiard`](@ref) for more.
 
 ## Returns
 * the arclengths at the collisions `ξs`
@@ -61,9 +61,9 @@ The `i` inner vectors correspond to the results of the `i` initial condition/par
 The `intervals` is a vector of `SVector`. The `i` entry of `intervals` is the
 arclength spanned by the `i` obstacle of the billiard table. The direction
 of the measurement of the arclength is dictated by `bt.sortorder`, see
-[`BilliardTable`](@ref) for more.
+[`Billiard`](@ref) for more.
 """
-function poincaresection(bt::BilliardTable{T}, t,
+function poincaresection(bt::Billiard{T}, t,
                          ps::Vector{<:AbstractParticle{T}}) where {T}
 
     params = Vector{T}[]
@@ -103,8 +103,8 @@ function poincaresection(bt::BilliardTable{T}, t,
     return params, angles, intervals
 end
 
-poincaresection(bt::BilliardTable, t, n::Int) =
+poincaresection(bt::Billiard, t, n::Int) =
     poincaresection(bt, t, [randominside(bt) for i ∈ 1:n])
 
-poincaresection(bt::BilliardTable, t, n::Int, ω::AbstractFloat) =
+poincaresection(bt::Billiard, t, n::Int, ω::AbstractFloat) =
     poincaresection(bt, t, [randominside(bt, ω) for i ∈ 1:n])

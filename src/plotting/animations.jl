@@ -9,7 +9,7 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
 
 ### Arguments
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bt::BilliardTable` : The billiard table.
+  * `bt::Billiard` : The billiard table.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
       that enables ray-splitting processes during evolution.

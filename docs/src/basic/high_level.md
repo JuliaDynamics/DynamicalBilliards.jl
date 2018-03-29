@@ -4,7 +4,7 @@
 With 3 simple steps, the user can get the output of the propagation of a particle in a billiard.
 
 In general, the workflow of `DynamicalBilliards` follows these simple steps:
-1. Create a [`BilliardTable`](@ref).
+1. Create a [`Billiard`](@ref).
 2. Create a particle inside that billiard table.
 3. Get the output you want by using one of the high level functions.
 
@@ -16,7 +16,7 @@ you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effo
 
 ---
 ## Billiard
-A [`BilliardTable`](@ref) is a collection of [`Obstacle`](@ref) subtypes. There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined tables that can be found in the [library page](library).
+A [`Billiard`](@ref) is a collection of [`Obstacle`](@ref) subtypes. There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined tables that can be found in the [library page](library).
 
 In this page we will be using some of the predefined ones. For example
 ```julia
