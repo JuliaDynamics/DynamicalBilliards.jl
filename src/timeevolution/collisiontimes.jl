@@ -259,7 +259,7 @@ function next_collision(
 end
 
 @inline next_collision(p::AbstractParticle, bt::Billiard) =
-    next_collision(p, bt.bt)
+    next_collision(p, bt.obstacles)
 
 function next_collision(
     p::AbstractParticle{T}, bt::Billiard{T})::Tuple{T,Int} where {T}

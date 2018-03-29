@@ -178,7 +178,7 @@ function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
     r, R = promote(r, R)
     T = typeof(r); center = T[center...]
     bt = Vector{Obstacle}()
-    append!(bt,billiard_polygon(6, R, center; setting = setting).bt)
+    append!(bt,billiard_polygon(6, R, center; setting = setting).obstacles)
     DT = setting == "random" ? RandomDisk : Disk
     push!(bt, Disk(center, r))
     return Billiard(bt, sortorder = SVector{7,Int}(7,1,2,3,4,5,6))
@@ -214,7 +214,7 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     7 => [Tp(0.65), sa, newo])
 
     bt = Vector{Obstacle}()
-    append!(bt, billiard_rectangle(x, y).bt)
+    append!(bt, billiard_rectangle(x, y).obstacles)
     sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
     push!(bt, sw)
     a1 = Antidot([x/4, y/2], r1, "Left Antidot")

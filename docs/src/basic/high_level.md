@@ -193,7 +193,39 @@ hcat(xt, yt, vxt, vyt, t)[1:5, :]
     Remember that the behavior of `evolve!` depends on the type of the third argument,
     which represents "total amount". If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total number of collisions.
 
+## Poincaré Sections
+Poincaré sections (also known as boundary maps) can be obtained with the high
+level function
+```@docs
+poincaresection
+```
+---
+For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
+```julia
+using DynamicalBilliards
 
+bt = billiard_mushroom()
+
+n = 100 # how many particles to create
+
+ξς, φς, ις = poincaresection(bt, 10000, n)
+
+using PyPlot # enables plot_psos function
+
+colors = ["C$(rand(1:9))" for i in 1:n] # random colors
+
+figure()
+plot_psos(ξς, φς, ις, color = colors)
+```
+![PSOS1](https://i.imgur.com/RO9UZa9.png)
+
+And of course similarly for magnetic fields
+```julia
+ξς, φς, ις = poincaresection(bt, 10000, n, 1.0) # angular velocity last argument
+figure()
+plot_psos(ξς, φς, ις, color = colors)
+```
+![PSOS2](https://i.imgur.com/YoW1FVD.png)
 
 ## Escape Times
 It is very easy to create your own function that calculates an "escape time": the time until the particle leaves the billiard by meeting a specified condition. There is also a high-level function for this though:

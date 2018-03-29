@@ -4,9 +4,8 @@
 dynamical billiards in two dimensions.
 
 
-# REWORK BASIC USAGE TO HIGH LEVEL INTERFACE AND ALSO
-# HA VE A LOW LEVEL INTERFACE
-# file basic usage is high level interface
+!!! tip "Julia Billiard animation"
+    Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard"!
 
 ## Introduction
 
@@ -140,6 +139,18 @@ The example .gif shown in the introduction, was generated simply with the code:
 ```julia
 using DynamicalBilliards, PyPlot
 
+btr = billiard_rectangle()
+
+r = 0.165
+ewidth = 6.0
+redcent = [0.28, 0.32]
+red = Disk(redcent, r, "Red dot")
+purple = Disk([1 - redcent[1], redcent[2]], r, "Purple dot")
+green = Disk([0.5, 1 - redcent[2]], r, "Green dot")
+
+bt = Billiard(btr.obstacles..., red, purple, green)
+
+
 bt = billiard_rectangle(1.5, 1.0)
 d1 = Disk([0.45, 0.6], 0.3, "Upper-left Disk")
 d2 = Disk([1.1, 0.3], 0.15, "Lower-right Disk")
@@ -148,6 +159,13 @@ w1 = InfiniteWall([0.0, 0.4], [0.6,0.0], [0.4,0.6], "Diagonal")
 push!(bt, d1, d2, d3, w1)
 ω = 2.0
 p = randominside(bt, ω)
+
+
+
+
+
+---
+
 
 plot_billiard(bt)
 axis("off")

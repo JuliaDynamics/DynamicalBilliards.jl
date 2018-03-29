@@ -3,8 +3,8 @@ import Base:start, next, done
 #######################################################################################
 ## Billiard Table
 #######################################################################################
-struct Billiard{T, D, BT<:Tuple}
-    bt::BT
+struct Billiard{T, D, O<:Tuple}
+    obstacles::O
     # if an entry of inverted is true, measure arclength the opposite way
     inverted::SVector{D, Bool}
 end
@@ -15,7 +15,9 @@ function Base.show(io::IO, bt::Billiard{T,D,BT}) where {T, D, BT}
     for o in bt
         s*="  $(o.name)\n"
     end
-    s*="inverted: $(find(bt.inverted))"
+    if true ∈ bt.inverted
+        s*="inverted: $(find(bt.inverted))"
+    end
     print(io, s)
 end
 
@@ -92,11 +94,11 @@ function Billiard(bt::Vararg{Obstacle};
 end
 
 
-getindex(bt::Billiard, i) = bt.bt[i]
+getindex(bt::Billiard, i) = bt.obstacles[i]
 # Iteration:
-start(bt::Billiard) = start(bt.bt)
-next(bt::Billiard, state) = next(bt.bt, state)
-done(bt::Billiard, state) = done(bt.bt, state)
+start(bt::Billiard) = start(bt.obstacles)
+next(bt::Billiard, state) = next(bt.obstacles, state)
+done(bt::Billiard, state) = done(bt.obstacles, state)
 
 eltype(bt::Billiard{T}) where {T} = T
 
@@ -108,7 +110,7 @@ isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)
 ## Distances
 #######################################################################################
 for f in (:distance, :distance_init)
-    @eval $(f)(p::AbstractParticle, bt::Billiard) = $(f)(p.pos, bt.bt)
+    @eval $(f)(p::AbstractParticle, bt::Billiard) = $(f)(p.pos, bt.obstacles)
 end
 
 for f in (:distance, :distance_init)
