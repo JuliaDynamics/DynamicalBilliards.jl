@@ -1,6 +1,6 @@
-export Obstacle, Disk, Antidot, RandomDisk,
+export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Wall, Circular, Semicircle,
+normalvec, distance, cellsize, Semicircle,
 arclength, totallength
 
 #######################################################################################
@@ -331,7 +331,7 @@ assumed to be very close to the obstacle's boundary).
 #######################################################################################
 
 """
-    function arclength(p::AbstractParticle, o::Obstacle)
+    arclength(p::AbstractParticle, o::Obstacle)
 Returns the boundary coordinate of the particle on the obstacle,
 assuming that the particle position is on the obstacle.
 
@@ -362,9 +362,8 @@ end
 
 
 """
-    function totallength(o::Obstacle)
-Returns the total length of `o`, i.e. the maximum value `arclength(…, o)` can
-return.
+    totallength(o::Obstacle)
+Return the total length of `o`.
 """
 @inline totallength(o::Wall) = norm(o.ep - o.sp)
 @inline totallength(o::Semicircle) = π*o.r

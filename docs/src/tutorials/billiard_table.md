@@ -1,3 +1,10 @@
+# Creating your own Billiard
+```@docs
+Billiard
+```
+
+## REWORK
+
 A billiard table `bt` is a vector of Obstacles: `bt::Vector{Obstacle{T}} where {T<:AbstractFloat}`.
 The abstract Type `Obstacle{T}` is the supertype of all objects that a particle may collide with, with global billiard precision of type `T`.
 

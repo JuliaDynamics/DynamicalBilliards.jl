@@ -15,19 +15,20 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 ## Features
 
-* Modular creation of a billiard table from well defined obstacles
+* Modular creation of a billiard from well defined obstacles
 * Straight propagation of a particle in a billiard table
 * Support for creating random initial conditions in an arbitrary
   billiard table
 * Magnetic propagation, where the particle moves in a circle instead
-  of a straight line (works with *any* billiard table)
+  of a straight line (works with *any* billiard)
 * Ray-splitting implementation: a particle may propagate
   through an obstacle given arbitrary transmission and refraction
   laws. This is also known as a "semiclassical billiard"
-* Computation of poincare surfaces of section (also known as boundary maps) for any table and any particle
+* Computation of Poincaré surfaces of section (also known as boundary maps) for any table and any particle
 * Escape times
 * Easy to use low-level interface
 * Full support for visualizing and animating billiards and motion in billiards
+* Brutal tests that confirm the package works and overcomes numerical precision issues
 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
@@ -45,7 +46,7 @@ spectrum of a billiard system.
 
 The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards`:
 
-- [How to define your custom Billiard Table](/tutorials/billiard_table)
+- [How to define your custom Billiard](/tutorials/billiard_table)
 - [Using Ray-Splitting billiards](/tutorials/ray-splitting)
 - [Visualizing the billiard table and animating the particle's evolution](/tutorials/visualizing)
 - [Creating your own Obstacle Type](/tutorials/own_obstacle)

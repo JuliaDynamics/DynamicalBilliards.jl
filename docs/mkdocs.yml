@@ -34,13 +34,13 @@ docs_dir: 'build'
 
 pages:
 - Introduction: index.md
-- Basic Usage: basic/basic_usage.md
+- High Level API: basic/high_level.md
+- Visualizing: visualizing.md
+- Low Level API: basic/low_level.md
 - Tutorials:
   - Defining a Billiard Table: tutorials/billiard_table.md
   - Ray-Splitting: tutorials/ray-splitting.md
-  - Visualizing: tutorials/visualizing.md
   - Creating your own Obstacle: tutorials/own_obstacle.md
   - Examples: tutorials/examples.md
 - Physics: physics.md
 - Lyapunov Exponents: lyapunovs.md
-- Library: basic/library.md

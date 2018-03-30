@@ -55,10 +55,12 @@ SplitterWall
 FiniteWall
 ```
 ---
-and related functions:
+### Obstacle-related functions
 ```@docs
 normalvec
-distance
+cellsize
+arclength
+totallength
 ```
 
 ## Collision Times
@@ -68,8 +70,9 @@ next_collision
 realangle
 ```
 
-## Other propagation functions
+## Propagation functions
 ```@docs
+propagate!
 resolvecollision!
 relocate!
 specular!

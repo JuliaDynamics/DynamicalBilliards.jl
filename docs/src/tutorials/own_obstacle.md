@@ -117,7 +117,7 @@ end
 ```
 
 And that is all. The obstacle now works perfectly fine for straight propagation
-and properly initializes particles with `randominside`!
+and properly initializes particles with [`randominside`](@ref)!
 
 
 
@@ -125,6 +125,7 @@ and properly initializes particles with `randominside`!
 
 1. [`collisiontime`](@ref) with `MagneticParticle` : enables magnetic propagation
 2. `plot_obstacle` : enables plotting (used in `plot_billiard`)
+3. [`arclength`](@ref) so that the [`poincaresection`](@ref) can be computed.
 
 The `collisiontime` method for `MagneticParticle` is very easy in this case, because
 it is almost identical with the method for the general `Circular` obstacle:

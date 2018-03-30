@@ -4,24 +4,24 @@
 With 3 simple steps, the user can get the output of the propagation of a particle in a billiard.
 
 In general, the workflow of `DynamicalBilliards` follows these simple steps:
-1. Create a [`Billiard`](@ref).
-2. Create a particle inside that billiard table.
+1. Create a billiard.
+2. Create a particle inside that billiard.
 3. Get the output you want by using one of the high level functions.
 
-Adding more complexity in your billiard table does not add complexity in your code. For example, to implement a ray-splitting billiard
+Adding more complexity in your billiard does not add complexity in your code. For example, to implement a ray-splitting billiard
 you only need to define one additional variable, a dictionary `Dict{Int, Vector{Function}}`.
 
 After reading through this basic usage page,
 you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effort.
 
 !!! tip "Visualizations"
-    Visualizing the billiards, particles and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing](tutorials/visualizing) tutorial.
+    Visualizing the billiards, particles and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing](/visualizing) page.
 
 ---
 ## Billiard
 A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
 
-There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#Standard-Billiards-Library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
+There is a [tutorial](/tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#standard-billiards-library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
 In this page we will be using the Bunimovich billiard as an example:
 ```julia
@@ -31,10 +31,9 @@ bt = billiard_bunimovich() # using default arguments
 ```
 Billiard{Float64} with 4 obstacles:
   Bottom wall
-  Left semicircle
-  Top wall
   Right semicircle
-inverted: [3]
+  Top wall
+  Left semicircle
 ```
 
 ## Particles
@@ -186,12 +185,13 @@ hcat(xt, yt, vxt, vyt, t)[1:5, :]
  0.257132  0.614421  -0.491756  -0.870733  0.02
  0.252236  0.605701  -0.487397  -0.873181  0.03
  0.247384  0.596957  -0.483025  -0.875607  0.04
- ```
+```
 
 
 !!! note "Type of `t`"
     Remember that the behavior of `evolve!` depends on the type of the third argument,
     which represents "total amount". If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total number of collisions.
+
 
 ## Poincaré Sections
 Poincaré sections (also known as boundary maps) can be obtained with the high
@@ -302,5 +302,4 @@ billiard_lorentz
 billiard_polygon
 billiard_hexagonal_sinai
 billiard_raysplitting_showcase
-billiard_square_mushroom
 ```

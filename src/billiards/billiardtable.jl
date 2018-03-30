@@ -1,12 +1,10 @@
-export Billiard, randominside, isperiodic, start, next, done
+export Billiard, randominside
 import Base:start, next, done
 #######################################################################################
 ## Billiard Table
 #######################################################################################
 struct Billiard{T, D, O<:Tuple}
     obstacles::O
-    # if an entry of inverted is true, measure arclength the opposite way
-    inverted::SVector{D, Bool}
 end
 
 #pretty print:
@@ -15,50 +13,29 @@ function Base.show(io::IO, bt::Billiard{T,D,BT}) where {T, D, BT}
     for o in bt
         s*="  $(o.name)\n"
     end
-    if true ∈ bt.inverted
-        s*="inverted: $(find(bt.inverted))"
-    end
     print(io, s)
 end
 
 
 
 """
-    Billiard(obstacles...; inverted = Int[])
+    Billiard(obstacles...)
 Construct a `Billiard` from given `obstacles` (tuple, vector, varargs).
 
-If you want to use the [`poincaresurface`](@ref) function, then it is expected to
+If you want to use the [`poincaresection`](@ref) function, then it is expected to
 provide the obstacles of the billiard in sorted order, such that the boundary
-coordinate around the billiard is increasing counter-clockwise.
+coordinate (measured using [`arclength`](@ref))
+around the billiard is increasing counter-clockwise.
 
 The boundary coordinate is measured as:
 * the distance from start point to end point in `Wall`s
 * the arc length measured counterclockwise from the open face in `Semicircle`s
 * the arc length measured counterclockwise from the rightmost point in `Circular`s
-
-If you want some of the obstacles to have their bounday coordinate measured in the
-*opposite* direction during e.g. [`poincaresection`](@ref),
-use the keyword `inverted` and pass a vector of indices
-of the obstacles that should be "inverted".
 """
-function Billiard(bt::Union{AbstractVector, Tuple}; inverted = Int[])
-    #default sortorder is 1,2,3,4...
-
-    if length(bt) != length(sortorder)
-        throw(ArgumentError(
-        "`sortorder` must have the same number of elements as the Billiard!"
-        ))
-    end
-    if 0 ∈ sortorder
-        throw(ArgumentError(
-        "0 cannot be in `sortorder`, because it has no sign!"
-        ))
-    end
+function Billiard(bt::Union{AbstractVector, Tuple})
 
     T = eltype(bt[1])
     D = length(bt)
-    sortorder = SVector{D, Int}(sortorder...)
-
     # Assert that all elements of `bt` are of same type:
     for i in 2:D
         eltype(bt[i]) != T && throw(ArgumentError(
@@ -68,15 +45,13 @@ function Billiard(bt::Union{AbstractVector, Tuple}; inverted = Int[])
     end
 
     tup = (bt...,)
-    s = SVector{D, Bool}([j ∈ inverted ? true : false for j ∈ 1:D])
-    return Billiard{T, D, typeof(tup)}(tup, s)
+    return Billiard{T, D, typeof(tup)}(tup)
 end
 
-function Billiard(bt::Vararg{Obstacle}; inverted = Int[])
-
+function Billiard(bt::Vararg{Obstacle})
     T = eltype(bt[1])
     tup = (bt...,)
-    return Billiard(tup; inverted = inverted)
+    return Billiard(tup)
 end
 
 
