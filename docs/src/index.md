@@ -37,22 +37,24 @@ also no support for collision between particles.
 
 
 ## Usage
-It is highly suggested to first read the [Basic Usage](/basic/basic_usage) section,
-for a general overview of how to use `DynamicalBilliards` as well as a short
-description of available features. The discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
+It is highly suggested to first read the [High Level API](/basic/high_level).
 
-The [Lyapunov Exponents](/lyapunovs) page has info on how to compute the Lyapunov
-spectrum of a billiard system.
+See the [Visualizing](visualizing) page for plotting, animating, etc.
+
+For more advanced usage see the [Low Level API](/basic/low_level).
 
 The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards`:
 
 - [How to define your custom Billiard](/tutorials/billiard_table)
 - [Using Ray-Splitting billiards](/tutorials/ray-splitting)
-- [Visualizing the billiard table and animating the particle's evolution](visualizing)
-- [Creating your own Obstacle Type](/tutorials/own_obstacle)
+-- [Creating your own Obstacle Type](/tutorials/own_obstacle)
 - [Examples page](/tutorials/examples)
 
-The [Library](/basic/library) section has the docstrings of all exported names in convenient groups and the [Physics](/physics) briefly discusses physical aspects of billiard systems as well as inner workings of the package.
+The discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
+
+The [Lyapunov Exponents](/lyapunovs) page has info on how to compute the Lyapunov
+spectrum of a billiard.
+
 
 ---
 
