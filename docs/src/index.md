@@ -48,7 +48,7 @@ The following tutorials offer detailed descriptions for various aspects of `Dyna
 
 - [How to define your custom Billiard](/tutorials/billiard_table)
 - [Using Ray-Splitting billiards](/tutorials/ray-splitting)
-- [Visualizing the billiard table and animating the particle's evolution](/tutorials/visualizing)
+- [Visualizing the billiard table and animating the particle's evolution](visualizing)
 - [Creating your own Obstacle Type](/tutorials/own_obstacle)
 - [Examples page](/tutorials/examples)
 

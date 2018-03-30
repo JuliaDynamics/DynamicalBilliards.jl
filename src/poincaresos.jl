@@ -82,11 +82,7 @@ function poincaresection(bt::Billiard{T}, t,
             if typeof(bt[i]) <: PeriodicWall
                 continue # do not write output if collision with with PeriodicWall
             else
-                if !bt.inverted[i]
-                    push!(pparams, arclength(p, bt[i]) + intervals[i][1])
-                else
-                    push!(pparams, intervals[i][2] - arclength(p, bt[i]))
-                end
+                push!(pparams, arclength(p, bt[i]) + intervals[i][1])
                 push!(pangles, reflection_angle(p, bt[i]))
                 # set counter
                 count += increment_counter(t, t_to_write)
