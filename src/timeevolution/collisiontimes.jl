@@ -4,13 +4,13 @@ export collisiontime
 #######################################################################################
 """
     collisiontime(p::AbstractParticle, o::Obstacle)
-Calculate the collision time (time-until-collision) between given
+Calculate the collision time between given
 particle and obstacle. Returns `Inf` if the collision is not possible *or* if the
 collision happens backwards in time.
 
 In the case of magnetic propagation, there are always two possible collisions.
-The function internally decides which of the two will occur first, based on the
-sign of the angular velocity of the magnetic particle.
+The function [`realangle`](@ref) decides which of the two will occur first,
+based on the sign of the angular velocity of the magnetic particle.
 """
 function collisiontime(p::Particle{T}, w::Wall{T})::T where {T}
     n = normalvec(w, p.pos)

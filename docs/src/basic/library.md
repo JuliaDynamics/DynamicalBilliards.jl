@@ -1,29 +1,4 @@
-Below you find all the docstrings of all exported names of `DynamicalBilliards.jl` in convenient groups.
-
-
-## Propagation
-
-```@docs
-resolvecollision!
-specular!
-periodicity!
-relocate!
-collisiontime
-next_collision
-propagate_pos
-propagate!
-evolve!
-construct
-escapetime
-```
-
-## Particles
-
-```@docs
-Particle
-MagneticParticle
-cyclotron
-```
+# Library
 
 ## Obstacles
 
@@ -56,10 +31,27 @@ billiard_hexagonal_sinai
 billiard_raysplitting_showcase
 ```
 
-## Ray-splitting
+
+## Propagation
 
 ```@docs
-isphysical
-acceptable_raysplitter
-reset_billiard!
+resolvecollision!
+specular!
+periodicity!
+relocate!
+collisiontime
+next_collision
+propagate_pos
+propagate!
+evolve!
+construct
+escapetime
+```
+
+## Particles
+
+```@docs
+Particle
+MagneticParticle
+cyclotron
 ```

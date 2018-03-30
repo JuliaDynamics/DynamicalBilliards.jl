@@ -240,7 +240,7 @@ The function [`construct`](@ref) takes that into account.
 ### Ray-splitting billiards
     evolve!(p::AbstractParticle, bt, t [, ray_splitter])
 
-To implement ray-splitting, the `evolve!()` function is supplemented with a
+To implement ray-splitting, the `evolve!` function is supplemented with a
 fourth argument, `ray_splitter::Dict{Int, Any}`, which maps integers
 to some kind of Function container (Tuple or Vector). The functions in this
 container are: (φ is the angle of incidence)

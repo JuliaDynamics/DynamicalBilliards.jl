@@ -36,7 +36,7 @@ so that constructing a `Semicircle` is possible from arbitrary vectors.
 ## Necessary Methods
 The following functions must obtain methods for `Semicircle` (or any other custom
 `Obstacle`) in order for it to
-work with `DynamicalBilliards.jl`:
+work with `DynamicalBilliards`:
 
 1. [`normalvec`](@ref)
 2. [`distance`](@ref) (with arguments `(position, obstacle)`)
@@ -179,4 +179,4 @@ function plot_obstacle(d::Semicircle; kwargs...)
 end
 ```
 (this method is in the `/plotting/obstacles.jl` file and is loaded on-demand
-through the command `DynamicalBilliards.enableplotting()`)
+when `using PyPlot`)

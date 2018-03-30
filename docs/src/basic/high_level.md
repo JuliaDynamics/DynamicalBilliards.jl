@@ -21,7 +21,7 @@ you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effo
 ## Billiard
 A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
 
-There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [library page](library/#Billiards). That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
+There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#Standard-Billiards-Library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
 In this page we will be using the Bunimovich billiard as an example:
 ```julia
@@ -290,3 +290,17 @@ xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., 0.01)
 ```
 
 For more information and instructions on defining the `ray_splitter` dictionary visit the [Ray-Splitting tutorial](/tutorials/ray-splitting).
+
+
+## Standard Billiards Library
+```@docs
+billiard_rectangle
+billiard_sinai
+billiard_bunimovich
+billiard_mushroom
+billiard_lorentz
+billiard_polygon
+billiard_hexagonal_sinai
+billiard_raysplitting_showcase
+billiard_square_mushroom
+```

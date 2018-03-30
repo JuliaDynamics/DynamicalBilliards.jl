@@ -1,23 +1,5 @@
 This page briefly discusses physical aspects of billiard systems.
 
-## Implementation
-Firstly one defines a billiard table and (if desired) the [ray-splitting dictionary](/tutorials/ray-splitting/#ray-splitter-dictionary). Then one creates a particle inside the defined billiard table. The algorithm followed for the propagation of a particle is the following:
-
-1. Calculate the `collisiontime()` for **all** obstacles in the billiard table.
-2. Find the smallest time, and the obstacle corresponding to that.
-3. `relocate!()` the particle, so that it is on the correct side of the obstacle to-be-collided with.
-1. Check whether there is transmission or not (only for ray-splitting): `T(φ) > rand()`
-3. `resolvecollision!()` between the particle and obstacle:
-    * If transmission happens, once again `relocate!()` the particle accordingly and implement the ray-splitting algorithm (not discussed here).
-    * For no transmission (or no ray-splitting), perform `specular!()` reflection or `periodicity!()` conditions based on the colliding obstacle.
-5. Continue this loop for a given amount of time.
-
-In the standard billiard case, one can always exclude the collision with the previous obstacle. However, in both magnetic or ray-splitting cases this is not true anymore. Therefore the same algorithm is applied on all 3 cases for the sake of simplicity.
-
-Notice that the `relocate!()` step is *very* important because it takes care that there is not particle "leakage": particles being outside the billiard table due to the finite precision of floating numbers.
-
----
-
 ## Numerical Precision
 
 All core types of `DynamicalBilliards.jl` are parametrically constructed, with
@@ -105,7 +87,7 @@ There are no possible collisions that take place and the particle will revolve i
 forever. This can happen for specific initial conditions depending on your billiard table
 and the angular velocity ω.
 
-In such event, the convention followed by `DynamicalBilliards.jl` is the following:
+In such event, the convention followed by `DynamicalBilliards` is the following:
 `evolve!()` returns the expected output, however all returned vectors have only 2
 entries. The collision times always have the entries `0.0, Inf`. All other returned
 vectors have the initial conditions, repeated once.
