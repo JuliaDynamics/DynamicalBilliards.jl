@@ -21,7 +21,7 @@ you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effo
 ## Billiard
 A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
 
-There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [library page](library). That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
+There is a [tutorial](tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [library page](library/#Billiards). That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
 In this page we will be using the Bunimovich billiard as an example:
 ```julia

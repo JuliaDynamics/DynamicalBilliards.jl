@@ -24,36 +24,24 @@ end
 
 
 """
-    Billiard(obstacles...; sortorder = 1:length(obstacles))
+    Billiard(obstacles...; inverted = Int[])
 Construct a `Billiard` from given `obstacles` (tuple, vector, varargs).
 
-The keyword argument `sortorder` is a container of **singed** integers,
-like for example `[1, 3, 5, 6, -4, -2]`.
-
-`sortorder` dictates how the obstacles
-of the billiard should be ordered such that the boundary coordinate
-(computed using the [`arclength`](@ref) function) goes around the billiard from
-obstacle to obstacle. Even if the order that the obstacles are given in is
-the "correct" one, the sign of the `sortorder` is still meaningful.
+If you want to use the [`poincaresurface`](@ref) function, then it is expected to
+provide the obstacles of the billiard in sorted order, such that the boundary
+coordinate around the billiard is increasing counter-clockwise.
 
 The boundary coordinate is measured as:
 * the distance from start point to end point in `Wall`s
 * the arc length measured counterclockwise from the open face in `Semicircle`s
 * the arc length measured counterclockwise from the rightmost point in `Circular`s
 
-If the *sign*
-of an entry of `sortorder` is negative, then the arclength of the specific obstacle
-should be measured in the *opposite direction*.
-
-In the example of `[1, 3, 5, 6, -4, -2]` this means that:
-1. From the order that `obstacles` where given, sort them differently:
-   first use the 1st entry, then the 3rd entry, then the 5th entry, then the
-   6th entry, then the 4th entry and lastly the 2nd entry.
-2. The obstacles originally in the 2nd and 4th entry should have their arclengths
-   measured in the *inverted* direction than the default.
+If you want some of the obstacles to have their bounday coordinate measured in the
+*opposite* direction during e.g. [`poincaresection`](@ref),
+use the keyword `inverted` and pass a vector of indices
+of the obstacles that should be "inverted".
 """
-function Billiard(bt::Union{AbstractVector, Tuple};
-    sortorder::AbstractVector{Int} = collect(1:length(bt)))
+function Billiard(bt::Union{AbstractVector, Tuple}; inverted = Int[])
     #default sortorder is 1,2,3,4...
 
     if length(bt) != length(sortorder)
@@ -79,18 +67,16 @@ function Billiard(bt::Union{AbstractVector, Tuple};
         ))
     end
 
-    idxs = abs.(sortorder)
-    tup = (bt[idxs]...,)
-    s = SVector{D, Bool}([a < 0 for a in sortorder])
+    tup = (bt...,)
+    s = SVector{D, Bool}([j ∈ inverted ? true : false for j ∈ 1:D])
     return Billiard{T, D, typeof(tup)}(tup, s)
 end
 
-function Billiard(bt::Vararg{Obstacle};
-    sortorder::AbstractVector{Int} = collect(1:length(bt)))
+function Billiard(bt::Vararg{Obstacle}; inverted = Int[])
 
     T = eltype(bt[1])
     tup = (bt...,)
-    return Billiard(tup; sortorder = sortorder)
+    return Billiard(tup; inverted = inverted)
 end
 
 
