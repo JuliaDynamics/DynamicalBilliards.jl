@@ -2,7 +2,7 @@ using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
-billiard_mushroom, billiard_bunimovich
+billiard_stadium, billiard_mushroom, billiard_square_mushroom
 
 ####################################################
 ## Famous/Standard Billiards
@@ -24,52 +24,47 @@ function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
     x = convert(AbstractFloat, x)
     x, y = promote(x,y)
-    bt = Obstacle{typeof(x)}[]
     o = typeof(x)(0.0)
     if setting == "standard"
-        sp = [o,o]; ep = [o, y]; n = [x,o]
-        leftw2 = InfiniteWall(sp, ep, n, "Left wall")
+        sp = [o,y]; ep = [o, o]; n = [x,o]
+        leftw = InfiniteWall(sp, ep, n, "Left wall")
         sp = [x,o]; ep = [x, y]; n = [-x,o]
-        rightw2 = InfiniteWall(sp, ep, n, "Right wall")
-        sp = [o,y]; ep = [x, y]; n = [o,-y]
-        topw2 = InfiniteWall(sp, ep, n, "Top wall")
+        rightw = InfiniteWall(sp, ep, n, "Right wall")
+        sp = [x,y]; ep = [o, y]; n = [o,-y]
+        topw = InfiniteWall(sp, ep, n, "Top wall")
         sp = [o,o]; ep = [x, o]; n = [o,y]
-        botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
-        push!(bt, leftw2, rightw2, topw2, botw2)
+        botw = InfiniteWall(sp, ep, n, "Bottom wall")
     elseif setting == "periodic"
-        sp = [o,o]; ep = [o, y]; n = [x,o]
+        sp = [o,y]; ep = [o, o]; n = [x,o]
         leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
         sp = [x,o]; ep = [x, y]; n = [-x,o]
         rightw = PeriodicWall(sp, ep, n, "Right periodic boundary")
-        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        sp = [x,y]; ep = [o, y]; n = [o,-y]
         topw = PeriodicWall(sp, ep, n, "Top periodic boundary")
         sp = [o,o]; ep = [x, o]; n = [o,y]
         botw = PeriodicWall(sp, ep, n, "Bottom periodic boundary")
-        push!(bt, leftw, rightw, topw, botw)
     elseif setting == "random"
-        sp = [o,o]; ep = [o, y]; n = [x,o]
+        sp = [o,y]; ep = [o, o]; n = [x,o]
         leftw = RandomWall(sp, ep, n, "Left random wall")
         sp = [x,o]; ep = [x, y]; n = [-x,o]
         rightw = RandomWall(sp, ep, n, "Right random wall")
-        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        sp = [x,y]; ep = [o, y]; n = [o,-y]
         topw = RandomWall(sp, ep, n, "Top random wall")
         sp = [o,o]; ep = [x, o]; n = [o,y]
         botw = RandomWall(sp, ep, n, "Bottom random wall")
-        push!(bt, leftw, rightw, topw, botw)
     elseif setting == "ray-splitting"
-        sp = [o,o]; ep = [o, y]; n = [x,o]
+        sp = [o,y]; ep = [o, o]; n = [x,o]
         leftw = SplitterWall(sp, ep, n, "Left ray-splitting wall")
         sp = [x,o]; ep = [x, y]; n = [-x,o]
         rightw = SplitterWall(sp, ep, n, "Right ray-splitting wall")
-        sp = [o,y]; ep = [x, y]; n = [o,-y]
+        sp = [x,y]; ep = [o, y]; n = [o,-y]
         topw = SplitterWall(sp, ep, n, "Top ray-splitting wall")
         sp = [o,o]; ep = [x, o]; n = [o,y]
         botw = SplitterWall(sp, ep, n, "Bottom ray-splitting wall")
-        push!(bt, leftw, rightw, topw, botw)
     else
         throw(ArgumentError("The given setting=$setting is unknown."))
     end
-    return Billiard(bt, sortorder = SVector{4,Int}(4, 2, -3, -1))
+    return Billiard(botw, rightw, topw, leftw)
 end
 
 """
@@ -107,7 +102,7 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         centerdisk = Disk(c, r, "Disk")
     end
 
-    return Billiard(btr..., centerdisk, sortorder = SVector{5,Int}(5, 4, 2, -3, -1))
+    return Billiard(centerdisk, btr...)
 end
 
 """
@@ -177,11 +172,10 @@ function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
     setting = "standard")
     r, R = promote(r, R)
     T = typeof(r); center = T[center...]
-    bt = Vector{Obstacle}()
-    append!(bt,billiard_polygon(6, R, center; setting = setting).obstacles)
+    btr = billiard_polygon(6, R, center; setting = setting)
     DT = setting == "random" ? RandomDisk : Disk
     push!(bt, Disk(center, r))
-    return Billiard(bt, sortorder = SVector{7,Int}(7,1,2,3,4,5,6))
+    return Billiard(Disk(center, r))
 end
 
 
@@ -213,16 +207,12 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     6 => [Tp(0.35), sa, newo],
     7 => [Tp(0.65), sa, newo])
 
-    bt = Vector{Obstacle}()
-    append!(bt, billiard_rectangle(x, y).obstacles)
+    btr =  billiard_rectangle(x, y)
     sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
-    push!(bt, sw)
     a1 = Antidot([x/4, y/2], r1, "Left Antidot")
-    push!(bt, a1)
     a2 = Antidot([3x/4, y/2], r2, "Right Antidot")
-    push!(bt, a2)
 
-    return Billiard(bt), rayspl
+    return Billiard(a1, a2, sw, btr...), rayspl
 end
 
 function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
@@ -233,29 +223,23 @@ function billiard_square_mushroom(sl = 1.0, sw = 0.2, cr =1.0)
     upleftcorn = SV(-sw/2, sl)
     uprightcorn = SV(sw/2, sl)
 
-    S = typeof(convert(AbstractFloat, sl))
-    bt = Obstacle{S}[]
-
     stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), true, "Stem bottom")
-    stemleft = FiniteWall(leftcorn, upleftcorn, SV(sw, 0), false, "Stem left")
+    stemleft = FiniteWall(upleftcorn, leftcorn, SV(sw, 0), false, "Stem left")
     stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
-
-    push!(bt, stembot, stemleft, stemright)
 
     farleft = SV(-cr, sl)
     farright = SV(cr, sl)
     upfarleft = SV(-cr, sl+cr)
     upfarright = SV(cr, sl+cr)
 
-    capbotleft = FiniteWall(upleftcorn, farleft, SV(0, sw), false)
-    capleft = FiniteWall(farleft, upfarleft, SV(sw, 0), false)
-    toptop = FiniteWall(upfarleft, upfarright, SV(0, -sw), false)
+    capbotleft = FiniteWall(farleft, upleftcorn, SV(0, sw), false)
+    capleft = FiniteWall(upfarleft, farleft, SV(sw, 0), false)
+    toptop = FiniteWall(upfarright, upfarleft, SV(0, -sw), false)
     capright = FiniteWall(farright, upfarright, SV(-sw, 0))
     capbotright = FiniteWall(uprightcorn, farright, SV(0, sw), false)
 
-    push!(bt, capbotleft, capleft, toptop, capright, capbotright)
-
-    return Billiard(bt, sortorder = SVector{8,Int}(1,3,8,7,-6,-5,-4,-2,))
+    return Billiard(stembot, stemright, capbotright, capright, toptop, capleft,
+                    capbotleft, stemleft)
 end
 
 """
@@ -277,28 +261,22 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     upleftcorn = SV(-sw/2 + stloc, sl)
     uprightcorn = SV(sw/2 + stloc, sl)
 
-    S = typeof(convert(AbstractFloat, sl))
-    bt = Obstacle{S}[]
-
     stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), true, "Stem bottom")
-    stemleft = FiniteWall(leftcorn, upleftcorn, SV(sw, 0), false, "Stem left")
+    stemleft = FiniteWall(upleftcorn, leftcorn, SV(sw, 0), false, "Stem left")
     stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
 
-    push!(bt, stembot, stemleft, stemright)
 
     farleft = SV(-cr, sl)
     farright = SV(cr, sl)
 
     capbotleft = FiniteWall(
-    upleftcorn, farleft, SV(0, sw), false, "Cap bottom left")
+    farleft, upleftcorn, SV(0, sw), false, "Cap bottom left")
     capbotright = FiniteWall(
     uprightcorn, farright, SV(0, sw), false, "Cap bottom right")
 
     cap = Semicircle([0.0, sl], cap_radious, [0.0, -1.0], "Mushroom cap")
 
-    push!(bt, capbotleft, capbotright, cap)
-
-    return Billiard(bt, sortorder = SVector{6,Int}(1, 3, 5, 6, -4, -2))
+    return Billiard(stembot, stemright, capbotright, cap, capbotleft, stemleft)
 end
 
 """
@@ -314,14 +292,12 @@ function billiard_bunimovich(l=1.0, w=1.0)
 
     l = convert(AbstractFloat, l)
     l, w = promote(l,w)
-    bt = Obstacle{typeof(l)}[]
     o = typeof(l)(0.0)
     bw = InfiniteWall([o,o], [l,o], [o,  w], "Bottom wall")
-    tw = InfiniteWall([o,w], [l,w], [o, -w], "Top wall")
+    tw = InfiniteWall([l,w], [o,w], [o, -w], "Top wall")
     leftc = Semicircle([o, w/2], w/2, [l, o], "Left semicircle")
     rightc = Semicircle([l, w/2], w/2, [-l, o], "Right semicircle")
-    push!(bt, bw, tw, leftc, rightc)
-    return Billiard(bt, sortorder = SVector{4, Int}(1,3,-2,4))
+    return Billiard(bw, rightc, tw, leftc)
 end
 
 billiard_stadium = billiard_bunimovich
