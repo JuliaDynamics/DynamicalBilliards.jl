@@ -174,8 +174,7 @@ function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
     T = typeof(r); center = T[center...]
     btr = billiard_polygon(6, R, center; setting = setting)
     DT = setting == "random" ? RandomDisk : Disk
-    push!(bt, Disk(center, r))
-    return Billiard(Disk(center, r))
+    return Billiard(Disk(center, r), btr...)
 end
 
 
