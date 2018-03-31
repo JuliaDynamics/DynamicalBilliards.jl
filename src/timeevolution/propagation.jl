@@ -1,7 +1,7 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
 export resolvecollision!, propagate!, evolve!, construct, specular!,
 periodicity!, propagate_pos, next_collision, escapetime, relocate!,
-bounce!
+bounce!, evolve
 
 #######################################################################################
 ## Mathetical/Convenience Functions
@@ -172,8 +172,8 @@ position.
 end
 
 """
-    bounce!(p::AbstractParticle, bt::BilliardTable) -> i, t, pos, vel
-"Bounce" the particle (perform a collision advance) in the billiard table.
+    bounce!(p::AbstractParticle, bt::Billiard) -> i, t, pos, vel
+"Bounce" the particle (advance for one collision) in the billiard.
 
 Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
 [`relocate!`](@ref) the particle correctly,
@@ -185,14 +185,14 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 """
-function bounce!(p::AbstractParticle{T}, bt::BilliardTable{T}) where {T}
+function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
     tmin = relocate!(p, bt[i], tmin)
     resolvecollision!(p, bt[i])
     return i, tmin, p.pos, p.vel
 end
 
-function bounce!(p::MagneticParticle{T}, bt::BilliardTable{T}) where {T}
+function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
     if tmin != Inf
         tmin = relocate!(p, bt[i], tmin)
@@ -206,8 +206,8 @@ end
 ## Evolve & Construct
 #######################################################################################
 """
-    evolve!(p::AbstractParticle, bt, t [, ray_splitter])
-Evolve the given particle `p` inside the billiard table `bt`. If `t` is of type
+    evolve!(p::AbstractParticle, bt::Billiard, t)
+Evolve the given particle `p` inside the billiard `bt`. If `t` is of type
 `AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
 Return the states of the particle between collisions.
@@ -215,26 +215,32 @@ Return the states of the particle between collisions.
 The evolution takes into account the particle's Type.
 E.g. if `typeof(p) <: MagneticParticle` then magnetic evolution will take place.
 
-This function mutates the particle, use [`evolve`](@ref) otherwise.
+This function mutates the particle, use `evolve` otherwise.
 
 ### Returns
 
 * `ct::Vector{T}` : Collision times.
-* `poss::Vector{SVector{2,T}}` : Positions during collisions.
-* `vels::Vector{SVector{2,T}})` : Velocities **exactly after** the collisions.
-* `ω`, either `T` or `Vector{T}` : Angular velocity/ies (returned only for magnetic).
+* `poss::Vector{SVector{2,T}}` : Positions at the collisions.
+* `vels::Vector{SVector{2,T}})` : Velocities exactly after the collisions.
+* `ω`, either `T` or `Vector{T}` : Angular velocity/ies (returned only for magnetic
+  particles).
+
+Use the function [`construct`](@ref) to create timeseries of positions and
+velocities out of these outputs.
 
 The time `ct[i+1]` is the time necessary to reach state `poss[i+1], vels[i+1]` starting
 from the state `poss[i], vels[i]`. That is why `ct[1]` is always 0 since
 `poss[1], vels[1]` are the initial conditions. The angular velocity `ω[i]` is the one
 the particle has while propagating from state `poss[i], vels[i]` to `i+1`.
 
-Notice that at any point, the velocity vector `vels[i]` is the one obtained **after**
+Notice that at any point, the velocity vector `vels[i]` is the one obtained *after*
 the specular reflection of the `i-1`th collision.
 The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
-To implement ray-splitting, the `evolve!()` function is supplemented with a
+    evolve!(p::AbstractParticle, bt, t [, ray_splitter])
+
+To implement ray-splitting, the `evolve!` function is supplemented with a
 fourth argument, `ray_splitter::Dict{Int, Any}`, which maps integers
 to some kind of Function container (Tuple or Vector). The functions in this
 container are: (φ is the angle of incidence)
@@ -245,7 +251,7 @@ container are: (φ is the angle of incidence)
 For more information and instructions on defining these functions
 please visit the official documentation.
 """
-function evolve!(p::AbstractParticle{T}, bt::BilliardTable{T}, t;
+function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
     warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
@@ -309,23 +315,22 @@ Same as [`evolve!`](@ref) but deep-copies the particle instead.
 evolve(p, args...) = evolve!(deepcopy(p), args...)
 
 """
-    construct(ct, poss, vels[, ω][, dt=0.01]) -> xt, yt, vxt, vyt, t
-Given the main output of the `evolve!()` function, construct the
+    construct(ct, poss, vels [, ω [, dt=0.01]]) -> xt, yt, vxt, vyt, t
+Given the output of [`evolve!`](@ref), construct the
 timeseries of the position and velocity, as well as the time vector.
 
-In case of not given ω (or ω == 0), straight construction takes place.
-In case of ω != 0 or ω::Vector magnetic construction takes place.
+In case of not given `ω` (or `ω == 0`), straight construction takes place.
+In case of `ω != 0` or `ω::Vector` magnetic construction takes place.
 
 The additional optional argument of `dt` (only valid for Magnetic construction)
 is the timestep with which the timeseries are constructed.
 
-### Return
-A tuple of the following:
-* xt::Vector{T} : x position time-series
-* yt::Vector{T} : y position time-series
-* vxt::Vector{T} : x velocity time-series
-* vyt::Vector{T} : y velocity time-series
-* ts::Vector{T} : time vector
+Return:
+* x position time-series
+* y position time-series
+* x velocity time-series
+* y velocity time-series
+* time vector
 """
 function construct(t::Vector{T},
     poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}) where {T}
@@ -393,11 +398,11 @@ end
 
 
 """
-    escapetime(p, bt, maxiter = 1000; warning = false)
-Calculate the escape time of a particle `p` in the billiard table `bt`, which
-is the time until colliding with any `Door` in `bt`.
-As `Door` is considered any [`FiniteWall`](@ref) with
-field `isdoor=true`.
+    escapetime(p, bt, maxiter; warning = false)
+Calculate the escape time of a particle `p` in the billiard `bt`, which
+is the time until colliding with any "door" in `bt`.
+As a "door" is considered any [`FiniteWall`](@ref) with
+field `isdoor = true`.
 
 If the particle performs more than `maxiter` collisions without colliding with the
 `Door` (i.e. escaping) the returned result is `Inf`.
@@ -406,13 +411,13 @@ A warning can be thrown if the result is `Inf`. Enable this using the keyword
 `warning = true`.
 """
 function escapetime(
-    p::AbstractParticle{T}, bt::BilliardTable{T},
-    t::Int = 1000; warning::Bool=false)::T where {T<:AbstractFloat}
+    p::AbstractParticle{T}, bt::Billiard{T},
+    t::Int; warning::Bool=false)::T where {T<:AbstractFloat}
 
     ipos = copy(p.pos); ivel = copy(p.vel)
     ei = escapeind(bt)
     if length(ei) == 0
-        error("Billiard table does not have any Doors!")
+        error("""The billiard does not have any "doors"!""")
     end
 
     totalt = zero(T)

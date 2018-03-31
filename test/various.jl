@@ -65,7 +65,7 @@ function escape_times(partnum=500; printinfo=true)
         for i in 1:partnum
             p = randominside(bt)
 
-            et = escapetime(p, bt, warning=false)
+            et = escapetime(p, bt, 10000, warning=false)
             @test typeof(et)==Float64
             if et == Inf
                 port +=1
@@ -78,7 +78,7 @@ function escape_times(partnum=500; printinfo=true)
         for i in 1:partnum
             p = randominside(bt, 0.1)
 
-            et = escapetime(p, bt, warning=false)
+            et = escapetime(p, bt, 10000, warning=false)
             @test typeof(et)==Float64
             if et == Inf
                 port +=1

@@ -9,13 +9,13 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
 
 ### Arguments
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bt::BilliardTable` : The billiard table.
+  * `bt::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
       that enables ray-splitting processes during evolution.
 ### Keyword Arguments
   * `newfig = true` : Creates a new figure at the function call, and plots
-    the billiard table in that figure.
+    the billiard in that figure.
   * `sleeptime` : Time passed to `sleep()` between each collision.
   * `col_to_plot` : How many previous collisions are shown during the animation.
   * `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.
@@ -28,6 +28,9 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
     since the animation process mutates the particle.
   * `savename` : Name (*including path*) of the figures to be produced. The ending
     "\_i.png" will be attached to all figures.
+
+The function returns `a, b, c`. Do `a[:remove](), b[:remove](), c[:remove]()` to clear
+the particle out of the figure.
 """
 function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict();
     sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
@@ -43,6 +46,8 @@ function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict
     i=0
     xdata = Vector{Float64}[]
     ydata = Vector{Float64}[]
+
+    line, point, quiv = nothing, nothing, nothing
 
     while i < colnumber
 
@@ -95,4 +100,5 @@ function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict
     end
     i+=1
     end
+    return line, point, quiv
 end

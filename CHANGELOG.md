@@ -1,7 +1,7 @@
 # v2.0
 
 ## Currently WIP
-* Poincaresos.
+* Lyapunov exponents for magnetic propagation
 
 ## Done changes
 * **2 to 3 orders of magnitude performance gains on all functions!!!**
@@ -10,6 +10,12 @@
   * Utilized the `Unrolled` package and other kind of stability features that
     make most of the functions of `DynamicalBilliards` non-allocating!
 
+* Added poincare surface of section (boundary map) computation function which works
+  for any billiard and any particle. It assumes that the obstacles are
+  sorted counter clockwise.
+  * Added `arclength`, `totallength`
+  * Added `plot_psos` that plots the poincare section and the obstacle boundaries.
+
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module. The function `enableplotting()` does not exist anymore!
 * Re-organized all source code into a much more readable state, and as a result
@@ -17,10 +23,12 @@
 * added `evolve` function that simply deepcopies particle.
 * new function `bounce!` that propagates a particle from one collision to the
   next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
-  of saving stuff.
+  of saving stuff. All high level functions use `bounce!`.
 
 ## Syntax changes
-
+* Overhauled what a "billiard table" is: Now, called simply `Billiard` is a
+  dedicated struct that stores the obstacles as a tuple. This means that
+  all functions do not accept a `Vector{Obstacle}` anymore but rather a `Billiard`.
 * `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
   multiple dispatch and reduce code repetition.
 * `realangle` now only takes one intersection and simply returns the real angle.

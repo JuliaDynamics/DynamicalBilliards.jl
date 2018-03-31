@@ -1,16 +1,16 @@
-export collisiontime
+export collisiontime, realangle
 #######################################################################################
 ## Particle
 #######################################################################################
 """
     collisiontime(p::AbstractParticle, o::Obstacle)
-Calculate the collision time (time-until-collision) between given
+Calculate the collision time between given
 particle and obstacle. Returns `Inf` if the collision is not possible *or* if the
 collision happens backwards in time.
 
 In the case of magnetic propagation, there are always two possible collisions.
-The function internally decides which of the two will occur first, based on the
-sign of the angular velocity of the magnetic particle.
+The function [`realangle`](@ref) decides which of the two will occur first,
+based on the sign of the angular velocity of the magnetic particle.
 """
 function collisiontime(p::Particle{T}, w::Wall{T})::T where {T}
     n = normalvec(w, p.pos)
@@ -258,11 +258,11 @@ function next_collision(
     findmin(Unrolled.unrolled_map(x -> collisiontime(p, x), bt))
 end
 
-@inline next_collision(p::AbstractParticle, bt::BilliardTable) =
-    next_collision(p, bt.bt)
+@inline next_collision(p::AbstractParticle, bt::Billiard) =
+    next_collision(p, bt.obstacles)
 
 function next_collision(
-    p::AbstractParticle{T}, bt::BilliardTable{T})::Tuple{T,Int} where {T}
+    p::AbstractParticle{T}, bt::Billiard{T})::Tuple{T,Int} where {T}
     tmin::T = T(Inf)
     ind::Int = 0
     for i in eachindex(bt)

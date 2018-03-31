@@ -1,18 +1,18 @@
-This section has some examples of usage of `DynamicalBilliards.jl`, with some brief
+This section has some examples of usage of `DynamicalBilliards`, with some brief
 comments.
 
 ## Julia-logo Billiard
-The "Julia-logo" billiard, accessed by `billiard_julia()` simply wraps this code:
+The "Julia-logo" billiard animation was made with:
 ```julia
 using DynamicalBilliards, PyPlot
-DynamicalBilliards.enableplotting()
 
-bt = Obstacle{Float64}[]
 bt = billiard_rectangle()
+# Plot walls:
 for w in bt
   plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
 end
 
+# Create and plot the 3 disks:
 r = 0.165
 ewidth = 6.0
 redcent = [0.28, 0.32]
@@ -28,27 +28,28 @@ green = Disk([0.5, 1 - redcent[2]], r, "green")
 plot_obstacle(green, edgecolor = (56/255, 152/255, 38/255),
 facecolor = (96/255, 173/255, 81/255), linewidth = ewidth)
 
-push!(bt, red, purple, green)
+# Create billiard
+bt = Billiard(bt.obstacles..., red, purple, green)
+
+# Set axis
+axis("off")
+tight_layout()
+gca()[:set_aspect]("equal")
+xlim(-0.1,1.1)
+ylim(-0.1,1.1)
+
+# Create a particle
+p = randominside(bt, 2.0)
 # particle colors
 darkblue = (64/255, 99/255, 216/255)
 lightblue = (102/255, 130/255, 223/255)
 
-p = randominside(bt, 2.0)
-
-PyPlot.axis("off")
-PyPlot.tight_layout()
-PyPlot.gca()[:set_aspect]("equal")
-PyPlot.xlim(-0.1,1.1)
-PyPlot.ylim(-0.1,1.1)
-
 okwargs = Dict(:linewidth => 2.0, :color => lightblue)
 pkwargs = Dict(:color => darkblue, :s => 150.0)
 
-# create and save the animation:
-sname = "C:\\***\\anim"
+# create the animation:
 animate_evolution(p, bt, 200; col_to_plot = 7,
-particle_kwargs = pkwargs, orbit_kwargs = okwargs,
-savefigs = true, savename = sname)
+particle_kwargs = pkwargs, orbit_kwargs = okwargs, newfig = false)
 ```
 and produces:
 
