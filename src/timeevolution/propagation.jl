@@ -1,4 +1,3 @@
-# ParticlesObstacles.jl must be loaded BEFORE this
 export resolvecollision!, propagate!, evolve!, construct, specular!,
 periodicity!, propagate_pos, next_collision, escapetime, relocate!,
 bounce!, evolve
@@ -187,8 +186,9 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
 """
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
-    tmin = relocate!(p, bt[i], tmin)
-    resolvecollision!(p, bt[i])
+    o = bt[i]
+    tmin = relocate!(p, o, tmin)
+    resolvecollision!(p, o)
     return i, tmin, p.pos, p.vel
 end
 
