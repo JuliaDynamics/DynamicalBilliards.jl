@@ -3,6 +3,10 @@
 `DynamicalBilliards` is an easy-to-use, modular and extendable Julia package for
 dynamical billiards in two dimensions.
 
+!!! warn "Version 2.0 incoming!"
+    We are currently developing 2.0 of `DynamicalBilliards` which will bring massive
+    performance increase, a lot of new features and unfortuantelly some breaking changes! You can view the [changelog](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/CHANGELOG.md) to prepare for up coming changes.
+
 
 !!! tip "Julia Billiard animation"
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard"!
