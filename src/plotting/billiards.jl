@@ -82,12 +82,14 @@ end
 Create a copy of the given obstacle with its position
 translated by `vector`.
 """
-function translation(d::Circular, vec)
-  newd = typeof(d)(d.c .+ vec, d.r)
+function translation end
+
+for T in subtypes(Circular)
+  @eval translation(d::$T, vec) = ($T)(d.c .+ vec, d.r)
 end
 
-function translation(w::Wall, vec)
-  neww = typeof(w)(w.sp + vec, w.ep + vec, w.normal)
+for T in subtypes(Wall)
+  @eval translation(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
 end
 
 
