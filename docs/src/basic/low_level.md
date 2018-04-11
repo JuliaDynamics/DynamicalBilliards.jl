@@ -34,7 +34,7 @@ The algorithm steps 1-3 described above are bundled in the following well-behavi
 bounce!
 ```
 ---
-`bounce!` is the function used internally by all high-level functions, like [`evolve!`](@ref), [`poincaresection`](@ref), [`escapetime`](@ref), etc.
+`bounce!` is the function used internally by all high-level functions, like [`evolve!`](@ref), [`boundarymap`](@ref), [`escapetime`](@ref), etc.
 
 This is the function a user should use if they want to calculate other things besides what is already available in the high level API.
 

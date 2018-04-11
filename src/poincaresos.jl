@@ -1,4 +1,5 @@
-export poincaresection
+export boundarymap
+export psoscut!, psoscut
 
 #this function only exists because incidence_angle from raysplitting.jl only works
 #if you pass the particle *before* collision, which I cannot do because of bounce!
@@ -19,7 +20,7 @@ end
 Generate an array of `SVector`s, with the `i`th `SVector` containing the arc
 length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
-Used by [`poincaresection`](@ref) to compute arc lengths.
+Used by [`boundarymap`](@ref) to compute arc lengths.
 """
 function arcintervals(bt::Billiard{T, D}) where {T, D}
     intervals = Vector{SVector{2,T}}(D)
@@ -36,8 +37,8 @@ end
 
 """
 ```julia
-poincaresection(bt::Billiard, t, ps::Vector{<:AbstractParticle})
-poincaresection(bt::Billiard, t, n::Int [, ω])
+boundarymap(bt::Billiard, t, ps::Vector{<:AbstractParticle})
+boundarymap(bt::Billiard, t, n::Int [, ω])
 ```
 Compute the Poincaré section (also called boundary map) of the
 billiard `bt` by evolving each particle for total amount `t` (either float for
@@ -61,7 +62,7 @@ The `i` inner vectors correspond to the results of the `i` initial condition/par
 The `intervals` is a vector of `SVector`. The `i` entry of `intervals` is the
 arclength spanned by the `i` obstacle of the billiard table.
 """
-function poincaresection(bt::Billiard{T}, t,
+function boundarymap(bt::Billiard{T}, t,
                          ps::Vector{<:AbstractParticle{T}}) where {T}
 
     params = Vector{T}[]
@@ -97,8 +98,64 @@ function poincaresection(bt::Billiard{T}, t,
     return params, angles, intervals
 end
 
-poincaresection(bt::Billiard, t, n::Int) =
-    poincaresection(bt, t, [randominside(bt) for i ∈ 1:n])
+boundarymap(bt::Billiard, t, n::Int) =
+    boundarymap(bt, t, [randominside(bt) for i ∈ 1:n])
 
-poincaresection(bt::Billiard, t, n::Int, ω::AbstractFloat) =
-    poincaresection(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
+    boundarymap(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+
+
+######################################################################################
+# Poincare sos
+######################################################################################
+psoscut(p, args...) = psoscut!(deepcopy(p), args...)
+
+"""
+    psoscut!(p, bt, plane::InfiniteWall, t = 1000) -> poss, vels
+Compute the Poincaré section of `p` moving in `bt` when crossing the given `plane`.
+Return the positions `poss` and velocities `vels` of the
+instances that the crosses the `plane`.
+
+The `plane` can be an [`InfiniteWall`](@ref) of *any* orientation.
+
+Total time of evolution is `t`, which can be either integer or float
+(see [`evolve!`](@ref)). Use `psoscut` if you don't want to mutate the particle.
+
+*Note* - "Pinned" orbits have only 0 or 1 entries in the returned values, depending
+on whether they cross the `plane`.
+"""
+function psoscut!(
+    p::AbstractParticle{T}, bt::Billiard{T}, plane::InfiniteWall{T}, t = 1000) where {T}
+
+    rpos = SV{T}[]
+    rvel = SV{T}[]
+    count = zero(t)
+
+    while count < t
+        # compute collision times
+        tmin::T, i::Int = next_collision(p, bt)
+        tplane = collisiontime(p, plane)
+
+        # if tplane is smaller, I intersect the section
+        if tplane ≥ 0 && tplane < tmin && tplane != Inf
+            psos_pos = propagate_pos(p.pos, p, tplane)
+            psos_vel = propagate_vel(p, tplane)
+            push!(rpos, psos_pos); push!(rvel, psos_vel)
+        end
+
+        tmin == Inf && break
+        # Now "bounce" the particle normally:
+        tmin = relocate!(p, bt[i], tmin)
+        resolvecollision!(p, bt[i])
+
+        count += increment_counter(t, tmin)
+    end
+    return rpos, rvel
+end
+
+propagate_vel(p::Particle, t) = p.vel
+function propagate_vel(p::MagneticParticle{T}, t) where {T}
+    ω = p.omega
+    φ0 = atan2(p.vel[2], p.vel[1])
+    psos_vel = SV{T}(cos(ω*t + φ0), sin(ω*t + φ0))
+end

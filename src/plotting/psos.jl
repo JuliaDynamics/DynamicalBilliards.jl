@@ -5,7 +5,7 @@ export plot_psos
     plot_psos(ξs, φs, intervals; kwargs...)
 
 Plots the Poincaré surface of section in boundary coordinates.
-The input arguments are the return values of `poincaresection`.
+The input arguments are the return values of `boundarymap`.
 
 ## Keyword Arguments
 * `ax = PyPlot.gca()` : The axis to plot on.

@@ -7,7 +7,7 @@ function stadium_psos(partnum=10; printinfo = true)
         t = 500
         l = w = 1.0
         bt = billiard_bunimovich(l, w)
-        ξs, φs = poincaresection(bt, t, 5*partnum)
+        ξs, φs = boundarymap(bt, t, 5*partnum)
         #using 5*partnum so it doesn't fail all the time
 
         p = (10,10)

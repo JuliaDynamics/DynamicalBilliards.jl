@@ -193,11 +193,10 @@ hcat(xt, yt, vxt, vyt, t)[1:5, :]
     which represents "total amount". If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total number of collisions.
 
 
-## Poincaré Sections
-Poincaré sections (also known as boundary maps) can be obtained with the high
-level function
+## Boundary Maps
+Boundary maps can be obtained with the high level function
 ```@docs
-poincaresection
+boundarymap
 ```
 ---
 For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
@@ -208,7 +207,7 @@ bt = billiard_mushroom()
 
 n = 100 # how many particles to create
 
-ξς, φς, ις = poincaresection(bt, 10000, n)
+ξς, φς, ις = boundarymap(bt, 10000, n)
 
 using PyPlot # enables plot_psos function
 
@@ -221,11 +220,22 @@ plot_psos(ξς, φς, ις, color = colors)
 
 And of course similarly for magnetic fields
 ```julia
-ξς, φς, ις = poincaresection(bt, 10000, n, 1.0) # angular velocity last argument
+ξς, φς, ις = boundarymap(bt, 10000, n, 1.0) # angular velocity last argument
 figure()
 plot_psos(ξς, φς, ις, color = colors)
 ```
-![PSOS2](https://i.imgur.com/YoW1FVD.png)
+![boudarymap](https://i.imgur.com/YoW1FVD.png)
+
+## Poincaré Sections
+```@docs
+psoscut!
+```
+```julia
+t = 1000
+bt = billiard_sinai(setting = "periodic")
+plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [1.0, 0.0])
+poss, vels = psoscut!(randominside(bt, 1.0), bt, plane, t)
+```
 
 ## Escape Times
 It is very easy to create your own function that calculates an "escape time": the time until the particle leaves the billiard by meeting a specified condition. There is also a high-level function for this though:
