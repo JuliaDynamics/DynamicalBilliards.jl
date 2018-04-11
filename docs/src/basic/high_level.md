@@ -228,13 +228,13 @@ plot_psos(ξς, φς, ις, color = colors)
 
 ## Poincaré Sections
 ```@docs
-psoscut!
+psos!
 ```
 ```julia
 t = 1000
 bt = billiard_sinai(setting = "periodic")
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [1.0, 0.0])
-poss, vels = psoscut!(randominside(bt, 1.0), bt, plane, t)
+poss, vels = psos!(randominside(bt, 1.0), bt, plane, t)
 ```
 
 ## Escape Times

@@ -43,18 +43,18 @@ function cut_psos(partnum=10; printinfo = true)
         plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [1.0, 0.0])
         @testset "pinned" begin
             p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
-            a, b = psoscut(p,bt,plane, t)
+            a, b = psos(p,bt,plane, t)
             @test length(a) == length(b) == 1
 
             p = MagneticParticle(0.1, 0.5, -π/2, 1/0.05)
-            a, b = psoscut(p,bt,plane, t)
+            a, b = psos(p,bt,plane, t)
             @test length(a) == length(b) == 0
         end
 
-        @testset "psoscut ω = $ω" for ω ∈ [0, 0.5, 1.0]
+        @testset "psos ω = $ω" for ω ∈ [0, 0.5, 1.0]
             for i in 1:partnum
                 p = ω == 0 ? randominside(bt) : randominside(bt, ω)
-                a, b = psoscut(p,bt,plane, t)
+                a, b = psos(p,bt,plane, t)
                 for j in 1:length(a)
                     @test a[j][1] ≈ 0.5
                     @test 0 < a[j][2] < 1

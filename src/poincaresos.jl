@@ -1,5 +1,5 @@
 export boundarymap
-export psoscut!, psoscut
+export psos!, psos
 
 #this function only exists because incidence_angle from raysplitting.jl only works
 #if you pass the particle *before* collision, which I cannot do because of bounce!
@@ -108,10 +108,15 @@ boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
 ######################################################################################
 # Poincare sos
 ######################################################################################
-psoscut(p, args...) = psoscut!(deepcopy(p), args...)
+psos(p, args...) = psos!(deepcopy(p), args...)
 
 """
-    psoscut!(p, bt, plane::InfiniteWall, t = 1000) -> poss, vels
+```julia
+boundarymap(bt::Billiard, t, ps::Vector{<:AbstractParticle})
+boundarymap(bt::Billiard, t, n::Int [, ω])
+```
+
+    psos!(p, bt, plane::InfiniteWall, t = 1000) -> poss, vels
 Compute the Poincaré section of `p` moving in `bt` when crossing the given `plane`.
 Return the positions `poss` and velocities `vels` of the
 instances that the crosses the `plane`.
@@ -119,12 +124,12 @@ instances that the crosses the `plane`.
 The `plane` can be an [`InfiniteWall`](@ref) of *any* orientation.
 
 Total time of evolution is `t`, which can be either integer or float
-(see [`evolve!`](@ref)). Use `psoscut` if you don't want to mutate the particle.
+(see [`evolve!`](@ref)). Use `psos` if you don't want to mutate the particle.
 
 *Note* - "Pinned" orbits have only 0 or 1 entries in the returned values, depending
 on whether they cross the `plane`.
 """
-function psoscut!(
+function psos!(
     p::AbstractParticle{T}, bt::Billiard{T}, plane::InfiniteWall{T}, t = 1000) where {T}
 
     rpos = SV{T}[]
