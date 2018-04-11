@@ -15,7 +15,7 @@ function psoscut!(
         tplane = collisiontime(p, plane)
 
         # if tplane is smaller, I intersect the section
-        if tplane < tmin
+        if tplane >= 0 && tplane < tmin
             psos_pos = propagate_pos(p.pos, p, tplane)
             psos_vel = propagate_vel(p, tplane)
             push!(rpos, psos_pos); push!(rvel, psos_vel)
