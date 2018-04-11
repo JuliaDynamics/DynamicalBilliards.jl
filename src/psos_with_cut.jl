@@ -2,11 +2,22 @@ export psoscut!, psoscut
 
 psoscut(p, args...) = psoscut!(deepcopy(p), args...)
 
-function psoscut!(
-    p::AbstractParticle{T}, bt::Billiard{T}, t, plane::InfiniteWall{T}) where {T}
+"""
+    psoscut!(p, bt, plane::InfiniteWall, t = 1000) -> poss, vels
+Compute the Poincaré section of `p` moving in `bt` when crossing the given `plane`.
+Return the positions `poss` and velocities `vels` of the
+instances that the crosses the `plane`.
 
-    rpos = SVector{2,T}[]
-    rvel = SVector{2,T}[]
+The `plane` can be an [`InfiniteWall`](@ref) of *any* orientation.
+
+Total time of evolution is `t`, which can be either integer or float
+(see [`evolve!`](@ref)). Use `psoscut` if you don't want to mutate the particle.
+"""
+function psoscut!(
+    p::AbstractParticle{T}, bt::Billiard{T}, plane::InfiniteWall{T}, t = 1000) where {T}
+
+    rpos = SV{T}[]
+    rvel = SV{T}[]
     count = zero(t)
 
     while count < t
