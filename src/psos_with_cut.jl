@@ -32,6 +32,7 @@ function psoscut!(
             push!(rpos, psos_pos); push!(rvel, psos_vel)
         end
 
+        tmin == Inf && break
         # Now "bounce" the particle normally:
         tmin = relocate!(p, bt[i], tmin)
         resolvecollision!(p, bt[i])
