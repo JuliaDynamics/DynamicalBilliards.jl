@@ -30,6 +30,7 @@ include("timeevolution/propagation.jl")
 include("raysplitting.jl")
 
 include("poincaresos.jl")
+include("psos_with_cut.jl")
 
 include("lyapunov_spectrum.jl")
 
