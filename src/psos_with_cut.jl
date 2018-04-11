@@ -12,6 +12,9 @@ The `plane` can be an [`InfiniteWall`](@ref) of *any* orientation.
 
 Total time of evolution is `t`, which can be either integer or float
 (see [`evolve!`](@ref)). Use `psoscut` if you don't want to mutate the particle.
+
+*Note* - "Pinned" orbits have only 0 or 1 entries in the returned values, depending
+on whether they cross the `plane`.
 """
 function psoscut!(
     p::AbstractParticle{T}, bt::Billiard{T}, plane::InfiniteWall{T}, t = 1000) where {T}
@@ -26,7 +29,7 @@ function psoscut!(
         tplane = collisiontime(p, plane)
 
         # if tplane is smaller, I intersect the section
-        if tplane >= 0 && tplane < tmin
+        if tplane ≥ 0 && tplane < tmin && tplane != Inf
             psos_pos = propagate_pos(p.pos, p, tplane)
             psos_vel = propagate_vel(p, tplane)
             push!(rpos, psos_pos); push!(rvel, psos_vel)
