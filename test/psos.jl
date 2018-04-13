@@ -67,7 +67,7 @@ function cut_psos(partnum=10; printinfo = true)
     if printinfo
         println("""
         Results:
-        + Poincare section trhough cut works
+        + Poincare section through cut works
         + Pinned particles correctly detected
         + positions and velocities are within correct bounds
         + Required time: $(round(time()-tim, 3)) sec
