@@ -230,11 +230,27 @@ plot_psos(ξς, φς, ις, color = colors)
 ```@docs
 psos!
 ```
+---
+For example, the surface of section in the periodic Sinai billiard with magnetic field
+reveals the mixed nature of the phasespace:
 ```julia
-t = 1000
+t = 100
 bt = billiard_sinai(setting = "periodic")
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [1.0, 0.0])
-poss, vels = psos!(randominside(bt, 1.0), bt, plane, t)
+posvector, velvector = psos(bt, plane, t, 1000, 2.0)
+
+for i in 1:length(posvector)
+    poss = posvector[i] # vector of positions
+    vels = velvector[i] # vector of velocities at the section
+    L = length(poss)
+    if L > 0
+        #plot y vs vy
+        y = [a[2] for a in poss]
+        vy = [a[2] for a in vels]
+        scatter(y, vy, color = "black")
+    end
+end
+
 ```
 
 ## Escape Times
