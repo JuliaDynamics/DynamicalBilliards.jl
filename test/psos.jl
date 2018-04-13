@@ -42,7 +42,7 @@ function cut_psos(partnum=10; printinfo = true)
     @testset "Cut PSOS: Sinai" begin
         t = 1000
         bt = billiard_sinai()
-        plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [1.0, 0.0])
+        plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
         @testset "pinned particle" begin
             p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
             a, b = psos(bt,plane, t, p)

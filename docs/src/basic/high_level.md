@@ -236,7 +236,7 @@ reveals the mixed nature of the phasespace:
 ```julia
 t = 100
 bt = billiard_sinai(setting = "periodic")
-plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [1.0, 0.0])
+plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
 posvector, velvector = psos(bt, plane, t, 1000, 2.0)
 
 for i in 1:length(posvector)
@@ -247,7 +247,7 @@ for i in 1:length(posvector)
         #plot y vs vy
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
-        scatter(y, vy, color = "black")
+        plot(y, vy, ls = "None", color = "black", ms = 0.2, marker = "o")
     end
 end
 
