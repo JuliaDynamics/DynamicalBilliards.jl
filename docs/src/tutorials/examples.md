@@ -5,7 +5,7 @@ comments.
 The "Julia-logo" billiard animation was made with:
 ```julia
 using DynamicalBilliards, PyPlot
-
+figure()
 bt = billiard_rectangle()
 # Plot walls:
 for w in bt

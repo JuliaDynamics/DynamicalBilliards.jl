@@ -104,7 +104,7 @@ By default it also plots the billiard in a new `PyPlot.figure()` using the corre
 """
 function billiard_julia(; plotit = true)
 
-  bt = billiard_rectangle()
+  btr = billiard_rectangle()
 
   r = 0.165
   ewidth = 6.0
@@ -112,7 +112,7 @@ function billiard_julia(; plotit = true)
   red = Disk(redcent, r, "Red dot")
   purple = Disk([1 - redcent[1], redcent[2]], r, "Purple dot")
   green = Disk([0.5, 1 - redcent[2]], r, "Green dot")
-  push!(bt, red, purple, green)
+  bt = Billiard(btr.obstacles..., red, purple, green)
 
   if plotit == true
     PyPlot.figure()
