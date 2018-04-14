@@ -228,7 +228,7 @@ plot_boundarymap(ξς, φς, ις, color = colors)
 
 ## Poincaré Sections
 ```@docs
-psos!
+psos
 ```
 ---
 For example, the surface of section in the periodic Sinai billiard with magnetic field
