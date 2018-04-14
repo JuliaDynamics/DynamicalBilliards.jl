@@ -1,4 +1,9 @@
-export poincaresection
+export boundarymap
+export psos!, psos
+
+#######################################################################################
+## Boundary Map
+#######################################################################################
 
 #this function only exists because incidence_angle from raysplitting.jl only works
 #if you pass the particle *before* collision, which I cannot do because of bounce!
@@ -19,7 +24,7 @@ end
 Generate an array of `SVector`s, with the `i`th `SVector` containing the arc
 length intervals corresponding to the `i`th `Obstacle` in `bt`.
 
-Used by [`poincaresection`](@ref) to compute arc lengths.
+Used by [`boundarymap`](@ref) to compute arc lengths.
 """
 function arcintervals(bt::Billiard{T, D}) where {T, D}
     intervals = Vector{SVector{2,T}}(D)
@@ -35,16 +40,17 @@ end
 
 
 """
-```julia
-poincaresection(bt::Billiard, t, ps::Vector{<:AbstractParticle})
-poincaresection(bt::Billiard, t, n::Int [, ω])
-```
-Compute the Poincaré section (also called boundary map) of the
+    boundarymap(bt::Billiard, t, particles)
+Compute the boundary map of the
 billiard `bt` by evolving each particle for total amount `t` (either float for
 time or integer for collision number). See below for the returned values.
 
-If `n::Int` is given instead of `ps`,
-then `n` random particles are produced in the billiard table using
+`particles` can be:
+* A single particle.
+* A `Vector` of particles.
+* An integer `n` optionally followed by an angular velocity `ω`.
+
+In the last case `n` random particles are produced in the billiard table using
 [`randominside`](@ref). If `ω` is also given, then the particles are magnetic.
 
 The measurement direction of the arclengths of the individual obstacles
@@ -55,50 +61,142 @@ Return
 * the incidence angles at the collisions `φs`
 * obstacle arclength `intervals`
 
-Both `ξs` and `φs` are vectors of `Vector`.
-The `i` inner vectors correspond to the results of the `i` initial condition/particle.
-
-The `intervals` is a vector of `SVector`. The `i` entry of `intervals` is the
-arclength spanned by the `i` obstacle of the billiard table.
+If `particles` is not a single particle then both `ξs` and `φs` are vectors of `Vector`.
+The `i` inner vector corresponds to the results of the `i` initial condition/particle.
 """
-function poincaresection(bt::Billiard{T}, t,
-                         ps::Vector{<:AbstractParticle{T}}) where {T}
+function boundarymap(bt::Billiard{T}, t,
+                     ps::Vector{<:AbstractParticle{T}}) where {T}
 
     params = Vector{T}[]
     angles = Vector{T}[]
-
     intervals = arcintervals(bt)
-
     for p ∈ ps
-        pparams = T[]
-        pangles = T[]
-        count = zero(T)
-        t_to_write = zero(T)
-
-        while count < t
-            i, tmin = bounce!(p,bt)
-            t_to_write += tmin
-
-            if typeof(bt[i]) <: PeriodicWall
-                continue # do not write output if collision with with PeriodicWall
-            else
-                push!(pparams, arclength(p, bt[i]) + intervals[i][1])
-                push!(pangles, reflection_angle(p, bt[i]))
-                # set counter
-                count += increment_counter(t, t_to_write)
-                t_to_write = zero(T)
-            end
-        end #time, or collision number, loop
-
+        pparams, pangles = boundarymap(bt, t, p, intervals)
         push!(params, pparams)
         push!(angles, pangles)
     end
-
     return params, angles, intervals
 end
 
-poincaresection(bt::Billiard, t, n::Int) =
-    poincaresection(bt, t, [randominside(bt) for i ∈ 1:n])
+function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
+                     intervals = arcintervals(bt)) where {T}
 
-poincaresection(bt::Billiard, t, n::Int, ω::AbstractFloat) =
-    poincaresection(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+    p = deepcopy(par)
+    pparams = T[]
+    pangles = T[]
+    count = zero(T)
+    t_to_write = zero(T)
+
+    while count < t
+        i, tmin = bounce!(p,bt)
+        t_to_write += tmin
+
+        if typeof(bt[i]) <: PeriodicWall
+            continue # do not write output if collision with with PeriodicWall
+        else
+            push!(pparams, arclength(p, bt[i]) + intervals[i][1])
+            push!(pangles, reflection_angle(p, bt[i]))
+            # set counter
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+    end #time, or collision number, loop
+    return pparams, pangles
+end
+
+
+boundarymap(bt::Billiard, t, n::Int) =
+    boundarymap(bt, t, [randominside(bt) for i ∈ 1:n])
+
+boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
+    boundarymap(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+
+
+######################################################################################
+# Poincare sos
+######################################################################################
+propagate_posvel(pos, p::Particle{T}, t) where {T} =
+    (SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t), p.vel)
+
+function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
+    ω = p.omega
+    φ0 = atan2(p.vel[2], p.vel[1])
+    ppos = SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
+    psos_vel = SV{T}(cos(ω*t + φ0), sin(ω*t + φ0))
+    return pos + ppos, psos_vel
+end
+
+
+"""
+    psos(bt::Billiard, plane::InfiniteWall, t, particles)
+Compute the Poincaré section of the `particles` with the given `plane`, by evolving
+each one for time `t` (either integer or float) inside `bt`.
+
+The `plane` can be an [`InfiniteWall`](@ref) of *any* orientation, however only
+crossings of the `plane` such that `dot(velocity, normal) < 0` are allowed, with
+`normal` the normal unit vector of the `plane`.
+
+`particles` can be:
+* A single particle.
+* A `Vector` of particles.
+* An integer `n` optionally followed by an angular velocity `ω`.
+
+Return the positions `poss` and velocities `vels` at the instances of crossing
+the `plane`. If given more than one particle, the result is a vector of vectors
+of vectors.
+"""
+function psos(
+    bt::Billiard{T}, plane::InfiniteWall{T}, t, par::AbstractParticle{T}) where {T}
+
+    p = deepcopy(par)
+    rpos = SV{T}[]
+    rvel = SV{T}[]
+    count = zero(t)
+
+    # periodic = isperiodic(bt)
+    # ismagnetic = typeof(p) <: MagneticParticle
+    # ismagnetic && (absω = abs(p.omega))
+    # t_to_write = zero(T)
+
+    while count < t
+        # compute collision times
+        tmin::T, i::Int = next_collision(p, bt)
+
+        # if periodic && typeof(bt[i]) <: PeriodicWall
+
+        tplane = collisiontime(p, plane)
+
+        # if tplane is smaller, I intersect the section
+        if tplane ≥ 0 && tplane < tmin && tplane != Inf
+            psos_pos, psos_vel = propagate_posvel(p.pos, p, tplane)
+            if dot(psos_vel, plane.normal) < 0 # only write crossings with 1 direction
+                push!(rpos, psos_pos); push!(rvel, psos_vel)
+            end
+        end
+
+        tmin == Inf && break
+        # Now "bounce" the particle normally:
+        tmin = relocate!(p, bt[i], tmin)
+        resolvecollision!(p, bt[i])
+
+        count += increment_counter(t, tmin)
+    end
+    return rpos, rvel
+end
+
+function psos(bt::Billiard{T}, plane::InfiniteWall{T}, t,
+    pars::Vector{<:AbstractParticle{T}}) where {T}
+
+    retpos = Vector{SV{T}}[]
+    retvel = Vector{SV{T}}[]
+
+    for p ∈ pars
+        rpos, rvel = psos(bt, plane, t, p)
+        push!(retpos, rpos); push!(retvel, rvel)
+    end
+    return retpos, retvel
+end
+
+psos(bt, plane, t, n::Integer) = psos(bt, plane, t, [randominside(bt) for i=1:n])
+psos(bt, plane, t, n::Integer, ω::Real) =
+psos(bt, plane, t, [randominside(bt, ω) for i=1:n])

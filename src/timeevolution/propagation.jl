@@ -154,7 +154,7 @@ end
 end
 
 """
-    propagate_pos(pos, p::Particle{T}, t::Real) where {T}
+    propagate_pos(pos, p::AbstractParticle, t::Real) -> newpos
 Perform a "fake" propagation, i.e. propagate a position as if it was the particle's
 position.
 """
@@ -267,7 +267,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
     push!(rvel, p.vel)
     push!(rt, zero(T))
 
-    count = zero(T)
+    count = zero(t)
     t_to_write = zero(T)
 
     while count < t

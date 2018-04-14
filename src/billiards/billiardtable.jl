@@ -22,7 +22,7 @@ end
     Billiard(obstacles...)
 Construct a `Billiard` from given `obstacles` (tuple, vector, varargs).
 
-If you want to use the [`poincaresection`](@ref) function, then it is expected to
+If you want to use the [`boundarymap`](@ref) function, then it is expected to
 provide the obstacles of the billiard in sorted order, such that the boundary
 coordinate (measured using [`arclength`](@ref))
 around the billiard is increasing counter-clockwise.

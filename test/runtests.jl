@@ -39,7 +39,7 @@ t = time()
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
     raysplit_straight, raysplit_magnetic, type_stability, lyapunov_spectrum,
-    escape_times, stadium_psos)
+    escape_times, stadium_psos, cut_psos)
 for f in fnames
     println()
     f(partnum, printinfo=printinfo)
