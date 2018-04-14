@@ -144,9 +144,6 @@ crossings of the `plane` such that `dot(velocity, normal) < 0` are allowed, with
 Return the positions `poss` and velocities `vels` at the instances of crossing
 the `plane`. If given more than one particle, the result is a vector of vectors
 of vectors.
-
-*Note* - "Pinned" orbits have only 0 or 1 entries in the returned values, depending
-on whether they cross the `plane`.
 """
 function psos(
     bt::Billiard{T}, plane::InfiniteWall{T}, t, par::AbstractParticle{T}) where {T}
@@ -156,9 +153,17 @@ function psos(
     rvel = SV{T}[]
     count = zero(t)
 
+    # periodic = isperiodic(bt)
+    # ismagnetic = typeof(p) <: MagneticParticle
+    # ismagnetic && (absω = abs(p.omega))
+    # t_to_write = zero(T)
+
     while count < t
         # compute collision times
         tmin::T, i::Int = next_collision(p, bt)
+
+        # if periodic && typeof(bt[i]) <: PeriodicWall
+
         tplane = collisiontime(p, plane)
 
         # if tplane is smaller, I intersect the section

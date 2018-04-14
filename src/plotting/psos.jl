@@ -1,8 +1,8 @@
 using PyPlot
-export plot_psos
+export plot_boundarymap
 
 """
-    plot_psos(ξs, φs, intervals; kwargs...)
+    plot_boundarymap(ξs, φs, intervals; kwargs...)
 
 Plots the Poincaré surface of section in boundary coordinates.
 The input arguments are the return values of `boundarymap`.
@@ -18,7 +18,7 @@ The input arguments are the return values of `boundarymap`.
 * Any other keyword argument is passed to `PyPlot.plot` which plots the points of
   the section.
 """
-function plot_psos(ξs, φs, intervals; ax = PyPlot.gca(),
+function plot_boundarymap(ξs, φs, intervals; ax = PyPlot.gca(),
     color = "C0", bordercolor = "C3", ms = 1.0, kwargs...)
 
     # Plot PSOS

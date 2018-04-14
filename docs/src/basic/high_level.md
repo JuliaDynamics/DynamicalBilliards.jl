@@ -209,22 +209,22 @@ n = 100 # how many particles to create
 
 ξς, φς, ις = boundarymap(bt, 10000, n)
 
-using PyPlot # enables plot_psos function
+using PyPlot # enables plot_boundarymap function
 
 colors = ["C$(rand(1:9))" for i in 1:n] # random colors
 
 figure()
-plot_psos(ξς, φς, ις, color = colors)
+plot_boundarymap(ξς, φς, ις, color = colors)
 ```
-![PSOS1](https://i.imgur.com/RO9UZa9.png)
+![Boundary map](https://i.imgur.com/RO9UZa9.png)
 
 And of course similarly for magnetic fields
 ```julia
 ξς, φς, ις = boundarymap(bt, 10000, n, 1.0) # angular velocity last argument
 figure()
-plot_psos(ξς, φς, ις, color = colors)
+plot_boundarymap(ξς, φς, ις, color = colors)
 ```
-![boudarymap](https://i.imgur.com/YoW1FVD.png)
+![Boundary map with magnetic field](https://i.imgur.com/YoW1FVD.png)
 
 ## Poincaré Sections
 ```@docs
@@ -232,12 +232,17 @@ psos!
 ```
 ---
 For example, the surface of section in the periodic Sinai billiard with magnetic field
-reveals the mixed nature of the phasespace:
+reveals the mixed nature of the phase-space:
 ```julia
-t = 100
-bt = billiard_sinai(setting = "periodic")
+using DynamicalBilliards, PyPlot
+t = 100; r = 0.15
+bt = billiard_sinai(r, setting = "periodic")
+
+# the direction of the normal vector is IMPORTANT!!!
+# (always keep in mind that ω > 0  means counter-clockwise rotation!)
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
-posvector, velvector = psos(bt, plane, t, 1000, 2.0)
+
+posvector, velvector = psos(bt, plane, t, 10000, 2.0)
 
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions
@@ -247,11 +252,35 @@ for i in 1:length(posvector)
         #plot y vs vy
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
-        plot(y, vy, ls = "None", color = "black", ms = 0.2, marker = "o")
+        # Make results of pinned orbits have only one entry (for plotting speed):
+        y = unique(round.(y, 8))
+        vy = unique(round.(vy, 8))
+        # color pinned orbits differently:
+        col = length(y) == 1 ? "C1" : "C0"
+        plot(y, vy, ls = "None", color = col, ms = 1.0, alpha = 0.5, marker = "o")
     end
 end
-
+xlabel("\$y\$"); ylabel("\$v_y\$")
 ```
+![PSOS 1](https://i.imgur.com/WoTB4HR.png)
+
+!!! note "`psos` operates on the unit cell"
+    The `psos` function always calculates the crossings *within* the unit cell of
+    a periodic billiard. This means that no information about the "actual" position
+    of the particle is stored, everything is modulo the unit cell.
+
+    This can be seen very well in the above example, where there aren't any entries
+    in the region `0.5 - r ≤ y ≤ 0.5 + r`.
+
+Of course it is very easy to "re-normalize" the result such that it is coherent.
+The only change we have to do is simply replace the line `y = [a[2] for a in poss]`
+with
+```julia
+y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
+```
+which gives
+![PSOS 2](https://i.imgur.com/BYDF6oG.png)
+
 
 ## Escape Times
 It is very easy to create your own function that calculates an "escape time": the time until the particle leaves the billiard by meeting a specified condition. There is also a high-level function for this though:

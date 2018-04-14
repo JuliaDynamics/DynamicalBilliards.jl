@@ -14,7 +14,7 @@
   for any billiard and any particle. It assumes that the obstacles are
   sorted counter clockwise.
   * Added `arclength`, `totallength`
-  * Added `plot_psos` that plots the poincare section and the obstacle boundaries.
+  * Added `plot_boundarymap` that plots the poincare section and the obstacle boundaries.
 
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module. The function `enableplotting()` does not exist anymore!
