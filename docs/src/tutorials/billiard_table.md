@@ -2,19 +2,18 @@
 ```@docs
 Billiard
 ```
+---
 
-## REWORK
-
-A billiard table `bt` is a vector of Obstacles: `bt::Vector{Obstacle{T}} where {T<:AbstractFloat}`.
+A billiard `bt` is a wrapper of a `Tuple` of `Obstacles`.
 The abstract Type `Obstacle{T}` is the supertype of all objects that a particle may collide with, with global billiard precision of type `T`.
 
 There are many premade functions that construct well-known billiards, like the periodic Sinai billiard.
-You can find all of them at the [Standard Billiards page](/basic/library/#standard-billiards).
+You can find all of them at the [Standard Billiards Library](/basic/high_level/#standard-billiards-library).
 
-To create a custom billiard, you start with an empty Vector:
+To create a custom billiard from scratch, it is often convenient to start with an empty `Vector{Obstacle{T}}`:
 ```julia
 using DynamicalBilliards
-bt = Obstacle{T}[]  # T<: AbstractFloat
+bt = Obstacle{Float64}[]  # T<: AbstractFloat
 ```
 and then you create your obstacles one by one and add them to it. All obstacles that are already defined in the package
 can be found at the [Obstacles page](/basic/library/#obstacles) of the library. The function [`billiard_polygon`](@ref) creates a polygonal billiard table.
@@ -27,7 +26,7 @@ The vertex points of a regular hexagon of radius `r` are given by the formula:
 ```math
 (x,y) = \left( r\cos\left(\frac{2\pi i}{6}\right), r\cos\left(\frac{2\pi i}{6}\right) \right)\,, \quad \text{for i $\in$ \{1,...,6\}}
 ```
-To create each wall object, we will implement the following loop, choosing a size of 2.0:
+To create each wall object, we will implement the following loop:
 ```julia
 hexagon_vertex = (r) -> [ [r*cos(2π*i/6), r*sin(2π*i/6)] for i in 1:6]
 hexver = hexagon_vertex(2.0)
@@ -41,27 +40,36 @@ for i in eachindex(hexver)
   push!(bt, wall)
 end
 ```
+
 The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the user because it must point towards where the particle is expected to come from. If `w` is the vector (wall) pointing from start- to end-point then the vector `[-w[2], w[1]]` is pointing to the left of `w` and the vector `[w[2], -[w1]]` is pointing to the right. Both are normal to `w`, but you have to know which one to pick. In this case this is very easy, since the normal has to simply point towards the origin.
 
 We add a disk by specifying a center and radius (and optionally a name):
 ```julia
 d = Disk([0,0], 0.8)
 push!(bt, d)
+# Make the structure required:
+billiard = Billiard(bt)
 ```
 To make sure the billiard looks as you would expect, use the function `plot_billiard(bt)`. Create a particle inside that billiard and evolve it:
 ```julia
-DynamicalBilliards.enableplotting()
-plot_billiard(bt)
+using PyPlot
+plot_billiard(billiard)
 ω = 0.5
-p = randominside(p, ω)
-xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 100)...)
+p = randominside(billiard, ω)
+xt, yt, vxt, vyt, t = construct(evolve!(p, billiard, 100)...)
+plot(xt, yt)
 ```
 
 The billiard table now works for straight or magnetic propagation.
-To expand this to ray-splitting you have to use ray-splitting Obstacles ([see the tutorial on Ray-Splitting](/tutorials/ray-splitting)).
+To expand this to ray-splitting you have to use ray-splitting `Obstacle`s ([see the tutorial on Ray-Splitting](/tutorials/ray-splitting)).
 Additional information on how to define your own `Obstacle` sub-type is given in the tutorial on [Defining your own Obstacles](/tutorials/own_obstacle).
 
-If you make *any* billiard system that you think is cool and missing from this package, you are more than welcome to submit a PR extending the `StandardBilliards.jl` library with your contribution!
+If you make *any* billiard system that you think is cool and missing from this package, you are more than welcome to submit a PR extending the Standard Billiards Library with your contribution!
+
+## Obstacle order
+!!! info "The obstacle order matters."
+    The order that the obstacles are given to the constructor is important for the
+    function [`boundarymap`](@ref). For any other functionality it is irrelevant.
 
 ## Convex Billiards
 These 2 types of walls used by `DynamicalBilliards` that behave differently during

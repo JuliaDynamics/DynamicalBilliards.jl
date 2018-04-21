@@ -4,14 +4,17 @@ In this tutorial we will go through the processes of creating a new obstacle typ
 `Semicircle`. This type is already used in the [`billiard_bunimovich`](@ref) and
 [`billiard_mushroom`](@ref) functions.
 
+!!! info "Everything uses `SVector{2}`"
+    Fields of `Particle`s and `Obstacle`s contain all their information in 2-dimensional static vectors from module `StaticArrays`. This is important to keep in mind when extending new methods.
+
 ## Type Definition
 The first thing you have to do is make your new type a sub-type of `Obstacle{T}`
 (or any other abstract sub-type of it). We will do:
 ```julia
 struct Semicircle{T<:AbstractFloat} <: Circular{T} # <: Obstacle{T}
-    c::SVector{2,T}
+    c::SVector{2,T} # this MUST be a static vector
     r::T
-    facedir::SVector{2,T}
+    facedir::SVector{2,T} # this MUST be a static vector
     name::String
 end
 ```
@@ -181,3 +184,17 @@ end
 ```
 (this method is in the `/plotting/obstacles.jl` file and is loaded on-demand
 when `using PyPlot`)
+
+Finally, we also add a method to the [`arclength`](@ref) function, so that
+we can compute the [`boundarymap`](@ref) of billiards containing our new obstacle
+```julia
+function arclength(pos, o::Semicircle)
+    #project pos on open face
+    chrd = SVector{2}(-o.facedir[2], o.facedir[1]) #tangent to open face
+    d = (pos - o.c)/o.r
+    x = dot(d, chrd)
+    r =  acos(clamp(x, -1, 1))*o.r
+    return r
+end
+```
+and we are done!

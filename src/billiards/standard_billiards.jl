@@ -152,10 +152,10 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
         w = ending - starting
         if setting == "periodic"
             normal = 2inr*normalize([-w[2], w[1]])
-            wall = PeriodicWall(starting, ending, normal, wallname*" $i")
+            wall = T(starting, ending, normal, wallname*" $i")
         else
             normal = [-w[2], w[1]]
-            wall = InfiniteWall(starting, ending, normal, wallname*" $i")
+            wall = T(starting, ending, normal, wallname*" $i")
         end
         push!(bt, wall)
     end

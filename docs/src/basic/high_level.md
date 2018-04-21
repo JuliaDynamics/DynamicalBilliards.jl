@@ -253,8 +253,8 @@ for i in 1:length(posvector)
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
         # Make results of pinned orbits have only one entry (for plotting speed):
-        y = unique(round.(y, 8))
-        vy = unique(round.(vy, 8))
+        y = unique(round.(y, 4))
+        vy = unique(round.(vy, 4))
         # color pinned orbits differently:
         col = length(y) == 1 ? "C1" : "C0"
         plot(y, vy, ls = "None", color = col, ms = 1.0, alpha = 0.5, marker = "o")
