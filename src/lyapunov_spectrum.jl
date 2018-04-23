@@ -1,5 +1,5 @@
 # ParticlesObstacles.jl must be loaded BEFORE this
-export lyapunovspectrum!
+export lyapunovspectrum!, lyapunovspectrum
 
 ##Auxiliar Functions ##
 """
@@ -116,10 +116,10 @@ function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
     ω = p.omega
     sω = sin(ω*t)
     cω = cos(ω*t)
-    J = [1  0     sω/ω  (cω-1)/ω;
-         0  1  (1-cω)/ω    -sω/ω;
-         0  0     cω         -sω;
-         0  0     sω          cω]
+    J = [1.0 0.0     sω/ω  (cω-1)/ω;
+         0.0 1.0  (1-cω)/ω     sω/ω;
+         0.0 0.0     cω         -sω;
+         0.0 0.0     sω          cω]
     for k in 1:4
         Γ = offset[:,k]
         offset[:,k] = J*Γ
@@ -210,3 +210,6 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where 
 
     return exps
 end
+
+
+lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(deepcopy(p), args...)
