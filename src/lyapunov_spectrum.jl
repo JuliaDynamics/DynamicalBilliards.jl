@@ -26,7 +26,8 @@ The function updates the position and velocity of the particle
 together with the components of 4 offset vectors stored in the matrix
 `offset` as columns.
 """
-function specular!(p::Particle{T}, o::Disk{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+function specular!(p::AbstractParticle{T}, o::Disk{T},
+                   offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     ti = [-p.vel[2],p.vel[1]]
     cosa = dot(n, -p.vel)
@@ -43,7 +44,9 @@ function specular!(p::Particle{T}, o::Disk{T}, offset::MArray{Tuple{4,4}, T}) wh
     end
 end
 
-function specular!(p::Particle{T}, o::Semicircle{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+function specular!(p::AbstractParticle{T}, o::Semicircle{T},
+                   offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+
     n = normalvec(o, p.pos)
     ti = [-p.vel[2],p.vel[1]]
     cosa = dot(n, -p.vel)
@@ -60,8 +63,9 @@ function specular!(p::Particle{T}, o::Semicircle{T}, offset::MArray{Tuple{4,4}, 
     end
 end
 
+function specular!(p::AbstractParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
+                   offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
 
-function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     specular!(p, o)
     for k in 1:4
@@ -73,18 +77,54 @@ function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}}, offs
         offset[:,k] = x
     end
 end
+
+
 """
     resolvecollision!(p::Particle, o::Union{Disk, InfiniteWall}, offset::MArray)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
 """
-function resolvecollision!(p::AbstractParticle{T}, o::Union{Disk{T}, InfiniteWall{T}, FiniteWall{T}, Semicircle{T}}, offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
+function resolvecollision!(p::AbstractParticle{T},
+                o::Union{Disk{T}, InfiniteWall{T}, FiniteWall{T}, Semicircle{T}},
+                offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
+
     specular!(p, o, offset)
     return nothing
 end
 
-resolvecollision!(p::AbstractParticle{T}, o::PeriodicWall{T}, offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat} =
-resolvecollision!(p, o)
+resolvecollision!(p::AbstractParticle{T}, o::PeriodicWall{T},
+                  offset::MArray{Tuple{4,4}, T}) where {T} = resolvecollision!(p, o)
+
+"""
+    propagate_offset!(offset::MArray{Tuple{4,4},T}, p::AbstractParticle)
+Computes the linearized evolution of the offset vectors during propagation for a
+time interval `t`
+"""
+#linear
+function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
+                           p::Particle{T}) where T
+    for k in 1:4
+        Γ = offset[:,k]
+        temp = [Γ[1] + t*Γ[3], Γ[2] + t*Γ[4], Γ[3], Γ[4]]
+        offset[:,k] = temp
+    end
+end
+
+#magnetic
+function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
+                           p::MagneticParticle{T}) where T
+    ω = p.omega
+    sω = sin(ω*t)
+    cω = cos(ω*t)
+    J = [1  0     sω/ω  (cω-1)/ω;
+         0  1  (1-cω)/ω    -sω/ω;
+         0  0     cω         -sω;
+         0  0     sω          cω]
+    for k in 1:4
+        Γ = offset[:,k]
+        offset[:,k] = J*Γ
+    end
+end
 
 """
     propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T})
@@ -92,34 +132,27 @@ Propagate the particle `p` for given time `t`, changing appropriately the the
 `p.pos` and `p.vel` fields together with the components of the offset vectors
 stored in the `offset` matrix.
 """
-function propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T}) where {T<: AbstractFloat}
-    vx0=p.vel[1]
-    vy0=p.vel[2]
-    p.pos += [vx0*t, vy0*t]
-    for k in 1:4
-        x = offset[:,k]
-        temp = [x[1] + t*x[3], x[2] + t*x[4], x[3], x[4]]
-        offset[:,k] = temp
-    end
+function propagate!(p::AbstractParticle{T}, t::T,
+                    offset::MArray{Tuple{4,4},T}) where {T<: AbstractFloat}
+
+    propagate!(p, t)
+    propagate_offset!(offset, t, p)
 end
+
 
 """
     relocate(p::Particle, o::Obstacle, t, offset::MArray) -> newt
 Propagate the particle's position for time `t` (corrected) and update the components
 of the `offset` matrix.
 """
-function relocate!(
-    p::Particle{T}, o::Obstacle{T}, tmin, offset::MArray{Tuple{4,4}, T}
-    ) where {T <: AbstractFloat}
+function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin,
+                   offset::MArray{Tuple{4,4}, T}) where {T <: AbstractFloat}
 
     tmin = relocate!(p, o, tmin)
-    for k in 1:4
-        x = offset[:,k]
-        temp = [x[1] + tmin*x[3], x[2] + tmin*x[4], x[3], x[4]]
-        offset[:,k] = temp
-    end
+    propagate_offset!(offset, tmin, p)
     return tmin
 end
+
 
 
 """
@@ -127,8 +160,7 @@ end
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
-function lyapunovspectrum!(p::Particle{T}, bt::Billiard{T}, t::T
-    ) where {T<:AbstractFloat}
+function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where {T<:AbstractFloat}
 
     offset = eye(MMatrix{4,4, T}) #The unit vectors in the 4 directions
 
