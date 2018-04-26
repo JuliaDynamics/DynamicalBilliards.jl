@@ -211,5 +211,8 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where 
     return exps
 end
 
-
+"""
+    lyapunovspectrum(p::AbstractParticle{T}, bt::Vector{Obstacle{T}}, t)
+Non-mutating version of [`lyapunovspectrum!`](@ref) 
+"""
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(deepcopy(p), args...)
