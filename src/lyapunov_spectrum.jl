@@ -20,7 +20,7 @@ function gramschmidt(u::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     return w
 end
 """
-    specular!(p::Particle, o::Obstacle, offset::MArray)
+    specular!(p::AbstractParticle, o::Obstacle, offset::MArray)
 Perform specular reflection based on the normal vector of the Obstacle.
 The function updates the position and velocity of the particle
 together with the components of 4 offset vectors stored in the matrix
@@ -80,7 +80,7 @@ end
 
 
 """
-    resolvecollision!(p::Particle, o::Union{Disk, InfiniteWall}, offset::MArray)
+    resolvecollision!(p::AbstractParticle, o::Union{Disk, InfiniteWall}, offset::MArray)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
 """
@@ -127,7 +127,7 @@ function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
 end
 
 """
-    propagate!(p::Particle{T}, t::T, offset::MArray{Tuple{4,4},T})
+    propagate!(p::AbstractParticle{T}, t::T, offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
 `p.pos` and `p.vel` fields together with the components of the offset vectors
 stored in the `offset` matrix.
@@ -141,7 +141,7 @@ end
 
 
 """
-    relocate(p::Particle, o::Obstacle, t, offset::MArray) -> newt
+    relocate(p::AbstractParticle, o::Obstacle, t, offset::MArray) -> newt
 Propagate the particle's position for time `t` (corrected) and update the components
 of the `offset` matrix.
 """
@@ -156,7 +156,7 @@ end
 
 
 """
-    lyapunovspectrum!(p::Particle{T}, bt::Vector{Obstacle{T}}, t)
+    lyapunovspectrum!(p::AbstractParticle{T}, bt::Vector{Obstacle{T}}, t)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
