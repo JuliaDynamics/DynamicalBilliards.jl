@@ -19,13 +19,13 @@ function gramschmidt(u::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     w[:,4] = u[:,4] - dot(u[:,4],v3)*v3 - dot(u[:,4],v2)*v2 - dot(u[:,4],v1)*v1
     return w
 end
-"""
+#="""
     specular!(p::AbstractParticle, o::Obstacle, offset::MArray)
 Perform specular reflection based on the normal vector of the Obstacle.
 The function updates the position and velocity of the particle
 together with the components of 4 offset vectors stored in the matrix
 `offset` as columns.
-"""
+"""=#
 function specular!(p::AbstractParticle{T}, o::Disk{T},
                    offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
@@ -78,12 +78,11 @@ function specular!(p::AbstractParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
     end
 end
 
-
-"""
+#="""
     resolvecollision!(p::AbstractParticle, o::Union{Disk, InfiniteWall}, offset::MArray)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
-"""
+"""=#
 function resolvecollision!(p::AbstractParticle{T},
                 o::Union{Disk{T}, InfiniteWall{T}, FiniteWall{T}, Semicircle{T}},
                 offset::MArray{Tuple{4,4}, T})::Void where {T<:AbstractFloat}
@@ -111,6 +110,7 @@ function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
 end
 
 #magnetic
+#TODO: Use `sincos` for julia v0.7
 function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
                            p::MagneticParticle{T}) where T
     ω = p.omega
@@ -126,12 +126,12 @@ function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
     end
 end
 
-"""
+#="""
     propagate!(p::AbstractParticle{T}, t::T, offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
 `p.pos` and `p.vel` fields together with the components of the offset vectors
 stored in the `offset` matrix.
-"""
+"""=#
 function propagate!(p::AbstractParticle{T}, t::T,
                     offset::MArray{Tuple{4,4},T}) where {T<: AbstractFloat}
 
@@ -140,11 +140,11 @@ function propagate!(p::AbstractParticle{T}, t::T,
 end
 
 
-"""
+#="""
     relocate(p::AbstractParticle, o::Obstacle, t, offset::MArray) -> newt
 Propagate the particle's position for time `t` (corrected) and update the components
 of the `offset` matrix.
-"""
+"""=#
 function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin,
                    offset::MArray{Tuple{4,4}, T}) where {T <: AbstractFloat}
 
@@ -156,7 +156,7 @@ end
 
 
 """
-    lyapunovspectrum!(p::AbstractParticle{T}, bt::Vector{Obstacle{T}}, t)
+    lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
@@ -212,7 +212,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where 
 end
 
 """
-    lyapunovspectrum(p::AbstractParticle{T}, bt::Vector{Obstacle{T}}, t)
-Non-mutating version of [`lyapunovspectrum!`](@ref) 
+    lyapunovspectrum(p::AbstractParticle, bt::Billiard, t)
+Non-mutating version of [`lyapunovspectrum!`](@ref)
 """
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(deepcopy(p), args...)
