@@ -77,6 +77,12 @@ Perform periodicity conditions of `w` on `p`.
     p.current_cell -= w.normal
     return nothing
 end
+@inline function periodicity!(p::MagneticParticle, w::PeriodicWall)::Void
+    p.pos += w.normal
+    p.center += w.normal
+    p.current_cell -= w.normal
+    return nothing
+end
 
 """
     resolvecollision!(p::AbstractParticle, o::Obstacle)
@@ -95,7 +101,7 @@ function resolvecollision!(p::MagneticParticle, o::Obstacle)
     p.center = find_cyclotron(p)
     return
 end
-fresolvecollision!(p::MagneticParticle, o::PeriodicWall) = specular!(p, o)
+resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
 
 
 """
