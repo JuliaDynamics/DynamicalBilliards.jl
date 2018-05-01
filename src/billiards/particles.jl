@@ -1,5 +1,4 @@
-export AbstractParticle, Particle, MagneticParticle,
-cyclotron
+export AbstractParticle, Particle, MagneticParticle
 ####################################################
 ## Particles
 ####################################################
@@ -62,12 +61,16 @@ mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
     vel::SVector{2,T}
     current_cell::SVector{2,T}
     omega::T
+    r::T
+    center::SVector{2, T}
     function MagneticParticle(pos::SVector{2,T}, vel::SVector{2,T},
         current_cell::SVector{2,T}, ω::T) where {T<:AbstractFloat}
         if ω==0
             throw(ArgumentError("Angular velocity of magnetic particle cannot be 0."))
         end
-        new{T}(pos, normalize(vel), current_cell, ω)
+        r = 1/ω
+        c::SV{T} = pos - r*SV{T}(vel[2], -vel[1])
+        new{T}(pos, normalize(vel), current_cell, ω, abs(1/ω), c)
     end
 end
 
@@ -89,13 +92,18 @@ print(io, "MagneticParticle{$T}\n",
 
 
 """
-    cyclotron(p::MagneticParticle, use_cell = false)
-Return center and radius of circular motion performed by the particle based on
-`p.pos` (or `p.pos + p.current_cell`) and `p.vel`.
+    find_cyclotron(p::MagneticParticle)
+Return the center of cyclotron motion of the particle.
 """
-@inline function cyclotron(p::MagneticParticle{T}, use_cell = false) where {T}
-    ω = p.omega; r = 1/ω
-    pos = use_cell ? p.pos + p.current_cell : p.pos
+function find_cyclotron(p::MagneticParticle{T}) where {T}
+    r = 1/p.omega
+    pos = p.pos
     c::SV{T} = pos - r*SV{T}(p.vel[2], -p.vel[1])
-    return c, abs(r)
+    return c
+end
+
+@inline cyclotron(p) = p.center, p.r
+function cyclotron(p, use_cell)
+    pos = use_cell ? p.pos + p.current_cell : p.pos
+    return pos, p.r
 end

@@ -88,8 +88,15 @@ This is the ray-splitting implementation. The three functions given are drawn fr
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-@inline resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
-@inline resolvecollision!(p::AbstractParticle, o::PeriodicWall) = periodicity!(p, o)
+@inline resolvecollision!(p::Particle, o::Obstacle) = specular!(p, o)
+@inline resolvecollision!(p::Particle, o::PeriodicWall) = periodicity!(p, o)
+function resolvecollision!(p::MagneticParticle, o::Obstacle)
+    specular!(p, o)
+    p.center = find_cyclotron(p)
+    return
+end
+fresolvecollision!(p::MagneticParticle, o::PeriodicWall) = specular!(p, o)
+
 
 """
     relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
