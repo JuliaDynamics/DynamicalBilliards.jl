@@ -153,9 +153,10 @@ particle should end up at.
 @inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
 @inline function propagate!(p::MagneticParticle{T}, t::Real)::Void where {T}
-    ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
+    ω = p.omega; r = 1/ω
+    φ0 = atan2(p.vel[2], p.vel[1])
     sinωtφ = sin(ω*t + φ0); cosωtφ = cos(ω*t + φ0)
-    p.pos += SV{T}(sinωtφ/ω - sin(φ0)/ω, -cosωtφ/ω + cos(φ0)/ω)
+    p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
     p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
 end
@@ -176,10 +177,10 @@ position.
 
 @inline function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
-    ω = p.omega
+    ω = p.omega; r = 1/ω
     φ0 = atan2(p.vel[2], p.vel[1])
     # Propagate:
-    ppos = SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
+    ppos = SV{T}((sin(ω*t + φ0) - sin(φ0))*r, (-cos(ω*t + φ0) + cos(φ0))*r)
     return pos + ppos
 end
 
