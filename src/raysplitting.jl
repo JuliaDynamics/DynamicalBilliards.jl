@@ -1,15 +1,12 @@
 export isphysical, acceptable_raysplitter, reset_billiard!
 
-########################
+#####################################################################################
 # Resolve collisions
-########################
-
-±(x) = 2x - 1
-
+#####################################################################################
 function relocate_rayspl!(
     p::Particle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
 
-    ineq = ±(trans)
+    ineq = 2trans - 1
     newpos = p.pos; newt = zero(T)
     i = 1
     while ineq*distance(newpos, o) > 0
@@ -24,7 +21,7 @@ end
 function relocate_rayspl!(
     p::MagneticParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
 
-    ineq = ±(trans)
+    ineq = 2trans - 1
     newpos = p.pos; newt = zero(T)
     i = 1
     while ineq*distance(newpos, o) > 0
@@ -69,12 +66,13 @@ end
 
 
 
-# Resolve collision for ray-splitting with Normal
+# Resolve collision for ray-splitting
 function resolvecollision!(p::AbstractParticle{T},
     a::Obstacle{T}, φ::T, trans::Bool,
-    θ::Function, newω::Function = (ω, bool) -> ω) where {T<:AbstractFloat}
+    θ, newω = (ω, bool) -> ω) where {T<:AbstractFloat}
 
-    ω = typeof(p) <: Particle ? zero(T) : p.omega
+    ismagnetic = typeof(p) <: MagneticParticle
+    ω = ismagnetic ? p.omega : T(0)
 
     if trans #perform raysplitting
         # Raysplit Algorithm step 4: find transmission angle in relative angles
@@ -91,8 +89,11 @@ function resolvecollision!(p::AbstractParticle{T},
         # Raysplit Algorithm step 9: Perform refraction
         p.vel = SVector{2,T}(cos(Θ), sin(Θ))
         # Raysplit Algorithm step 10: Set new angular velocity
-        if typeof(p) <: MagneticParticle
-            p.omega = newω(p.omega, !a.pflag)  # notice the exclamation mark
+        if ismagnetic
+            ω = newω(p.omega, !a.pflag)  # notice the exclamation mark
+            p.omega = ω
+            p.r = abs(1/ω)
+            p.center = find_cyclotron(p)
         end
     else # No ray-splitting:
         #perform specular
@@ -101,156 +102,90 @@ function resolvecollision!(p::AbstractParticle{T},
     return
 end
 
-###########
-# Straight
-###########
+# Ray-splitting version of bounce!
+function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
-# evolve For Particle and Ray-Splitting:
-function evolve!(p::Particle{T}, bt, t,
-    ray::Dict) where {T}
+    const debug = true
+    tmin::T, i::Int = next_collision(p, bt)
+    debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 
-    const debug = false
-
-    if t <= 0
-    throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
+    if haskey(ray, i)
+        propagate!(p, tmin)
+        trans, φ = istransmitted(p, bt[i], ray[i][1])
+        debug && println("Angle of incidence: $(φ), transmitted? $trans")
+        if debug
+            println("Currently, pflag is $(bt[i].pflag) (will be reversed!)")
+            println()
+        end
+        newt = relocate_rayspl!(p, bt[i], trans)
+        resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
+    else
+        tmin = relocate!(p, bt[i], tmin)
+        resolvecollision!(p, bt[i])
     end
 
-    rt = T[]
-    rpos = SVector{2,T}[]
-    rvel = SVector{2,T}[]
-    push!(rpos, p.pos)
-    push!(rvel, p.vel)
-    push!(rt, 0)
-
-    count = zero(t)
-    t_to_write = zero(T)
-
-    while count < t
-        # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = next_collision(p, bt)
-
-        debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
-
-        if haskey(ray, i)
-            propagate!(p, tmin)
-            trans, φ = istransmitted(p, bt[i], ray[i][1])
-            debug && println("Angle of incidence: $(φ), transmitted? $trans")
-            if debug
-                println("Currently, pflag is $(bt[colobst_idx].pflag)")
-                println("After collision is resolved, it will be the opposite")
-            end
-            newt = relocate_rayspl!(p, bt[i], trans)
-            resolvecollision!(p, bt[i], φ, trans, ray[i][2])
-            t_to_write += tmin + newt
-        else
-            tmin = relocate!(p, bt[i], tmin)
-            resolvecollision!(p, bt[i])
-            t_to_write += tmin
-        end
-
-        debug && println()
-        if typeof(bt[i]) <: PeriodicWall
-            continue
-        else
-            push!(rpos, p.pos + p.current_cell)
-            push!(rvel, p.vel)
-            push!(rt, t_to_write)
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
-        end
-
-    end#time loop
-    return (rt, rpos, rvel)
+    return i, tmin, p.pos, p.vel
 end
 
-##########
-# Magnetic
-##########
-
-# evolve For MagneticParticle and Ray-Splitting
-function evolve!(p::MagneticParticle{T}, bt::Billiard{T},
-t, ray::Dict; warning::Bool = false) where {T}
+#####################################################################################
+# Evolve raysplitting
+#####################################################################################
+function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
+    warning = false) where {T}
 
     if t <= 0
-    error("`evolve!()` cannot evolve backwards in time.")
-    end
-    if isperiodic(bt) && T == BigFloat
-        error("raysplitting + magnetic + BigFloat is not supported :(")
+        throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
 
-    const debug = false
+    ismagnetic = typeof(p) <: MagneticParticle
 
-    omegas = T[]
-    rt = T[]
-    rpos = SVector{2,T}[]
-    rvel = SVector{2,T}[]
-    push!(rpos, p.pos)
-    push!(rvel, p.vel)
-    push!(rt, zero(T))
-    push!(omegas, p.omega)
+    rt = T[]; push!(rt, 0)
+    rpos = SVector{2,T}[]; push!(rpos, p.pos)
+    rvel = SVector{2,T}[]; push!(rvel, p.vel)
+    ismagnetic && (omegas = T[]; push!(omegas, p.omega))
 
     count = zero(t)
     t_to_write = zero(T)
 
     while count < t
-        # Declare these because `bt` is of un-stable type!
-        tmin::T, i::Int = next_collision(p, bt)
+        i, tmin, pos, vel = bounce!(p, bt, ray)
+        t_to_write += tmin
 
-        debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
-
-        if tmin == Inf
-            warning && warn("Pinned particle in evolve! (Inf col t)")
-            push!(rpos, rpos[end])
-            push!(rvel, rvel[end])
-            push!(rt, Inf)
-            push!(omegas, p.omega)
+        if ismagnetic && tmin == Inf
+            warning && warn("Pinned particle in evolve! (Inf. col. t)")
+            push!(rpos, pos); push!(rvel, vel)
+            push!(rt, tmin); push!(omegas, p.omega)
             return (rt, rpos, rvel, omegas)
         end
 
-        if haskey(ray, i)
-            propagate!(p, tmin)
-            trans, φ = istransmitted(p, bt[i], ray[i][1])
-            debug && println("Angle of incidence: $(φ), transmitted? $trans")
-            if debug
-                println("Currently, pflag is $(bt[colobst_idx].pflag)")
-                println("After collision is resolved, it will be the opposite")
-            end
-            newt = relocate_rayspl!(p, bt[i], trans)
-            resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
-            t_to_write += tmin + newt
-        else
-            tmin = relocate!(p, bt[i], tmin)
-            resolvecollision!(p, bt[i])
-            t_to_write += tmin
-        end
-
-
-        # Write output only if the collision was not made with PeriodicWall
         if typeof(bt[i]) <: PeriodicWall
             # Pinned particle:
-            if t_to_write >= 2π/abs(p.omega)
-            warning && warn("Pinned particle in evolve! (completed circle)")
-            push!(rpos, rpos[end])
-            push!(rvel, rvel[end])
-            push!(rt, Inf)
-            push!(omegas, p.omega)
-            return (rt, rpos, rvel, omegas)
+            if ismagnetic && t_to_write ≥ 2π/absω
+                warning && warn("Pinned particle in evolve! (completed circle)")
+                push!(rpos, pos); push!(rvel, vel)
+                push!(rt, tmin); push!(omegas, p.omega)
+                return (rt, rpos, rvel, omegas)
             end
             #If not pinned, continue (do not write for PeriodicWall)
             continue
         else
             push!(rpos, p.pos + p.current_cell)
-            push!(rvel, p.vel)
-            push!(rt, t_to_write)
-            push!(omegas, p.omega)
+            push!(rvel, p.vel); push!(rt, t_to_write); push!(omegas, p.omega)
             count += increment_counter(t, t_to_write)
             t_to_write = zero(T)
         end
 
     end#time loop
-    return (rt, rpos, rvel, omegas)
+    if ismagnetic
+        return (rt, rpos, rvel, omegas)
+    else
+        return (rt, rpos, rvel)
+    end
 end
 
+#####################################################################################
+# Construct
+#####################################################################################
 function construct(t::Vector{T}, poss::Vector{SVector{2,T}},
 vels::Vector{SVector{2,T}}, omegas::Vector{T}, dt=0.01) where T
 

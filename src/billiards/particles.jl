@@ -95,12 +95,8 @@ print(io, "MagneticParticle{$T}\n",
     find_cyclotron(p::MagneticParticle)
 Return the center of cyclotron motion of the particle.
 """
-function find_cyclotron(p::MagneticParticle{T}) where {T}
-    r = 1/p.omega
-    pos = p.pos
-    c::SV{T} = pos - r*SV{T}(p.vel[2], -p.vel[1])
-    return c
-end
+@inline find_cyclotron(p::MagneticParticle{T}) where {T} =
+    c::SV{T} = p.pos - (1/p.omega)*SV{T}(p.vel[2], -p.vel[1])
 
 @inline cyclotron(p) = p.center, p.r
 function cyclotron(p, use_cell)

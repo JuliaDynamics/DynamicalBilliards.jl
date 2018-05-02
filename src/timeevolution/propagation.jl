@@ -196,6 +196,9 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
 * position and velocity of the particle at the current collision (*after* the
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
+
+    bounce!(p, bt, raysplit::Dict) -> i, t, pos, vel
+Ray-splitting version of `bounce!`.
 """
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
@@ -251,10 +254,10 @@ the specular reflection of the `i-1`th collision.
 The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
-    evolve!(p::AbstractParticle, bt, t [, ray_splitter])
+    evolve!(p, bt, t, ray_splitter)
 
 To implement ray-splitting, the `evolve!` function is supplemented with a
-fourth argument, `ray_splitter::Dict{Int, Any}`, which maps integers
+fourth argument, `ray_splitter::Dict`, which maps integers
 to some kind of Function container (Tuple or Vector). The functions in this
 container are: (φ is the angle of incidence)
 * T(φ, pflag, ω) : Transmission probability.
@@ -272,20 +275,16 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
     end
 
     ismagnetic = typeof(p) <: MagneticParticle
-    ismagnetic && (absω = abs(p.omega))
-    rt = T[]
-    rpos = SVector{2,T}[]
-    rvel = SVector{2,T}[]
-    push!(rpos, p.pos)
-    push!(rvel, p.vel)
-    push!(rt, zero(T))
+    rt = T[]; push!(rt, 0)
+    rpos = SVector{2,T}[]; push!(rpos, p.pos)
+    rvel = SVector{2,T}[]; push!(rvel, p.vel)
+    ismagnetic && (omegas = T[]; push!(omegas, p.omega); absω = abs(p.omega))
 
     count = zero(t)
     t_to_write = zero(T)
 
     while count < t
 
-        # Declare these because `bt` is of un-stable type!
         i, tmin, pos, vel = bounce!(p, bt)
         t_to_write += tmin
 
