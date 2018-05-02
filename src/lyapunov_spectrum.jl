@@ -163,7 +163,7 @@ for a given particle in a billiard table.
 function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where {T<:AbstractFloat}
 
     offset = eye(MMatrix{4,4, T}) #The unit vectors in the 4 directions
-
+    ismagnetic = typeof(p) <: MagneticParticle
     if t <= 0.0
         error("`evolve!()` cannot evolve backwards in time.")
     end
@@ -180,6 +180,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where 
         ###
         tmin = relocate!(p, bt[i], tmin, offset)
         resolvecollision!(p, bt[i], offset)
+        ismagnetic && (p.center = find_cyclotron(p))
         count += increment_counter(t, tmin)
 
         if typeof(bt[i]) <: Wall
