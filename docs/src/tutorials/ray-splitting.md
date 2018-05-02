@@ -11,9 +11,18 @@ Let's add an `Antidot` to a billiard table:
 
 ```julia
 using DynamicalBilliards
-bt = billiard_rectangle()
+bt = Obstacle[billiard_rectangle().obstacles...]
 a = Antidot([0.5,0.5], 0.3)
 push!(bt, a)
+bt = Billiard(bt)
+```
+```
+Billiard{Float64} with 5 obstacles:
+  Bottom wall
+  Right wall
+  Top wall
+  Left wall
+  Antidot
 ```
 
 ## Ray-Splitting Functions
@@ -49,21 +58,16 @@ raysplitter = Dict(5 => (T, sa, newo))  # Index maps to container of Functions
 ```
 
 !!! note "Order of Arguments"
-    The functions **must accept the specific number of arguments shown in the previous section** even if some are not used. Also, the functions must be given **in the specific order: [1. transmission probability, 2. refraction angle, 3. new ω]** in the vector passed to the dictionary.
+    The functions **must accept the specific number of arguments shown in the previous section** even if some are not used. Also, the functions must be given **in the specific order: (1. transmission probability, 2. refraction angle, 3. new ω)** in the container passed to the dictionary.
 
-The next step is very simple: the `raysplitter` dictionary is directly passed into `evolve!()` as a fourth argument.
+The next step is very simple: the `raysplitter` dictionary is directly passed into [`evolve!`](@ref) as a fourth argument.
 Using the billiard table we defined previously, where its 5th element is a ray-splitting `Antidot`, we now do:
 ```julia
-bt = billiard_rectangle()
-a = Antidot([0.5, 0.5], 0.25)
-push!(bt, a)
 ω = 1.25
 p = randominside(bt, ω)
 dt = 0.05
 xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, raysplitter)..., dt)
 using PyPlot
-DynamicalBilliards.enableplotting()
-plot_billiard(bt)
 plot(xt, yt)
 ```
 which should give a result similar to this:
@@ -82,8 +86,7 @@ supports_raysplitting(obst::Obstacle)
 to find out what you did wrong. Most likely, the index you supplied was incorrect, i.e. the index could be `5` instead of `4`.
 
 ## Example Animation
-In the [examples page], you can find the code for the following animation, which
-includes ray-splitting:
+In the [examples page](examples), you can find the code for the following animation, which includes ray-splitting:
 
 ![Ray-splitter animation](http://i.imgur.com/89s0fon.gif)
 

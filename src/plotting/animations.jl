@@ -54,7 +54,7 @@ function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict
     if raysplit == Dict()
         xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1)...)
     else
-        xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1, rayspl)...)
+        xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1, raysplit)...)
     end
 
     if i < col_to_plot

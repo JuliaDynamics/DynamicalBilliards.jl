@@ -77,6 +77,12 @@ Perform periodicity conditions of `w` on `p`.
     p.current_cell -= w.normal
     return nothing
 end
+@inline function periodicity!(p::MagneticParticle, w::PeriodicWall)::Void
+    p.pos += w.normal
+    p.center += w.normal
+    p.current_cell -= w.normal
+    return nothing
+end
 
 """
     resolvecollision!(p::AbstractParticle, o::Obstacle)
@@ -88,8 +94,15 @@ This is the ray-splitting implementation. The three functions given are drawn fr
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-@inline resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
-@inline resolvecollision!(p::AbstractParticle, o::PeriodicWall) = periodicity!(p, o)
+@inline resolvecollision!(p::Particle, o::Obstacle) = specular!(p, o)
+@inline resolvecollision!(p::Particle, o::PeriodicWall) = periodicity!(p, o)
+function resolvecollision!(p::MagneticParticle, o::Obstacle)
+    specular!(p, o)
+    p.center = find_cyclotron(p)
+    return
+end
+resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
+
 
 """
     relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
@@ -140,9 +153,10 @@ particle should end up at.
 @inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
 @inline function propagate!(p::MagneticParticle{T}, t::Real)::Void where {T}
-    ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
+    ω = p.omega; r = 1/ω
+    φ0 = atan2(p.vel[2], p.vel[1])
     sinωtφ = sin(ω*t + φ0); cosωtφ = cos(ω*t + φ0)
-    p.pos += SV{T}(sinωtφ/ω - sin(φ0)/ω, -cosωtφ/ω + cos(φ0)/ω)
+    p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
     p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
 end
@@ -163,10 +177,10 @@ position.
 
 @inline function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
-    ω = p.omega
+    ω = p.omega; r = 1/ω
     φ0 = atan2(p.vel[2], p.vel[1])
     # Propagate:
-    ppos = SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
+    ppos = SV{T}((sin(ω*t + φ0) - sin(φ0))*r, (-cos(ω*t + φ0) + cos(φ0))*r)
     return pos + ppos
 end
 
@@ -183,6 +197,9 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
 * position and velocity of the particle at the current collision (*after* the
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
+
+    bounce!(p, bt, raysplit::Dict) -> i, t, pos, vel
+Ray-splitting version of `bounce!`.
 """
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bt)
@@ -198,6 +215,7 @@ function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
         tmin = relocate!(p, bt[i], tmin)
         resolvecollision!(p, bt[i])
     end
+    p.center = find_cyclotron(p)
     return i, tmin, p.pos, p.vel
 end
 
@@ -238,10 +256,10 @@ the specular reflection of the `i-1`th collision.
 The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
-    evolve!(p::AbstractParticle, bt, t [, ray_splitter])
+    evolve!(p, bt, t, ray_splitter)
 
 To implement ray-splitting, the `evolve!` function is supplemented with a
-fourth argument, `ray_splitter::Dict{Int, Any}`, which maps integers
+fourth argument, `ray_splitter::Dict`, which maps integers
 to some kind of Function container (Tuple or Vector). The functions in this
 container are: (φ is the angle of incidence)
 * T(φ, pflag, ω) : Transmission probability.
@@ -259,20 +277,16 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
     end
 
     ismagnetic = typeof(p) <: MagneticParticle
-    ismagnetic && (absω = abs(p.omega))
-    rt = T[]
-    rpos = SVector{2,T}[]
-    rvel = SVector{2,T}[]
-    push!(rpos, p.pos)
-    push!(rvel, p.vel)
-    push!(rt, zero(T))
+    rt = T[]; push!(rt, 0)
+    rpos = SVector{2,T}[]; push!(rpos, p.pos)
+    rvel = SVector{2,T}[]; push!(rvel, p.vel)
+    ismagnetic && (omegas = T[]; push!(omegas, p.omega); absω = abs(p.omega))
 
     count = zero(t)
     t_to_write = zero(T)
 
     while count < t
 
-        # Declare these because `bt` is of un-stable type!
         i, tmin, pos, vel = bounce!(p, bt)
         t_to_write += tmin
 

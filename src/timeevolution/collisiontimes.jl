@@ -136,8 +136,8 @@ function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     # Check if the line is completely inside the circle:
     if cond1 || cond2
         # Calculate real angle until intersection:
-        θ1 = cond1 ? (I1 = w.sp + u1*(w.ep-w.sp); realangle(p, w, pc, pr, I1)) : T(Inf)
-        θ2 = cond2 ? (I2 = w.sp + u2*(w.ep-w.sp); realangle(p, w, pc, pr, I2)) : T(Inf)
+        θ1 = cond1 ? (I1 = w.sp + u1*(w.ep-w.sp); realangle(p, w, I1)) : T(Inf)
+        θ2 = cond2 ? (I2 = w.sp + u2*(w.ep-w.sp); realangle(p, w, I2)) : T(Inf)
         # Collision time, equiv. to arc-length until collision point:
         return min(θ1, θ2)*pr
     else
@@ -159,14 +159,16 @@ function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
     h = sqrt(rc^2 - a^2)
     # Collision points (always 2):
     I1 = SVector{2, T}(
-    pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
-    pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+        pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d
+    )
     I2 = SVector{2, T}(
-    pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
-    pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+        pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d
+    )
     # Calculate real time until intersection:
-    θ1 = realangle(p, o, pc, rc, I1)
-    θ2 = realangle(p, o, pc, rc, I2)
+    θ1 = realangle(p, o, I1)
+    θ2 = realangle(p, o, I2)
     # Collision time, equiv. to arc-length until collision point:
     return min(θ1, θ2)*rc
 end
@@ -185,18 +187,20 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     h = sqrt(rc^2 - a^2)
     # Collision points (always 2):
     I1 = SVector{2, T}(
-    pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
-    pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+        pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d
+    )
     I2 = SVector{2, T}(
-    pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
-    pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+        pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d
+    )
     # Only consider intersections on the "correct" side of Semicircle:
     cond1 = dot(I1-o.c, o.facedir) < 0
     cond2 = dot(I2-o.c, o.facedir) < 0
     if cond1 || cond2
         # Calculate real angle until intersection:
-        θ1 = cond1 ? realangle(p, o, pc, rc, I1) : T(Inf)
-        θ2 = cond2 ? realangle(p, o, pc, rc, I2) : T(Inf)
+        θ1 = cond1 ? realangle(p, o, I1) : T(Inf)
+        θ2 = cond2 ? realangle(p, o, I2) : T(Inf)
         # Collision time, equiv. to arc-length until collision point:
         return min(θ1, θ2)*rc
     else
@@ -205,21 +209,17 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
 end
 
 """
-    realangle(p::MagneticParticle, o::Obstacle, pc, pr, I) -> θ
+    realangle(p::MagneticParticle, o::Obstacle, I) -> θ
 Given the intersection point `I` of the trajectory of a magnetic particle `p` with
 some obstacle `o`, find the real angle that will be spanned until the particle
 collides with the obstacle.
 
 The function also takes care of problems that may arise when particles are very
 close to the obstacle's boundaries, due to floating-point precision.
-
-(the cyclotron center `pc` and radius `pr` are suplimented for efficiency, since they
-have been calculated already)
 """
-function realangle(p::MagneticParticle{T}, o::Obstacle{T},
-    pc::SVector{2, T}, pr::T, i::SV{T})::T where {T}
+function realangle(p::MagneticParticle{T}, o::Obstacle{T}, i::SV{T})::T where {T}
 
-    ω = p.omega
+    pc = p.center; pr = p.r; ω = p.omega
     P0 = p.pos
     PC = pc - P0
     d2 = dot(i-P0,i-P0) #distance of particle from intersection point

@@ -103,7 +103,8 @@ push!(bt, d, d2)
 
 p = randominside(bt, 0.5)
 xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 25)...)
-plot_billiard(bt, xt, yt)
+plot_billiard(bt)
+plot(xt, yt)
 plot_particle(p)
 ```
 Result:
@@ -115,13 +116,14 @@ The following code produces an animation of a Ray-Splitting billiard:
 ```julia
 using DynamicalBilliards, PyPlot
 
-bt = billiard_rectangle(2, 1)
+bt = Obstacle[billiard_rectangle(2, 1).obstacles...]
 sw = SplitterWall([1.0, 0.0], [1,1], [-1,0], true)
 push!(bt, sw)
 a1 = Antidot([0.5, 0.5], 0.3)
 push!(bt, a1)
 a2 = Antidot([1.5, 0.5], 0.2)
 push!(bt, a2)
+bt = Billiard(bt)
 
 sa = (θ, where, ω) -> where ? 1.25*θ : 0.8*θ
 Tp = (p) -> (θ, where, ω) -> begin
@@ -139,10 +141,11 @@ rayspl = Dict(
 7 => (Tp(0.65), sa, newo))
 
 p = randominside(bt, 1.0)
-plot_billiard(bt)
 
-savedir = "C:\\***\\anim"
-animate_evolution(p, bt, 200, rayspl, savefigs = true, savename = savedir)
+xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, rayspl)...)
+plot(xt, yt)
+
+animate_evolution(p, bt, 200, rayspl)
 ```
 result:
 
