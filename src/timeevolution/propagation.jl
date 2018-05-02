@@ -214,6 +214,7 @@ function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
         tmin = relocate!(p, bt[i], tmin)
         resolvecollision!(p, bt[i])
     end
+    p.center = find_cyclotron(p)
     return i, tmin, p.pos, p.vel
 end
 

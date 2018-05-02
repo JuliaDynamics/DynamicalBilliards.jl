@@ -93,7 +93,6 @@ function resolvecollision!(p::AbstractParticle{T},
             ω = newω(p.omega, !a.pflag)  # notice the exclamation mark
             p.omega = ω
             p.r = abs(1/ω)
-            p.center = find_cyclotron(p)
         end
     else # No ray-splitting:
         #perform specular
@@ -105,7 +104,7 @@ end
 # Ray-splitting version of bounce!
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
-    const debug = true
+    const debug = false
     tmin::T, i::Int = next_collision(p, bt)
     debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 
@@ -123,6 +122,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
         tmin = relocate!(p, bt[i], tmin)
         resolvecollision!(p, bt[i])
     end
+    typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))
 
     return i, tmin, p.pos, p.vel
 end
@@ -170,7 +170,8 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
             continue
         else
             push!(rpos, p.pos + p.current_cell)
-            push!(rvel, p.vel); push!(rt, t_to_write); push!(omegas, p.omega)
+            push!(rvel, p.vel); push!(rt, t_to_write);
+            ismagnetic && push!(omegas, p.omega)
             count += increment_counter(t, t_to_write)
             t_to_write = zero(T)
         end
