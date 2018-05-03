@@ -15,8 +15,7 @@ The input arguments are the return values of `boundarymap`.
 * `ms = 1.0` : Marker size of the points.
 * `bordercolor = "C3"` : The color of the vertical lines that denote the obstacle
   borders.
-* `obstacleindices = true`: If true, the a twin axis is created labelling the
-  indivdual obstacles by their index
+* `obstacleindices = true`: show obstacle indices above plot
 * Any other keyword argument is passed to `PyPlot.plot` which plots the points of
   the section.
 """
