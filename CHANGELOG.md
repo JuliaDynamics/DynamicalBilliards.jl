@@ -1,20 +1,20 @@
 # v2.0
 
-## Currently WIP
-* Lyapunov exponents for magnetic propagation
-
-## Done changes
+## New Features!
+* Lyapunov exponents for magnetic particles are now possible!
 * **2 to 3 orders of magnitude performance gains on all functions!!!**
   * Reduced a lot of allocations done all over the place.
   * Fixed many instances of broadcasting with static vectors (which is bad).
   * Utilized the `Unrolled` package and other kind of stability features that
     make most of the functions of `DynamicalBilliards` non-allocating!
 
-* Added poincare surface of section (boundary map) computation function which works
+* Added boundary map computation function which works
   for any billiard and any particle. It assumes that the obstacles are
   sorted counter clockwise.
   * Added `arclength`, `totallength`
   * Added `plot_boundarymap` that plots the poincare section and the obstacle boundaries.
+* Added Poincare surface of section function, which computes intersections with
+  arbitrary planes!
 
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module. The function `enableplotting()` does not exist anymore!

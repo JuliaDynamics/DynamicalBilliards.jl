@@ -4,8 +4,10 @@
 dynamical billiards in two dimensions.
 
 !!! warn "Version 2.0 incoming!"
-    We are currently developing 2.0 of `DynamicalBilliards` which will bring massive
-    performance increase, a lot of new features and unfortuantelly some breaking changes! You can view the [changelog](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/CHANGELOG.md) to prepare for up coming changes.
+    We are currently finishing the development of v2.0 of `DynamicalBilliards` which will bring massive performance increase, a lot of new features and unfortunately some breaking changes! You can view the [changelog](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/CHANGELOG.md) to prepare for up coming changes.
+
+    Consider doing `Pkg.checkout("DynamicalBilliards")` to get huge performance
+    benefits and a big amount of new features!
 
 
 !!! tip "Julia Billiard animation"
