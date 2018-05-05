@@ -1,5 +1,5 @@
 export resolvecollision!, propagate!, evolve!, construct, specular!,
-periodicity!, propagate_pos, next_collision, escapetime, relocate!,
+periodicity!, propagate_pos, next_collision, relocate!,
 bounce!, evolve
 
 #######################################################################################
@@ -393,71 +393,4 @@ vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
         end#collision time
     end#total time
     return xt, yt, vxt, vyt, ts
-end
-
-
-
-#######################################################################################
-## Escape times
-#######################################################################################
-function escapeind(bt)
-    j = Int[]
-    for (i, obst) in enumerate(bt)
-        if typeof(obst) <: FiniteWall && obst.isdoor == true
-            push!(j, i)
-        end
-    end
-    return j
-end
-
-
-"""
-    escapetime(p, bt, maxiter; warning = false)
-Calculate the escape time of a particle `p` in the billiard `bt`, which
-is the time until colliding with any "door" in `bt`.
-As a "door" is considered any [`FiniteWall`](@ref) with
-field `isdoor = true`.
-
-If the particle performs more than `maxiter` collisions without colliding with the
-`Door` (i.e. escaping) the returned result is `Inf`.
-
-A warning can be thrown if the result is `Inf`. Enable this using the keyword
-`warning = true`.
-"""
-function escapetime(
-    p::AbstractParticle{T}, bt::Billiard{T},
-    t::Int; warning::Bool=false)::T where {T<:AbstractFloat}
-
-    ipos = copy(p.pos); ivel = copy(p.vel)
-    ei = escapeind(bt)
-    if length(ei) == 0
-        error("""The billiard does not have any "doors"!""")
-    end
-
-    totalt = zero(T)
-    count = zero(t)
-    t_to_write = zero(T)
-
-    while count < t
-
-        i, tmin, pos, vel = bounce!(p, bt)
-        t_to_write += tmin
-
-        if typeof(bt[i]) <: PeriodicWall
-            continue # do not write output if collision with with PeriodicWall
-        else
-            totalt += t_to_write
-            i ∈ ei &&  break # the collision happens with a Door!
-
-            # set counter
-            count += 1
-            t_to_write = zero(T)
-        end
-    end#time, or collision number, loop
-    p.pos = ipos; p.vel = ivel
-    if count ≥ t
-        warning && warn("Particle did not escape within max-iter window.")
-        return T(Inf)
-    end
-    return totalt
 end

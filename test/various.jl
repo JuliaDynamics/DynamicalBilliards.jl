@@ -96,3 +96,44 @@ function escape_times(partnum=500; printinfo=true)
     end
     return
 end
+
+
+function meancoltimes(partnum=500; printinfo=true)
+    tim = time()
+    @testset "Mean Collision Times" begin
+    bt = billiard_sinai()
+    @testset "Sinai ω = $ω" for ω in (0.0, 0.5)
+        for i ∈ 1:partnum
+            p = ω == 0 ? randominside(bt) : randominside(bt, ω)
+
+            κ1 = meancollisiontime!(p, bt, 1000)
+            @test κ1 < 1.0
+        end
+    end
+    j = 1
+    bt = billiard_sinai(0.15, setting = "periodic")
+    @testset "Periodic sinai ω = $ω" for ω ∈ [0, 0.88, 2.0]
+        mcts = [3.097297, 2.201, 1.76]
+        port = 0
+        for i in 1:partnum
+            p = ω == 0 ? randominside(bt) : randominside(bt, ω)
+
+            mct = meancollisiontime!(p, bt, 10000)
+            if mct == Inf
+                port +=1
+            else
+                @test mcts[j] - 1.0 ≤ mct ≤ mcts[j] + 1.0
+            end
+        end#particle loop
+        @test port < partnum
+        partnum > 10 && ω != 0.0 && @test port > 0
+        j += 1
+    end
+    end
+    if printinfo
+        println("Results:")
+        println("+ mean collision time works.")
+        println("+ Required time: $(round(time()-tim, 3)) sec.")
+    end
+    return
+end
