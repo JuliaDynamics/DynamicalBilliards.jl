@@ -27,11 +27,11 @@ include("billiards/standard_billiards.jl")
 include("timeevolution/collisiontimes.jl")
 include("timeevolution/propagation.jl")
 
-include("raysplitting.jl")
-
+include("highleveltimes.jl")
 include("poincaresos.jl")
-
 include("lyapunov_spectrum.jl")
+
+include("raysplitting.jl")
 
 ##########################################
 # Test Options                           #

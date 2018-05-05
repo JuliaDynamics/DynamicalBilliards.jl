@@ -315,7 +315,12 @@ escapetime(randominside(bt, 1.0), bt, 10000)
 87.17643414941281
 ```
 
-
+## Mean Collision Times
+Because the computation of a mean collision time (average time between collisions
+in a billiard) is often a useful quantity, the following function computes it
+```@docs
+meancollisiontime
+```
 
 ## Ray-Splitting
 During ray-splitting a particle may propagate
