@@ -63,7 +63,8 @@ Pkg.add("PyPlot"); using PyPlot;
 ## Acknowledgements
 This package is mainly developed by George Datseris. However, this development would not have been possible without significant help from other people:
 
-1. [Diego Tapias](https://github.com/dapias) (@dapias) Contributed the lyapunov spectrum calculation methods.
+1. [Lukas Hupe](https://github.com/lhupe)(@lhupe) Contributed the lyapunov spectrum calculation for magnetic propagation, implemented the boundary map function and did other contributions in bringing this package to version 2.0 (see [here](https://github.com/JuliaDynamics/DynamicalBilliards.jl/projects/1)).
+1. [Diego Tapias](https://github.com/dapias) (@dapias) Contributed the lyapunov spectrum calculation method for straight propagation.
 1. [David. P. Sanders](https://github.com/dpsanders) (@dpsanders) and [Ragnar Fleischmann](https://www.ds.mpg.de/person/20199/118124) contributed in fruitful discussions about the programming and physics of Billiard systems all-around.
 2. [Christopher Rackauckas](https://github.com/ChrisRackauckas) (@ChrisRackauckas) helped set-up the continuous integration, testing, documentation publishing and all around package development-related concepts.
 3. [Tony Kelman](https://github.com/tkelman) (@tkelman) helped significantly in the package publication process, especially in making it work correctly without destroying METADATA.jl.
