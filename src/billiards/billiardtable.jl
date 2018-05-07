@@ -72,6 +72,7 @@ isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)
 #######################################################################################
 for f in (:distance, :distance_init)
     @eval $(f)(p::AbstractParticle, bt::Billiard) = $(f)(p.pos, bt.obstacles)
+    @eval $(f)(pos::SV{T}, bt::Billiard) where {T} = $(f)(pos, bt.obstacles)
 end
 
 for f in (:distance, :distance_init)
@@ -87,23 +88,6 @@ for f in (:distance, :distance_init)
     end
 end
 
-function distance(p::AbstractParticle{T}, bt::Billiard{T})::T where {T}
-    d = T(Inf)
-    for obst ∈ bt
-        di = distance(p, obst)
-        di < d && (d = di)
-    end
-    return d
-end
-
-function distance_init(pos::SVector, bt::Billiard{T})::T where {T}
-    d = T(Inf)
-    for obst ∈ bt
-        di = distance_init(pos, obst)
-        di < d && (d = di)
-    end
-    return d
-end
 
 
 #######################################################################################
@@ -130,12 +114,13 @@ Return a particle with random allowed initial conditions inside the given
 billiard. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
 """
-randominside(bt::Billiard{T}) where {T} =
-    Particle(_randominside(bt)..., T(2π*rand()))
-randominside(bt::Billiard{T}, ω) where {T} =
-    MagneticParticle(_randominside(bt)..., T(2π*rand()), T(ω))
+randominside(bt::Billiard) = Particle(_randominside(bt)...)
+randominside(bt::Billiard{T}, ω) where {T} = MagneticParticle(_randominside(bt)..., T(ω))
+
+
 
 function _randominside(bt::Billiard{T}) where {T<:AbstractFloat}
+    #1. position
     xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bt)
 
     xp = T(rand())*(xmax-xmin) + xmin
@@ -151,5 +136,12 @@ function _randominside(bt::Billiard{T}) where {T<:AbstractFloat}
         dist = distance_init(pos, bt)
     end
 
-    return pos[1], pos[2]
+    #2. velocity
+    φ = T(2π*rand())
+    vel = SV{T}(sin(φ), cos(φ)) #TODO:Change to sincos for julia 0.7
+
+    #3. current_cell (does nothing)
+    cc = zero(SV{T})
+
+    return pos, vel, cc
 end

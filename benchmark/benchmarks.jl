@@ -4,6 +4,11 @@ using BenchmarkTools, DynamicalBilliards, IterTools
 const SUITE = BenchmarkGroup(["DynamicalBilliards"])
 bt = billiard_mushroom()
 bt2 = billiard_sinai(;setting="periodic")
+
+################################################################################
+## COLLISION & PROPAGATION
+################################################################################
+
 particles = [Particle(0.05, 0.05, -0.1), MagneticParticle(0.05,0.05,-0.1,1.0)]
 obstacles = [bt[1], bt[6], bt2[1], bt2[5]] #distinct obstacles for resolvecollision! tests
 proptime = 4.2
@@ -12,8 +17,8 @@ colf = (collisiontime,
         next_collision,
         bounce!,
         resolvecollision!,
-        propagate!)
-        
+        propagate!,
+        )
 name = (f) -> split(string(f), '.')[end]
 
 for f in colf
@@ -58,4 +63,17 @@ for (f, p) in zip(["straight", "magnetic"], particles)
     ploc = deepcopy(p)
     SUITE["propagate!"][f] =
         @benchmarkable propagate!($ploc, $proptime)
+end
+
+################################################################################
+## randominside – rewrite to add more non-collision benchmarks
+################################################################################
+
+SUITE["randominside"] = BenchmarkGroup() #I don't know any tags for randominside...
+SUITE["randominside"]["straight"] = BenchmarkGroup(["straight"])
+
+let f = "straight"
+    for (bname, bil) in zip(["mushroom", "psinai"], (bt, bt2))
+        SUITE["randominside"][f][bname] = @benchmarkable randominside($bil)
+    end
 end
