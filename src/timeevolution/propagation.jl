@@ -120,7 +120,7 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
     while distance(newpos, o)*sig > 0
-        tmin = tmin + i*timeprec_sign(o)*timeprec(p, o)
+        tmin = tmin + i*sig*timeprec(p, o)
         newpos = propagate_pos(p.pos, p, tmin)
         i *= 10
     end
