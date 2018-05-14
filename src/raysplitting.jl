@@ -1,5 +1,8 @@
 export isphysical, acceptable_raysplitter, reset_billiard!
 
+const debug = true
+debug && using Juno # for debugging
+
 #####################################################################################
 # Resolve collisions
 #####################################################################################
@@ -104,18 +107,20 @@ end
 # Ray-splitting version of bounce!
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
-    const debug = false
-    tmin::T, i::Int = next_collision(p, bt)
-    debug && println("Min. col. t with obst $(bt[i].name) = $tmin")
 
+    tmin::T, i::Int = next_collision(p, bt)
+    debug && println("Min. col. t with $(bt[i].name) = $tmin")
+
+    if tmin == Inf
+        return i, tmin, p.pos, p.vel
+    end
     if haskey(ray, i)
         propagate!(p, tmin)
         trans, φ = istransmitted(p, bt[i], ray[i][1])
         debug && println("Angle of incidence: $(φ), transmitted? $trans")
-        if debug
-            println("Currently, pflag is $(bt[i].pflag) (will be reversed!)")
-            println()
-        end
+        debug && println("Currently, pflag is $(bt[i].pflag) (will be reversed!)")
+        debug && trans && println("(pflag will be reversed!)")
+        debug && println()
         newt = relocate_rayspl!(p, bt[i], trans)
         resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
     else
@@ -123,7 +128,6 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
         resolvecollision!(p, bt[i])
     end
     typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))
-
     return i, tmin, p.pos, p.vel
 end
 
@@ -147,7 +151,19 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
     count = zero(t)
     t_to_write = zero(T)
 
+    debug && (dc = 0)
+
     while count < t
+        if debug
+            if dc > 5
+                Juno.clearconsole()
+                sleep(0.1) # only until next Juno release
+                dc = 0
+            else
+                dc += 1
+            end
+        end
+
         i, tmin, pos, vel = bounce!(p, bt, ray)
         t_to_write += tmin
 

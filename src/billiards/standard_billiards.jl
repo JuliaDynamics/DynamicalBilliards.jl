@@ -203,7 +203,7 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     newo = ((x, bool) -> bool ? -0.5x : -2.0x)
     rayspl = Dict{Int, Vector{Function}}(
     3 => [Tp(0.5), sa, newo],
-    1 => [Tp(0.35), sa, newo],
+    1 => [Tp(0.65), sa, newo],
     2 => [Tp(0.65), sa, newo])
 
     btr =  billiard_rectangle(x, y)

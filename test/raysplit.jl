@@ -13,6 +13,7 @@ tim = time()
         for i in 1:partnum
             p = randominside(bt)
             t, poss, vels = evolve!(p, bt, tt, ray)
+            reset_billiard!(bt)
             @test t[end] != Inf
             xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
             @test maximum(xt) ≤ x
@@ -43,10 +44,11 @@ tim = time()
         bt, ray = billiard_raysplitting_showcase(x, y, r1, r2)
 
         @test isphysical(ray)
-        tt=100.0
+        tt=1000.0
         for i in 1:partnum
             p = randominside(bt, 0.8)
             t, poss, vels = evolve!(p, bt, tt, ray)
+            reset_billiard!(bt)
             @test t[end] != Inf
             xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
             @test maximum(xt) ≤ x

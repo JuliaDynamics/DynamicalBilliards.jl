@@ -100,5 +100,6 @@ function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict
     end
     i+=1
     end
+    reset_billiard!(bt)
     return line, point, quiv
 end
