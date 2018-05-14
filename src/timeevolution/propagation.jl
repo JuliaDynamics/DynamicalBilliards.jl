@@ -198,7 +198,9 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
-    bounce!(p, bt, raysplit::Dict) -> i, t, pos, vel
+```julia
+bounce!(p, bt, raysplit::Dict) -> i, t, pos, vel
+```
 Ray-splitting version of `bounce!`.
 """
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}

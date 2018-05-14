@@ -61,8 +61,12 @@ Return
 * the incidence angles at the collisions `φs`
 * obstacle arclength `intervals`
 
-If `particles` is not a single particle then both `ξs` and `φs` are vectors of `Vector`.
-The `i` inner vector corresponds to the results of the `i` initial condition/particle.
+If `particles` is not a single particle then both `ξs` and `φs` are vectors
+of `Vector`. The `i` inner vector corresponds to the results of the
+`i` initial condition/particle.
+
+*Notice* - this function only works for normal specular reflection. Random reflections
+or ray-splitting will give unexpected results.
 """
 function boundarymap(bt::Billiard{T}, t,
                      ps::Vector{<:AbstractParticle{T}}) where {T}

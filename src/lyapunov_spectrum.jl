@@ -1,4 +1,3 @@
-# ParticlesObstacles.jl must be loaded BEFORE this
 export lyapunovspectrum!, lyapunovspectrum
 
 ##Auxiliar Functions ##

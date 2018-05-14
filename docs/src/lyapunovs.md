@@ -4,10 +4,9 @@ It can be shown theoretically that two of these exponents must be zero ($\lambda
 
 The function provided to calculate the FTLS is
 ```julia
-lyapunovspectrum!(p::Particle, bt::Vector{Obstacle}, t)
+lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t)
 ```
-and it returns an array with the 4 lyapunov exponents. Currently it is available
-only for `Particle`.
+and it returns an array with the 4 Lyapunov exponents.
 
 Here its basic use is illustrated
 ```julia
@@ -38,15 +37,13 @@ radius = 1.0
 spaces = 2.0:0.1:4.4 #Distances between adjacent disks
 lyap_time = zeros(spaces) #Array where the exponents will be stored
 
-i = 1
-for space in spaces
+for (i, space) in enumerate(spaces)
     bt = billiard_polygon(6, space/(sqrt(3)); setting = "periodic")
     disc = Disk([0., 0.], radius)
-    push!(bt, disc)
-    p = randominside(bt)
-    exps = lyapunovspectrum(p, bt, t)
+    billiard = Billiard(bt.obstacles..., disc)
+    p = randominside(billiard)
+    exps = lyapunovspectrum(p, billiard, t)
     lyap_time[i] = exps[1]
-    i+=1
 end
 
 plot(spaces, lyap_time, "*-")
