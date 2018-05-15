@@ -1,5 +1,9 @@
 export lyapunovspectrum!, lyapunovspectrum
 
+const δqind = SV{Int}(1,2)
+const δpind = SV{Int}(3,4)
+
+
 ##Auxiliar Functions ##
 """
 ```julia
@@ -18,6 +22,7 @@ function gramschmidt(u::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     w[:,4] = u[:,4] - dot(u[:,4],v3)*v3 - dot(u[:,4],v2)*v2 - dot(u[:,4],v1)*v1
     return w
 end
+
 #="""
     specular!(p::AbstractParticle, o::Obstacle, offset::MArray)
 Perform specular reflection based on the normal vector of the Obstacle.
@@ -25,7 +30,7 @@ The function updates the position and velocity of the particle
 together with the components of 4 offset vectors stored in the matrix
 `offset` as columns.
 """=#
-function specular!(p::AbstractParticle{T}, o::Disk{T},
+function specular!(p::AbstractParticle{T}, o::Circular{T},
                    offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     ti = [-p.vel[2],p.vel[1]]
@@ -33,34 +38,19 @@ function specular!(p::AbstractParticle{T}, o::Disk{T},
     p.vel = p.vel - 2*dot(n, p.vel)*n
     tf = [-p.vel[2], p.vel[1]]
     for k in 1:4
-        x = [offset[:,k]...]
+        x = offset[k]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
         # with norm(p) = 1
-        x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n-2./o.r*dot(x[1:2],ti)/cosa*tf
-        x[1:2]  = x[1:2] - 2.*dot(x[1:2],n)*n
+        a  = x[δpind] - 2.*dot(x[3:4],n)*n + curvature(o)*2./o.r*dot(x[1:2],ti)/cosa*tf
+        b  = x[1:2] - 2.*dot(x[1:2],n)*n
         ###
-        offset[:,k] = x
+        offset[k] = vcat(a, b)
     end
 end
 
-function specular!(p::AbstractParticle{T}, o::Semicircle{T},
-                   offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
+@inline curvature(::Semicircle) = +1
+@inline curvature(::Disk) = -1
 
-    n = normalvec(o, p.pos)
-    ti = [-p.vel[2],p.vel[1]]
-    cosa = dot(n, -p.vel)
-    p.vel = p.vel - 2*dot(n, p.vel)*n
-    tf = [-p.vel[2], p.vel[1]]
-    for k in 1:4
-        x = [offset[:,k]...]
-        # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
-        # with norm(p) = 1
-        x[3:4]  = x[3:4] - 2.*dot(x[3:4],n)*n+2./o.r*dot(x[1:2],ti)/cosa*tf
-        x[1:2]  = x[1:2] - 2.*dot(x[1:2],n)*n
-        ###
-        offset[:,k] = x
-    end
-end
 
 function specular!(p::AbstractParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
                    offset::MArray{Tuple{4,4}, T}) where {T<:AbstractFloat}
@@ -102,9 +92,8 @@ time interval `t`
 function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
                            p::Particle{T}) where T
     for k in 1:4
-        Γ = offset[:,k]
-        temp = [Γ[1] + t*Γ[3], Γ[2] + t*Γ[4], Γ[3], Γ[4]]
-        offset[:,k] = temp
+        Γ = offset[k]
+        offset[k] = SV{T}(Γ[1] + t*Γ[3], Γ[2] + t*Γ[4], Γ[3], Γ[4])
     end
 end
 
@@ -119,9 +108,13 @@ function propagate_offset!(offset::MArray{Tuple{4,4},T}, t::T,
          0.0 1.0  (1-cω)/ω     sω/ω;
          0.0 0.0     cω         -sω;
          0.0 0.0     sω          cω]
+
+         # DELETE J
+         # INSTEAD FIND ANALYTICALLY WHAT DOES J*x does for a general x
+
     for k in 1:4
-        Γ = offset[:,k]
-        offset[:,k] = J*Γ
+        Γ = offset[k]
+        offset[k] = SV{T}(whatever you get)
     end
 end
 
@@ -186,6 +179,13 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where 
             continue
         else
             offset = gramschmidt(offset)
+
+            Q, R = qr(hcat(offset[1], v[2], v[3], v[4]))
+            offset[1], v[2], v[3], v[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
+            for i in 1:k
+                λ[i] += log(abs(R[i,i]))
+            end
+
             instantaneous_norms = [norm(offset[:,j]) for j in 1:4]
             norms = vcat(norms,instantaneous_norms')
             for j in 1:4
