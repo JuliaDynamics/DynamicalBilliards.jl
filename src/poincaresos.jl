@@ -105,7 +105,7 @@ function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
             t_to_write = zero(T)
         end
     end #time, or collision number, loop
-    return pparams, pangles
+    return pparams, pangles, intervals
 end
 
 
