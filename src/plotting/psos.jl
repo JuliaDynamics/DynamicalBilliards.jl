@@ -4,7 +4,7 @@ export plot_boundarymap
 """
     plot_boundarymap(ξs, sφs, intervals; kwargs...)
 
-Plots the Poincaré surface of section in boundary coordinates.
+Plots the boundary map.
 The input arguments are the return values of `boundarymap`.
 
 ## Keyword Arguments
