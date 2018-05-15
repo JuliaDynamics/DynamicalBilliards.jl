@@ -1,7 +1,6 @@
 export isphysical, acceptable_raysplitter, reset_billiard!
 
-const debug = true
-debug && using Juno # for debugging
+#=debug=# false && using Juno
 
 #####################################################################################
 # Resolve collisions
@@ -109,7 +108,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
 
     tmin::T, i::Int = next_collision(p, bt)
-    debug && println("Min. col. t with $(bt[i].name) = $tmin")
+    #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
 
     if tmin == Inf
         return i, tmin, p.pos, p.vel
@@ -117,10 +116,10 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
     if haskey(ray, i)
         propagate!(p, tmin)
         trans, φ = istransmitted(p, bt[i], ray[i][1])
-        debug && println("Angle of incidence: $(φ), transmitted? $trans")
-        debug && println("Currently, pflag is $(bt[i].pflag) (will be reversed!)")
-        debug && trans && println("(pflag will be reversed!)")
-        debug && println()
+        #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
+        #=debug=# false && println("Currently, pflag is $(bt[i].pflag) (will be reversed!)")
+        #=debug=# false && trans && println("(pflag will be reversed!)")
+        #=debug=# false && println()
         newt = relocate_rayspl!(p, bt[i], trans)
         resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
     else
@@ -151,13 +150,12 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
     count = zero(t)
     t_to_write = zero(T)
 
-    debug && (dc = 0)
+    #=debug=# false && (dc = 0)
 
     while count < t
-        if debug
-            if dc > 5
+        if #=debug=# false
+            if dc > 10
                 Juno.clearconsole()
-                sleep(0.1) # only until next Juno release
                 dc = 0
             else
                 dc += 1
