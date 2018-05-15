@@ -56,7 +56,7 @@ Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
 """=#
 function resolvecollision!(p::AbstractParticle{T}, o::Obstacle{T},
-                offset::Vector{SVector{4, T}})::Void where {T<:AbstractFloat}
+                offset::Vector{SVector{4, T}})::Void where {T}
 
     specular!(p, o, offset)
     return nothing
@@ -163,14 +163,6 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where 
         end
 
     end#time loop
-
-    tmin = t - count
-    propagate!(p, tmin, offset)
-    Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
-    offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
-    for i ∈ 1:4
-        λ[i] += log(abs(R[i,i]))
-    end
 
     return λ./count
 end
