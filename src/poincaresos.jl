@@ -58,10 +58,10 @@ is dictated by `bt`, see [`Billiard`](@ref) for more.
 
 Return
 * the arclengths at the collisions `ξs`
-* the incidence angles at the collisions `φs`
+* the sines of the incidence angles at the collisions `sφs`
 * obstacle arclength `intervals`
 
-If `particles` is not a single particle then both `ξs` and `φs` are vectors
+If `particles` is not a single particle then both `ξs` and `sφs` are vectors
 of `Vector`. The `i` inner vector corresponds to the results of the
 `i` initial condition/particle.
 
@@ -72,14 +72,14 @@ function boundarymap(bt::Billiard{T}, t,
                      ps::Vector{<:AbstractParticle{T}}) where {T}
 
     params = Vector{T}[]
-    angles = Vector{T}[]
+    sines = Vector{T}[]
     intervals = arcintervals(bt)
     for p ∈ ps
-        pparams, pangles = boundarymap(bt, t, p, intervals)
+        pparams, psines = boundarymap(bt, t, p, intervals)
         push!(params, pparams)
-        push!(angles, pangles)
+        push!(sines, psines)
     end
-    return params, angles, intervals
+    return params, sines, intervals
 end
 
 function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
@@ -105,7 +105,7 @@ function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
             t_to_write = zero(T)
         end
     end #time, or collision number, loop
-    return pparams, pangles
+    return pparams, sin.(pangles), intervals
 end
 
 

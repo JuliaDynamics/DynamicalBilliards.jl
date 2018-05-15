@@ -8,15 +8,14 @@ function stadium_psos(partnum=10; printinfo = true)
         t = 500
         l = w = 1.0
         bt = billiard_bunimovich(l, w)
-        ξs, φs = boundarymap(bt, t, partnum)
-        #using 5*partnum so it doesn't fail all the time
+        ξs, sφs = boundarymap(bt, t, partnum)
 
         p = (10,10)
         A = zeros(Bool, p)
         c = 0
-        ε = ( (2*l + w*π)/p[1], π/p[2] )
-        for point ∈ zip(vcat(ξs...), vcat(φs...))
-            id = clamp.(ceil.(Int, (point .- (0, -π/2))./ε), (1,1), p)
+        ε = ( (2*l + w*π)/p[1], 2/p[2] )
+        for point ∈ zip(vcat(ξs...), vcat(sφs...))
+            id = clamp.(ceil.(Int, (point .- (0, -1))./ε), (1,1), p)
             if !A[id...]
                 A[id...] = true
                 c += 1

@@ -2,9 +2,9 @@ using PyPlot
 export plot_boundarymap
 
 """
-    plot_boundarymap(ξs, φs, intervals; kwargs...)
+    plot_boundarymap(ξs, sφs, intervals; kwargs...)
 
-Plots the Poincaré surface of section in boundary coordinates.
+Plots the boundary map.
 The input arguments are the return values of `boundarymap`.
 
 ## Keyword Arguments
@@ -19,14 +19,14 @@ The input arguments are the return values of `boundarymap`.
 * Any other keyword argument is passed to `PyPlot.plot` which plots the points of
   the section.
 """
-function plot_boundarymap(ξs, φs, intervals; ax = PyPlot.gca(),
+function plot_boundarymap(ξs, sφs, intervals; ax = PyPlot.gca(),
     color = "C0", bordercolor = "C3", ms = 1.0, obstacleindices = true, kwargs...)
 
     # Plot PSOS
-    for (i, (xis, phis)) in enumerate(zip(ξs, φs))
+    for (i, (xis, sphis)) in enumerate(zip(ξs, sφs))
         c = typeof(color) <: AbstractVector ? color[i] : color
 
-        ax[:plot](xis, phis; marker="o", color = c,
+        ax[:plot](xis, sphis; marker="o", color = c,
         linestyle="None", ms = ms, kwargs...)
     end
 
@@ -34,19 +34,15 @@ function plot_boundarymap(ξs, φs, intervals; ax = PyPlot.gca(),
     xmax = 0.0
     for intv ∈ intervals
         for xval ∈ intv
-            ax[:plot]([xval,xval], [-π/2, π/2], linewidth = 1.5, color = bordercolor,
+            ax[:plot]([xval,xval], [-1, 1], linewidth = 1.5, color = bordercolor,
             alpha = 0.5)
             xmax = (xval > xmax) ? xval : xmax
         end
     end
     ax[:set_xlim](0,xmax)
-    ax[:set_ylim](-π/2,π/2)
-    ax[:set_xlabel](L"arc length $\xi$")
-    ax[:set_ylabel](L"angle of incidence $\phi$")
-
-    #label tics in units of π/4
-    ax[:yaxis][:set_major_formatter](matplotlib[:ticker][:FuncFormatter]((x,p)->"$(x/pi) \$\\pi\$"))
-    ax[:yaxis][:set_major_locator](matplotlib[:ticker][:MultipleLocator](base=π/4))
+    ax[:set_ylim](-1,1)
+    ax[:set_xlabel](L"$\xi$")
+    ax[:set_ylabel](L"$\sin(\phi)$")
 
     #number obstacles by index
     if obstacleindices
