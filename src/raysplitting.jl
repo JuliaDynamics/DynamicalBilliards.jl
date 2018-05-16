@@ -109,6 +109,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
     tmin::T, i::Int = next_collision(p, bt)
     #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
+    #=debug=# false && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
 
     if tmin == Inf
         return i, tmin, p.pos, p.vel
@@ -153,6 +154,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
     #=debug=# false && (dc = 0)
 
     while count < t
+        #=debug=# true && println("count=$count")
         if #=debug=# false
             if dc > 10
                 Juno.clearconsole()
