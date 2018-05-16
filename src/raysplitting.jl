@@ -1,6 +1,6 @@
 export isphysical, acceptable_raysplitter, reset_billiard!
 
-#=debug=# false && using Juno
+#=debug=# true && using Juno
 
 #####################################################################################
 # Resolve collisions
@@ -26,10 +26,12 @@ function relocate_rayspl!(
     ineq = 2trans - 1
     newpos = p.pos; newt = zero(T)
     i = 1
+    # THE BUG IS IN THIS LOOP!!!!
     while ineq*distance(newpos, o) > 0
         newt += ineq*timeprec_forward(T)
         newpos = propagate_pos(p.pos, p, newt)
         i *= 10
+        #=debug=# true && i > 10000 && println("care, iteration $(log10(i))")
     end
     propagate!(p, newpos, newt)
     return newt
@@ -109,7 +111,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
     tmin::T, i::Int = next_collision(p, bt)
     #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
-    #=debug=# false && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
+    #=debug=# true && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
 
     if tmin == Inf
         return i, tmin, p.pos, p.vel
