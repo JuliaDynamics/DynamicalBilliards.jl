@@ -21,11 +21,12 @@ function specular!(p::AbstractParticle{T}, o::Circular{T},
     tf = SV{T}(-p.vel[2], p.vel[1])
 
     for k in 1:4
-        δΓ = offset[k]
+        δqprev = offset[k][δqind]
+        δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
         # with norm(p) = 1
-        δq  = δΓ[δqind] - 2.*dot(δΓ[δqind],n)*n
-        δp  = δΓ[δpind] - 2.*dot(δΓ[δpind],n)*n - curvature(o)*2./o.r*dot(δΓ[δqind],ti)/cosa*tf
+        δq  = δqprev - 2.*dot(δqprev,n)*n
+        δp  = δpprev - 2.*dot(δpprev,n)*n - curvature(o)*2./o.r*dot(δqprev,ti)/cosa*tf
         ###
         offset[k] = vcat(δq, δp)
     end
@@ -41,10 +42,11 @@ function specular!(p::AbstractParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
     n = normalvec(o, p.pos)
     specular!(p, o)
     for k in 1:4
-        δΓ = offset[k]
+        δqprev = offset[k][δqind]
+        δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 20)
-        δq  = δΓ[δqind] -  2.*dot(δΓ[δqind],n)*n
-        δp  = δΓ[δpind] - 2.*dot(δΓ[δpind],n)*n
+        δq  = δqprev -  2.*dot(δqprev,n)*n
+        δp  = δpprev - 2.*dot(δpprev,n)*n
         ###
         offset[k] = vcat(δq, δp)
     end
@@ -130,11 +132,11 @@ end
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
-function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t::T) where {T<:AbstractFloat}
-
+function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, t) where {T<:AbstractFloat}
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
               SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
 
+    t = T(t)
     ismagnetic = typeof(p) <: MagneticParticle
     if t <= 0.0
         error("`evolve!()` cannot evolve backwards in time.")
