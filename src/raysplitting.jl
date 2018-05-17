@@ -25,7 +25,7 @@ The functions have the following signatures:
    Notice that `newangular` is a keyword argument and defaults to `(ω, pflag) -> ω`.
 
 The above three functions use the **same convention**: the argument `pflag` is the
-one the Obstacle has **before transmission**. For example, if a particle is
+one the obstacle has **before transmission**. For example, if a particle is
 outside an [`Antidot`](@ref) (with `pflag = true` here) and is transmitted inside
 the `Antidot` (`pflag` becomes `false` here), then all three functions will be
 given their second argument (the Boolean one) as `true`!
@@ -33,26 +33,27 @@ given their second argument (the Boolean one) as `true`!
 Also notice that the call signature **must** be as stated, irrespectively of
 whether some of the arguments are used in the functions.
 
-`affect` is a vector of integers, and denotes which obstacles
-of the billiard are affected when transmission occurs (for which obstacles
-should the field `pflag` be reversed). Defaults to `idxs`.
+`affect` is a function, and denotes which obstacles
+of the billiard are affected when transmission occurs at obstacle
+`i` (for which obstacles should the field `pflag` be reversed).
+Defaults to `idxs = (i) -> i`, i.e. only the colliding obstacle is affected.
+If you want many obstacles to be affected you could write
+`idxs = (i) -> SVector(2,3,5)`, etc.
+Keep in mind that the only values of `i` that can be passed into this function
+are the ones that are given in the argument `idxs`!
 """
-struct RaySplitter{T, Φ, Ω}
+struct RaySplitter{T, Φ, Ω, A}
     oidx::Vector{Int}
     transmission::T
     refraction::Φ
-    affect::Vector{Int}
-    # Change this to make it easier to handle.?
-    # Affect to be a function that returns the indices to be affected?
-    # Otherwise not so easy to use same struct for different obstacles
-    # and then I use Set{} on oidx given to affect
+    affect::A
     newω::Ω
 end
 
-function RaySplitter(idxs, tr, ref; affect = idxs, newangular = nothing)
+function RaySplitter(idxs, tr, ref; affect = (i) -> i, newangular = (ω, pflag) -> ω)
     for i ∈ idxs
-        i ∈ affect || throw(ArgumentError(
-        "All indices that correspond to this RaySplitter must also be affected"))
+        i ∈ affect(i) || throw(ArgumentError(
+        "All indices that correspond to this RaySplitter must also be affected!"))
     end
     return RaySplitter(idxs, tr, ref, affect, newangular)
 end
@@ -103,7 +104,7 @@ end
 # Raysplit Algorithm step 4: relocate the particle _inside_ the obstacle
 # if ray-splitting happens (see `ineq` variable)
 function relocate_rayspl!(
-    p::Particle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+    p::AbstractParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
 
     ineq = 2trans - 1
     newpos = p.pos; newt = zero(T)
@@ -134,7 +135,7 @@ function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
         theta = rayspl.refraction(φ, a.pflag, ω)
         # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
         # for all obstacles dictated by the RaySplitter
-        for oi ∈ rayspl.affect
+        for oi ∈ rayspl.affect(colidx)
             bt[oi].pflag = ! bt[oi].pflag
         end
         # Raysplit Algorithm step 8: find transmission angle in real-space angles
@@ -157,7 +158,7 @@ function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
 end
 
 # Ray-splitting version of bounce!
-# rays is a tuple of RaySplitter. raysidx is a vector that given the obstacle
+# raysplitters is a tuple of RaySplitter. raysidx is a vector that given the obstacle
 # index it tells you which raysplitter to choose from the tuple OR to not
 # do raysplitting at all (for returned index 0)
 function bounce!(p::AbstractParticle{T}, bt::Billiard{T},
@@ -171,7 +172,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T},
         return i, tmin, p.pos, p.vel
     elseif raysidx[i] != 0
         propagate!(p, tmin)
-        trans = istransmitted(p, bt[i], rays[raysidx[i]].transmission)
+        trans = istransmitted(p, bt[i], raysplitters[raysidx[i]].transmission)
         #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
         #=debug=# false && println("Currently, pflag is $(bt[i].pflag)")
         #=debug=# false && trans && println("(pflag will be reversed!)")

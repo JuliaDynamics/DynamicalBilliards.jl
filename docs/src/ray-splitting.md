@@ -27,7 +27,7 @@ Billiard{Float64} with 5 obstacles:
 
 ## The `RaySplitter` structure
 In the second step, you have to define 2+1 functions: transmission probability,
-refraction angle and optionally new angular velocity after transmission. These functions, as well as the obstacle index are bundled into a special structure:
+refraction angle and optionally new angular velocity after transmission. These functions, as well as which obstacles participate in ray-splitting, are bundled into a special structure:
 ```@docs
 RaySplitter
 ```
@@ -35,6 +35,8 @@ RaySplitter
 Notice that if you want different type of transmission/refraction functions for
 different obstacles, then you define multiple `RaySplitter`s.
 
+
+## Evolution with Ray-Splitting
 After you have created your `RaySplitter`s, you must bundle them into a tuple
 before passing them into a high-level function.
 
