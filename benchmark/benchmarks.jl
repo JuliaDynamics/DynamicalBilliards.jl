@@ -18,6 +18,7 @@ colf = (collisiontime,
         bounce!,
         resolvecollision!,
         propagate!,
+        lyapunovspectrum
         )
 name = (f) -> split(string(f), '.')[end]
 
@@ -63,6 +64,13 @@ for (f, p) in zip(["straight", "magnetic"], particles)
     ploc = deepcopy(p)
     SUITE["propagate!"][f] =
         @benchmarkable propagate!($ploc, $proptime)
+end
+
+for (f, p) in zip(["straight", "magnetic"], particles)
+    for (bname, bil) in zip(["mushroom", "psinai"], (bt, bt2))
+        SUITE["lyapunovspectrum"][f][bname] =
+            @benchmarkable lyapunovspectrum($p, $bil, 10000.0)
+    end
 end
 
 ################################################################################

@@ -107,7 +107,7 @@ function meancoltimes(partnum=500; printinfo=true)
             p = ω == 0 ? randominside(bt) : randominside(bt, ω)
 
             κ1 = meancollisiontime!(p, bt, 1000)
-            @test κ1 < 1.0
+            @test κ1 < 1.5
         end
     end
     j = 1
@@ -122,7 +122,7 @@ function meancoltimes(partnum=500; printinfo=true)
             if mct == Inf
                 port +=1
             else
-                @test mcts[j] - 1.5 ≤ mct ≤ mcts[j] + 1.5
+                @test mcts[j] - 1.5 ≤ mct ≤ mcts[j] + 2.5
             end
         end#particle loop
         @test port < partnum
