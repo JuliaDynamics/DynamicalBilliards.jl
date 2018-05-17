@@ -1,6 +1,6 @@
 export isphysical, acceptable_raysplitter, reset_billiard!
 
-#=debug=# true && using Juno
+#=debug=# false && using Juno
 
 #####################################################################################
 # RaySplitter structures
@@ -42,6 +42,10 @@ struct RaySplitter{T, Φ, Ω}
     transmission::T
     refraction::Φ
     affect::Vector{Int}
+    # Change this to make it easier to handle.?
+    # Affect to be a function that returns the indices to be affected?
+    # Otherwise not so easy to use same struct for different obstacles
+    # and then I use Set{} on oidx given to affect
     newω::Ω
 end
 
@@ -109,7 +113,7 @@ function relocate_rayspl!(
         newt += ineq*timeprec_rayspl(p)
         newpos = propagate_pos(p.pos, p, newt)
         i *= 10
-        #=debug=# true && i > 10000 && println("care, iteration $(log10(i))")
+        #=debug=# false && i > 10000 && println("care, iteration $(log10(i))")
     end
     propagate!(p, newpos, newt)
     return newt
@@ -160,18 +164,18 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T},
     raysidx::Vector{Int}, raysplitters::Tuple) where {T}
 
     tmin::T, i::Int = next_collision(p, bt)
-    #=debug=# true && println("Colt. with Left antidot = $(collisiontime(p, bt[1]))")
-    #=debug=# true && println("Min. col. t with $(bt[i].name) = $tmin")
-    #=debug=# true && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
+    #=debug=# false && println("Colt. with Left antidot = $(collisiontime(p, bt[1]))")
+    #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
+    #=debug=# false && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
     if tmin == Inf
         return i, tmin, p.pos, p.vel
     elseif raysidx[i] != 0
         propagate!(p, tmin)
         trans = istransmitted(p, bt[i], rays[raysidx[i]].transmission)
-        #=debug=# true && println("Angle of incidence: $(φ), transmitted? $trans")
-        #=debug=# true && println("Currently, pflag is $(bt[i].pflag)")
-        #=debug=# true && trans && println("(pflag will be reversed!)")
-        #=debug=# true && println()
+        #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
+        #=debug=# false && println("Currently, pflag is $(bt[i].pflag)")
+        #=debug=# false && trans && println("(pflag will be reversed!)")
+        #=debug=# false && println()
         newt = relocate_rayspl!(p, bt[i], trans)
         resolvecollision!(p, bt, i, trans,  raysplitters[raysidx[i]])
         tmin += newt
@@ -210,7 +214,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
     #=debug=# false && (dc = 0)
 
     while count < t
-        #=debug=# true && println("count=$count")
+        #=debug=# false && println("count=$count")
         if #=debug=# false
             if dc > 10
                 Juno.clearconsole()

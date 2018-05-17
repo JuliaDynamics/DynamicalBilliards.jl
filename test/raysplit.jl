@@ -50,8 +50,8 @@ tim = time()
         tt=1000.0
         for i in 1:partnum
             p = randominside(bt, 0.4)
-            #=debug=# true && Juno.clearconsole()
-            #=debug=# true && println("Particle ", i, " billiard $btcount")
+            #=debug=# false && Juno.clearconsole()
+            #=debug=# false && println("Particle ", i, " billiard $btcount")
             #=debug=# false && println("pos = SVector($(p.pos[1]), $(p.pos[2]))")
             #=debug=# false && println("vel = SVector($(p.vel[1]), $(p.vel[2]))")
             t, poss, vels = evolve!(p, bt, tt, ray)
