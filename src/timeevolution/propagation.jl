@@ -2,9 +2,9 @@ export resolvecollision!, propagate!, evolve!, construct, specular!,
 periodicity!, propagate_pos, next_collision, relocate!,
 bounce!, evolve
 
-#######################################################################################
-## Mathetical/Convenience Functions
-#######################################################################################
+#####################################################################################
+# Mathetical/Convenience Functions
+#####################################################################################
 const sixsqrt = 6sqrt(2)
 
 # Used in relocate:
@@ -38,9 +38,9 @@ Approximate arccos(1 - x) for x very close to 0.
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
 
-#######################################################################################
-## Resolve Collisions
-#######################################################################################
+#####################################################################################
+# Resolve Collisions
+#####################################################################################
 """
     specular!(p::AbstractParticle, o::Obstacle)
 Perform specular reflection based on the normal vector of the Obstacle.
@@ -115,7 +115,7 @@ Notice that the adjustment is increased geometrically; if one adjustment is not
 enough, the adjusted time is multiplied by a factor of 10. This happens as many
 times as necessary.
 """
-function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin) where {T}
+function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
     sig = timeprec_sign(o)
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
@@ -133,9 +133,9 @@ end
 
 
 
-#######################################################################################
-## Propagate & Bounce
-#######################################################################################
+#####################################################################################
+# Propagate & Bounce
+#####################################################################################
 """
     propagate!(p::AbstractParticle, t)
 Propagate the particle `p` for given time `t`, changing appropriately the the
@@ -222,9 +222,9 @@ function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
 end
 
 
-#######################################################################################
-## Evolve & Construct
-#######################################################################################
+#####################################################################################
+# Evolve & Construct
+#####################################################################################
 """
     evolve!(p::AbstractParticle, bt::Billiard, t)
 Evolve the given particle `p` inside the billiard `bt`. If `t` is of type

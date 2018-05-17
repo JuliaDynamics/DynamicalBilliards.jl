@@ -3,22 +3,59 @@ export isphysical, acceptable_raysplitter, reset_billiard!
 #=debug=# true && using Juno
 
 #####################################################################################
+# RaySplitter structures
+#####################################################################################
+"""
+    RaySplitter(idxs, transmission, refraction; affect, newangular)
+Return a `RaySplitter` instance, that performs raysplitting.
+`idxs` is a `Vector{Int}` with the indices of the obstacles
+that this `RaySplitter` corresponds to.
+
+`transmission`, `refraction` and `newangular` are **functions** with the following
+signatures:
+
+1. `transmission(φ, pflag, ω) -> T` : Transmission probability `T` depending on
+   whether the particle is inside or outside the obstacle (`pflag`) and optionally
+   depending on ω.
+2. `refraction(φ, pflag, ω) -> θ` : Refraction angle `θ`
+   depending on whether the particle is inside or outside the obstacle (`pflag`)
+   and optionally depending on `ω`.
+3. `newangular(ω, pflag) -> newω` : New angular velocity after transmission.
+   Notice that `newangular` is a keyword argument and defaults to `(ω, pflag) -> ω`.
+
+`φ` is the angle of incidence while `ω` is the angular velocity (before transmission).
+The above three functions use the **same convention**: the argument `pflag` is the
+one the Obstacle has **before transmission**. For example, if a particle is
+outside an [`Antidot`](@ref) (with `pflag = true` here) and is transmitted inside
+the `Antidot` (`pflag` becomes `false` here), then all three functions will be
+given their second argument (the Boolean one) as `true`!
+
+Also notice that the call signature **must** be as stated, irrespectively of
+whether some of the arguments are used in the functions.
+
+`affect` is a vector of integers, and denotes which obstacles
+of the billiard are affected when transmission occurs (for which obstacles
+should the field `pflag` be reversed). Defaults to `idxs`.
+"""
+struct RaySplitter{T, Φ, Ω}
+    obstind::Vector{Int}
+    transmission::T
+    refraction::Φ
+    affect::Vector{Int}
+    newω::Ω
+end
+
+RaySplitter(i, tr, ref; affect = [i], newangular = nothing) =
+    Raysplitter(i, tr, ref, affect, newangular)
+
+
+
+
+#####################################################################################
 # Resolve collisions
 #####################################################################################
-function relocate_rayspl!(
-    p::Particle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
-
-    ineq = 2trans - 1
-    newpos = p.pos; newt = zero(T)
-    i = 1
-    while ineq*distance(newpos, o) > 0
-        newt += i*ineq*timeprec(T)
-        newpos = propagate_pos(p.pos, p, newt)
-        i *= 10
-    end
-    propagate!(p, newpos, newt)
-    return newt
-end
+timeprec_rayspl(::Particle{T}) = timeprec(T)
+timeprec_rayspl(::MagneticParticle{T}) = timeprec_forward(T)
 
 function relocate_rayspl!(
     p::MagneticParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
@@ -28,7 +65,7 @@ function relocate_rayspl!(
     i = 1
     # THE BUG IS IN THIS LOOP!!!!
     while ineq*distance(newpos, o) > 0
-        newt += ineq*timeprec_forward(T)
+        newt += ineq*timeprec_rayspl(p)
         newpos = propagate_pos(p.pos, p, newt)
         i *= 10
         #=debug=# true && i > 10000 && println("care, iteration $(log10(i))")
@@ -110,9 +147,9 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
 
     tmin::T, i::Int = next_collision(p, bt)
+    #=debug=# true && println("Colt. with Left antidot = $(collisiontime(p, bt[1]))")
     #=debug=# true && println("Min. col. t with $(bt[i].name) = $tmin")
     #=debug=# true && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
-
     if tmin == Inf
         return i, tmin, p.pos, p.vel
     end
@@ -125,6 +162,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
         #=debug=# true && println()
         newt = relocate_rayspl!(p, bt[i], trans)
         resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
+        tmin += newt
     else
         tmin = relocate!(p, bt[i], tmin)
         resolvecollision!(p, bt[i])
