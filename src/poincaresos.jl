@@ -1,4 +1,4 @@
-export boundarymap
+export boundarymap, boundarymap_portion
 export psos!, psos
 
 #######################################################################################
@@ -114,6 +114,46 @@ boundarymap(bt::Billiard, t, n::Int) =
 
 boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
     boundarymap(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+
+
+
+function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ,
+                             intervals = arcintervals(bt)) where {T}
+    count = zero(T)
+    t_to_write = zero(T)
+
+    d = Dict{SV{Int}, Int}()
+    while count < t
+        i, tmin = bounce!(p,bt)
+        t_to_write += tmin
+
+        if typeof(bt[i]) <: PeriodicWall
+            continue # do not write output if collision with with PeriodicWall
+        else
+            # get Birkhoff coordinates
+            ξ = arclength(p, bt[i]) + intervals[i][1]
+            sφ = sin(reflection_angle(p, bt[i]))
+
+            # compute index & increment dictionary entry
+            ind = SV{Int}(floor.((ξ, sφ + 1)./δ))
+            d[ind] = get(d, ind, 0) + 1
+
+            # set counter
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+    end #time or collision number loop
+
+    #calculate ratio of visited boxes
+    total_boxes = prod((totallength(bt), 2)./δ)
+    ratio = length(keys(d))/total_boxes
+
+    return ratio, d
+end
+    # After evolution compute the ratio of dictionary entries to total possible entries.
+    # return the ratio and the dictionary as well. Can be very useful!
+
+
 
 
 ######################################################################################
