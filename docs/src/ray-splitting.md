@@ -95,3 +95,27 @@ In the [examples page](examples), you can find the code for the following animat
 ## Physics
 The condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. Otherwise just specular reflection will take place. A more detailed discussion is on the ray-splitting section of the
 [Physics](/physics#ray-splitting-functions) page.
+
+## The Ray-Splitting Algorithm
+In this section we describe the algorithm we follow to implement the ray-splitting
+process. Let $T$ denote the transmission function, $\theta$ the refraction function and $\omega_{\text{new}}$ the new angular velocity function. The following describes the process after a particle has reached an obstacle that supports ray-splitting.
+
+1.  Find the angle of incidence $\phi' = \pi - \arccos(\vec{v} \cdot \vec{n}) = \arccos(\vec{v} \cdot (-\vec{n}))$ with $\vec{n}$ the normal vector at collision point. Notice that we use here $-\vec{n}$ because the velocity is opposing the normal vector before the collision happens. Using $-\vec{n}$ gives the angle between 0 and $\pi/2$ instead of $\pi/2$ to $\pi$.
+
+2.  Find the *correct* sign of the incidence angle, $\phi = \pm \phi'$. Specifically, use the cross product: if the third entry of $\vec{v} \times \vec{n}$ is negative, then have minus sign. The "correct" sign debates on whether the velocity vector is to the right or to the left of $(-\vec{n})$. This is important for finding the correct transmission angle and/or probability.
+
+3.  Check if $T(\phi, \verb|pflag|, \omega) > \text{random}()$. If not, do standard specular reflection.
+
+4. If ray-splitting happens, then relocate the particle so that it is on the *other* side of the colliding obstacle. This contrasts the main evolution algorithm of this billiard package.
+
+5. Re-compute the *correct* angle of incidence, as the position of the particle generally changes with relocating.
+
+6.  Find refraction angle $\theta(\phi, \verb|pflag|, \omega)$. Notice that this is a relative angle with respect to the normal vector. Also notice that $\theta$ may have opposite sign from $\phi$. It depends on the user if they want to add anomalous refraction.
+
+7.  Set `obstacle.pflag = !obstacle.pflag` for *all* obstacles affected by the current `RaySplitter`. This reverses $\vec{n}$ to $-\vec{n}$ as well! So from now on $\vec{n}$ is the opposite than what it was at the beginning of the algorithm!
+
+8.  Find the refraction angle in absolute space. First find $a = \text{atan2}(n_y, n_x)$ and then set $\Theta = a + \theta$.
+
+9. Perform refraction, i.e. set the particle velocity to the direction of $\Theta$.
+
+10. Scale the magnetic field, i.e. set `p.omega` = $\omega_{\text{new}}(\omega, \verb|!pflag|)$. It is important to note that we use `!pflag` because we have already changed the `pflag` field.

@@ -258,17 +258,11 @@ the specular reflection of the `i-1`th collision.
 The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
-    evolve!(p, bt, t, ray_splitter)
+    evolve!(p, bt, t, raysplitters)
 
 To implement ray-splitting, the `evolve!` function is supplemented with a
-fourth argument, `ray_splitter::Dict`, which maps integers
-to some kind of Function container (Tuple or Vector). The functions in this
-container are: (φ is the angle of incidence)
-* T(φ, pflag, ω) : Transmission probability.
-* θ(φ, pflag, ω) : Transmission (aka refraction) angle.
-* ω_new(ω, pflag) : Angular velocity after transmission.
-
-For more information and instructions on defining these functions
+fourth argument, `raysplitters` which is a tuple of [`RaySplitter`](@ref) instances.
+For more information and instructions on using ray-splitting
 please visit the official documentation.
 """
 function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;

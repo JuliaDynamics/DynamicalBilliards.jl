@@ -7,23 +7,23 @@ export isphysical, acceptable_raysplitter, reset_billiard!
 #####################################################################################
 """
     RaySplitter(idxs, transmission, refraction; affect, newangular)
-Return a `RaySplitter` instance, that performs raysplitting.
+Return a `RaySplitter` instance, used to performs raysplitting.
 `idxs` is a `Vector{Int}` with the indices of the obstacles
 that this `RaySplitter` corresponds to.
 
-`transmission`, `refraction` and `newangular` are **functions** with the following
-signatures:
+`transmission`, `refraction` and `newangular` are **functions**. Let
+`φ` be the angle of incidence and `ω` be the angular velocity (before transmission).
+The functions have the following signatures:
 
 1. `transmission(φ, pflag, ω) -> T` : Transmission probability `T` depending on
    whether the particle is inside or outside the obstacle (`pflag`) and optionally
    depending on ω.
 2. `refraction(φ, pflag, ω) -> θ` : Refraction angle `θ`
    depending on whether the particle is inside or outside the obstacle (`pflag`)
-   and optionally depending on `ω`.
+   and optionally depending on `ω`. This angle is *relative* to the normal vector.
 3. `newangular(ω, pflag) -> newω` : New angular velocity after transmission.
    Notice that `newangular` is a keyword argument and defaults to `(ω, pflag) -> ω`.
 
-`φ` is the angle of incidence while `ω` is the angular velocity (before transmission).
 The above three functions use the **same convention**: the argument `pflag` is the
 one the Obstacle has **before transmission**. For example, if a particle is
 outside an [`Antidot`](@ref) (with `pflag = true` here) and is transmitted inside
@@ -38,27 +38,68 @@ of the billiard are affected when transmission occurs (for which obstacles
 should the field `pflag` be reversed). Defaults to `idxs`.
 """
 struct RaySplitter{T, Φ, Ω}
-    obstind::Vector{Int}
+    oidx::Vector{Int}
     transmission::T
     refraction::Φ
     affect::Vector{Int}
     newω::Ω
 end
 
-RaySplitter(i, tr, ref; affect = [i], newangular = nothing) =
-    Raysplitter(i, tr, ref, affect, newangular)
+function RaySplitter(idxs, tr, ref; affect = idxs, newangular = nothing)
+    for i ∈ idxs
+        i ∈ affect || throw(ArgumentError(
+        "All indices that correspond to this RaySplitter must also be affected"))
+    end
+    return RaySplitter(idxs, tr, ref, affect, newangular)
+end
 
+"""
+    raysplit_indices(bt::Billiard, raysplitters::Tuple)
+Create a vector of integers. The `i`th entry tells you which entry of the
+`raysplitters` tuple is associated with the `i`th obstacle of the billiard.
 
+If the `i`th entry is `0`, this means that the obstacle does not do raysplitting.
+"""
+function raysplit_indices(bt::Billiard, raysplitters::Tuple)
+    O = zeros(Int, length(bt.obstacles))
+    for (k, rayspl) ∈ enumerate(raysplitters)
+        O[rayspl.oidx] = k
+    end
+    return O
+end
 
+# in isphysical add test that different raysplitters cannot share
+# ANY entry in oidx
 
 #####################################################################################
 # Resolve collisions
 #####################################################################################
-timeprec_rayspl(::Particle{T}) = timeprec(T)
-timeprec_rayspl(::MagneticParticle{T}) = timeprec_forward(T)
+timeprec_rayspl(::Particle{T}) where {T} = timeprec(T)
+timeprec_rayspl(::MagneticParticle{T}) where {T} = timeprec_forward(T)
 
+function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
+    # Raysplit Algorithm step 1: Determine incidence angle (0 < φ < π/4)
+    n = normalvec(a, p.pos)
+    inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
+    φ = acos(inverse_dot)
+    # Raysplit Algorithm step 2: get correct sign
+    if cross2D(p.vel, n) < 0
+        φ *= -1
+    end
+    return φ
+end
+
+function istransmitted(p::AbstractParticle{T}, a::Obstacle{T}, Tr::F) where {T, F}
+    ω = typeof(p) <: MagneticParticle ? p.omega : T(0)
+    φ = incidence_angle(p, a)
+    # Raysplit Algorithm step 3: check transmission probability
+    trans = Tr(φ, a.pflag, ω) > rand()
+end
+
+# Raysplit Algorithm step 4: relocate the particle _inside_ the obstacle
+# if ray-splitting happens (see `ineq` variable)
 function relocate_rayspl!(
-    p::MagneticParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+    p::Particle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
 
     ineq = 2trans - 1
     newpos = p.pos; newt = zero(T)
@@ -74,64 +115,33 @@ function relocate_rayspl!(
     return newt
 end
 
-function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
-    # Raysplit Algorithm step 1: Determine incidence angle (0 < θ < π/4)
-    n = normalvec(a, p.pos)
-    inverse_dot = clamp(dot(p.vel, -n), -1.0, 1.0)
-    φ = acos(inverse_dot)
-    # Raysplit Algorithm step 2:
-    if cross2D(p.vel, n) < 0
-        φ *= -1
-    end
-    return φ
-end
+function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
+    trans::Bool, rayspl::RaySplitter) where {T<:AbstractFloat}
 
-function istransmitted(p::Particle{T}, a::Obstacle{T}, Tr::Function) where {T}
-    φ = incidence_angle(p, a)
-    # Raysplit Algorithm step 3: check transmission probability
-    trans = Tr(φ, a.pflag) > rand()
-    return trans, φ
-    # comment: more accurate would be to calculate incidence angle again
-    # within relocate!(). But the angle changes so little that this must have
-    # almost zero impact.
-end
-function istransmitted(p::MagneticParticle{T}, a::Obstacle{T}, Tr::Function) where {T}
-    φ = incidence_angle(p, a)
-    # Raysplit Algorithm step 3: check transmission probability
-    trans = Tr(φ, a.pflag, p.omega) > rand()
-    return trans, φ
-    # comment: more accurate would be to calculate incidence angle again
-    # within relocate!(). But the angle changes so little that this must have
-    # almost zero impact.
-end
-
-
-
-# Resolve collision for ray-splitting
-function resolvecollision!(p::AbstractParticle{T},
-    a::Obstacle{T}, φ::T, trans::Bool,
-    θ, newω = (ω, bool) -> ω) where {T<:AbstractFloat}
-
+    a = bt[colidx]
     ismagnetic = typeof(p) <: MagneticParticle
     ω = ismagnetic ? p.omega : T(0)
 
+    # Raysplit Algorithm step 5: recompute angle of incidence
+    φ = incidence_angle(p, a)
+
     if trans #perform raysplitting
-        # Raysplit Algorithm step 4: find transmission angle in relative angles
-        theta = θ(φ, a.pflag, ω)
-        # Raysplit Algorithm step 5: reverse the Obstacle propagation flag
-        a.pflag = !a.pflag
-        # Raysplit Algorithm step 6: find transmission angle in real-space angles
-        n = normalvec(a, p.pos) #notice that this is reversed! It's the new!
+        # Raysplit Algorithm step 6: find transmission angle in relative angles
+        theta = rayspl.refraction(φ, a.pflag, ω)
+        # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
+        # for all obstacles dictated by the RaySplitter
+        for oi ∈ rayspl.affect
+            bt[oi].pflag = ! bt[oi].pflag
+        end
+        # Raysplit Algorithm step 8: find transmission angle in real-space angles
+        n = normalvec(a, p.pos) #notice that this is reversed! It's the new normalvec!
         Θ = theta + atan2(n[2], n[1])
-        # Step 7+8: Relocation has been done already by the
-        # call of `tmin = relocate!(p, bt[colobst_idx], tmin, trans)`
-        # Sidenote: The above call must happen BEFORE flag reversal!
 
         # Raysplit Algorithm step 9: Perform refraction
         p.vel = SVector{2,T}(cos(Θ), sin(Θ))
         # Raysplit Algorithm step 10: Set new angular velocity
         if ismagnetic
-            ω = newω(p.omega, !a.pflag)  # notice the exclamation mark
+            ω = rayspl.newω(p.omega, !a.pflag)  # notice the exclamation mark
             p.omega = ω
             p.r = abs(1/ω)
         end
@@ -143,8 +153,11 @@ function resolvecollision!(p::AbstractParticle{T},
 end
 
 # Ray-splitting version of bounce!
-function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
-
+# rays is a tuple of RaySplitter. raysidx is a vector that given the obstacle
+# index it tells you which raysplitter to choose from the tuple OR to not
+# do raysplitting at all (for returned index 0)
+function bounce!(p::AbstractParticle{T}, bt::Billiard{T},
+    raysidx::Vector{Int}, raysplitters::Tuple) where {T}
 
     tmin::T, i::Int = next_collision(p, bt)
     #=debug=# true && println("Colt. with Left antidot = $(collisiontime(p, bt[1]))")
@@ -152,16 +165,15 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
     #=debug=# true && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
     if tmin == Inf
         return i, tmin, p.pos, p.vel
-    end
-    if haskey(ray, i)
+    elseif raysidx[i] != 0
         propagate!(p, tmin)
-        trans, φ = istransmitted(p, bt[i], ray[i][1])
+        trans = istransmitted(p, bt[i], rays[raysidx[i]].transmission)
         #=debug=# true && println("Angle of incidence: $(φ), transmitted? $trans")
         #=debug=# true && println("Currently, pflag is $(bt[i].pflag)")
         #=debug=# true && trans && println("(pflag will be reversed!)")
         #=debug=# true && println()
         newt = relocate_rayspl!(p, bt[i], trans)
-        resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
+        resolvecollision!(p, bt, i, trans,  raysplitters[raysidx[i]])
         tmin += newt
     else
         tmin = relocate!(p, bt[i], tmin)
@@ -174,14 +186,18 @@ end
 #####################################################################################
 # Evolve raysplitting
 #####################################################################################
-function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
+function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple;
     warning = false) where {T}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
 
+    # TODO: Here check if raysplitters is acceptable
+
     ismagnetic = typeof(p) <: MagneticParticle
+
+    raysidx = raysplit_indices(bt, raysplitters)
 
     rt = T[]; push!(rt, 0)
     rpos = SVector{2,T}[]; push!(rpos, p.pos)
@@ -204,7 +220,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, ray::Dict;
             end
         end
 
-        i, tmin, pos, vel = bounce!(p, bt, ray)
+        i, tmin, pos, vel = bounce!(p, bt, raysidx, raysplitters)
         t_to_write += tmin
 
         if ismagnetic && tmin == Inf
