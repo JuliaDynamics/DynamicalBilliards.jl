@@ -110,7 +110,7 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
 
 
     tmin::T, i::Int = next_collision(p, bt)
-    #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
+    #=debug=# true && println("Min. col. t with $(bt[i].name) = $tmin")
     #=debug=# true && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
 
     if tmin == Inf
@@ -119,10 +119,10 @@ function bounce!(p::AbstractParticle{T}, bt::Billiard{T}, ray::Dict) where {T}
     if haskey(ray, i)
         propagate!(p, tmin)
         trans, φ = istransmitted(p, bt[i], ray[i][1])
-        #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
-        #=debug=# false && println("Currently, pflag is $(bt[i].pflag) (will be reversed!)")
-        #=debug=# false && trans && println("(pflag will be reversed!)")
-        #=debug=# false && println()
+        #=debug=# true && println("Angle of incidence: $(φ), transmitted? $trans")
+        #=debug=# true && println("Currently, pflag is $(bt[i].pflag)")
+        #=debug=# true && trans && println("(pflag will be reversed!)")
+        #=debug=# true && println()
         newt = relocate_rayspl!(p, bt[i], trans)
         resolvecollision!(p, bt[i], φ, trans, ray[i][2], ray[i][3])
     else
