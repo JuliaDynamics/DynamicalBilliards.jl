@@ -7,7 +7,7 @@ export isphysical, acceptable_raysplitter, reset_billiard!
 #####################################################################################
 """
     RaySplitter(idxs, transmission, refraction; affect, newangular)
-Return a `RaySplitter` instance, used to performs raysplitting.
+Return a `RaySplitter` instance, used to perform raysplitting.
 `idxs` is a `Vector{Int}` with the indices of the obstacles
 that this `RaySplitter` corresponds to.
 
@@ -55,8 +55,10 @@ function RaySplitter(idxs, tr, ref; affect = (i) -> i, newangular = (ω, pflag) 
         i ∈ affect(i) || throw(ArgumentError(
         "All indices that correspond to this RaySplitter must also be affected!"))
     end
-    return RaySplitter(idxs, tr, ref, affect, newangular)
+    typeof(idxs) == Int && (idxs = [idxs])
+    return RaySplitter(sort(idxs), tr, ref, affect, newangular)
 end
+
 
 """
     raysplit_indices(bt::Billiard, raysplitters::Tuple)
@@ -73,8 +75,39 @@ function raysplit_indices(bt::Billiard, raysplitters::Tuple)
     return O
 end
 
+allaffected(ray::RaySplitter) = union(ray.affect(i) for i in ray.oidx)
+
 # in isphysical add test that different raysplitters cannot share
 # ANY entry in oidx
+"""
+    acceptable_raysplitter(raysplitters, bt::Billiard)
+Return `true` if the given `raysplitters` (`Tuple` of [`RaySplitter`](@ref)
+can be used in conjuction with given billiard `bt`.
+"""
+function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
+
+    for ray in raysplitters
+        for i in (ray.oidx ∪ ray.affect(ray.oidx))
+            if !supports_raysplitting(bt[i])
+                error("Obstacle at index $i of given billiard table"*
+                " does not have a field `pflag`"*
+                " and therefore does not support ray-splitting."*
+                " However a `RaySplitter` uses it!")
+            end
+        end
+    end
+
+    idx = raysplit_indices(bt, raysplitters)
+
+    # Make sure that no indices are shared in the corresponding obstacles
+    vecs = [ray.oidx for ray in raysplitters]
+    if length(unique(vcat(vecs))) != sum(length.(vecs))
+        error("Different `RaySplitter`s cannot correspond to the same "*
+        "obstacles!")
+    end
+
+    true
+end
 
 #####################################################################################
 # Resolve collisions
@@ -191,12 +224,16 @@ end
 #####################################################################################
 # Evolve raysplitting
 #####################################################################################
+evolve!(p, bt, t, ray::RaySplitter; warning = false) =
+    evolve!(p, bt, t, (ray, ); warning = warning)
 function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple;
     warning = false) where {T}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
+    # Check if raysplitters are acceptable
+    acceptable_raysplitter(ray, bt)
 
     # TODO: Here check if raysplitters is acceptable
 
@@ -321,25 +358,8 @@ function reset_billiard!(bt::Billiard)
 end
 
 """
-    acceptable_raysplitter(raysplitter, bt)
-Return `true` if the given ray-splitting dictionary `raysplitter`
-can be used in conjuction with given billiard table `bt`.
-"""
-function acceptable_raysplitter(ray::Dict{Int, Any}, bt::Billiard)
-    for i in keys(ray)
-        if !supports_raysplitting(bt[i])
-            print("Obstacle at index $i of given billiard table")
-            println("does not have a field `pflag`")
-            println("and therefore does not support ray-splitting.")
-            return false
-        end
-    end
-    true
-end
-
-"""
-    isphysical(raysplitter::Dict; only_mandatory = false)
-Return `true` if the given ray-splitting dictionary has physically
+    isphysical(raysplitters::Tuple; only_mandatory = true)
+Return `true` if the given `raysplitters` have physically
 plausible properties.
 
 Specifically, check if (φ is the incidence angle, θ the refraction angle):
@@ -353,46 +373,23 @@ Specifically, check if (φ is the incidence angle, θ the refraction angle):
 The first property is mandatory to hold for any setting and is always checked.
 The rest are checked if `only_mandatory = false`.
 """
-function isphysical(ray::Dict; only_mandatory = false)
-  for i in keys(ray)
-    scatter = ray[i][2]
-    tr = ray[i][1]
-    om = ray[i][3]
+function isphysical(rays::Tuple; only_mandatory = true)
+  for (i, ray) in enumerate(rays)
+    scatter = ray.refraction
+    tr = ray.transmission
+    om = ray.newω
     range = -1.5:0.01:1.5
     orange = -1.0:0.1:1.0
-    display_er = true
-    for pflag in [true, false]
+    for pflag in (true, false)
       for ω in orange
         for φ in range
-          θ::Float64 = 0.0
           # Calculate refraction angle:
-          try
-            θ = scatter(φ, pflag, ω)
-          catch er
-            if display_er
-              ws = "Got error message: $er\n"
-              ws*= "while calculating the refraction angle with settings:\n"
-              ws*= "index = $i, φ = $φ, pflag = $pflag, ω = $ω\n"
-              ws*= "Similar warnings will be skipped as long as the Tr. prob. is 0."
-              warn(ws)
-            end
-            display_er = false
-            T = tr(φ, pflag, ω)
-            if T!= 0
-              println("Got error message: $er")
-              println("while calculating the refraction angle with settings:")
-              println("index = $i, φ = $φ, pflag = $pflag, ω = $ω")
-              println("PROBLEM: Transmission prob. was not 0 for these settings!")
-              return false
-            else
-              continue
-            end
-          end
+          θ = scatter(φ, pflag, ω)
           # Calculate transmission probability:
           T = tr(φ, pflag, ω)
           # Check critical angle:
           if θ >= π/2 && T > 0
-            es = "Refraction angle >= π/2 and T > 0 !\n"
+            es = "Refraction angle ≥ π/2 and T > 0 !\n"
             es*= "For index = $i, tested with φ = $φ, pflag = $pflag, ω = $ω"
             println(es)
             return false

@@ -200,9 +200,9 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     sa = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
     Tp = (p) -> (φ, pflag, ω) -> begin
         if pflag
-            abs(φ) < π/4 ? p*exp(-(φ)^2/2(π/8)^2) : 0.0
+            p*exp(-(φ)^2/2(π/8)^2)
         else
-            (1-p)*exp(-(φ)^2/2(π/4)^2)
+            abs(φ) < π/4 ? (1-p)*exp(-(φ)^2/2(π/4)^2) : 0.0
         end
     end
     newoantidot = ((x, bool) -> bool ? -0.5x : -2.0x)
