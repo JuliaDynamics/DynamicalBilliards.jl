@@ -1,4 +1,5 @@
-export isphysical, acceptable_raysplitter, reset_billiard!
+export isphysical, reset_billiard!
+export RaySplitter
 
 #=debug=# false && using Juno
 
@@ -99,7 +100,7 @@ function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
 
     # Make sure that no indices are shared in the corresponding obstacles
     vecs = [ray.oidx for ray in raysplitters]
-    if length(unique(vcat(vecs))) != sum(length.(vecs))
+    if length(unique(vcat(vecs...))) != sum(length.(vecs))
         error("Different `RaySplitter`s cannot correspond to the same "*
         "obstacles!")
     end
@@ -356,7 +357,7 @@ function reset_billiard!(bt::Billiard)
 end
 
 """
-    isphysical(raysplitters::Tuple; only_mandatory = true)
+    isphysical(raysplitters::Tuple; only_mandatory = false)
 Return `true` if the given `raysplitters` have physically
 plausible properties.
 
@@ -371,7 +372,7 @@ Specifically, check if (φ is the incidence angle, θ the refraction angle):
 The first property is mandatory to hold for any setting and is always checked.
 The rest are checked if `only_mandatory = false`.
 """
-function isphysical(rays::Tuple; only_mandatory = true)
+function isphysical(rays::Tuple; only_mandatory = false)
   for (i, ray) in enumerate(rays)
     scatter = ray.refraction
     tr = ray.transmission

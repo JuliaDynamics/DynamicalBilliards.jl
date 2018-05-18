@@ -55,31 +55,6 @@ two ways:
 
 ---
 
-## Ray-Splitting Functions
-If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed in the [Ray-Splitting tutorial](/tutorials/ray-splitting), the condition of total internal reflection must be taken care of by the user.
-
-The [three key functions](/tutorials/ray-splitting/#ray-splitting-functions) given to the `ray-splitter` dictionary must have some properties in order to have physical meaning, like for example that the scattering probability function is even towards φ. One of these properties is absolutely **mandatory** for this package to work properly. This is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. **This condition is not assured internally** and therefore you must be sure that your transmission probability function satisfies it. In the above example, the function `T` makes sure to return 0 in that case.
-
-In order to test if the `raysplitter` dictionary you have defined has physical meaning, the function `isphysical()` is provided:
-
-```julia
-isphysical(raysplitter::Dict{Int, Any}; only_mandatory = false)
-```
-Return `true` if the given ray-splitting dictionary has physically plausible properties.
-
-Specifically, check if (φ is the incidence angle, θ the refraction angle):
-* Critical angle means total reflection: If θ(φ) ≥ π/2 then T(φ) = 0
-* Transmission probability is even function: T(φ) ≈ T(-φ) at ω = 0
-* Refraction angle is odd function: θ(φ) ≈ -θ(-φ) at ω = 0
-* Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ
-* Magnetic conservation is true: (ω_new(ω_new(ω, pflag), !pflag) ≈ ω
-The first property is mandatory and must hold for correct propagation.
-The above tests are done for all possible combinations of arguments.
-
-They keyword `only_mandatory` notes whether the rest of
-the properties should be tested or not.
-
----
 
 ## Pinned Particles
 In the case of propagation with magnetic field, a particle may be "pinned" (collision-less):

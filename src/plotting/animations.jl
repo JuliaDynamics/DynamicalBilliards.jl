@@ -3,7 +3,7 @@ export animate_evolution
 
 """
 ```julia
-animate_evolution(p, bt, colnumber[, ray-splitter]; kwargs...)
+animate_evolution(p, bt, colnumber[, raysplitters]; kwargs...)
 ```
 Animate the evolution of the particle, plotting the orbit from collision to collision.
 
@@ -11,8 +11,8 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
   * `bt::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
-  * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
-      that enables ray-splitting processes during evolution.
+  * `ray-splitter` : (Optional) Tuple of [`RaySplitters`](@ref),
+      that enable ray-splitting processes during evolution.
 ### Keyword Arguments
   * `newfig = true` : Creates a new figure at the function call, and plots
     the billiard in that figure.

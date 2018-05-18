@@ -1,31 +1,42 @@
 # Ray-Splitting
 Ray-splitting is a semi-classical approach to the billiard system, giving a wave attribute to the ray traced by the particle.
-Upon collision a particle may propagate through an obstacle (transmission & refraction) or be reflected. Following the mindset of this package, implementing a ray-splitting billiard requires only three very simple steps.
+Upon collision a particle may propagate through an obstacle (transmission & refraction) or be reflected. Following the mindset of this package, implementing a ray-splitting billiard requires only three simple steps. We will introduce them and demonstrate
+them using a simple example in this documentation page.
 
-## Ray-Splitting Obstacles
+## 1. Ray-Splitting Obstacles
 The first step is that an [`Obstacle`](@ref) that supports ray-splitting is required to be present in your billiard table. The only new feature these obstacles have is an additional Boolean field called `pflag` (propagation flag). This field notes on which side of the obstacle the particle is currently propagating.
 
 The normal vector as well as the distance from boundary change sign depending on the value of `pflag`. The obstacles `Antidot` and `SplitterWall` are the equivalents of disk and wall for ray-splitting.
 
-Let's add an `Antidot` to a billiard table:
-
+Let's create a billiard with a bunch of ray-splitting obstacles!
 ```julia
 using DynamicalBilliards
-bt = Obstacle[billiard_rectangle().obstacles...]
-a = Antidot([0.5,0.5], 0.3)
-push!(bt, a)
-bt = Billiard(bt)
+x, y = 2.0, 1.0
+btr =  billiard_rectangle(x, y)
+sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
+a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
+a2 = Antidot([3x/4, y/2], 0.15, "Right Antidot")
+bt = Billiard(a1, a2, sw, btr...)
 ```
 ```
-Billiard{Float64} with 5 obstacles:
+Billiard{Float64} with 7 obstacles:
+  Left Antidot
+  Right Antidot
+  Splitter wall
   Bottom wall
   Right wall
   Top wall
   Left wall
-  Antidot
 ```
 
-## The `RaySplitter` structure
+and plot it:
+```julia
+using PyPlot
+plot_billiard(bt)
+```
+![Ray-splitting billiard](https://i.imgur.com/UKsyURY.png)
+
+## 2. The `RaySplitter` structure
 In the second step, you have to define 2+1 functions: transmission probability,
 refraction angle and optionally new angular velocity after transmission. These functions, as well as which obstacles participate in ray-splitting, are bundled into a special structure:
 ```@docs
@@ -35,68 +46,79 @@ RaySplitter
 Notice that if you want different type of transmission/refraction functions for
 different obstacles, then you define multiple `RaySplitter`s.
 
+Continuing from the above billiard, let's also create some `RaySplitter` instances
+for it.
 
-## Evolution with Ray-Splitting
-After you have created your `RaySplitter`s, you must bundle them into a tuple
-before passing them into a high-level function.
-
-## Ray-Splitter Dictionary
-To pass the information of the aforementioned functions into the main API a dictionary is required:
+First define a refraction function
 ```julia
-raysplitter::Dict{Int, Any}
+refraction = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
 ```
-This dictionary is a map of the **obstacle index** within the billiard table to a **container of the ray-splitting functions**. This container could be a `Vector` or a `Tuple` and the later is the suggested version.
-
-For example, if we wanted to allocate ray-splitting functions for the **5th** obstacle in our billiard table, which could be e.g. an `Antidot`, we would write something like:
+Then, a transmission probability function. In this example, we want to create a
+function that given some factor `p`, it returns a probability weighted with
+`p` in one direction of ray-splitting and `1-p` in another direction.
 ```julia
-sa = (θ, pflag, ω) -> pflag ? 2θ : 0.5θ  # refraction (scatter) angle
-T = (θ, pflag, ω) -> begin   # Transmission probability
-  if pflag
-    abs(θ) < π/4 ? 0.5exp(-(θ)^2/2(π/8)^2) : 0.0
-  else
-    0.75*exp(-(θ)^2/2(π/4)^2)
-  end
+transmission_p = (p) -> (φ, pflag, ω) -> begin
+    if pflag
+        p*exp(-(φ)^2/2(π/8)^2)
+    else
+        abs(φ) < π/4 ? (1-p)*exp(-(φ)^2/2(π/4)^2) : 0.0
+    end
 end
-newo = (ω, bool) -> bool ? -0.5ω : -2ω   # new angular velocity
-raysplitter = Dict(5 => (T, sa, newo))  # Index maps to container of Functions
 ```
+Notice also how we defined the function in such a way that critical refraction is
+respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0` (more on that later).
 
-!!! note "Order of Arguments"
-    The functions **must accept the specific number of arguments shown in the previous section** even if some are not used. Also, the functions must be given **in the specific order: (1. transmission probability, 2. refraction angle, 3. new ω)** in the container passed to the dictionary.
+!!! important "Critical angle"
+    The user has the responsibility to be absolutely certain that there can never
+    be transmission with refracted angle `≥ π/2`. If such an event occurs, everything
+    in the code will break and lead to infinite recursion.
 
-The next step is very simple: the `raysplitter` dictionary is directly passed into [`evolve!`](@ref) as a fourth argument.
-Using the billiard table we defined previously, where its 5th element is a ray-splitting `Antidot`, we now do:
+    Please also see the discussion at the end of this page about the "Physics"
+    of the ray-splitting functions.
+
+Lastly, for this example we will use magnetic propagation. We define functions
+such that the antidots also reverse the direction of the magnetic field
 ```julia
-ω = 1.25
-p = randominside(bt, ω)
-dt = 0.05
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 25.0, raysplitter)..., dt)
-using PyPlot
-plot(xt, yt)
+newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
+newowall = ((x, bool) -> bool ? 0.5x : 2.0x)
 ```
-which should give a result similar to this:
 
-![Ray-splitting billiard](http://i.imgur.com/UfGQfOm.png)
-
-A final difference to be noted is that in the case of ray-splitting with magnetic fields, the fourth value returned by `evolve!()` is not a number, but a vector of angular velocities `omegas`. The value `omegas[i]` is the angular velocity the particle has while propagating from state `pos[i], vel[i]` to state `pos[i+1], vel[i+1]`. The `construct()` function takes this into account.
-
-### No field `pflag` error
-
-If you ever encounter the error `ERROR: type SomeObstacleType has no field pflag` this means that the index provided by your ray-splitting dictionary points to an object that does not support ray-splitting. Use the functions:
+Now we create the [`RaySplitter`](@ref) instances we want
 ```julia
-acceptable_raysplitter(raysplitter, bt)
-supports_raysplitting(obst::Obstacle)
+raywall = RaySplitter([3], transmission_p(0.5), refraction; newangular = newowall)
+raya = RaySplitter([1, 2], transmission_p(0.8), refraction; newangular = newoantidot)
 ```
-to find out what you did wrong. Most likely, the index you supplied was incorrect, i.e. the index could be `5` instead of `4`.
+Because we want to use same functions for both antidots, we gave
+both indices in `raya`, `[1, 2]` (which are the indices of the antidots in the
+billiard `bt`).
 
-## Example Animation
-In the [examples page](examples), you can find the code for the following animation, which includes ray-splitting:
+## 3. Evolution with Ray-Splitting
+The third step is trivial. After you have created your `RaySplitter`(s),
+you simply pass them into `evolve` or `animate_evolution` as a fourth argument!
+If you have many instances of `RaySplitter` you pass a tuple of them.
 
-![Ray-splitter animation](http://i.imgur.com/89s0fon.gif)
+For example, doing
+```julia
+p = randominside(bt, 1.0)
+raysplitters = (raywall, raya)
+xt, yt, vxt, vyt, tt = construct(evolve(p, bt, 1000.0, raysplitters)...)
+animate_evolution(p, bt, 100, raysplitters)
+```
+will produce
+![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif)
 
-## Physics
-The condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. Otherwise just specular reflection will take place. A more detailed discussion is on the ray-splitting section of the
-[Physics](/physics#ray-splitting-functions) page.
+
+!!! note "Resetting the billiard"
+    Notice that evolving a particle inside a billiard always mutates the billiard
+    if ray-splitting is used. This means that you should always set the fields
+    `pflag` of some obstacles to the values you desire after *each* call
+    to `evolve`.
+
+    The function `reset_billiard!(bt)` turns all `pflag`s to `true`.
+
+    
+## Important Notice
+Here talk about the problem I have found.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
@@ -121,3 +143,14 @@ process. Let $T$ denote the transmission function, $\theta$ the refraction funct
 9. Perform refraction, i.e. set the particle velocity to the direction of $\Theta$.
 
 10. Scale the magnetic field, i.e. set `p.omega` = $\omega_{\text{new}}(\omega, \verb|!pflag|)$. It is important to note that we use `!pflag` because we have already changed the `pflag` field.
+
+
+## Physics of the Ray-Splitting Functions
+If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed, the condition of total internal reflection must be taken care of by the user.
+
+The functions given to [`RaySplitter`](@ref) must have some properties in order to have physical meaning. One of these properties is absolutely **mandatory** for this package to work properly. This is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. **This condition is not assured internally** and therefore you must be sure that your transmission probability function satisfies it.
+
+In order to test if the `RaySplitter` you have defined has physical meaning, the function `isphysical()` is provided
+```@docs
+isphysical
+```

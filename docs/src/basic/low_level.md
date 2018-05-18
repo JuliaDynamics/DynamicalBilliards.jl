@@ -78,11 +78,3 @@ relocate!
 specular!
 periodicity!
 ```
-
-
-## Ray-splitting
-```@docs
-isphysical
-acceptable_raysplitter
-reset_billiard!
-```
