@@ -77,11 +77,9 @@ end
 
 allaffected(ray::RaySplitter) = union(ray.affect(i) for i in ray.oidx)
 
-# in isphysical add test that different raysplitters cannot share
-# ANY entry in oidx
 """
     acceptable_raysplitter(raysplitters, bt::Billiard)
-Return `true` if the given `raysplitters` (`Tuple` of [`RaySplitter`](@ref)
+Return `true` if the given `raysplitters`
 can be used in conjuction with given billiard `bt`.
 """
 function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
@@ -233,7 +231,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
     # Check if raysplitters are acceptable
-    acceptable_raysplitter(ray, bt)
+    acceptable_raysplitter(raysplitters, bt)
 
     # TODO: Here check if raysplitters is acceptable
 

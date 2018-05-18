@@ -38,8 +38,9 @@ t = time()
 
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
-    raysplit_straight, raysplit_magnetic, type_stability, lyapunov_spectrum,
-    lyapunov_magnetic, escape_times, stadium_psos, cut_psos, meancoltimes)
+    type_stability, lyapunov_spectrum,
+    lyapunov_magnetic, escape_times, stadium_psos, cut_psos, meancoltimes,
+    raysplit_straight, raysplit_magnetic)
 for f in fnames
     println()
     f(partnum, printinfo=printinfo)
