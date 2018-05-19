@@ -15,15 +15,20 @@ using DynamicalBilliards
 radius = 1.0
 l = 2.0
 
-bt = billiard_polygon(6, l; setting = "periodic")
-disc = Disk([0., 0.], radius)
-push!(bt, disc)
+bt = Billiard(billiard_polygon(6, l; setting = "periodic")..., Disk([0., 0.], radius))
 
 p = randominside(bt)
 t = 1000.0
 
 exps = lyapunovspectrum(p, bt, t)
 ```
+```
+0.694…
+0.0000395…
+-0.00128…
+-0.692…
+```
+
 
 The following code is for a family of polygonal billiards (hexagonal unit cell) parameterized by the space between the disks.
 

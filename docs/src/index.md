@@ -13,7 +13,7 @@ dynamical billiards in two dimensions.
 !!! tip "Julia Billiard animation"
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard"!
 
-## Introduction
+## About Billiards
 
 A dynamical billiard is a system where a particle is propagating as a straight line from obstacle to obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
 
@@ -21,17 +21,17 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 ## Features
 
-* Modular creation of a billiard from well defined obstacles
-* Straight propagation of a particle in a billiard table
-* Support for creating random initial conditions in an arbitrary
+* Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles
+* Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table. During magnetic propagation the particle orbit is a circle instead of a line! All features mentioned in this section exist for both types of propagation!
+* Support for creating [random initial conditions](basic/high_level/#random-initial-conditions) in an arbitrary
   billiard table
-* Magnetic propagation, where the particle moves in a circle instead
-  of a straight line (works with *any* billiard)
-* Ray-splitting implementation: a particle may propagate
+* [Ray-splitting implementation](ray-splitting): a particle may propagate
   through an obstacle given arbitrary transmission and refraction
   laws. This is also known as a "semiclassical billiard"
-* Computation of Poincaré surfaces of section (also known as boundary maps) for any table and any particle
-* Escape times
+* [Poincaré surfaces of section](high_level/#poincare-sections) (intersections with arbitrary plane)
+* [Boundary maps](basic/high_level/#boundary-maps)
+* [Escape times](basic/high_level/#escape-times) & [mean collision times](basic/high_level/#mean-collision-times)
+* [Lyapunov exponents](lyapunovs)
 * Easy to use low-level interface
 * Full support for visualizing and animating billiards and motion in billiards
 * Brutal tests that confirm the package works and overcomes numerical precision issues
@@ -47,14 +47,8 @@ It is highly suggested to first read the [High Level API](/basic/high_level).
 
 See the [Visualizing](visualizing) page for plotting, animating, etc.
 
-For more advanced usage see the [Low Level API](/basic/low_level).
-
-The following tutorials offer detailed descriptions for various aspects of `DynamicalBilliards`:
-
-- [How to define your custom Billiard](/tutorials/billiard_table)
-- [Using Ray-Splitting billiards](/tutorials/ray-splitting)
-- [Creating your own Obstacle Type](/tutorials/own_obstacle)
-- [Examples page](/tutorials/examples)
+For more advanced usage see the [Low Level API](/basic/low_level) and all other
+sections of this documentation.
 
 The discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
 

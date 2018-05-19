@@ -112,7 +112,7 @@ There is a simple function for that, called `evolve!` (or `evolve` if you don't 
 evolve!
 ```
 ---
-Forget the ray-splitting part for now, we'll talk a bit more about it later on (see [Ray-Splitting](#ray-splitting)).
+Forget the ray-splitting part for now (see [Ray-Splitting](/ray-splitting)).
 
 Let's see an example:
 ```julia
@@ -322,36 +322,6 @@ in a billiard) is often a useful quantity, the following function computes it
 meancollisiontime
 ```
 
-## Ray-Splitting
-During ray-splitting a particle may propagate
-through an obstacle given arbitrary transmission and refraction
-laws. This is also known as a "semiclassical billiard".
-
-No matter how complex ray-splitting processes you want, and irrespectively of
-how many obstacles in the billiard table can perform ray-splitting, there is only
-a single difference on the main function call:
-The `evolve!()` function is supplemented with a fourth argument:
-```julia
-ray_splitter::Dict{Int, Any}
-```
-This argument is simply a dictionary which handles all ray-splitting processes in the billiard system.
-
-Given an obstacle index within the billiard table it returns a container of the
-ray-splitting functions: (φ is the angle of incidence)
-* T(φ, pflag, ω) : Transmission probability.
-* θ(φ, pflag, ω) : Transmission (aka diffraction) angle.
-* new_ω(ω, pflag) : Angular velocity after transmission.
-
-Assuming you have defined a billiard table and a ray-splitter dictionary, the implementation is exactly the same as in the two previous cases: the ray-splitting dictionary is passed to `evolve!()` as a fourth argument.
-```julia
-ray_splitter = Dict(5 => (foo, bar, baz))
-p = randominside(bt, 4.0)
-xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 100.0, ray_splitter)..., 0.01)
-```
-
-For more information and instructions on defining the `ray_splitter` dictionary visit the [Ray-Splitting tutorial](/tutorials/ray-splitting).
-
-
 ## Standard Billiards Library
 ```@docs
 billiard_rectangle
@@ -361,5 +331,4 @@ billiard_mushroom
 billiard_lorentz
 billiard_polygon
 billiard_hexagonal_sinai
-billiard_raysplitting_showcase
 ```
