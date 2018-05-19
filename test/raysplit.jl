@@ -1,7 +1,7 @@
 using DynamicalBilliards
 using Base.Test
 
-#=debug=# false && using Juno
+#=debug=# true && using Juno
 
 function raysplit_straight(partnum=500; printinfo = true)
 tim = time()
@@ -51,7 +51,7 @@ tim = time()
         for i in 1:partnum
             p = randominside(bt, 0.4)
             #=debug=# false && Juno.clearconsole()
-            #=debug=# false && println("Particle ", i, " billiard $btcount")
+            #=debug=# true && println("Particle ", i, " billiard $btcount")
             #=debug=# false && println("pos = SVector($(p.pos[1]), $(p.pos[2]))")
             #=debug=# false && println("vel = SVector($(p.vel[1]), $(p.vel[2]))")
             t, poss, vels = evolve!(p, bt, tt, ray)
@@ -64,7 +64,7 @@ tim = time()
             @test minimum(yt) ≥ 0
             reset_billiard!(bt)
         end#particle loop
-        #=debug=# false && Juno.clearconsole()
+        #=debug=# true && Juno.clearconsole()
         btcount += 1
     end#parameters
 end#testset

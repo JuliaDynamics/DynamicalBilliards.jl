@@ -6,7 +6,7 @@ them using a simple example in this documentation page.
 ## 1. Ray-Splitting Obstacles
 The first step is that an [`Obstacle`](@ref) that supports ray-splitting is required to be present in your billiard table. The only new feature these obstacles have is an additional Boolean field called `pflag` (propagation flag). This field notes on which side of the obstacle the particle is currently propagating.
 
-The normal vector as well as the distance from boundary change sign depending on the value of `pflag`. The obstacles `Antidot` and `SplitterWall` are the equivalents of disk and wall for ray-splitting.
+The normal vector as well as the distance from boundary change sign depending on the value of `pflag`. The obstacles [`Antidot`](@ref) and [`SplitterWall`](@ref) are the equivalents of disk and wall for ray-splitting.
 
 Let's create a billiard with a bunch of ray-splitting obstacles!
 ```julia
@@ -42,8 +42,8 @@ refraction angle and optionally new angular velocity after transmission. These f
 ```@docs
 RaySplitter
 ```
-
-Notice that if you want different type of transmission/refraction functions for
+---
+If you want different type of transmission/refraction functions for
 different obstacles, then you define multiple `RaySplitter`s.
 
 Continuing from the above billiard, let's also create some `RaySplitter` instances
@@ -66,7 +66,7 @@ transmission_p = (p) -> (φ, pflag, ω) -> begin
 end
 ```
 Notice also how we defined the function in such a way that critical refraction is
-respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0` (more on that later).
+respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0`.
 
 !!! important "Critical angle"
     The user has the responsibility to be absolutely certain that there can never
@@ -112,13 +112,16 @@ will produce
     Notice that evolving a particle inside a billiard always mutates the billiard
     if ray-splitting is used. This means that you should always set the fields
     `pflag` of some obstacles to the values you desire after *each* call
-    to `evolve`.
+    to `evolve`. If you use the function [`randominside`](@ref) you must definitely
+    do this!
 
     The function `reset_billiard!(bt)` turns all `pflag`s to `true`.
 
-    
+
 ## Important Notice
 Here talk about the problem I have found.
+
+I do a clamping so that refraction angle is π/2 - ε.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
@@ -153,4 +156,34 @@ The functions given to [`RaySplitter`](@ref) must have some properties in order 
 In order to test if the `RaySplitter` you have defined has physical meaning, the function `isphysical()` is provided
 ```@docs
 isphysical
+```
+
+## Example of Affecting Multiple Obstacles
+Here we will show an application of *inverse* billiards, where particles go in and out
+of a billiard, while taking advantage of the existence of a magnetic field outside to return.
+
+As always, we define the ray-splitting functions:
+```julia
+using DynamicalBilliards, PyPlot
+trans(args...) = 1.0 # always perfect transmission
+refra(φ, pflag, ω) = pflag ? 0.8φ : 1.25φ # refraction angle
+neww(ω, pflag) = pflag ? 2.0 : 0.4
+```
+Now, when we define the [`RaySplitter`](@ref) instance we will choose a different
+value for `affect`:
+```julia
+ray = RaySplitter([1,2,3,4], trans, refra, neww, affect = (i) -> SVector(1,2,3,4))
+```
+
+We initialize a simple rectangular billiard and a particle
+```julia
+bt = billiard_rectangle(setting = "ray-splitting")
+p = randominside(bt, 0.4)
+```
+
+and we animate its evolution, by first zooming out of the billiard
+```julia
+plot_billiard(bt)
+xlim(-1, 2); ylim(-1, 2);
+animate_evolution(p, bt, 100, (ray,); newfig = false)
 ```

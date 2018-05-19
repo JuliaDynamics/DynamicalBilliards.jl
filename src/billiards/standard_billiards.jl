@@ -210,12 +210,10 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
 
     # I Need 3 ray-splitters because I want different affect for
     # different antidots
-    raywall = RaySplitter([3], Tp(0.5), sa; newangular = newowall)
-    raya1 = RaySplitter([1], Tp(0.64), sa; newangular = newoantidot)
-    raya2 = RaySplitter([2], Tp(0.64), sa; newangular = newoantidot)
+    raywall = RaySplitter([3], Tp(0.5), sa, newowall)
+    raya = RaySplitter([1, 2], Tp(0.64), sa, newoantidot)
 
-
-    return Billiard(a1, a2, sw, btr...), (raywall, raya1, raya2)
+    return Billiard(a1, a2, sw, btr...), (raywall, raya)
 end
 
 

@@ -7,7 +7,7 @@ export RaySplitter
 # RaySplitter structures
 #####################################################################################
 """
-    RaySplitter(idxs, transmission, refraction; affect, newangular)
+    RaySplitter(idxs, transmission, refraction [, newangular]; affect)
 Return a `RaySplitter` instance, used to perform raysplitting.
 `idxs` is a `Vector{Int}` with the indices of the obstacles
 that this `RaySplitter` corresponds to.
@@ -23,7 +23,7 @@ The functions have the following signatures:
    depending on whether the particle is inside or outside the obstacle (`pflag`)
    and optionally depending on `ω`. This angle is *relative* to the normal vector.
 3. `newangular(ω, pflag) -> newω` : New angular velocity after transmission.
-   Notice that `newangular` is a keyword argument and defaults to `(ω, pflag) -> ω`.
+   Notice that `newangular` is an optional argument and defaults to `(ω, pflag) -> ω`.
 
 The above three functions use the **same convention**: the argument `pflag` is the
 one the obstacle has **before transmission**. For example, if a particle is
@@ -47,17 +47,17 @@ struct RaySplitter{T, Φ, Ω, A}
     oidx::Vector{Int}
     transmission::T
     refraction::Φ
-    affect::A
     newω::Ω
+    affect::A
 end
 
-function RaySplitter(idxs, tr, ref; affect = (i) -> i, newangular = (ω, pflag) -> ω)
+function RaySplitter(idxs, tr, ref, newangular = (ω, pflag) -> ω; affect = (i) -> i)
     for i ∈ idxs
         i ∈ affect(i) || throw(ArgumentError(
         "All indices that correspond to this RaySplitter must also be affected!"))
     end
     typeof(idxs) == Int && (idxs = [idxs])
-    return RaySplitter(sort(idxs), tr, ref, affect, newangular)
+    return RaySplitter(sort(idxs), tr, ref, newangular, affect)
 end
 
 

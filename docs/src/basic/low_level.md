@@ -4,16 +4,16 @@
 Before talking about the low level methods that enable everything to work nicely
 together, let's talk about how this package works.
 
-Firstly one defines a [`Billiard`](@ref) and (if desired) the [ray-splitting dictionary](/tutorials/ray-splitting/#ray-splitter-dictionary). Then one creates a particle inside the defined billiard table. The algorithm for the propagation of a particle is the following:
+Firstly one defines a [`Billiard`](@ref) and optionally some [`RaySplitter`](@ref) instances. Then one creates a particle inside the defined billiard. The algorithm for the propagation of a particle is the following:
 
 1. Calculate the [`collisiontime`](@ref) of the particle with **all** obstacles in the billiard.
 2. Find the smallest time, and the obstacle corresponding to that.
 3. [`relocate!`](@ref) the particle, so that it is on the correct side of the obstacle to-be-collided with.
-3. (Optionally) check if there is transmission for ray-splitting: `T(φ) > rand()`
-    * If yes, perform the ray-splitting algorithm (not discussed here).
+4. (Optionally) check if there is transmission for ray-splitting: `T(φ) > rand()`
+    * If yes, perform the ray-splitting algorithm (see the [ray-splitting](ray-splitting) page).
     * If not, then [`resolvecollision!`](@ref) of the particle with the obstacle.
 
-4. Continue this loop for a given amount of time.
+5. Continue this loop for a given amount of time.
 
 Notice that the [`relocate!`](@ref) step is *very* important because it takes care that all particles remain inside the billiard.
 
