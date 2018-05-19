@@ -26,7 +26,7 @@ recursive relocating step.
   value of `timeprec(T)`.
 * This `timeprec` cannot be used with `PeriodicWall` and RaySplitting obstacles with
   `MagneticParticle`s because when relocating forward in time you get progressively
-  shallower and shallower angles. This mean that you need huge changes in time for even tiny changes in `distance`.
+  shallower and shallower angles. This means that you need huge changes in time for even tiny changes in `distance`.
   * For this special case the function `timeprec_forward(T)` is used instead. This
     function results to on average 3-5 geometric relocation steps.
 

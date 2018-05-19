@@ -68,14 +68,6 @@ end
 Notice also how we defined the function in such a way that critical refraction is
 respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0`.
 
-!!! important "Critical angle"
-    The user has the responsibility to be absolutely certain that there can never
-    be transmission with refracted angle `≥ π/2`. If such an event occurs, everything
-    in the code will break and lead to infinite recursion.
-
-    Please also see the discussion at the end of this page about the "Physics"
-    of the ray-splitting functions.
-
 Lastly, for this example we will use magnetic propagation. We define functions
 such that the antidots also reverse the direction of the magnetic field
 ```julia
@@ -118,10 +110,10 @@ will produce
     The function `reset_billiard!(bt)` turns all `pflag`s to `true`.
 
 
-## Important Notice
-Here talk about the problem I have found.
-
-I do a clamping so that refraction angle is π/2 - ε.
+!!! important "Angle of refraction is clamped"
+    Internally we clamp the output of the angle of refraction function to
+    `-π/2 + 0.1 ≤ θ ≤ π/2 - 0.1`. This is so that the relocating algorithm does not fall
+    into an infinite loop.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
@@ -151,7 +143,7 @@ process. Let $T$ denote the transmission function, $\theta$ the refraction funct
 ## Physics of the Ray-Splitting Functions
 If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed, the condition of total internal reflection must be taken care of by the user.
 
-The functions given to [`RaySplitter`](@ref) must have some properties in order to have physical meaning. One of these properties is absolutely **mandatory** for this package to work properly. This is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. **This condition is not assured internally** and therefore you must be sure that your transmission probability function satisfies it.
+The functions given to [`RaySplitter`](@ref) should have some properties in order to have physical meaning. One of these properties is absolutely **mandatory** for this package to work properly, and is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. As mentioned previously, internally the refraction angle is clamped so you can say that this condition is *asserted*. 
 
 In order to test if the `RaySplitter` you have defined has physical meaning, the function `isphysical()` is provided
 ```@docs
@@ -187,3 +179,4 @@ plot_billiard(bt)
 xlim(-1, 2); ylim(-1, 2);
 animate_evolution(p, bt, 100, (ray,); newfig = false)
 ```
+![Inverse magnetic billiard](https://i.imgur.com/R1LNtjt.gif)

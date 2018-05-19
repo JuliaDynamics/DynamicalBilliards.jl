@@ -152,6 +152,8 @@ function relocate_rayspl!(
     return newt
 end
 
+angleclamp(φ::T) where {T} = clamp(φ, -π/2 + T(0.1), π/2 - T(0.1))
+
 function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
     trans::Bool, rayspl::RaySplitter) where {T<:AbstractFloat}
 
@@ -164,7 +166,7 @@ function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
 
     if trans #perform raysplitting
         # Raysplit Algorithm step 6: find transmission angle in relative angles
-        theta = rayspl.refraction(φ, a.pflag, ω)
+        theta = angleclamp(rayspl.refraction(φ, a.pflag, ω))
         # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
         # for all obstacles dictated by the RaySplitter
         for oi ∈ rayspl.affect(colidx)
@@ -233,8 +235,6 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
     end
     # Check if raysplitters are acceptable
     acceptable_raysplitter(raysplitters, bt)
-
-    # TODO: Here check if raysplitters is acceptable
 
     ismagnetic = typeof(p) <: MagneticParticle
 
