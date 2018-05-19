@@ -20,9 +20,9 @@ if haskey(ENV, "DYNAMICALBILLIARDS_LONGTEST")
 end
 
 if longtests
-    partnum = 500
+    partnum = 1000
 else
-    partnum = 10
+    partnum = 50
 end
 
 include("straight.jl")
