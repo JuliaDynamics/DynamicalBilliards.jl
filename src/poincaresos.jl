@@ -117,12 +117,12 @@ boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
 
 
 
-function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ,
-                             intervals = arcintervals(bt)) where {T}
+function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ) where {T}
     count = zero(T)
     t_to_write = zero(T)
 
     d = Dict{SV{Int}, Int}()
+    intervals = arcintervals(bt)
     while count < t
         i, tmin = bounce!(p,bt)
         t_to_write += tmin
@@ -145,13 +145,11 @@ function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ,
     end #time or collision number loop
 
     #calculate ratio of visited boxes
-    total_boxes = prod((totallength(bt), 2)./δ)
+    total_boxes = ceil(Int, totallength(bt)/δ)*ceil(Int, 2/δ)
     ratio = length(keys(d))/total_boxes
 
     return ratio, d
 end
-    # After evolution compute the ratio of dictionary entries to total possible entries.
-    # return the ratio and the dictionary as well. Can be very useful!
 
 
 
