@@ -117,7 +117,9 @@ boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
 
 
 
-function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ) where {T}
+function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ ) where {T}
+    p = deepcopy(par)
+
     count = zero(T)
     t_to_write = zero(T)
 
@@ -135,7 +137,7 @@ function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ) whe
             sφ = sin(reflection_angle(p, bt[i]))
 
             # compute index & increment dictionary entry
-            ind = SV{Int}(floor.((ξ, sφ + 1)./δ))
+            ind = SV{Int}(floor(ξ/δξ), floor((sφ + 1)/δφ))
             d[ind] = get(d, ind, 0) + 1
 
             # set counter
@@ -145,7 +147,7 @@ function boundarymap_portion(p::AbstractParticle{T}, bt::Billiard{T}, t, δ) whe
     end #time or collision number loop
 
     #calculate ratio of visited boxes
-    total_boxes = ceil(Int, totallength(bt)/δ)*ceil(Int, 2/δ)
+    total_boxes = ceil(Int, totallength(bt)/δξ) * ceil(Int, 2/δφ)
     ratio = length(keys(d))/total_boxes
 
     return ratio, d
