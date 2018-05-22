@@ -68,23 +68,27 @@ tim = time()
         btcount += 1
     end#parameters
 end#testset
-# @testset "Raysplitting Magnetic BigFloat" begin
-#
-#     (x, y, r1, r2) = big.([3,1,0.3,0.2])
-#     bt, ray = billiard_raysplitting_showcase(x, y, r1, r2)
-#
-#     @test isphysical(ray)
-#     tt=50.0
-#     p = randominside(bt, big(0.8))
-#     t, poss, vels = evolve!(p, bt, tt, ray)
-#     @test t[end] != Inf
-#     xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
-#     @test maximum(xt) ≤ x
-#     @test minimum(xt) ≥ 0
-#     @test maximum(yt) ≤ y
-#     @test minimum(yt) ≥ 0
-#     reset_billiard!(bt)
-# end#testset
+@testset "Raysplitting Magnetic BigFloat" begin
+
+    (x, y, r1, r2) = big.([3,1,0.3,0.2])
+    bt, ray = billiard_raysplitting_showcase(x, y, r1, r2)
+
+    @test isphysical(ray)
+    tt=1000.0
+    for ασδφ in 1:10
+        p = randominside(bt, big(0.8))
+        t, poss, vels = evolve!(p, bt, tt, ray)
+        @test typeof(t[1]) == BigFloat
+        @test typeof(poss[1][1]) == BigFloat
+        @test t[end] != Inf
+        xt = [pos[1] for pos in poss]; yt = [pos[2] for pos in poss]
+        @test maximum(xt) ≤ x
+        @test minimum(xt) ≥ 0
+        @test maximum(yt) ≤ y
+        @test minimum(yt) ≥ 0
+        reset_billiard!(bt)
+    end
+end#testset
 if printinfo
     println("Results:")
     println("+ evolve!() works for Ray-splitting billiards & MagneticParticle.")
