@@ -122,7 +122,7 @@ function meancoltimes(partnum=500; printinfo=true)
             if mct == Inf
                 port +=1
             else
-                @test mcts[j] - 1.5 ≤ mct ≤ mcts[j] + 2.5
+                @test mcts[j] - 1.5 ≤ mct ≤ mcts[j] + 3.0
             end
         end#particle loop
         @test port < partnum
