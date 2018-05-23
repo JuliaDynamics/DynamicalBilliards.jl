@@ -1,5 +1,5 @@
 using PyPlot
-export plot_boundarymap
+export plot_boundarymap, plot_boundarymap_portion
 
 """
     plot_boundarymap(ξs, sφs, intervals; kwargs...)
@@ -80,7 +80,7 @@ and the histogram box size `δ`
 * `transp = true`: don't plot non-visited boxes
 * Any other keyword argument is passed to `PyPlot.pcolormesh` which plots the histogram
 """
-function plot_bmportion(d, δξ, δφ = δξ; ax = nothing, cb::Bool = true,
+function plot_boundarymap_portion(d, δξ, δφ = δξ; ax = nothing, cb::Bool = true,
                         transp::Bool = true, kwargs...)
     ξmax = maximum(map(x->x[1], keys(d))) + 2
     φmax = maximum(map(x->x[2], keys(d))) + 2
