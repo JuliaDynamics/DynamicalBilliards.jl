@@ -117,7 +117,7 @@ boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
 
 
 
-function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ ) where {T}
+function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
     p = deepcopy(par)
 
     count = zero(T)
@@ -137,7 +137,8 @@ function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ,
             sφ = sin(reflection_angle(p, bt[i]))
 
             # compute index & increment dictionary entry
-            ind = SV{Int}(floor(ξ/δξ), floor((sφ + 1)/δφ))
+            ind = SV{Int}(floor(Int, ξ/δξ), floor(Int, (sφ + 1)/δφ))
+
             d[ind] = get(d, ind, 0) + 1
 
             # set counter
