@@ -6,9 +6,8 @@ const δpind = SV{Int}(3,4)
 @inline curvature(::Semicircle) = -1
 @inline curvature(::Disk) = +1
 
-
 ################################################################################
-## LINEAR PROPAGATION
+## SPECULAR (LINEAR)
 ################################################################################
 
 #="""
@@ -58,11 +57,9 @@ function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
 
 end
 
-
 ################################################################################
-## MAGNETIC PROPAGATION
+## SPECULAR (MAGNETIC)
 ################################################################################
-
 
 function specular!(p::MagneticParticle{T}, o::Circular{T},
                    offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
@@ -124,9 +121,12 @@ function specular!(p::MagneticParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
         ###
         offset[k] = vcat(δq, δp)
     end
-
-
 end
+
+################################################################################
+## RESOLVECOLLISON
+################################################################################
+
 #="""
     resolvecollision!(p::AbstractParticle, o::Union{Disk, InfiniteWall}, offset::MArray)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
@@ -135,22 +135,27 @@ updating the components of the offset vectors stored in the matrix `offset` as c
 resolvecollision!(p::Particle{T}, o::Obstacle{T},
                   offset::Vector{SVector{4, T}}) where {T} = specular!(p, o, offset)
 
+resolvecollision!(p::Particle{T}, o::PeriodicWall{T},
+                  offset::Vector{SVector{4, T}}) where {T} = resolvecollision!(p, o)
+
+
 function resolvecollision!(p::MagneticParticle{T}, o::Obstacle{T},
-                           offset::Vector{SVector{4, T}}) where {T}
+    offset::Vector{SVector{4, T}}) where {T}
 
     specular!(p, o, offset)
     p.center = find_cyclotron(p)
     return
 end
 
-resolvecollision!(p::Particle{T}, o::PeriodicWall{T},
-                  offset::Vector{SVector{4, T}}) where {T} = resolvecollision!(p, o)
-
 # this method only exists to avoid ambiguity for MagneticParticles colliding with
 # periodic walls.
 resolvecollision!(p::MagneticParticle{T}, o::PeriodicWall{T},
                   offset::Vector{SVector{4, T}}) where {T} = resolvecollision!(p, o)
 
+
+################################################################################
+## OFFSET PROPAGATION
+################################################################################
 
 """
     propagate_offset!(offset::MArray{Tuple{4,4},T}, p::AbstractParticle)
@@ -183,6 +188,10 @@ function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,
     end
 end
 
+################################################################################
+## PROPAGATION & RELOCATION
+################################################################################
+
 #="""
     propagate!(p::AbstractParticle{T}, t::T, offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
@@ -211,6 +220,9 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin,
 end
 
 
+################################################################################
+## HIGH-LEVEL FUNCTION
+################################################################################
 
 """
     lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t)
