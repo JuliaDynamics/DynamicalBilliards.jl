@@ -2,7 +2,7 @@ using Base.Test
 
 function lyapunov_spectrum(partnum=500; printinfo = true)
     tim = time()
-    partnum= min(10, partnum)
+    # partnum= min(10, partnum)
     @testset "Lyapunov Spectrum (straight)" begin
 
 
@@ -54,7 +54,7 @@ end
 
 function lyapunov_magnetic(partnum=500; printinfo = true)
     tim = time()
-    partnum= min(10, partnum)
+    # partnum= min(10, partnum)
     @testset "Lyapunov Spectrum (magnetic)" begin
         @testset "Sinai billiard, ω = 0.75" begin
             bt = billiard_sinai()
@@ -71,7 +71,7 @@ function lyapunov_magnetic(partnum=500; printinfo = true)
             end#particle loop
         end
 
-        @testset "Sinai billiard, ω = 2" begin
+        @testset "Sinai billiard, pinned" begin
             bt = billiard_sinai(;setting="periodic")
             p = MagneticParticle(0.1, 0.5, -π/2, 2.0)
             error_level = 1e-5
