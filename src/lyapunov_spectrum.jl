@@ -225,11 +225,13 @@ end
 ################################################################################
 
 """
-    lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t)
+    lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t::Float)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
+
+Returns zeros for pinned particles.
 """
-function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt;
+function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::AbstractFloat;
     warning::Bool = false) where {T<:AbstractFloat}
 
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
@@ -243,7 +245,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt;
 
     count = zero(T)
     t_pincheck = zero(T)
-    ismagnetic &&( absω = abs(p.omega))
+    ismagnetic && (absω = abs(p.omega))
 
     λ = zeros(T, 4)
 

@@ -76,7 +76,7 @@ function lyapunov_magnetic(partnum=500; printinfo = true)
             p = MagneticParticle(0.1, 0.5, -π/2, 2.0)
             error_level = 1e-5
             Λ = lyapunovspectrum!(p, bt, 10000.0)
-            @test abs(Λ[1]) < error_level
+            @test Λ == zeros(4)
         end
 
         @testset "Hexagonal Sinai, ω = 0.01" begin
