@@ -3,6 +3,13 @@ export lyapunovspectrum!, lyapunovspectrum
 const δqind = SV{Int}(1,2)
 const δpind = SV{Int}(3,4)
 
+@inline curvature(::Semicircle) = -1
+@inline curvature(::Disk) = +1
+
+################################################################################
+## SPECULAR (LINEAR)
+################################################################################
+
 #="""
     specular!(p::AbstractParticle, o::Obstacle, offset::MArray)
 Perform specular reflection based on the normal vector of the Obstacle.
@@ -10,12 +17,12 @@ The function updates the position and velocity of the particle
 together with the components of 4 offset vectors stored in the matrix
 `offset` as columns.
 """=#
-function specular!(p::AbstractParticle{T}, o::Circular{T},
+function specular!(p::Particle{T}, o::Circular{T},
                    offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
     n = normalvec(o, p.pos)
     ti = SV{T}(-p.vel[2],p.vel[1])
 
-    cosa = dot(n, -p.vel)
+    cosa = -dot(n, p.vel)
     p.vel = p.vel + 2*cosa*n
 
     tf = SV{T}(-p.vel[2], p.vel[1])
@@ -32,15 +39,12 @@ function specular!(p::AbstractParticle{T}, o::Circular{T},
     end
 end
 
-@inline curvature(::Semicircle) = -1
-@inline curvature(::Disk) = +1
-
-
-function specular!(p::AbstractParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
+function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
                    offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
 
     n = normalvec(o, p.pos)
     specular!(p, o)
+
     for k in 1:4
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
@@ -50,22 +54,108 @@ function specular!(p::AbstractParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
         ###
         offset[k] = vcat(δq, δp)
     end
+
 end
+
+################################################################################
+## SPECULAR (MAGNETIC)
+################################################################################
+
+function specular!(p::MagneticParticle{T}, o::Circular{T},
+                   offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
+    n = normalvec(o, p.pos)
+
+    cosa = -dot(n, p.vel)
+
+    Rn = SV{T}(-n[2], n[1])
+    ti = SV{T}(-p.vel[2],p.vel[1])
+
+    # magterm = ω*δτ_c*(BR-RB)*p_i / δqprev_normal
+    # i.e. everything that can be calculated without using the previous offset vector
+    magterm = -2*p.omega*((dot(p.vel, Rn)/(-cosa))*n + Rn)
+
+    #actual specular reflection should not occur before magterm is computed
+    p.vel = p.vel + 2*cosa*n
+    tf = SV{T}(-p.vel[2], p.vel[1])
+
+
+    for k in 1:4
+        δqprev = offset[k][δqind]
+        δpprev = offset[k][δpind]
+
+        δqprev_normal = dot(δqprev, n)
+
+        # Formulas derived analogously to Dellago et al., PRE 53, 2, 1996: 1485-1501
+        δq  = δqprev - 2.*δqprev_normal*n
+        δp  = δpprev - 2.*dot(δpprev,n)*n - curvature(o)*2./o.r*dot(δqprev,ti)/cosa*tf + magterm*δqprev_normal
+        ###
+        offset[k] = vcat(δq, δp)
+    end
+
+end
+
+function specular!(p::MagneticParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
+                   offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
+
+    n = normalvec(o, p.pos)
+
+    cosa = -dot(n, p.vel)
+    Rn = SV{T}(-n[2], n[1])
+
+    # magterm = ω*δτ_c*(BR-RB)*p_i / δqprev_normal
+    # i.e. everything that can be calculated without using the previous offset vector
+    magterm = -2*p.omega*((dot(p.vel, Rn)/(-cosa))*n + Rn)
+
+    #actual specular reflection should not occur before magterm is calculated
+    p.vel = p.vel + 2*cosa*n
+
+    for k in 1:4
+        δqprev = offset[k][δqind]
+        δpprev = offset[k][δpind]
+
+        δqprev_normal = dot(δqprev, n)
+
+        # Formulas derived analogously to Dellago et al., PRE 53, 2, 1996: 1485-1501
+        δq  = δqprev - 2*δqprev_normal*n
+        δp  = δpprev - 2*dot(δpprev,n)*n + magterm*δqprev_normal
+        ###
+        offset[k] = vcat(δq, δp)
+    end
+end
+
+################################################################################
+## RESOLVECOLLISON
+################################################################################
 
 #="""
     resolvecollision!(p::AbstractParticle, o::Union{Disk, InfiniteWall}, offset::MArray)
 Resolve the collision between particle `p` and obstacle `o` of type *Circular*,
 updating the components of the offset vectors stored in the matrix `offset` as columns.
 """=#
-function resolvecollision!(p::AbstractParticle{T}, o::Obstacle{T},
-                offset::Vector{SVector{4, T}})::Void where {T}
+resolvecollision!(p::Particle{T}, o::Obstacle{T},
+                  offset::Vector{SVector{4, T}}) where {T} = specular!(p, o, offset)
+
+resolvecollision!(p::Particle{T}, o::PeriodicWall{T},
+                  offset::Vector{SVector{4, T}}) where {T} = resolvecollision!(p, o)
+
+
+function resolvecollision!(p::MagneticParticle{T}, o::Obstacle{T},
+    offset::Vector{SVector{4, T}}) where {T}
 
     specular!(p, o, offset)
-    return nothing
+    p.center = find_cyclotron(p)
+    return
 end
 
-resolvecollision!(p::AbstractParticle{T}, o::PeriodicWall{T},
+# this method only exists to avoid ambiguity for MagneticParticles colliding with
+# periodic walls.
+resolvecollision!(p::MagneticParticle{T}, o::PeriodicWall{T},
                   offset::Vector{SVector{4, T}}) where {T} = resolvecollision!(p, o)
+
+
+################################################################################
+## OFFSET PROPAGATION
+################################################################################
 
 """
     propagate_offset!(offset::MArray{Tuple{4,4},T}, p::AbstractParticle)
@@ -98,6 +188,10 @@ function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,
     end
 end
 
+################################################################################
+## PROPAGATION & RELOCATION
+################################################################################
+
 #="""
     propagate!(p::AbstractParticle{T}, t::T, offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
@@ -126,13 +220,20 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin,
 end
 
 
+################################################################################
+## HIGH-LEVEL FUNCTION
+################################################################################
 
 """
-    lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t)
+    lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t::Float)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
+
+Returns zeros for pinned particles.
 """
-function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt) where {T<:AbstractFloat}
+function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::AbstractFloat;
+    warning::Bool = false) where {T<:AbstractFloat}
+
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
               SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
 
@@ -143,26 +244,46 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt) where {T
     end
 
     count = zero(T)
+    t_pincheck = zero(T)
+    ismagnetic && (absω = abs(p.omega))
+
     λ = zeros(T, 4)
 
     while count < t
+        #bounce!-step
         tmin::T, i::Int = next_collision(p, bt)
-        # set counter
-        if count +  increment_counter(t, tmin) > t
-            break
+
+        #check for pinning
+        if ismagnetic && tmin == Inf
+            warning && warn("Pinned particle! (Inf. col. t)")
+            return zeros(T, 4)
         end
-        ###
 
         tmin = relocate!(p, bt[i], tmin, offset)
         resolvecollision!(p, bt[i], offset)
         ismagnetic && (p.center = find_cyclotron(p))
         count += increment_counter(t, tmin)
 
+        t_pincheck += tmin
+
+        #check for pinning
+        if typeof(bt[i]) <: PeriodicWall
+            # Pinned particle:
+            if ismagnetic && t_pincheck ≥ 2π/absω
+                warning && warn("Pinned particle! (completed circle)")
+                return zeros(T, 4)
+            end
+        else
+            t_pincheck = zero(T)
+        end
+
+        #QR decomposition to get lyapunov exponents
         Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
         offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
         for i ∈ 1:4
             λ[i] += log(abs(R[i,i]))
         end
+
 
     end#time loop
 
