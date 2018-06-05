@@ -229,7 +229,9 @@ end
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 """
-function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt) where {T<:AbstractFloat}
+function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt;
+    warning::Bool = false) where {T<:AbstractFloat}
+
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
               SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
 
@@ -240,27 +242,46 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt) where {T
     end
 
     count = zero(T)
+    t_pincheck = zero(T)
+    ismagnetic &&( absω = abs(p.omega))
+
     λ = zeros(T, 4)
 
     while count < t
+        #bounce!-step
         tmin::T, i::Int = next_collision(p, bt)
-        # set counter
 
-        if count +  increment_counter(t, tmin) > t
-            break
+        #check for pinning
+        if ismagnetic && tmin == Inf
+            warning && warn("Pinned particle! (Inf. col. t)")
+            return zeros(T, 4)
         end
-        ###
 
         tmin = relocate!(p, bt[i], tmin, offset)
         resolvecollision!(p, bt[i], offset)
         ismagnetic && (p.center = find_cyclotron(p))
         count += increment_counter(t, tmin)
 
+        t_pincheck += tmin
+
+        #check for pinning
+        if typeof(bt[i]) <: PeriodicWall
+            # Pinned particle:
+            if ismagnetic && t_pincheck ≥ 2π/absω
+                warning && warn("Pinned particle! (completed circle)")
+                return zeros(T, 4)
+            end
+        else
+            t_pincheck = zero(T)
+        end
+
+        #QR decomposition to get lyapunov exponents
         Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
         offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
         for i ∈ 1:4
             λ[i] += log(abs(R[i,i]))
         end
+
 
     end#time loop
 
