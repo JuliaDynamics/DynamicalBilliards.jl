@@ -112,7 +112,7 @@ function meancoltimes(partnum=500; printinfo=true)
     end
     j = 1
     bt = billiard_sinai(0.15, setting = "periodic")
-    @testset "Periodic sinai ω = $ω" for ω ∈ [0, 0.88, 2.0]
+    @testset "Periodic sinai ω = $ω" for ω ∈ [0.01, 0.88, 2.0]
         mcts = [3.097297, 2.201, 1.76]
         port = 0
         for i in 1:partnum
