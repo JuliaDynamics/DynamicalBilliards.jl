@@ -126,7 +126,7 @@ function meancoltimes(partnum=500; printinfo=true)
             end
         end#particle loop
         @test port < partnum
-        partnum > 10 && ω != 0.0 && @test port > 0
+        partnum > 10 && ω != 0.01 && @test port > 0
         j += 1
     end
     end
