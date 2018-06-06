@@ -218,13 +218,15 @@ end
 
 
 """
-    billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
-    stem_location = 0.0)
-Create a mushroom billiard. The center of the cap (which is Semicircle) is always
-at [0, stem_length]. The bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
+    billiard_mushroom(l = 1.0, w = 0.2, r = 1.0, sloc = 0.0; door = true)
+Create a mushroom billiard with cap radius `r`, stem width `w` and step
+height `l`. The center of the cap (which is Semicircle) is always
+at `[0, l]`. The center of the stem is located at `sloc`.
+
+Optionally, the bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
 """
 function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
-    stem_location = 0.0)
+    stem_location = 0.0; door = true)
 
     stloc = stem_location
     sl = stem_length; sw = stem_width; cr = cap_radious
@@ -236,7 +238,7 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     upleftcorn = SV(-sw/2 + stloc, sl)
     uprightcorn = SV(sw/2 + stloc, sl)
 
-    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), true, "Stem bottom")
+    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), door, "Stem bottom")
     stemleft = FiniteWall(upleftcorn, leftcorn, SV(sw, 0), false, "Stem left")
     stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
 
