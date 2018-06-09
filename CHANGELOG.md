@@ -1,13 +1,13 @@
 # v2.0
 
 ## New Features!
-* Lyapunov exponents for magnetic particles are now possible!
-* **2 to 3 orders of magnitude performance gains on all functions!!!**
-  * Reduced a lot of allocations done all over the place.
+* **3 orders of magnitude performance gains on all functions!!!**
+  * Reduced a lot of allocations done all over the place. In most places allocations
+    done are now exactly zero! ZEROOOOOOOOOOOO
   * Fixed many instances of broadcasting with static vectors (which is bad).
-  * Utilized the `Unrolled` package and other kind of stability features that
-    make most of the functions of `DynamicalBilliards` non-allocating!
+  * Utilized the `Unrolled` package and other kind of stability and performance features!
 
+* Lyapunov exponents for magnetic particles are now possible!
 * Added boundary map computation function which works
   for any billiard and any particle. It assumes that the obstacles are
   sorted counter clockwise.
@@ -15,17 +15,18 @@
   * Added `plot_boundarymap` that plots the poincare section and the obstacle boundaries.
 * Added Poincare surface of section function, which computes intersections with
   arbitrary planes!
-
+* It is now possible to affect many different obstacles during ray-splitting!
 * Plotting is now available the moment the user does `using PyPlot`. Done through
   the `Requires` module. The function `enableplotting()` does not exist anymore!
 * Re-organized all source code into a much more readable state, and as a result
   significantly reduced the total lines of code.
 * added `evolve` function that simply deepcopies particle.
+* Added convenience function to compute the mean collision time in a billiard.
+
+## Syntax changes
 * new function `bounce!` that propagates a particle from one collision to the
   next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
   of saving stuff. All high level functions use `bounce!`.
-
-## Syntax changes
 * Overhauled what a "billiard table" is: Now, called simply `Billiard` is a
   dedicated struct that stores the obstacles as a tuple. This means that
   all functions do not accept a `Vector{Obstacle}` anymore but rather a `Billiard`.
@@ -34,6 +35,7 @@
 * `realangle` now only takes one intersection and simply returns the real angle.
 * `animate_evolution` now does not have `!` at the end, because it deepcopies the
   particle.
+* Re-worked ray-splitting: We now use the `RaySplitter` struct. See docs.
 
 ---
 

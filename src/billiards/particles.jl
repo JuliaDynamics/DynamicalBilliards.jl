@@ -14,6 +14,7 @@ eltype(p::AbstractParticle{T}) where {T} = T
 ```julia
 Particle(ic::Vector{T}) #where ic = [x0, y0, φ0]
 Particle(x0, y0, φ0)
+Particle(pos::SVector, vel::SVector)
 ```
 Create a particle with initial conditions `x0, y0, φ0`. It propagates as
 a straight line.
@@ -39,6 +40,10 @@ function Particle(ic::AbstractVector{S}) where {S<:Real}
 end
 Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
 Particle() = Particle(rand(), rand(), rand()*2π)
+function Particle(pos::SV{T}, vel::SV{T}) where {T}
+    S = T<:Integer ? Float64 : T
+    return MagneticParticle(pos, vel, SVector{2,S}(0,0))
+end
 show(io::IO, p::Particle{T}) where {T} =
 print(io, "Particle{$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
@@ -47,8 +52,9 @@ print(io, "Particle{$T}\n",
 
 """
 ```julia
-MagneticParticle(ic::AbstractVector{T}, ω::Real) #where ic = [x0, y0, φ0]
+MagneticParticle(ic::AbstractVector{T}, ω::Real) # where ic = [x0, y0, φ0]
 MagneticParticle(x0, y0, φ0, ω)
+MagneticParticle(pos::SVector, vel::SVector, ω)
 ```
 Create a *magnetic* particle with initial conditions `x0, y0, φ0` and angular
 velocity `ω`. It propagates as a circle instead of a line.
@@ -85,6 +91,10 @@ function MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)
     MagneticParticle(a[1:3], a[4])
 end
 MagneticParticle() = MagneticParticle([rand(), rand(), rand()*2π], 1.0)
+function MagneticParticle(pos::SV{T}, vel::SV{T}, ω::T) where {T}
+    S = T<:Integer ? Float64 : T
+    return MagneticParticle(pos, vel, SVector{2,S}(0,0), convert(S,ω))
+end
 
 show(io::IO, p::MagneticParticle{T}) where {T} =
 print(io, "MagneticParticle{$T}\n",

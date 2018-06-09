@@ -192,37 +192,41 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
 
     r1≥x/4 || r2≥x/4 && throw(ArgumentError("Disks overlap with walls!"))
 
-    sa = (θ, pflag, ω) -> pflag ? 2.0*θ : 0.5*θ
-    Tp = (p) -> (θ, pflag, ω=0.0) -> begin
-        if pflag
-            abs(θ) < π/4 ? p*exp(-(θ)^2/2(π/8)^2) : 0.0
-        else
-            (1-p)*exp(-(θ)^2/2(π/4)^2)
-        end
-    end
-    newo = ((x, bool) -> bool ? -0.5x : -2.0x)
-    rayspl = Dict{Int, Vector{Function}}(
-    3 => [Tp(0.5), sa, newo],
-    1 => [Tp(0.35), sa, newo],
-    2 => [Tp(0.65), sa, newo])
-
     btr =  billiard_rectangle(x, y)
     sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
     a1 = Antidot([x/4, y/2], r1, "Left Antidot")
     a2 = Antidot([3x/4, y/2], r2, "Right Antidot")
 
-    return Billiard(a1, a2, sw, btr...), rayspl
+    sa = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
+    Tp = (p) -> (φ, pflag, ω) -> begin
+        if pflag
+            p*exp(-(φ)^2/2(π/8)^2)
+        else
+            abs(φ) < π/4 ? (1-p)*exp(-(φ)^2/2(π/4)^2) : 0.0
+        end
+    end
+    newoantidot = ((x, bool) -> bool ? -0.5x : -2.0x)
+    newowall = ((x, bool) -> bool ? 0.5x : 2.0x)
+
+    # I Need 3 ray-splitters because I want different affect for
+    # different antidots
+    raywall = RaySplitter([3], Tp(0.5), sa, newowall)
+    raya = RaySplitter([1, 2], Tp(0.64), sa, newoantidot)
+
+    return Billiard(a1, a2, sw, btr...), (raywall, raya)
 end
 
 
 """
-    billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
-    stem_location = 0.0)
-Create a mushroom billiard. The center of the cap (which is Semicircle) is always
-at [0, stem_length]. The bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
+    billiard_mushroom(l = 1.0, w = 0.2, r = 1.0, sloc = 0.0; door = true)
+Create a mushroom billiard with cap radius `r`, stem width `w` and step
+height `l`. The center of the cap (which is Semicircle) is always
+at `[0, l]`. The center of the stem is located at `sloc`.
+
+Optionally, the bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
 """
 function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
-    stem_location = 0.0)
+    stem_location = 0.0; door = true)
 
     stloc = stem_location
     sl = stem_length; sw = stem_width; cr = cap_radious
@@ -234,7 +238,7 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     upleftcorn = SV(-sw/2 + stloc, sl)
     uprightcorn = SV(sw/2 + stloc, sl)
 
-    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), true, "Stem bottom")
+    stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), door, "Stem bottom")
     stemleft = FiniteWall(upleftcorn, leftcorn, SV(sw, 0), false, "Stem left")
     stemright = FiniteWall(rightcorn, uprightcorn, SV(-sw, 0), false, "Stem right")
 

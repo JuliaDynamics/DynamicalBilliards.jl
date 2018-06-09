@@ -20,9 +20,9 @@ if haskey(ENV, "DYNAMICALBILLIARDS_LONGTEST")
 end
 
 if longtests
-    partnum = 500
+    partnum = 1000
 else
-    partnum = 10
+    partnum = 50
 end
 
 include("straight.jl")
@@ -38,9 +38,10 @@ t = time()
 
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
-    raysplit_straight, raysplit_magnetic, type_stability, lyapunov_spectrum,
-    lyapunov_magnetic, escape_times, stadium_psos, cut_psos, boundarymap_portion_test,
-    meancoltimes)
+    type_stability, lyapunov_spectrum,
+    lyapunov_magnetic, escape_times, stadium_psos, cut_psos, meancoltimes,
+    boundarymap_portion_test, raysplit_straight, raysplit_magnetic)
+
 for f in fnames
     println()
     f(partnum, printinfo=printinfo)

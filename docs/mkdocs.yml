@@ -39,8 +39,8 @@ pages:
 - Low Level API: basic/low_level.md
 - Tutorials:
   - Defining a Billiard Table: tutorials/billiard_table.md
-  - Ray-Splitting: tutorials/ray-splitting.md
   - Creating your own Obstacle: tutorials/own_obstacle.md
   - Examples: tutorials/examples.md
 - Physics: physics.md
+- Ray-Splitting: ray-splitting.md
 - Lyapunov Exponents: lyapunovs.md

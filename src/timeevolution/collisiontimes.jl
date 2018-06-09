@@ -261,22 +261,23 @@ end
 @inline next_collision(p::AbstractParticle, bt::Billiard) =
     next_collision(p, bt.obstacles)
 
-function next_collision(
-    p::AbstractParticle{T}, bt::Billiard{T})::Tuple{T,Int} where {T}
-    tmin::T = T(Inf)
-    ind::Int = 0
-    for i in eachindex(bt)
-        tcol::T = collisiontime(p, bt[i])
-        # Set minimum time:
-        if tcol < tmin
-            tmin = tcol
-            ind = i
-        end
-    end#obstacle loop
-    return tmin, ind
-end
 
 ### OTher attempts:
+# function next_collision(
+#     p::AbstractParticle{T}, bt::Billiard{T})::Tuple{T,Int} where {T}
+#     tmin::T = T(Inf)
+#     ind::Int = 0
+#     for i in eachindex(bt.obstacles)
+#         tcol::T = collisiontime(p, bt[i])
+#         # Set minimum time:
+#         if tcol < tmin
+#             tmin = tcol
+#             ind = i
+#         end
+#     end#obstacle loop
+#     return tmin, ind
+# end
+
 # function next_collision(
 #     p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
 #     findmin(map(x -> collisiontime(p, x), bt))
