@@ -109,7 +109,8 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
                     p = MushroomTools.randomregular(l, w, r)
                     ratio, dic = boundarymap_portion(bt,t, p, 0.1)
                     trueratio =  MushroomTools.g_r_2D(l,w,r)
-                    @test trueratio - 0.1 ≤ ratio ≤ trueratio + 0.1
+                    # Only one regular particle covers very small amount of space:
+                    @test ratio < trueratio
                 end
             end
             @testset "chaotic" begin
