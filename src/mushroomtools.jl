@@ -9,6 +9,9 @@ Made by Lukas Hupe.
 """
 module MushroomTools
 
+using DynamicalBilliards
+using DynamicalBilliards: SV
+
 #="""
     is_regular(p::Particle, o::Semicircle, w)
 checks whether the particle `p` is on an integrable orbit in a mushroom billiard
@@ -57,7 +60,7 @@ This result is known analytically, see [`MushroomTools`](@ref) for references.
 g_c_3D(l,w,r) = 1 - g_r_3D(l,w,r)
 
 """
-    V_3D_tot(l,w,r)
+    V_2D_tot(l,w,r)
 Return the total boundary map volume (2D) of the mushroom parameterized by `(l,w,r)`.
 """
 V_2D_tot(l, w, r) = 2(π*r + 2r + 2l)
@@ -80,7 +83,7 @@ This result is known analytically, see [`MushroomTools`](@ref) for references.
 g_c_2D(l,w,r) = 1 - g_r_2D(l,w,r)
 
 #applying Kac's Lemma to the stem
-τ_r_2D_kac(l,w,r) = (V_2D_tot(l,w,r) - V_2D_reg.(l,w,r)) / (2w + 4l)
+τ_r_2D_kac(l,w,r) = (V_2D_tot(l,w,r) - V_2D_reg(l,w,r)) / (2w + 4l)
 
 
 #="""
@@ -104,7 +107,7 @@ end
 
 """
     randin_mushroom(l, w, r [, ω])
-Generate a random particle within the mushroom parameterised by `l`,  `w` and `r`.
+Generate a random particle within the mushroom parameterised by `l`, `w` and `r`.
 If `ω` is given the particle is magnetic instead.
 
 This function is much more efficient than [`randominside`](@ref).
@@ -113,7 +116,7 @@ function randin_mushroom(l::T = 1.0, w::T = 0.2, r::T = 1.0) where {T <: Abstrac
     pos, vel = _randin_mushroom(l, w, r)
     return Particle(pos, vel, zero(SV{T}))
 end
-function randin_mushroom(l::T = 1.0, w::T = 0.2, r::T = 1.0, ω) where {T <: AbstractFloat}
+function randin_mushroom(l::T, w::T, r::T, ω::T) where {T <: AbstractFloat}
     pos, vel = _randin_mushroom(l, w, r)
     return MagneticParticle(pos, vel, zero(SV{T}), T(ω))
 end
@@ -154,3 +157,5 @@ function randomregular(l, w, r)
     end
     return p
 end
+
+end # module

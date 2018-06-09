@@ -31,6 +31,9 @@ include("highleveltimes.jl")
 include("poincaresos.jl")
 include("lyapunov_spectrum.jl")
 
+include("mushroomtools.jl")
+export MushroomTools
+
 include("raysplitting.jl")
 
 ##########################################
