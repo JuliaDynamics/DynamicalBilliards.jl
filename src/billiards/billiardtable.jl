@@ -88,6 +88,13 @@ for f in (:distance, :distance_init)
     end
 end
 
+#######################################################################################
+## total arclength
+#######################################################################################
+function totallength(bt::Billiard)
+    #for some reason, this is faster than @inline totallength(bt) = ...
+    return unrolled_reduce(+,0.0, unrolled_map(x->totallength(x),bt.obstacles))
+end
 
 
 #######################################################################################

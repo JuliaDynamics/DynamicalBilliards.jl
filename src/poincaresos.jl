@@ -1,4 +1,4 @@
-export boundarymap
+export boundarymap, boundarymap_portion
 export psos!, psos
 
 #######################################################################################
@@ -114,6 +114,47 @@ boundarymap(bt::Billiard, t, n::Int) =
 
 boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
     boundarymap(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+
+
+
+function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
+    p = deepcopy(par)
+
+    count = zero(T)
+    t_to_write = zero(T)
+
+    d = Dict{SV{Int}, Int}()
+    intervals = arcintervals(bt)
+    while count < t
+        i, tmin = bounce!(p,bt)
+        t_to_write += tmin
+
+        if typeof(bt[i]) <: PeriodicWall
+            continue # do not write output if collision with with PeriodicWall
+        else
+            # get Birkhoff coordinates
+            ξ = arclength(p, bt[i]) + intervals[i][1]
+            sφ = sin(reflection_angle(p, bt[i]))
+
+            # compute index & increment dictionary entry
+            ind = SV{Int}(floor(Int, ξ/δξ), floor(Int, (sφ + 1)/δφ))
+
+            d[ind] = get(d, ind, 0) + 1
+
+            # set counter
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+    end #time or collision number loop
+
+    #calculate ratio of visited boxes
+    total_boxes = ceil(Int, totallength(bt)/δξ) * ceil(Int, 2/δφ)
+    ratio = length(keys(d))/total_boxes
+
+    return ratio, d
+end
+
+
 
 
 ######################################################################################
