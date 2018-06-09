@@ -81,3 +81,40 @@ function cut_psos(partnum=10; printinfo = true)
         """)
     end
 end
+
+
+function boundarymap_portion_test(partnum = 10; printinfo = true)
+    tim = time()
+    @testset "Bunimovich" begin
+        t = 1000000.0
+        bt = billiard_bunimovich()
+        @testset "ω = $ω" for ω in [0.0, 0.1]
+            for i in 1:min(partnum, 20)
+                p = ω == 0 ? randominside(bt) : randominside(bt, ω)
+                φ = π/4 * rand() # so that we never find bouncing walls
+                p.vel = (cos(φ), sin(φ))
+                ratio, dic = boundarymap_portion(bt,t, randominside(bt), 0.1)
+                @test ratio == 1.0
+            end
+        end
+    end
+    @testset "Mushroom" begin
+        t = 1000000.0
+        bt = billiard_mushroom()
+        for i in 1:min(partnum, 20)
+            p = randominside(bt)
+            ratio, dic = boundarymap_portion(bt,t, randominside(bt), 0.1)
+            @test ratio < 1.0
+        end
+    end
+
+    if printinfo
+        println("""
+        Results:
+        + Poincare section through cut works
+        + Pinned particles correctly detected
+        + positions and velocities are within correct bounds
+        + Required time: $(round(time()-tim, 3)) sec
+        """)
+    end
+end
