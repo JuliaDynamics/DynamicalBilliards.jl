@@ -57,15 +57,15 @@ end
 
 getindex(bt::Billiard, i) = bt.obstacles[i]
 # Iteration:
-start(bt::Billiard) = start(bt.obstacles)
-next(bt::Billiard, state) = next(bt.obstacles, state)
-done(bt::Billiard, state) = done(bt.obstacles, state)
+iterate(bt::Billiard) = iterate(bt.obstacles)
+iterate(bt::Billiard, state) = iterate(bt.obstacles, state)
 
 eltype(bt::Billiard{T}) where {T} = T
 
+isperiodic(bt) = any(x -> typeof(x) <: PeriodicWall, bt.obstacles)
 
-isperiodic(bt) = Unrolled.unrolled_any(x -> typeof(x) <: PeriodicWall, bt)
-
+# total arclength
+totallength(bt::Billiard) = sum(totallength(x) for x in bt.obstacles)
 
 #######################################################################################
 ## Distances
@@ -77,9 +77,9 @@ end
 
 for f in (:distance, :distance_init)
     @eval begin
-        @unroll function ($f)(p::SV{T}, bt::Tuple)::T where {T}
+        function ($f)(p::SV{T}, bt::Tuple)::T where {T}
             dmin::T = T(Inf)
-            @unroll for obst in bt
+            for obst in bt
                 d::T = distance(p, obst)
                 d < dmin && (dmin = d)
             end#obstacle loop
@@ -87,15 +87,6 @@ for f in (:distance, :distance_init)
         end
     end
 end
-
-#######################################################################################
-## total arclength
-#######################################################################################
-function totallength(bt::Billiard)
-    #for some reason, this is faster than @inline totallength(bt) = ...
-    return unrolled_reduce(+,0.0, unrolled_map(x->totallength(x),bt.obstacles))
-end
-
 
 #######################################################################################
 ## randominside
@@ -122,7 +113,8 @@ billiard. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
 """
 randominside(bt::Billiard) = Particle(_randominside(bt)...)
-randominside(bt::Billiard{T}, ω) where {T} = MagneticParticle(_randominside(bt)..., T(ω))
+randominside(bt::Billiard{T}, ω) where {T} =
+MagneticParticle(_randominside(bt)..., T(ω))
 
 
 

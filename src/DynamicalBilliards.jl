@@ -10,7 +10,6 @@ fast implementation of billiard systems of arbitrary construction.
 module DynamicalBilliards
 
 using StaticArrays
-using Unrolled
 import Base: show, eltype, getindex
 
 const SV = SVector{2}

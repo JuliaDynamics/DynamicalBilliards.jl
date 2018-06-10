@@ -255,7 +255,7 @@ as well as the `index` of the corresponding obstacle.
 """
 function next_collision(
     p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
-    findmin(Unrolled.unrolled_map(x -> collisiontime(p, x), bt))
+    findmin(map(x -> collisiontime(p, x), bt))
 end
 
 @inline next_collision(p::AbstractParticle, bt::Billiard) =
