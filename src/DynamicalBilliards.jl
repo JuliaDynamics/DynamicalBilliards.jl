@@ -9,6 +9,7 @@ fast implementation of billiard systems of arbitrary construction.
 """
 module DynamicalBilliards
 
+using LinearAlgebra
 using StaticArrays
 import Base: show, eltype, getindex
 
