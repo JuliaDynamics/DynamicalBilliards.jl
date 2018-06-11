@@ -71,7 +71,7 @@ If the `i`th entry is `0`, this means that the obstacle does not do raysplitting
 function raysplit_indices(bt::Billiard, raysplitters::Tuple)
     O = zeros(Int, length(bt.obstacles))
     for (k, rayspl) ∈ enumerate(raysplitters)
-        O[rayspl.oidx] = k
+        O[rayspl.oidx] .= k
     end
     return O
 end

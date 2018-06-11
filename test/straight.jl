@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using DynamicalBilliards
 
 function straight_sinai(partnum=500; printinfo=true)
@@ -36,7 +36,7 @@ if printinfo
     println("+ relocate(), collisiontime(), resolvecollision() work for")
     println("  for Particle with InfiniteWall and Disk.")
     println("+ particle never leaks the billiard table.")
-    println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
 end#function
@@ -86,7 +86,7 @@ if printinfo
     println("  for Particle with PeriodicWall and Disk.")
     println("+ collisiontime() ≤ min(x,y) - 2r.")
     println("+ Particle never invades the Disk.")
-    println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
 end#function

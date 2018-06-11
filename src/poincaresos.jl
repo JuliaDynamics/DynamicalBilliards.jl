@@ -27,7 +27,7 @@ length intervals corresponding to the `i`th `Obstacle` in `bt`.
 Used by [`boundarymap`](@ref) to compute arc lengths.
 """
 function arcintervals(bt::Billiard{T, D}) where {T, D}
-    intervals = Vector{SVector{2,T}}(D)
+    intervals = Vector{SVector{2,T}}(undef, D)
     current = zero(T)
     for i ∈ 1:D
         l = totallength(bt[i]) + current

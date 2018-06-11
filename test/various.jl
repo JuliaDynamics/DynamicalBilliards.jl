@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using DynamicalBilliards
 
 function type_stability(partnum=500; printinfo=true)
@@ -92,7 +92,7 @@ function escape_times(partnum=500; printinfo=true)
         println("  and understands Doors.")
         println("+ The escape time is always finite.")
         println("+ randominside() works for billiard_mushroom()!")
-        println("+ Required time: $(round(time()-tim, 3)) sec.")
+        println("+ Required time: $(round(time()-tim, digits=3)) sec.")
     end
     return
 end
@@ -133,7 +133,7 @@ function meancoltimes(partnum=500; printinfo=true)
     if printinfo
         println("Results:")
         println("+ mean collision time works.")
-        println("+ Required time: $(round(time()-tim, 3)) sec.")
+        println("+ Required time: $(round(time()-tim, digits=3)) sec.")
     end
     return
 end

@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 
 function lyapunov_spectrum(partnum=500; printinfo = true)
     tim = time()
@@ -47,7 +47,7 @@ function lyapunov_spectrum(partnum=500; printinfo = true)
         println("  hexagonal lorentz and sinai billiard.")
         println("+ λ₁ + λ₄ ≈ 0.")
         println("+ λ₂ ≈ λ₃ ≈ 0.")
-        println("+ Required time: $(round(time()-tim, 3)) sec.")
+        println("+ Required time: $(round(time()-tim, digits=3)) sec.")
     end
     return
 end
@@ -127,7 +127,7 @@ function lyapunov_magnetic(partnum=500; printinfo = true)
                 + λ₁ ≈ 0 for pinned particles
                 + magnetic λ similar to non-magnetic
                   λ for small ω
-                + Required time: $(round(time()-tim, 3)) sec.
+                + Required time: $(round(time()-tim, digits=3)) sec.
                 """)
     end
     return

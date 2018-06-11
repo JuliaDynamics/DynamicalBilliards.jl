@@ -118,7 +118,7 @@ Let's see an example:
 ```julia
 ct, poss, vels = evolve(p, bt, 100)
 for i in 1:5
-  println(round(ct[i], 3), "  ", poss[i], "  ", vels[i])
+  println(round(ct[i], digits=3), "  ", poss[i], "  ", vels[i])
 end
 ```
 ```
@@ -133,7 +133,7 @@ Similarly, for magnetic propagation
 ```julia
 ct, poss, vels, ω = evolve(mp, bt, 100)
 for i in 1:10
-  println(round(ct[i], 3), "  ", poss[i], "  ", vels[i])
+  println(round(ct[i], digits=3), "  ", poss[i], "  ", vels[i])
 end
 ```
 ```

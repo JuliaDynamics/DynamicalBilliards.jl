@@ -1,5 +1,5 @@
 using DynamicalBilliards
-using Base.Test
+using Test
 
 function stadium_psos(partnum=10; printinfo = true)
     tim = time()
@@ -30,7 +30,7 @@ function stadium_psos(partnum=10; printinfo = true)
             Results:
             + boundarymap works
             + billiard_bunimovich uniformly fills its boundarymap
-            + Required time: $(round(time()-tim, 3)) sec
+            + Required time: $(round(time()-tim, digits=3)) sec
             """)
         end
     end
@@ -77,7 +77,7 @@ function cut_psos(partnum=10; printinfo = true)
         + Poincare section through cut works
         + Pinned particles correctly detected
         + positions and velocities are within correct bounds
-        + Required time: $(round(time()-tim, 3)) sec
+        + Required time: $(round(time()-tim, digits=3)) sec
         """)
     end
 end
@@ -131,7 +131,7 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
         + Poincare section through cut works
         + Pinned particles correctly detected
         + positions and velocities are within correct bounds
-        + Required time: $(round(time()-tim, 3)) sec
+        + Required time: $(round(time()-tim, digits=3)) sec
         """)
     end
 end

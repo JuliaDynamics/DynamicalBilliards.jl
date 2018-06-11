@@ -1,5 +1,5 @@
 using DynamicalBilliards
-using Base.Test
+using Test
 
 #=debug=# false && using Juno
 
@@ -32,7 +32,7 @@ if printinfo
     println("+ relocate(), collisiontime(), resolvecollision() work for")
     println("  Particle & Ray-splitting with SplitterWall and Antidot.")
     println("+ particle never leaks the billiard table.")
-    println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
 end
@@ -96,7 +96,7 @@ if printinfo
     println("  MagneticParticle & Ray-splitting with SplitterWall and Antidot.")
     println("+ particle never leaks the billiard table + process terminates.")
     println("+ All the above also work for BigFloat.")
-    println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
 end

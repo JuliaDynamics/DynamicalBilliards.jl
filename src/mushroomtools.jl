@@ -12,6 +12,7 @@ module MushroomTools
 
 using DynamicalBilliards
 using DynamicalBilliards: SV
+using LinearAlgebra
 
 #="""
     is_regular(p::Particle, o::Semicircle, w)
