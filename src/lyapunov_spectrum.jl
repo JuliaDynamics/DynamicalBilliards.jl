@@ -32,8 +32,8 @@ function specular!(p::Particle{T}, o::Circular{T},
         δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
         # with norm(p) = 1
-        δq  = δqprev - 2.*dot(δqprev,n)*n
-        δp  = δpprev - 2.*dot(δpprev,n)*n - curvature(o)*2./o.r*dot(δqprev,ti)/cosa*tf
+        δq  = δqprev - 2*dot(δqprev,n)*n
+        δp  = δpprev - 2*dot(δpprev,n)*n - curvature(o)*2/o.r*dot(δqprev,ti)/cosa*tf
         ###
         offset[k] = vcat(δq, δp)
     end
@@ -49,8 +49,8 @@ function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 20)
-        δq  = δqprev - 2.*dot(δqprev,n)*n
-        δp  = δpprev - 2.*dot(δpprev,n)*n
+        δq  = δqprev - 2*dot(δqprev,n)*n
+        δp  = δpprev - 2*dot(δpprev,n)*n
         ###
         offset[k] = vcat(δq, δp)
     end
@@ -86,8 +86,8 @@ function specular!(p::MagneticParticle{T}, o::Circular{T},
         δqprev_normal = dot(δqprev, n)
 
         # Formulas derived analogously to Dellago et al., PRE 53, 2, 1996: 1485-1501
-        δq  = δqprev - 2.*δqprev_normal*n
-        δp  = δpprev - 2.*dot(δpprev,n)*n - curvature(o)*2./o.r*dot(δqprev,ti)/cosa*tf + magterm*δqprev_normal
+        δq  = δqprev - 2*δqprev_normal*n
+        δp  = δpprev - 2*dot(δpprev,n)*n - curvature(o)* 2/o.r * dot(δqprev,ti)/cosa*tf + magterm*δqprev_normal
         ###
         offset[k] = vcat(δq, δp)
     end
@@ -172,12 +172,10 @@ function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,
 end
 
 #magnetic
-#TODO: Use `sincos` for julia v0.7
 function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,
                            p::MagneticParticle{T}) where T
     ω = p.omega
-    sω = sin(ω*t)
-    cω = cos(ω*t)
+    sω, cω = sincos(ω*t)
 
     for k in 1:4
         δΓ = offset[k]
@@ -278,10 +276,10 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::Abstract
         end
 
         #QR decomposition to get lyapunov exponents
-        Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
-        offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
+        qres = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
+        offset[1], offset[2], offset[3], offset[4] = qres.Q[:, 1], qres.Q[:, 2], qres.Q[:, 3], qres.Q[:, 4]
         for i ∈ 1:4
-            λ[i] += log(abs(R[i,i]))
+            λ[i] += log(abs(qres.R[i,i]))
         end
 
 
