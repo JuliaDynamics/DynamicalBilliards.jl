@@ -30,7 +30,7 @@ include("straight.jl")
 include("magnetic.jl")
 include("raysplit.jl")
 include("various.jl")
-#include("lyapunov.jl")
+include("lyapunov.jl")
 include("psos.jl")
 
 print("DynamicalBilliards tests started at: ")
@@ -39,8 +39,8 @@ t = time()
 
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
-    type_stability, #=lyapunov_spectrum,
-    lyapunov_magnetic,=# escape_times, stadium_psos, cut_psos, meancoltimes,
+    type_stability, lyapunov_spectrum,
+    lyapunov_magnetic, escape_times, stadium_psos, cut_psos, meancoltimes,
     boundarymap_portion_test, raysplit_straight, raysplit_magnetic)
 
 for f in fnames

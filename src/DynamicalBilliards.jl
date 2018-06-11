@@ -16,6 +16,8 @@ import Base: show, eltype, getindex
 const SV = SVector{2}
 export SVector
 
+cossin(a) = ((x, y) = sincos(a); (y, x))
+
 ##########################################
 # Core                                   #
 ##########################################
