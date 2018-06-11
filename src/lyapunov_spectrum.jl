@@ -162,8 +162,7 @@ resolvecollision!(p::MagneticParticle{T}, o::PeriodicWall{T},
 Computes the linearized evolution of the offset vectors during propagation for a
 time interval `t`
 """
-#linear
-function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,
+function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,     #linear case 
                            p::Particle{T}) where T
     for k in 1:4
         δΓ = offset[k]

@@ -397,7 +397,6 @@ the billiard.
 
 All `distance` functions can also be given a position (vector) instead of a particle.
 """
-
 (distance(p::AbstractParticle{T}, obst::Obstacle{T})::T) where {T} =
 distance(p.pos, obst)
 
@@ -423,7 +422,7 @@ end
 
 function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     # Check on which half of circle is the particle
-    v1 = pos .- s.c
+    v1 = pos - s.c
     nn = dot(v1, s.facedir)
     if nn ≤ 0 # I am "inside" semicircle
         return s.r - norm(pos - s.c)

@@ -83,7 +83,6 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "random" : The velocity is randomized upon collision.
 * "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
-
 function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
     if (setting == "periodic") && (r>=x/2 || r>=y/2)
         es = "Disk radius too big for a periodic Sinai billiard.\n"
