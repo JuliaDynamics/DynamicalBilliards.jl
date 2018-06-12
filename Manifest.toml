@@ -31,6 +31,12 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 [[LinearAlgebra]]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
+[[MacroTools]]
+deps = ["Compat"]
+git-tree-sha1 = "f5c87f9af1c1b0aea42080672dea169f936a83fb"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.4.1"
+
 [[Markdown]]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
@@ -83,3 +89,8 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[Unrolled]]
+deps = ["MacroTools", "Test"]
+uuid = "9602ed7d-8fef-5bc8-8597-8f21381861e8"
+version = "0.0.2+"

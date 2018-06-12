@@ -248,14 +248,14 @@ end
 #######################################################################################
 ## next_collision
 #######################################################################################
+using Unrolled
 """
     next_collision(p, bt) -> (tmin, index)
 Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
 as well as the `index` of the corresponding obstacle.
 """
-function next_collision(
-    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
-    findmin(map(x -> collisiontime(p, x), bt))
+function next_collision(p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+    findmin(unrolled_map(x -> collisiontime(p, x), bt))
 end
 
 @inline next_collision(p::AbstractParticle, bt::Billiard) =
