@@ -1,4 +1,4 @@
-export boundarymap, boundarymap_portion
+export boundarymap, boundarymap_portion, phasespace_portion
 export psos!, psos
 
 #######################################################################################
@@ -154,6 +154,42 @@ function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ,
     return ratio, d
 end
 
+function phasespace_portion(bd::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
+    PT = typeof(par)
+
+    r, dict = boundarymap_portion(bd, t, par, δξ, δφ)
+
+    maxξ = ceil(Int, totallength(bd)/δξ)
+    maxφ = ceil(Int, 2/δφ)
+
+    dummy = PT <: MagneticParticle ? MagneticParticle(zeros(T, 3)..., p.omega) : Particle(zeros(T, 3)...)
+
+    total = zero(T)
+    visited = zero(T)
+
+    for ξcell ∈ 1:maxξ-1, φcell ∈ 1:maxφ-1
+
+        #get center position
+        ξc = (ξcell - 0.5)*δξ
+        φc = (φcell - 0.5)*δφ - 1
+
+        #convert to real space
+        pos, vel, i = real_coordinates(ξc, φc, bd, return_obst=true)
+
+        #set dummy coordinates
+        dummy.pos = pos
+        dummy.vel = vel
+        specular!(dummy, bd[i])
+        #  1c) bounce! & look what happens
+        τ, = next_collision(dummy,bd)
+        # 2. add to total
+        total += τ
+        (haskey(dict, SV{Int64}(ξcell, φcell))) && (visited += τ)
+    end
+
+
+    return visited/total
+end
 
 
 
