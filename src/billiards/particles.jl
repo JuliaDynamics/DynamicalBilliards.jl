@@ -35,7 +35,7 @@ end
 function Particle(ic::AbstractVector{S}) where {S<:Real}
     T = S<:Integer ? Float64 : S
     φ0 = ic[3]
-    pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cos(φ0), sin(φ0))
+    pos = SVector{2,T}(ic[1:2]); vel = SVector{2,T}(cossin(φ0)...)
     return Particle(pos, vel, SVector{2,T}(0,0))
 end
 Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
@@ -83,7 +83,7 @@ end
 function MagneticParticle(ic::AbstractVector{T}, ω::Real) where {T<:Real}
     φ0 = ic[3]
     S = T<:Integer ? Float64 : T
-    pos = SVector{2,S}(ic[1:2]); vel = SVector{2,S}(cos(φ0), sin(φ0))
+    pos = SVector{2,S}(ic[1:2]); vel = SVector{2,S}(cossin(φ0)...)
     return MagneticParticle(pos, vel, SVector{2,S}(0,0), convert(S,ω))
 end
 function MagneticParticle(x0::Real, y0::Real, φ0::Real, ω::Real)

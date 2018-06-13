@@ -248,7 +248,38 @@ end
 #######################################################################################
 ## next_collision
 #######################################################################################
-using Unrolled
+# metaprogramming
+@inline next_collision(p::AbstractParticle, bt::Billiard) =
+    next_collision(p, bt.obstacles)
+
+@generated function next_collision(p::AbstractParticle{T}, bt::TUP) where {T, TUP}
+    L = fieldcount(TUP)
+
+    out = quote
+        i = 0; ind = 0
+        tmin = T(Inf)
+    end
+
+    for j=1:L
+        push!(out.args,
+              quote
+                  let x = bt[$j]
+                tcol = collisiontime(p, x)
+                # Set minimum time:
+                if tcol < tmin
+                  tmin = tcol
+                  ind = $j
+                end
+              end
+          end
+              )
+    end
+    push!(out.args, :(return tmin, ind))
+    return out
+end
+
+
+# Using Unrolled
 # # """
 # #     next_collision(p, bt) -> (tmin, index)
 # # Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
@@ -258,8 +289,6 @@ using Unrolled
 # #     findmin(unrolled_map(x -> collisiontime(p, x), bt))
 # # end
 #
-@inline next_collision(p::AbstractParticle, bt::Billiard) =
-    next_collision(p, bt.obstacles)
 
 
 #= OTher attempts:
@@ -300,30 +329,3 @@ end
     return tmin, ind
 end
 =#
-
-# metaprogramming
-@generated function next_collision(p::AbstractParticle{T}, bt::TUP) where {T, TUP}
-    L = fieldcount(TUP)
-
-    out = quote
-        i = 0; ind = 0
-        tmin = T(Inf)
-    end
-
-    for j=1:L
-        push!(out.args,
-              quote
-                  let x = bt[$j]
-                tcol = collisiontime(p, x)
-                # Set minimum time:
-                if tcol < tmin
-                  tmin = tcol
-                  ind = $j
-                end
-              end
-          end
-              )
-    end
-    push!(out.args, :(return tmin, ind))
-    return out
-end
