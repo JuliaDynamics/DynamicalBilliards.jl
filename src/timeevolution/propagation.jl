@@ -182,7 +182,7 @@ position.
     # Propagate:
     sφ0, cφ0 = sincos(φ0)
     sωφ0, cωφ0 = sincos(ω*t + φ0)
-    ppos = SV{T}((sωφ0 - sφ0)*r, -cωφ0 + cφ0*r)
+    ppos = SV{T}((sωφ0 - sφ0)*r, (-cωφ0 + cφ0)*r)
     return pos + ppos
 end
 
