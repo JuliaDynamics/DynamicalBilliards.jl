@@ -303,7 +303,7 @@ end
 
 # metaprogramming
 @generated function next_collision(p::AbstractParticle{T}, bt::TUP) where {T, TUP}
-    L = length(TUP.parameters)
+    L = fieldcount(TUP)
 
     out = quote
         i = 0; ind = 0
