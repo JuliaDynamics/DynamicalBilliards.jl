@@ -166,8 +166,10 @@ propagate_posvel(pos, p::Particle{T}, t) where {T} =
 function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
     ω = p.omega
     φ0 = atan2(p.vel[2], p.vel[1])
-    ppos = SV{T}(sin(ω*t + φ0)/ω - sin(φ0)/ω, -cos(ω*t + φ0)/ω + cos(φ0)/ω)
-    psos_vel = SV{T}(cos(ω*t + φ0), sin(ω*t + φ0))
+    sφ0, cφ0 = sincos(φ0)
+    sωφ0, cωφ0 = sincos(ω*t + φ0)
+    ppos = SV{T}((sωφ0 - sφ0)*r, -cωφ0 + cφ0*r)
+    psos_vel = SV{T}(cωφ0, sωφ0)
     return pos + ppos, psos_vel
 end
 
