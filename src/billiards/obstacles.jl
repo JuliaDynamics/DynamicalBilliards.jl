@@ -1,7 +1,7 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
 normalvec, distance, cellsize, Semicircle,
-arclength, totallength
+arclength, totallength, real_pos, real_coordinates
 
 #######################################################################################
 ## Circles
@@ -33,6 +33,7 @@ struct Disk{T<:AbstractFloat} <: Circular{T}
     r::T
     name::String
 end
+
 function Disk(c::AbstractVector{T}, r::Real, name::String = "Disk") where {T<:Real}
     S = T <: Integer ? Float64 : T
     return Disk{S}(SVector{2,S}(c), convert(S, abs(r)), name)
@@ -359,8 +360,28 @@ function arclength(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
     return r
 end
 
+#######################################################################################
+## real_coordinates
+#######################################################################################
+
+function real_coordinates(ξ, sφ, o::Obstacle{T}) where T
+    pos = real_pos(ξ, o)
+    cφ = cos(asin(sφ))
+    n = normalvec(o, pos)
+    vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
+    return pos,vel
+end
 
 
+real_pos(ξ, o::Wall) = o.sp + ξ*normalize(o.ep - o.sp)
+
+#TODO: Use `sincos` for julia 0.7
+real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cos(ξ/o.r), sin(ξ/o.r))
+
+function real_pos(ξ, o::Semicircle{T}) where T
+    θshift = acos(-o.facedir[2])
+    return o.c .+ SV{T}(cos(ξ/o.r + θshift), sin(ξ/o.r + θshift))
+end
 """
     totallength(o::Obstacle)
 Return the total length of `o`.
