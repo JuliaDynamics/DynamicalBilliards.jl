@@ -48,8 +48,7 @@ for f in fnames
     f(partnum, printinfo=printinfo)
 end
 
-print("\nDynamicalBilliards tests ended (successfully) at: ")
-println(Dates.format(now(), "HH:MM:s"))
+print("\nDynamicalBilliards tests ended (successfully)")
 t = time() - t
 println("Total time required was:")
 println(round(t, 3), " seconds, or ", round(t/60, digits=3), " minutes")
