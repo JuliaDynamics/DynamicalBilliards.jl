@@ -170,7 +170,27 @@ function boundarymap_portion(bd::Billiard{T}, t, par::AbstractParticle{T}, δξ,
     return ratio, d
 end
 
-
+#######################################################################################
+## Phase space ratio
+#######################################################################################
+function real_coordinates(ξ, sφ, bd::Billiard{T}; return_obst::Bool = false) where T
+    abs(sφ) > 1 && throw(DomainError())#"|sin φ| must not be larger than 1"))
+    lower = zero(T)
+    upper = lower
+    for (i, obst) ∈ enumerate(bd)
+        #println("testing $(obst.name)")
+        upper = lower + totallength(obst)
+        #println("\tbounds: $lower:$upper")
+        if ξ <= upper
+            ret = real_coordinates(ξ - lower, sφ, obst)
+            return return_obst ? (ret..., i) : ret
+        end
+        lower = upper
+        #println("\tNEXT!")
+    end
+    #println("was: $ξ\tmax: $upper")
+    throw(DomainError())#"ξ is too large for this billiard!"))
+end
 
 """
     phasespace_portion(bd::Billiard, t, p::AbstractParticle, δξ, δφ = δξ)
@@ -234,9 +254,9 @@ propagate_posvel(pos, p::Particle{T}, t) where {T} =
 function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
     ω = p.omega
     φ0 = atan2(p.vel[2], p.vel[1])
-    sφ0, cφ0 = sincos(φ0)
+    s0, c0 = sincos(φ0)
     sωφ0, cωφ0 = sincos(ω*t + φ0)
-    ppos = SV{T}((sωφ0 - sφ0)*r, -cωφ0 + cφ0*r)
+    ppos = SV{T}(sωφ0/ω - s0/ω, -cωφ0/ω + c0/ω)
     psos_vel = SV{T}(cωφ0, sωφ0)
     return pos + ppos, psos_vel
 end

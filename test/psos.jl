@@ -1,7 +1,7 @@
 using DynamicalBilliards
 using Test
 
-function stadium_psos(partnum=10; printinfo = true)
+function stadium_bm(partnum=10; printinfo = true)
     tim = time()
     partnum = max(partnum, 100)
     @testset "PSOS: Stadium Billiard" begin
@@ -44,7 +44,7 @@ function cut_psos(partnum=10; printinfo = true)
         plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
         @testset "pinned particle" begin
             p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
-            a, b = psos(bt,plane, t, p)
+            a, b = psos(bt, plane, t, p)
             @test length(a) == length(b) == 1
 
             p = MagneticParticle(0.1, 0.5, -π/2, 1/0.05)
@@ -55,7 +55,7 @@ function cut_psos(partnum=10; printinfo = true)
         @testset "psos ω = $ω" for ω ∈ [0, 0.5, 1.0]
             for i in 1:partnum
                 p = ω == 0 ? randominside(bt) : randominside(bt, ω)
-                a, b = psos(bt,plane, t, p)
+                a, b = psos(bt, plane, t, p)
                 for j in 1:length(a)
                     @test a[j][1] ≈ 0.5
                     @test 0 < a[j][2] < 1
@@ -71,15 +71,15 @@ function cut_psos(partnum=10; printinfo = true)
             end
         end
     end
-    if printinfo
-        println("""
-        Results:
-        + Poincare section through cut works
-        + Pinned particles correctly detected
-        + positions and velocities are within correct bounds
-        + Required time: $(round(time()-tim, digits=3)) sec
-        """)
-    end
+if printinfo
+println("""
+Results:
++ Poincare section through cut works
++ Pinned particles correctly detected
++ positions and velocities are within correct bounds
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
+end
 end
 
 
@@ -125,13 +125,13 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
         end
     end
 
-    if printinfo
-        println("""
-        Results:
-        + Poincare section through cut works
-        + Pinned particles correctly detected
-        + positions and velocities are within correct bounds
-        + Required time: $(round(time()-tim, digits=3)) sec
-        """)
-    end
+if printinfo
+println("""
+Results:
++ `boundarymap_portion` works
++ Mushroom boundary map ratios are replicated correctly
++ Bunimovich stadium always gives ratio of 1.0
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
+end
 end

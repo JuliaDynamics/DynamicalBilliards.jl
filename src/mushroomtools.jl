@@ -11,7 +11,7 @@ Made by Lukas Hupe.
 module MushroomTools
 
 using DynamicalBilliards
-using DynamicalBilliards: SV
+using DynamicalBilliards: SV, cossin
 using LinearAlgebra
 
 #="""

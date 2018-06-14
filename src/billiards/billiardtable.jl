@@ -65,7 +65,7 @@ eltype(bd::Billiard{T}) where {T} = T
 isperiodic(bd) = any(x -> typeof(x) <: PeriodicWall, bd.obstacles)
 
 # total arclength
-totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
+@inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
 #######################################################################################
 ## Distances
@@ -88,32 +88,6 @@ for f in (:distance, :distance_init)
     end
 end
 
-#######################################################################################
-## total arclength
-#######################################################################################
-function totallength(bd::Billiard)
-    #for some reason, this is faster than @inline totallength(bd) = ...
-    return unrolled_reduce(+,0.0, unrolled_map(x->totallength(x),bd.obstacles))
-end
-
-function real_coordinates(ξ, sφ, bd::Billiard{T}; return_obst::Bool = false) where T
-    abs(sφ) > 1 && throw(DomainError())#"|sin φ| must not be larger than 1"))
-    lower = zero(T)
-    upper = lower
-    for (i, obst) ∈ enumerate(bd)
-        #println("testing $(obst.name)")
-        upper = lower + totallength(obst)
-        #println("\tbounds: $lower:$upper")
-        if ξ <= upper
-            ret = real_coordinates(ξ - lower, sφ, obst)
-            return return_obst ? (ret..., i) : ret
-        end
-        lower = upper
-        #println("\tNEXT!")
-    end
-    #println("was: $ξ\tmax: $upper")
-    throw(DomainError())#"ξ is too large for this billiard!"))
-end
 #######################################################################################
 ## randominside
 #######################################################################################
