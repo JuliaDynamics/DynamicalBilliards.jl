@@ -12,6 +12,7 @@ module MushroomTools
 
 using DynamicalBilliards
 using DynamicalBilliards: SV
+using LinearAlgebra
 
 #="""
     is_regular(p::Particle, o::Semicircle, w)
@@ -133,7 +134,7 @@ function _randin_mushroom(l::T = 1.0, w::T = 0.2, r::T = 1.0) where {T <: Abstra
     end
 
     φ = T(2π * rand(T))
-    vel = SV{T}(sin(φ), cos(φ))
+    vel = SV{T}(cossin(φ)...)
 
     return pos, vel
 end

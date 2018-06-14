@@ -12,53 +12,53 @@ In the case of magnetic propagation, there are always two possible collisions.
 The function [`realangle`](@ref) decides which of the two will occur first,
 based on the sign of the angular velocity of the magnetic particle.
 """
-function collisiontime(p::Particle{T}, w::Wall{T})::T where {T}
+function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
-    denom >= 0 ? Inf : dot(w.sp-p.pos, n)/denom
+    denom >= 0.0 ? T(Inf) : dot(w.sp-p.pos, n)/denom
 end
 
-function collisiontime(p::Particle{T}, w::FiniteWall{T})::T where {T}
+function collisiontime(p::Particle{T}, w::FiniteWall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     # case of velocity pointing away of wall:
-    denom ≥ 0 && return Inf
+    denom ≥ 0.0 && return Inf
     posdot = dot(w.sp-p.pos, n)
     # Case of particle starting behind finite wall:
-    posdot ≥ 0 && return Inf
+    posdot ≥ 0.0 && return Inf
     colt = posdot/denom
-    intersection = p.pos .+ colt .* p.vel
+    intersection = p.pos + colt * p.vel
     dfc = norm(intersection - w.center)
     if dfc > w.width/2
-        return Inf
+        return T(Inf)
     else
         return colt
     end
 end
 
-function collisiontime(p::Particle{T}, d::Circular{T})::T where {T}
+function collisiontime(p::Particle{T}, d::Circular{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
-    dotp >=0 && return Inf
+    dotp >= 0.0 && return T(Inf)
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #pointing towards circle center: B < 0
     C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return Inf
+    Δ <= 0.0 && return T(Inf)
     sqrtD = sqrt(Δ)
 
     # Closest point:
     t = -B - sqrtD
-    t <=0 ? Inf : t
+    t <= 0.0 ? T(Inf) : t
 end
 
 function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
-        dotp >=0 && return Inf
+        dotp >=0 && return T(Inf)
     end
 
     dc = p.pos - d.c
@@ -66,7 +66,7 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return Inf
+    Δ <= 0 && return T(Inf)
     sqrtD = sqrt(Δ)
 
     # Closest point (may be in negative time):
@@ -77,7 +77,7 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     end
 
     # If collision time is negative, return Inf:
-    t <= 0.0 ? Inf : t
+    t <= 0.0 ? T(Inf) : t
 end
 
 function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
@@ -248,35 +248,64 @@ end
 #######################################################################################
 ## next_collision
 #######################################################################################
-"""
-    next_collision(p, bt) -> (tmin, index)
-Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
-as well as the `index` of the corresponding obstacle.
-"""
-function next_collision(
-    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
-    findmin(Unrolled.unrolled_map(x -> collisiontime(p, x), bt))
-end
-
+# metaprogramming
 @inline next_collision(p::AbstractParticle, bt::Billiard) =
     next_collision(p, bt.obstacles)
 
+@generated function next_collision(p::AbstractParticle{T}, bt::TUP) where {T, TUP}
+    L = fieldcount(TUP)
 
-### OTher attempts:
-# function next_collision(
-#     p::AbstractParticle{T}, bt::Billiard{T})::Tuple{T,Int} where {T}
-#     tmin::T = T(Inf)
-#     ind::Int = 0
-#     for i in eachindex(bt.obstacles)
-#         tcol::T = collisiontime(p, bt[i])
-#         # Set minimum time:
-#         if tcol < tmin
-#             tmin = tcol
-#             ind = i
-#         end
-#     end#obstacle loop
-#     return tmin, ind
-# end
+    out = quote
+        i = 0; ind = 0
+        tmin = T(Inf)
+    end
+
+    for j=1:L
+        push!(out.args,
+              quote
+                  let x = bt[$j]
+                tcol = collisiontime(p, x)
+                # Set minimum time:
+                if tcol < tmin
+                  tmin = tcol
+                  ind = $j
+                end
+              end
+          end
+              )
+    end
+    push!(out.args, :(return tmin, ind))
+    return out
+end
+
+
+# Using Unrolled
+# # """
+# #     next_collision(p, bt) -> (tmin, index)
+# # Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
+# # as well as the `index` of the corresponding obstacle.
+# # """
+# # function next_collision(p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+# #     findmin(unrolled_map(x -> collisiontime(p, x), bt))
+# # end
+#
+
+
+#= OTher attempts:
+function next_collision(
+    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+    tmin::T = T(Inf)
+    ind::Int = 0
+    for i in eachindex(bt)
+        tcol::T = collisiontime(p, bt[i])
+        # Set minimum time:
+        if tcol < tmin
+            tmin = tcol
+            ind = i
+        end
+    end#obstacle loop
+    return tmin, ind
+end
 
 # function next_collision(
 #     p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
@@ -284,18 +313,19 @@ end
 # end
 #
 # using Unrolled
-# @unroll function next_collision2(p::AbstractParticle{T}, bt::Tuple) where {T}
-#     tmin::T = T(Inf)
-#     ind::Int = 0
-#     i::Int = 0
-#     @unroll for obst in bt
-#         tcol::T = collisiontime(p, obst)
-#         i+=1
-#         # Set minimum time:
-#         if tcol < tmin
-#             tmin = tcol
-#             ind = i
-#         end
-#     end#obstacle loop
-#     return tmin, ind
-# end
+@unroll function next_collision2(p::AbstractParticle{T}, bt::Tuple) where {T}
+    tmin::T = T(Inf)
+    ind::Int = 0
+    i::Int = 0
+    @unroll for obst in bt
+        tcol::T = collisiontime(p, obst)
+        i+=1
+        # Set minimum time:
+        if tcol < tmin
+            tmin = tcol
+            ind = i
+        end
+    end#obstacle loop
+    return tmin, ind
+end
+=#

@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using DynamicalBilliards
 
 function magnetic_sinai(partnum=500; printinfo = true)
@@ -35,7 +35,7 @@ if printinfo
     println("+ relocate(), collisiontime(), resolvecollision() work for")
     println("  MagneticParticle with InfiniteWall and Disk.")
     println("+ particle never leaks the billiard table.")
-    println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
 end
@@ -112,7 +112,7 @@ if printinfo
     println("+ Particle never invades the Disk.")
     println("+ Collision time is never Infinite (no pinned particles).")
     println("+ All the above also work for BigFloat.")
-    println("+ Required time: $(round(time()-tim, 3)) sec.")
+    println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
 end#function

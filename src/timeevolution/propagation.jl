@@ -48,23 +48,23 @@ Perform specular reflection based on the normal vector of the Obstacle.
 In the case where the given obstacle is a `RandomObstacle`, the specular reflection
 randomizes the velocity instead (within -π/2+ε to π/2-ε of the normal vector).
 """
-@inline function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Void where {T}
+@inline function specular!(p::AbstractParticle{T}, o::Obstacle{T})::Nothing where {T}
     n = normalvec(o, p.pos)
     p.vel = p.vel - 2*dot(n, p.vel)*n
     return nothing
 end
 
-@inline function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Void where {T}
+@inline function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Nothing where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
     return nothing
 end
 
-@inline function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Void where {T}
+@inline function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Nothing where {T}
     n = normalvec(r, p.pos)
     φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
-    p.vel = SVector{2,T}(cos(φ), sin(φ))
+    p.vel = SVector{2,T}(cossin(φ)...)
     return nothing
 end
 
@@ -72,12 +72,12 @@ end
     periodicity!(p::AbstractParticle, w::PeriodicWall)
 Perform periodicity conditions of `w` on `p`.
 """
-@inline function periodicity!(p::AbstractParticle, w::PeriodicWall)::Void
+@inline function periodicity!(p::AbstractParticle, w::PeriodicWall)::Nothing
     p.pos += w.normal
     p.current_cell -= w.normal
     return nothing
 end
-@inline function periodicity!(p::MagneticParticle, w::PeriodicWall)::Void
+@inline function periodicity!(p::MagneticParticle, w::PeriodicWall)::Nothing
     p.pos += w.normal
     p.center += w.normal
     p.current_cell -= w.normal
@@ -152,10 +152,10 @@ particle should end up at.
 @inline propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
 @inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
-@inline function propagate!(p::MagneticParticle{T}, t::Real)::Void where {T}
+@inline function propagate!(p::MagneticParticle{T}, t::Real)::Nothing where {T}
     ω = p.omega; r = 1/ω
     φ0 = atan2(p.vel[2], p.vel[1])
-    sinωtφ = sin(ω*t + φ0); cosωtφ = cos(ω*t + φ0)
+    sinωtφ, cosωtφ = sincos(ω*t + φ0)
     p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
     p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
@@ -163,7 +163,7 @@ end
 @inline function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
     ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
     p.pos = newpos
-    p.vel = SVector{2, T}(cos(ω*t + φ0), sin(ω*t + φ0))
+    p.vel = SVector{2, T}(cossin(ω*t + φ0)...)
     return
 end
 
@@ -180,7 +180,9 @@ position.
     ω = p.omega; r = 1/ω
     φ0 = atan2(p.vel[2], p.vel[1])
     # Propagate:
-    ppos = SV{T}((sin(ω*t + φ0) - sin(φ0))*r, (-cos(ω*t + φ0) + cos(φ0))*r)
+    sφ0, cφ0 = sincos(φ0)
+    sωφ0, cωφ0 = sincos(ω*t + φ0)
+    ppos = SV{T}((sωφ0 - sφ0)*r, (-cωφ0 + cφ0)*r)
     return pos + ppos
 end
 
@@ -381,10 +383,12 @@ vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
         end
 
         for td in timevec
-            push!(vxt, cos(ω*td + φ0))
-            push!(vyt, sin(ω*td + φ0))
-            push!(xt, sin(ω*td + φ0)/ω + x0 - sin(φ0)/ω)  #vy0 is sin(φ0)
-            push!(yt, -cos(ω*td + φ0)/ω + y0 + cos(φ0)/ω) #vx0 is cos(φ0)
+            s, c = sincos(ω*td + φ0)
+            s0, c0 = sincos(φ0)
+            push!(vxt, c)
+            push!(vyt, s)
+            push!(xt, s/ω + x0 - s0/ω)  #vy0 is sin(φ0)
+            push!(yt, -c/ω + y0 + c0/ω) #vx0 is cos(φ0)
             push!(ts, t0 + td)
         end#collision time
     end#total time

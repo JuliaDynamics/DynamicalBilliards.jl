@@ -1,5 +1,6 @@
 using DynamicalBilliards
-using Base.Test
+using Dates, LinearAlgebra
+using Test
 # Test options:
 printinfo = true
 longtests = true
@@ -51,4 +52,4 @@ print("\nDynamicalBilliards tests ended (successfully) at: ")
 println(Dates.format(now(), "HH:MM:s"))
 t = time() - t
 println("Total time required was:")
-println(round(t, 3), " seconds, or ", round(t/60, 3), " minutes")
+println(round(t, 3), " seconds, or ", round(t/60, digits=3), " minutes")
