@@ -162,7 +162,7 @@ resolvecollision!(p::MagneticParticle{T}, o::PeriodicWall{T},
 Computes the linearized evolution of the offset vectors during propagation for a
 time interval `t`
 """
-function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,     #linear case 
+function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,     #linear case
                            p::Particle{T}) where T
     for k in 1:4
         δΓ = offset[k]
@@ -275,10 +275,10 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
         end
 
         #QR decomposition to get lyapunov exponents
-        qres = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
-        offset[1], offset[2], offset[3], offset[4] = qres.Q[:, 1], qres.Q[:, 2], qres.Q[:, 3], qres.Q[:, 4]
+        Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
+        offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
         for i ∈ 1:4
-            λ[i] += log(abs(qres.R[i,i]))
+            λ[i] += log(abs(R[i,i]))
         end
 
 
