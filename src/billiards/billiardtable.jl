@@ -8,9 +8,9 @@ struct Billiard{T, D, O<:Tuple}
 end
 
 #pretty print:
-function Base.show(io::IO, bt::Billiard{T,D,BT}) where {T, D, BT}
+function Base.show(io::IO, bd::Billiard{T,D,BT}) where {T, D, BT}
     s = "Billiard{$T} with $D obstacles:\n"
-    for o in bt
+    for o in bd
         s*="  $(o.name)\n"
     end
     print(io, s)
@@ -32,54 +32,54 @@ The boundary coordinate is measured as:
 * the arc length measured counterclockwise from the open face in `Semicircle`s
 * the arc length measured counterclockwise from the rightmost point in `Circular`s
 """
-function Billiard(bt::Union{AbstractVector, Tuple})
+function Billiard(bd::Union{AbstractVector, Tuple})
 
-    T = eltype(bt[1])
-    D = length(bt)
-    # Assert that all elements of `bt` are of same type:
+    T = eltype(bd[1])
+    D = length(bd)
+    # Assert that all elements of `bd` are of same type:
     for i in 2:D
-        eltype(bt[i]) != T && throw(ArgumentError(
+        eltype(bd[i]) != T && throw(ArgumentError(
         "All obstacles of the billiard must have same type of
-        numbers. Found $T and $(eltype(bt[i])) instead."
+        numbers. Found $T and $(eltype(bd[i])) instead."
         ))
     end
 
-    tup = (bt...,)
+    tup = (bd...,)
     return Billiard{T, D, typeof(tup)}(tup)
 end
 
-function Billiard(bt::Vararg{Obstacle})
-    T = eltype(bt[1])
-    tup = (bt...,)
+function Billiard(bd::Vararg{Obstacle})
+    T = eltype(bd[1])
+    tup = (bd...,)
     return Billiard(tup)
 end
 
 
-getindex(bt::Billiard, i) = bt.obstacles[i]
+getindex(bd::Billiard, i) = bd.obstacles[i]
 # Iteration:
-iterate(bt::Billiard) = iterate(bt.obstacles)
-iterate(bt::Billiard, state) = iterate(bt.obstacles, state)
+iterate(bd::Billiard) = iterate(bd.obstacles)
+iterate(bd::Billiard, state) = iterate(bd.obstacles, state)
 
-eltype(bt::Billiard{T}) where {T} = T
+eltype(bd::Billiard{T}) where {T} = T
 
-isperiodic(bt) = any(x -> typeof(x) <: PeriodicWall, bt.obstacles)
+isperiodic(bd) = any(x -> typeof(x) <: PeriodicWall, bd.obstacles)
 
 # total arclength
-totallength(bt::Billiard) = sum(totallength(x) for x in bt.obstacles)
+totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
 #######################################################################################
 ## Distances
 #######################################################################################
 for f in (:distance, :distance_init)
-    @eval $(f)(p::AbstractParticle, bt::Billiard) = $(f)(p.pos, bt.obstacles)
-    @eval $(f)(pos::SV{T}, bt::Billiard) where {T} = $(f)(pos, bt.obstacles)
+    @eval $(f)(p::AbstractParticle, bd::Billiard) = $(f)(p.pos, bd.obstacles)
+    @eval $(f)(pos::SV{T}, bd::Billiard) where {T} = $(f)(pos, bd.obstacles)
 end
 
 for f in (:distance, :distance_init)
     @eval begin
-        function ($f)(p::SV{T}, bt::Tuple)::T where {T}
+        function ($f)(p::SV{T}, bd::Tuple)::T where {T}
             dmin::T = T(Inf)
-            for obst in bt
+            for obst in bd
                 d::T = distance(p, obst)
                 d < dmin && (dmin = d)
             end#obstacle loop
@@ -91,22 +91,22 @@ end
 #######################################################################################
 ## total arclength
 #######################################################################################
-function totallength(bt::Billiard)
-    #for some reason, this is faster than @inline totallength(bt) = ...
-    return unrolled_reduce(+,0.0, unrolled_map(x->totallength(x),bt.obstacles))
+function totallength(bd::Billiard)
+    #for some reason, this is faster than @inline totallength(bd) = ...
+    return unrolled_reduce(+,0.0, unrolled_map(x->totallength(x),bd.obstacles))
 end
 
-function real_coordinates(ξ, sφ, bt::Billiard{T}; return_obst::Bool = false) where T
+function real_coordinates(ξ, sφ, bd::Billiard{T}; return_obst::Bool = false) where T
     abs(sφ) > 1 && throw(DomainError())#"|sin φ| must not be larger than 1"))
     lower = zero(T)
     upper = lower
-    for (i, obst) ∈ enumerate(bt)
+    for (i, obst) ∈ enumerate(bd)
         #println("testing $(obst.name)")
         upper = lower + totallength(obst)
         #println("\tbounds: $lower:$upper")
         if ξ <= upper
             ret = real_coordinates(ξ - lower, sφ, obst)
-            return return_obst?(ret..., i):ret
+            return return_obst ? (ret..., i) : ret
         end
         lower = upper
         #println("\tNEXT!")
@@ -118,11 +118,11 @@ end
 ## randominside
 #######################################################################################
 function cellsize(
-    bt::Union{Vector{<:Obstacle{T}}, Billiard{T}}) where {T<:AbstractFloat}
+    bd::Union{Vector{<:Obstacle{T}}, Billiard{T}}) where {T<:AbstractFloat}
 
     xmin::T = ymin::T = T(Inf)
     xmax::T = ymax::T = T(-Inf)
-    for obst ∈ bt
+    for obst ∈ bd
         xs::T, ys::T, xm::T, ym::T = cellsize(obst)
         xmin = xmin > xs ? xs : xmin
         ymin = ymin > ys ? ys : ymin
@@ -133,32 +133,32 @@ function cellsize(
 end
 
 """
-    randominside(bt::Billiard [, ω])
+    randominside(bd::Billiard [, ω])
 Return a particle with random allowed initial conditions inside the given
 billiard. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
 """
-randominside(bt::Billiard) = Particle(_randominside(bt)...)
-randominside(bt::Billiard{T}, ω) where {T} =
-MagneticParticle(_randominside(bt)..., T(ω))
+randominside(bd::Billiard) = Particle(_randominside(bd)...)
+randominside(bd::Billiard{T}, ω) where {T} =
+MagneticParticle(_randominside(bd)..., T(ω))
 
 
 
-function _randominside(bt::Billiard{T}) where {T<:AbstractFloat}
+function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
     #1. position
-    xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bt)
+    xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bd)
 
     xp = T(rand())*(xmax-xmin) + xmin
     yp = T(rand())*(ymax-ymin) + ymin
     pos = SV{T}(xp, yp)
 
-    dist = distance_init(pos, bt)
+    dist = distance_init(pos, bd)
     while dist <= sqrt(eps(T))
 
         xp = T(rand())*(xmax-xmin) + xmin
         yp = T(rand())*(ymax-ymin) + ymin
         pos = SV{T}(xp, yp)
-        dist = distance_init(pos, bt)
+        dist = distance_init(pos, bd)
     end
 
     #2. velocity

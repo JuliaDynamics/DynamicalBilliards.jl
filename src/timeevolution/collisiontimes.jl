@@ -249,10 +249,10 @@ end
 ## next_collision
 #######################################################################################
 # metaprogramming
-@inline next_collision(p::AbstractParticle, bt::Billiard) =
-    next_collision(p, bt.obstacles)
+@inline next_collision(p::AbstractParticle, bd::Billiard) =
+    next_collision(p, bd.obstacles)
 
-@generated function next_collision(p::AbstractParticle{T}, bt::TUP) where {T, TUP}
+@generated function next_collision(p::AbstractParticle{T}, bd::TUP) where {T, TUP}
     L = fieldcount(TUP)
 
     out = quote
@@ -263,7 +263,7 @@ end
     for j=1:L
         push!(out.args,
               quote
-                  let x = bt[$j]
+                  let x = bd[$j]
                 tcol = collisiontime(p, x)
                 # Set minimum time:
                 if tcol < tmin
@@ -281,23 +281,23 @@ end
 
 # Using Unrolled
 # # """
-# #     next_collision(p, bt) -> (tmin, index)
-# # Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bt`,
+# #     next_collision(p, bd) -> (tmin, index)
+# # Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bd`,
 # # as well as the `index` of the corresponding obstacle.
 # # """
-# # function next_collision(p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
-# #     findmin(unrolled_map(x -> collisiontime(p, x), bt))
+# # function next_collision(p::AbstractParticle{T}, bd::Tuple)::Tuple{T,Int} where {T}
+# #     findmin(unrolled_map(x -> collisiontime(p, x), bd))
 # # end
 #
 
 
 #= OTher attempts:
 function next_collision(
-    p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
+    p::AbstractParticle{T}, bd::Tuple)::Tuple{T,Int} where {T}
     tmin::T = T(Inf)
     ind::Int = 0
-    for i in eachindex(bt)
-        tcol::T = collisiontime(p, bt[i])
+    for i in eachindex(bd)
+        tcol::T = collisiontime(p, bd[i])
         # Set minimum time:
         if tcol < tmin
             tmin = tcol
@@ -308,16 +308,16 @@ function next_collision(
 end
 
 # function next_collision(
-#     p::AbstractParticle{T}, bt::Tuple)::Tuple{T,Int} where {T}
-#     findmin(map(x -> collisiontime(p, x), bt))
+#     p::AbstractParticle{T}, bd::Tuple)::Tuple{T,Int} where {T}
+#     findmin(map(x -> collisiontime(p, x), bd))
 # end
 #
 # using Unrolled
-@unroll function next_collision2(p::AbstractParticle{T}, bt::Tuple) where {T}
+@unroll function next_collision2(p::AbstractParticle{T}, bd::Tuple) where {T}
     tmin::T = T(Inf)
     ind::Int = 0
     i::Int = 0
-    @unroll for obst in bt
+    @unroll for obst in bd
         tcol::T = collisiontime(p, obst)
         i+=1
         # Set minimum time:

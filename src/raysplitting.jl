@@ -62,14 +62,14 @@ end
 
 
 """
-    raysplit_indices(bt::Billiard, raysplitters::Tuple)
+    raysplit_indices(bd::Billiard, raysplitters::Tuple)
 Create a vector of integers. The `i`th entry tells you which entry of the
 `raysplitters` tuple is associated with the `i`th obstacle of the billiard.
 
 If the `i`th entry is `0`, this means that the obstacle does not do raysplitting.
 """
-function raysplit_indices(bt::Billiard, raysplitters::Tuple)
-    O = zeros(Int, length(bt.obstacles))
+function raysplit_indices(bd::Billiard, raysplitters::Tuple)
+    O = zeros(Int, length(bd.obstacles))
     for (k, rayspl) ∈ enumerate(raysplitters)
         O[rayspl.oidx] .= k
     end
@@ -79,15 +79,15 @@ end
 allaffected(ray::RaySplitter) = union(ray.affect(i) for i in ray.oidx)
 
 """
-    acceptable_raysplitter(raysplitters, bt::Billiard)
+    acceptable_raysplitter(raysplitters, bd::Billiard)
 Return `true` if the given `raysplitters`
-can be used in conjuction with given billiard `bt`.
+can be used in conjuction with given billiard `bd`.
 """
-function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
+function acceptable_raysplitter(raysplitters::Tuple, bd::Billiard)
 
     for ray in raysplitters
         for i in (ray.oidx ∪ ray.affect(ray.oidx))
-            if !supports_raysplitting(bt[i])
+            if !supports_raysplitting(bd[i])
                 error("Obstacle at index $i of given billiard table"*
                 " does not have a field `pflag`"*
                 " and therefore does not support ray-splitting."*
@@ -96,7 +96,7 @@ function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
         end
     end
 
-    idx = raysplit_indices(bt, raysplitters)
+    idx = raysplit_indices(bd, raysplitters)
 
     # Make sure that no indices are shared in the corresponding obstacles
     vecs = [ray.oidx for ray in raysplitters]
@@ -154,10 +154,10 @@ end
 
 angleclamp(φ::T) where {T} = clamp(φ, -π/2 + T(0.1), π/2 - T(0.1))
 
-function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
+function resolvecollision!(p::AbstractParticle{T}, bd::Billiard{T}, colidx::Int,
     trans::Bool, rayspl::RaySplitter) where {T<:AbstractFloat}
 
-    a = bt[colidx]
+    a = bd[colidx]
     ismagnetic = typeof(p) <: MagneticParticle
     ω = ismagnetic ? p.omega : T(0)
 
@@ -170,7 +170,7 @@ function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
         # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
         # for all obstacles dictated by the RaySplitter
         for oi ∈ rayspl.affect(colidx)
-            bt[oi].pflag = ! bt[oi].pflag
+            bd[oi].pflag = ! bd[oi].pflag
         end
         # Raysplit Algorithm step 8: find transmission angle in real-space angles
         n = normalvec(a, p.pos) #notice that this is reversed! It's the new normalvec!
@@ -195,28 +195,28 @@ end
 # raysplitters is a tuple of RaySplitter. raysidx is a vector that given the obstacle
 # index it tells you which raysplitter to choose from the tuple OR to not
 # do raysplitting at all (for returned index 0)
-function bounce!(p::AbstractParticle{T}, bt::Billiard{T},
+function bounce!(p::AbstractParticle{T}, bd::Billiard{T},
     raysidx::Vector{Int}, raysplitters::Tuple) where {T}
 
-    tmin::T, i::Int = next_collision(p, bt)
-    #=debug=# false && println("Colt. with Left antidot = $(collisiontime(p, bt[1]))")
-    #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
+    tmin::T, i::Int = next_collision(p, bd)
+    #=debug=# false && println("Colt. with Left antidot = $(collisiontime(p, bd[1]))")
+    #=debug=# false && println("Min. col. t with $(bd[i].name) = $tmin")
     #=debug=# false && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
     if tmin == Inf
         return i, tmin, p.pos, p.vel
     elseif raysidx[i] != 0
         propagate!(p, tmin)
-        trans = istransmitted(p, bt[i], raysplitters[raysidx[i]].transmission)
+        trans = istransmitted(p, bd[i], raysplitters[raysidx[i]].transmission)
         #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
-        #=debug=# false && println("Currently, pflag is $(bt[i].pflag)")
+        #=debug=# false && println("Currently, pflag is $(bd[i].pflag)")
         #=debug=# false && trans && println("(pflag will be reversed!)")
         #=debug=# false && println()
-        newt = relocate_rayspl!(p, bt[i], trans)
-        resolvecollision!(p, bt, i, trans,  raysplitters[raysidx[i]])
+        newt = relocate_rayspl!(p, bd[i], trans)
+        resolvecollision!(p, bd, i, trans,  raysplitters[raysidx[i]])
         tmin += newt
     else
-        tmin = relocate!(p, bt[i], tmin)
-        resolvecollision!(p, bt[i])
+        tmin = relocate!(p, bd[i], tmin)
+        resolvecollision!(p, bd[i])
     end
     typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))
     return i, tmin, p.pos, p.vel
@@ -225,20 +225,20 @@ end
 #####################################################################################
 # Evolve raysplitting
 #####################################################################################
-evolve!(p, bt, t, ray::RaySplitter; warning = false) =
-    evolve!(p, bt, t, (ray, ); warning = warning)
-function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple;
+evolve!(p, bd, t, ray::RaySplitter; warning = false) =
+    evolve!(p, bd, t, (ray, ); warning = warning)
+function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple;
     warning = false) where {T}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
     # Check if raysplitters are acceptable
-    acceptable_raysplitter(raysplitters, bt)
+    acceptable_raysplitter(raysplitters, bd)
 
     ismagnetic = typeof(p) <: MagneticParticle
 
-    raysidx = raysplit_indices(bt, raysplitters)
+    raysidx = raysplit_indices(bd, raysplitters)
 
     rt = T[]; push!(rt, 0)
     rpos = SVector{2,T}[]; push!(rpos, p.pos)
@@ -261,7 +261,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
             end
         end
 
-        i, tmin, pos, vel = bounce!(p, bt, raysidx, raysplitters)
+        i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
         t_to_write += tmin
 
         if ismagnetic && tmin == Inf
@@ -271,7 +271,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
             return (rt, rpos, rvel, omegas)
         end
 
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             # Pinned particle:
             if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")
@@ -346,12 +346,12 @@ function supports_raysplitting(obst::Obstacle)
 end
 
 """
-    reset_billiard!(bt)
+    reset_billiard!(bd)
 Sets the `pflag` field of all ray-splitting obstacles of a billiard table
 to `true`.
 """
-function reset_billiard!(bt::Billiard)
-    for obst in bt
+function reset_billiard!(bd::Billiard)
+    for obst in bd
         supports_raysplitting(obst) && (obst.pflag = true)
     end
 end

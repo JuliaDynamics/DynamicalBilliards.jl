@@ -20,17 +20,17 @@ end
 
 
 """
-    arcintervals(bt::Billiard)
+    arcintervals(bd::Billiard)
 Generate an array of `SVector`s, with the `i`th `SVector` containing the arc
-length intervals corresponding to the `i`th `Obstacle` in `bt`.
+length intervals corresponding to the `i`th `Obstacle` in `bd`.
 
 Used by [`boundarymap`](@ref) to compute arc lengths.
 """
-function arcintervals(bt::Billiard{T, D}) where {T, D}
+function arcintervals(bd::Billiard{T, D}) where {T, D}
     intervals = Vector{SVector{2,T}}(undef, D)
     current = zero(T)
     for i ∈ 1:D
-        l = totallength(bt[i]) + current
+        l = totallength(bd[i]) + current
         intervals[i] = SVector{2,T}(current, l)
         current = l
     end
@@ -42,7 +42,7 @@ end
 """
     boundarymap(bd::Billiard, t, particles)
 Compute the boundary map of the
-billiard `bt` by evolving each particle for total amount `t` (either float for
+billiard `bd` by evolving each particle for total amount `t` (either float for
 time or integer for collision number). See below for the returned values.
 
 `particles` can be:
@@ -54,7 +54,7 @@ In the last case `n` random particles are produced in the billiard table using
 [`randominside`](@ref). If `ω` is also given, then the particles are magnetic.
 
 The measurement direction of the arclengths of the individual obstacles
-is dictated by `bt`, see [`Billiard`](@ref) for more.
+is dictated by `bd`, see [`Billiard`](@ref) for more.
 
 Return
 * the arclengths at the collisions `ξs`
@@ -72,22 +72,22 @@ in an intuitive way.
 *Notice* - this function only works for normal specular reflection. Random reflections
 or ray-splitting will give unexpected results.
 """
-function boundarymap(bt::Billiard{T}, t,
+function boundarymap(bd::Billiard{T}, t,
                      ps::Vector{<:AbstractParticle{T}}) where {T}
 
     params = Vector{T}[]
     sines = Vector{T}[]
-    intervals = arcintervals(bt)
+    intervals = arcintervals(bd)
     for p ∈ ps
-        pparams, psines = boundarymap(bt, t, p, intervals)
+        pparams, psines = boundarymap(bd, t, p, intervals)
         push!(params, pparams)
         push!(sines, psines)
     end
     return params, sines, intervals
 end
 
-function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
-                     intervals = arcintervals(bt)) where {T}
+function boundarymap(bd::Billiard{T}, t, par::AbstractParticle{T},
+                     intervals = arcintervals(bd)) where {T}
 
     p = deepcopy(par)
     pparams = T[]
@@ -96,14 +96,14 @@ function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
     t_to_write = zero(T)
 
     while count < t
-        i, tmin = bounce!(p,bt)
+        i, tmin = bounce!(p,bd)
         t_to_write += tmin
 
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             continue # do not write output if collision with with PeriodicWall
         else
-            push!(pparams, arclength(p, bt[i]) + intervals[i][1])
-            push!(pangles, reflection_angle(p, bt[i]))
+            push!(pparams, arclength(p, bd[i]) + intervals[i][1])
+            push!(pangles, reflection_angle(p, bd[i]))
             # set counter
             count += increment_counter(t, t_to_write)
             t_to_write = zero(T)
@@ -113,11 +113,11 @@ function boundarymap(bt::Billiard{T}, t, par::AbstractParticle{T},
 end
 
 
-boundarymap(bt::Billiard, t, n::Int) =
-    boundarymap(bt, t, [randominside(bt) for i ∈ 1:n])
+boundarymap(bd::Billiard, t, n::Int) =
+    boundarymap(bd, t, [randominside(bd) for i ∈ 1:n])
 
-boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
-    boundarymap(bt, t, [randominside(bt, ω) for i ∈ 1:n])
+boundarymap(bd::Billiard, t, n::Int, ω::AbstractFloat) =
+    boundarymap(bd, t, [randominside(bd, ω) for i ∈ 1:n])
 
 
 """
@@ -133,24 +133,24 @@ by the total boxes of size `(δξ, δφ)` needed to cover the boundary map.
 on the full, three dimensional phase-space. Use the function
 [`phasespace_portion`](@ref) for that!
 """
-function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
+function boundarymap_portion(bd::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
     p = deepcopy(par)
 
     count = zero(T)
     t_to_write = zero(T)
 
     d = Dict{SV{Int}, Int}()
-    intervals = arcintervals(bt)
+    intervals = arcintervals(bd)
     while count < t
-        i, tmin = bounce!(p,bt)
+        i, tmin = bounce!(p,bd)
         t_to_write += tmin
 
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             continue # do not write output if collision with with PeriodicWall
         else
             # get Birkhoff coordinates
-            ξ = arclength(p, bt[i]) + intervals[i][1]
-            sφ = sin(reflection_angle(p, bt[i]))
+            ξ = arclength(p, bd[i]) + intervals[i][1]
+            sφ = sin(reflection_angle(p, bd[i]))
 
             # compute index & increment dictionary entry
             ind = SV{Int}(floor(Int, ξ/δξ), floor(Int, (sφ + 1)/δφ))
@@ -164,7 +164,7 @@ function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ,
     end #time or collision number loop
 
     #calculate ratio of visited boxes
-    total_boxes = ceil(Int, totallength(bt)/δξ) * ceil(Int, 2/δφ)
+    total_boxes = ceil(Int, totallength(bd)/δξ) * ceil(Int, 2/δφ)
     ratio = length(keys(d))/total_boxes
 
     return ratio, d
@@ -243,9 +243,9 @@ end
 
 
 """
-    psos(bt::Billiard, plane::InfiniteWall, t, particles)
+    psos(bd::Billiard, plane::InfiniteWall, t, particles)
 Compute the Poincaré section of the `particles` with the given `plane`, by evolving
-each one for time `t` (either integer or float) inside `bt`.
+each one for time `t` (either integer or float) inside `bd`.
 
 The `plane` can be an [`InfiniteWall`](@ref) of *any* orientation, however only
 crossings of the `plane` such that `dot(velocity, normal) < 0` are allowed, with
@@ -261,23 +261,23 @@ the `plane`. If given more than one particle, the result is a vector of vectors
 of vectors.
 """
 function psos(
-    bt::Billiard{T}, plane::InfiniteWall{T}, t, par::AbstractParticle{T}) where {T}
+    bd::Billiard{T}, plane::InfiniteWall{T}, t, par::AbstractParticle{T}) where {T}
 
     p = deepcopy(par)
     rpos = SV{T}[]
     rvel = SV{T}[]
     count = zero(t)
 
-    # periodic = isperiodic(bt)
+    # periodic = isperiodic(bd)
     # ismagnetic = typeof(p) <: MagneticParticle
     # ismagnetic && (absω = abs(p.omega))
     # t_to_write = zero(T)
 
     while count < t
         # compute collision times
-        tmin::T, i::Int = next_collision(p, bt)
+        tmin::T, i::Int = next_collision(p, bd)
 
-        # if periodic && typeof(bt[i]) <: PeriodicWall
+        # if periodic && typeof(bd[i]) <: PeriodicWall
 
         tplane = collisiontime(p, plane)
 
@@ -291,27 +291,27 @@ function psos(
 
         tmin == Inf && break
         # Now "bounce" the particle normally:
-        tmin = relocate!(p, bt[i], tmin)
-        resolvecollision!(p, bt[i])
+        tmin = relocate!(p, bd[i], tmin)
+        resolvecollision!(p, bd[i])
 
         count += increment_counter(t, tmin)
     end
     return rpos, rvel
 end
 
-function psos(bt::Billiard{T}, plane::InfiniteWall{T}, t,
+function psos(bd::Billiard{T}, plane::InfiniteWall{T}, t,
     pars::Vector{<:AbstractParticle{T}}) where {T}
 
     retpos = Vector{SV{T}}[]
     retvel = Vector{SV{T}}[]
 
     for p ∈ pars
-        rpos, rvel = psos(bt, plane, t, p)
+        rpos, rvel = psos(bd, plane, t, p)
         push!(retpos, rpos); push!(retvel, rvel)
     end
     return retpos, retvel
 end
 
-psos(bt, plane, t, n::Integer) = psos(bt, plane, t, [randominside(bt) for i=1:n])
-psos(bt, plane, t, n::Integer, ω::Real) =
-psos(bt, plane, t, [randominside(bt, ω) for i=1:n])
+psos(bd, plane, t, n::Integer) = psos(bd, plane, t, [randominside(bd) for i=1:n])
+psos(bd, plane, t, n::Integer, ω::Real) =
+psos(bd, plane, t, [randominside(bd, ω) for i=1:n])

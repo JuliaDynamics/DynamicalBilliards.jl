@@ -90,7 +90,7 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         error(es)
     end
     r, x, y = promote(r,x,y)
-    btr = billiard_rectangle(x, y; setting = setting)
+    bdr = billiard_rectangle(x, y; setting = setting)
 
     c = [x/2, y/2]
     if setting == "random"
@@ -101,7 +101,7 @@ function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
         centerdisk = Disk(c, r, "Disk")
     end
 
-    return Billiard(centerdisk, btr...)
+    return Billiard(centerdisk, bdr...)
 end
 
 """
@@ -125,7 +125,7 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 """
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
     S = typeof(convert(AbstractFloat, r))
-    bt = Obstacle{S}[]
+    bd = Obstacle{S}[]
     verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
 
     if setting == "standard"
@@ -156,9 +156,9 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
             normal = [-w[2], w[1]]
             wall = T(starting, ending, normal, wallname*" $i")
         end
-        push!(bt, wall)
+        push!(bd, wall)
     end
-    return Billiard(bt)
+    return Billiard(bd)
 end
 
 """
@@ -171,27 +171,27 @@ function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
     setting = "standard")
     r, R = promote(r, R)
     T = typeof(r); center = T[center...]
-    btr = billiard_polygon(6, R, center; setting = setting)
+    bdr = billiard_polygon(6, R, center; setting = setting)
     DT = setting == "random" ? RandomDisk : Disk
-    return Billiard(Disk(center, r), btr...)
+    return Billiard(Disk(center, r), bdr...)
 end
 
 
 
 
 """
-    billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2) -> bt, rayspl
+    billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2) -> bd, rayspl
 Showcase example billiard for ray-splitting processes. A rectangle `(x,y)` with a
 SplitterWall at `x/2` and two disks at each side, with respective radii `r1`, `r2`.
 
-**Notice**: This function returns a billiard `bt` as well as a `rayspl`
+**Notice**: This function returns a billiard `bd` as well as a `rayspl`
 dictionary!
 """
 function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
 
     r1≥x/4 || r2≥x/4 && throw(ArgumentError("Disks overlap with walls!"))
 
-    btr =  billiard_rectangle(x, y)
+    bdr =  billiard_rectangle(x, y)
     sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
     a1 = Antidot([x/4, y/2], r1, "Left Antidot")
     a2 = Antidot([3x/4, y/2], r2, "Right Antidot")
@@ -212,7 +212,7 @@ function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
     raywall = RaySplitter([3], Tp(0.5), sa, newowall)
     raya = RaySplitter([1, 2], Tp(0.64), sa, newoantidot)
 
-    return Billiard(a1, a2, sw, btr...), (raywall, raya)
+    return Billiard(a1, a2, sw, bdr...), (raywall, raya)
 end
 
 

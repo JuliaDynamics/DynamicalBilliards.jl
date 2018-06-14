@@ -222,13 +222,13 @@ end
 ################################################################################
 
 """
-    lyapunovspectrum!(p::AbstractParticle, bt::Billiard, t::Float)
+    lyapunovspectrum!(p::AbstractParticle, bd::Billiard, t::Float)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 
 Returns zeros for pinned particles.
 """
-function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::AbstractFloat;
+function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::AbstractFloat;
     warning::Bool = false) where {T<:AbstractFloat}
 
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
@@ -248,7 +248,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::Abstract
 
     while count < t
         #bounce!-step
-        tmin::T, i::Int = next_collision(p, bt)
+        tmin::T, i::Int = next_collision(p, bd)
 
         #check for pinning
         if ismagnetic && tmin == Inf
@@ -256,15 +256,15 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::Abstract
             return zeros(T, 4)
         end
 
-        tmin = relocate!(p, bt[i], tmin, offset)
-        resolvecollision!(p, bt[i], offset)
+        tmin = relocate!(p, bd[i], tmin, offset)
+        resolvecollision!(p, bd[i], offset)
         ismagnetic && (p.center = find_cyclotron(p))
         count += increment_counter(t, tmin)
 
         t_pincheck += tmin
 
         #check for pinning
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             # Pinned particle:
             if ismagnetic && t_pincheck ≥ 2π/absω
                 warning && warn("Pinned particle! (completed circle)")
@@ -288,7 +288,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bt::Billiard{T}, tt::Abstract
 end
 
 """
-    lyapunovspectrum(p::AbstractParticle, bt::Billiard, t)
+    lyapunovspectrum(p::AbstractParticle, bd::Billiard, t)
 Non-mutating version of [`lyapunovspectrum!`](@ref)
 """
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(deepcopy(p), args...)

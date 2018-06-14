@@ -411,9 +411,9 @@ Return the **signed** distance between particle `p` and obstacle `o`, based on
 of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
 outside of the disk, negative otherwise.
 
-    distance(p::AbstractParticle, bt::Billiard)
-Return minimum `distance(p, obst)` for all `obst` in `bt`.
-If the `distance(p, bt)` is negative this means that the particle is outside
+    distance(p::AbstractParticle, bd::Billiard)
+Return minimum `distance(p, obst)` for all `obst` in `bd`.
+If the `distance(p, bd)` is negative this means that the particle is outside
 the billiard.
 
 All `distance` functions can also be given a position (vector) instead of a particle.
@@ -481,7 +481,7 @@ end
 ## Initial Conditions
 ####################################################
 """
-    cellsize(bt)
+    cellsize(bd)
 Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard.
 
 Used in `randominside()`, error checking and plotting.

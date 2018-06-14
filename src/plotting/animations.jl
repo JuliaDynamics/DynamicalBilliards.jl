@@ -3,13 +3,13 @@ export animate_evolution
 
 """
 ```julia
-animate_evolution(p, bt, colnumber[, raysplitters]; kwargs...)
+animate_evolution(p, bd, colnumber[, raysplitters]; kwargs...)
 ```
 Animate the evolution of the particle, plotting the orbit from collision to collision.
 
 ### Arguments
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bt::Billiard` : The billiard.
+  * `bd::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter` : (Optional) Tuple of [`RaySplitters`](@ref),
       that enable ray-splitting processes during evolution.
@@ -32,14 +32,14 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
 The function returns `a, b, c`. Do `a[:remove](), b[:remove](), c[:remove]()` to clear
 the particle out of the figure.
 """
-function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict();
+function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = Dict();
     sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
     particle_kwargs = nothing, orbit_kwargs = nothing, newfig = true)
 
     p = deepcopy(par)
     if newfig == true
         fig = figure()
-        plot_billiard(bt)
+        plot_billiard(bd)
     end
 
     sleeptime == 0 && (sleeptime = 1e-3)
@@ -52,9 +52,9 @@ function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict
     while i < colnumber
 
     if raysplit == Dict()
-        xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1)...)
+        xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1)...)
     else
-        xt, yt, vxt, vyt, ts = construct(evolve!(p, bt, 1, raysplit)...)
+        xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1, raysplit)...)
     end
 
     if i < col_to_plot
@@ -100,6 +100,6 @@ function animate_evolution(par::AbstractParticle, bt, colnumber, raysplit = Dict
     end
     i+=1
     end
-    reset_billiard!(bt)
+    reset_billiard!(bd)
     return line, point, quiv
 end

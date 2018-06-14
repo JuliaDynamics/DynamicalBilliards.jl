@@ -4,32 +4,32 @@ export plot_billiard, billiard_julia
 
 """
 ```julia
-plot_billiard(bt::Billiard)
+plot_billiard(bd::Billiard)
 ```
-Plot all obstacles in `bt` using the default arguments, set
+Plot all obstacles in `bd` using the default arguments, set
 `xlim` and `ylim` to be 10% larger than `cellsize` and
 set the axis aspect ratio to equal.
 
 ```julia
-plot_billiard(bt, xmin, ymin, xmax, ymax)
+plot_billiard(bd, xmin, ymin, xmax, ymax)
 ```
-Plot the given (periodic) billiard `bt` on the current PyPlot figure, repeatedly
+Plot the given (periodic) billiard `bd` on the current PyPlot figure, repeatedly
 plotting from `(xmin, ymin)` to `(xmax, ymax)`. Only works for rectangular billiards.
 
 ```julia
-plot_billiard(bt, xt::Vector, yt::Vector; plot_orbit = true)
+plot_billiard(bd, xt::Vector, yt::Vector; plot_orbit = true)
 ```
-Plot the given (periodic) billiard `bt` along with a particle trajectory defined
+Plot the given (periodic) billiard `bd` along with a particle trajectory defined
 by `xt` and `yt`, on the current PyPlot figure. Only works for rectangular billiards.
 
 Sets limits automatically. Set the keyword argument `plot_orbit = false` to not
 plot the orbit defined by `(xt, yt)`.
 """
-function plot_billiard(bt::Billiard{T}) where {T}
-  for obst in bt
+function plot_billiard(bd::Billiard{T}) where {T}
+  for obst in bd
     plot_obstacle(obst)
   end
-  xmin, ymin, xmax, ymax = cellsize(bt)
+  xmin, ymin, xmax, ymax = cellsize(bd)
   dx = xmax - xmin; dy = ymax - ymin
   PyPlot.xlim(xmin - 0.1dx, xmax + 0.1dx)
   PyPlot.ylim(ymin - 0.1dy, ymax + 0.1dy)
@@ -37,14 +37,14 @@ function plot_billiard(bt::Billiard{T}) where {T}
 end
 
 
-function plot_billiard(bt, xmin, ymin, xmax, ymax)
+function plot_billiard(bd, xmin, ymin, xmax, ymax)
   # Cell limits:
-  cellxmin, cellymin, cellxmax, cellymax = cellsize(bt)
+  cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
   dcx = cellxmax - cellxmin
   dcy = cellymax - cellymin
   # Obstacles to plot:
-  toplot = Obstacle{eltype(bt)}[]
-  for obst in bt
+  toplot = Obstacle{eltype(bd)}[]
+  for obst in bd
     typeof(obst) <: PeriodicWall && continue
     push!(toplot, obst)
   end
@@ -66,14 +66,14 @@ function plot_billiard(bt, xmin, ymin, xmax, ymax)
   PyPlot.gca()[:set_aspect]("equal")
 end
 
-function plot_billiard(bt, xt::AbstractVector, yt::AbstractVector; plot_orbit = true)
+function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector; plot_orbit = true)
   xmin = floor(minimum(round.(xt,3))); xmax = ceil(maximum(round.(xt,3)))
   ymin = floor(minimum(round.(yt,3))); ymax = ceil(maximum(round.(yt,3)))
   if plot_orbit
     plot(xt, yt, color = "blue")
   end
 
-  plot_billiard(bt, xmin, ymin, xmax, ymax)
+  plot_billiard(bd, xmin, ymin, xmax, ymax)
 end
 
 
@@ -84,11 +84,11 @@ translated by `vector`.
 """
 function translation end
 
-for T in subtypes(Circular)
+for T in subdypes(Circular)
   @eval translation(d::$T, vec) = ($T)(d.c .+ vec, d.r)
 end
 
-for T in subtypes(Wall)
+for T in subdypes(Wall)
   @eval translation(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
 end
 
@@ -104,7 +104,7 @@ By default it also plots the billiard in a new `PyPlot.figure()` using the corre
 """
 function billiard_julia(; plotit = true)
 
-  btr = billiard_rectangle()
+  bdr = billiard_rectangle()
 
   r = 0.165
   ewidth = 6.0
@@ -112,11 +112,11 @@ function billiard_julia(; plotit = true)
   red = Disk(redcent, r, "Red dot")
   purple = Disk([1 - redcent[1], redcent[2]], r, "Purple dot")
   green = Disk([0.5, 1 - redcent[2]], r, "Green dot")
-  bt = Billiard(btr.obstacles..., red, purple, green)
+  bd = Billiard(bdr.obstacles..., red, purple, green)
 
   if plotit == true
     PyPlot.figure()
-    for w in bt
+    for w in bd
       plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
     end
     plot_obstacle(red; edgecolor = (203/255, 60/255, 51/255),
@@ -137,5 +137,5 @@ function billiard_julia(; plotit = true)
     PyPlot.ylim(-0.1,1.1)
   end
 
-  return bt
+  return bd
 end

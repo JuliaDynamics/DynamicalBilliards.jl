@@ -187,10 +187,10 @@ position.
 end
 
 """
-    bounce!(p::AbstractParticle, bt::Billiard) -> i, t, pos, vel
+    bounce!(p::AbstractParticle, bd::Billiard) -> i, t, pos, vel
 "Bounce" the particle (advance for one collision) in the billiard.
 
-Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
+Specifically, find the [`next_collision`](@ref) of `p` with `bd`,
 [`relocate!`](@ref) the particle correctly,
 [`resolvecollision!`](@ref) with the colliding obstacle and finally return:
 
@@ -201,23 +201,23 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
 ```julia
-bounce!(p, bt, raysplit::Dict) -> i, t, pos, vel
+bounce!(p, bd, raysplit::Dict) -> i, t, pos, vel
 ```
 Ray-splitting version of `bounce!`.
 """
-function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
-    tmin::T, i::Int = next_collision(p, bt)
-    o = bt[i]
+function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
+    tmin::T, i::Int = next_collision(p, bd)
+    o = bd[i]
     tmin = relocate!(p, o, tmin)
     resolvecollision!(p, o)
     return i, tmin, p.pos, p.vel
 end
 
-function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
-    tmin::T, i::Int = next_collision(p, bt)
+function bounce!(p::MagneticParticle{T}, bd::Billiard{T}) where {T}
+    tmin::T, i::Int = next_collision(p, bd)
     if tmin != Inf
-        tmin = relocate!(p, bt[i], tmin)
-        resolvecollision!(p, bt[i])
+        tmin = relocate!(p, bd[i], tmin)
+        resolvecollision!(p, bd[i])
     end
     p.center = find_cyclotron(p)
     return i, tmin, p.pos, p.vel
@@ -228,8 +228,8 @@ end
 # Evolve & Construct
 #####################################################################################
 """
-    evolve!(p::AbstractParticle, bt::Billiard, t)
-Evolve the given particle `p` inside the billiard `bt`. If `t` is of type
+    evolve!(p::AbstractParticle, bd::Billiard, t)
+Evolve the given particle `p` inside the billiard `bd`. If `t` is of type
 `AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
 Return the states of the particle between collisions.
@@ -255,19 +255,19 @@ from the state `poss[i], vels[i]`. That is why `ct[1]` is always 0 since
 `poss[1], vels[1]` are the initial conditions. The angular velocity `ω[i]` is the one
 the particle has while propagating from state `poss[i], vels[i]` to `i+1`.
 
-Notice that at any point, the velocity vector `vels[i]` is the one obtained *after*
+Notice that at any point, the velocity vector `vels[i]` is the one obdained *after*
 the specular reflection of the `i-1`th collision.
 The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
-    evolve!(p, bt, t, raysplitters)
+    evolve!(p, bd, t, raysplitters)
 
 To implement ray-splitting, the `evolve!` function is supplemented with a
 fourth argument, `raysplitters` which is a tuple of [`RaySplitter`](@ref) instances.
 For more information and instructions on using ray-splitting
 please visit the official documentation.
 """
-function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
+function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
     warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
@@ -285,7 +285,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
 
     while count < t
 
-        i, tmin, pos, vel = bounce!(p, bt)
+        i, tmin, pos, vel = bounce!(p, bd)
         t_to_write += tmin
 
         if ismagnetic && tmin == Inf
@@ -296,7 +296,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
             return (rt, rpos, rvel, p.omega)
         end
 
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             # Pinned particle:
             if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")
