@@ -40,7 +40,7 @@ end
 
 
 """
-    boundarymap(bt::Billiard, t, particles)
+    boundarymap(bd::Billiard, t, particles)
 Compute the boundary map of the
 billiard `bt` by evolving each particle for total amount `t` (either float for
 time or integer for collision number). See below for the returned values.
@@ -64,6 +64,10 @@ Return
 If `particles` is not a single particle then both `ξs` and `sφs` are vectors
 of `Vector`. The `i` inner vector corresponds to the results of the
 `i` initial condition/particle.
+
+The returned values of this function are can be used in conjuction with the
+function `plot_boundarymap` (requires `using PyPlot`) to plot the boundary map
+in an intuitive way.
 
 *Notice* - this function only works for normal specular reflection. Random reflections
 or ray-splitting will give unexpected results.
@@ -116,7 +120,19 @@ boundarymap(bt::Billiard, t, n::Int, ω::AbstractFloat) =
     boundarymap(bt, t, [randominside(bt, ω) for i ∈ 1:n])
 
 
+"""
+    boundarymap_portion(bd::Billiard, t, p::AbstractParticle, δξ, δφ = δξ)
+Calculate the portion of the boundary map of the billiard `bd` covered by the
+particle `p` when it is evolved for time `t` (float or integer).
 
+The boundary map is partitioned into boxes of size `(δξ, δφ)` and as the particle
+evolves visited boxes are counted. The returned ratio is this count divided
+by the total boxes of size `(δξ, δφ)` needed to cover the boundary map.
+
+**Important:** This portion **does not** equate the portion the particle's orbit covers
+on the full, three dimensional phase-space. Use the function
+[`phasespace_portion`](@ref) for that!
+"""
 function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
     p = deepcopy(par)
 
@@ -154,6 +170,22 @@ function boundarymap_portion(bt::Billiard{T}, t, par::AbstractParticle{T}, δξ,
     return ratio, d
 end
 
+
+
+"""
+    phasespace_portion(bd::Billiard, t, p::AbstractParticle, δξ, δφ = δξ)
+Calculate the portion of the phase space of the billiard `bd` covered by the
+particle `p` when it is evolved for time `t` (float or integer).
+
+This function extends [`boundarymap_portion`](@ref) using a novel approach. For
+each visited box of the boundary map, [`bounce!`](@ref) attributes a third dimension
+(the collision time, equal to collision distance) which expands the two dimensions
+of the boundary map to the three dimensions of the phase space.
+
+The true phase space portion is then the weighted portion of boxes visited by the
+particle, divided by the total weighted sum of boxes. The weights of the boxes are
+the collision times.
+"""
 function phasespace_portion(bd::Billiard{T}, t, par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
     PT = typeof(par)
 
