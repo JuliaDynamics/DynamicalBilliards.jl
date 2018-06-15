@@ -124,12 +124,63 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
 
         end
     end
-
 if printinfo
 println("""
 Results:
 + `boundarymap_portion` works
 + Mushroom boundary map ratios are replicated correctly
++ Bunimovich stadium always gives ratio of 1.0
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
+end
+end
+
+
+function phasespace_portion_test(partnum = 10; printinfo = true)
+    tim = time()
+    @testset "Bunimovich" begin
+        t = 1000000.0
+        bt = billiard_bunimovich()
+        @testset "ω = $ω" for ω in [0.0, 0.1]
+            for i in 1:min(partnum, 20)
+                p = ω == 0 ? randominside(bt) : randominside(bt, ω)
+                φ = π/4 * rand() # so that we never find bouncing walls
+                p.vel = (cos(φ), sin(φ))
+                ratio = phasespace_portion(bt,t, randominside(bt), 0.1)
+                @test ratio == 1.0
+            end
+        end
+    end
+    @testset "Mushroom" begin
+        t = 1000000.0
+        l = 1.0; r = 1.0
+        @testset "w = $w" for w ∈ [0.2, 0.4]
+            bt = billiard_mushroom(l, w, r)
+            @testset "regular" begin
+                for i in 1:min(partnum, 10)
+                    p = MushroomTools.randomregular(l, w, r)
+                    ratio = phasespace_portion(bt,t, p, 0.1)
+                    trueratio =  MushroomTools.g_r_3D(l,w,r)
+                    # Only one regular particle covers very small amount of space:
+                    @test ratio < trueratio
+                end
+            end
+            @testset "chaotic" begin
+                for i in 1:min(partnum, 10)
+                    p = MushroomTools.randomchaotic(l, w, r)
+                    ratio = phasespace_portion(bt, t, p, 0.1)
+                    trueratio =  MushroomTools.g_c_3D(l,w,r)
+                    @test trueratio - 0.1 ≤ ratio ≤ trueratio + 0.1
+                end
+            end
+
+        end
+    end
+if printinfo
+println("""
+Results:
++ `phasespace_portion` works
++ Mushroom phase space ratios are replicated correctly
 + Bunimovich stadium always gives ratio of 1.0
 + Required time: $(round(time()-tim, digits=3)) sec
 """)

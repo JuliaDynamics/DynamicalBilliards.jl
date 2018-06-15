@@ -31,12 +31,6 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 [[LinearAlgebra]]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
-[[MacroTools]]
-deps = ["Compat"]
-git-tree-sha1 = "f5c87f9af1c1b0aea42080672dea169f936a83fb"
-uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.4.1"
-
 [[Markdown]]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
@@ -56,9 +50,10 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[Requires]]
-git-tree-sha1 = "fc07f83ee89fdec5cf08886a61271fae8d964cf9"
+deps = ["Test"]
+git-tree-sha1 = "36e27b810e096ab501655e4b841b779cd9adaf33"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
-version = "0.4.3"
+version = "0.5.0"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -73,10 +68,10 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[StaticArrays]]
-deps = ["Compat", "LinearAlgebra", "Random", "Test"]
-git-tree-sha1 = "6c0c5902c84cc4a5066052c9089eed5f5f2c794c"
+deps = ["Compat", "InteractiveUtils", "LinearAlgebra", "Random"]
+git-tree-sha1 = "a114d61f0ffe541c3ae2cddef4b44c844cebb4bf"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.7.0"
+version = "0.7.1"
 
 [[SuiteSparse]]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
