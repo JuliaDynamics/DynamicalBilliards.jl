@@ -72,6 +72,19 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
     end
 end
 
+function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
+    hexagonal = false, ax = (figure(); gca()))
+
+    xmin = floor(minimum(round.(xt,3))); xmax = ceil(maximum(round.(xt,3)))
+    ymin = floor(minimum(round.(yt,3))); ymax = ceil(maximum(round.(yt,3)))
+
+    plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
+
+    if plot_orbit
+        sca(ax)
+        plot(xt, yt, color = "blue")
+    end
+end
 
 function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
 
@@ -85,7 +98,7 @@ function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
     dy = (floor((ymin - cellymin)/dcy):1:ceil((ymax - cellymax)/dcy)) * dcy
 
     # Plot displaced Obstacles
-    toplot = nonperiodic(bt)
+    toplot = nonperiodic(bd)
     for x in dx
         for y in dy
             disp = SVector(x,y)
@@ -94,22 +107,65 @@ function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
             end
         end
     end
-    # Set limits etc.
     PyPlot.xlim(xmin, xmax)
     PyPlot.ylim(ymin, ymax)
     PyPlot.gca()[:set_aspect]("equal")
 end
 
-function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
-    hexagonal = false, ax = (figure(); gca()))
+function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
-    xmin = floor(minimum(round.(xt,3))); xmax = ceil(maximum(round.(xt,3)))
-    ymin = floor(minimum(round.(yt,3))); ymax = ceil(maximum(round.(yt,3)))
+    # Get distance between billiards
+    v = 1
+    while !(typeof(bd[v]) <: PeriodicWall); v += 1; end
+    space = norm(bd[v].sp - bd[v].ep)*cos(π/6)*2
 
-    plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
+    disp1 = SVector(0.0, space)
+    disp2 = SVector(space*cos(π/6), space*sin(π/6))
 
-    if plot_orbit
-        sca(ax)
-        plot(xt, yt, color = "blue")
+    toplot = nonperiodic(bd)
+
+    # Plot all obstacles
+    for d in toplot
+
+        j = 0
+        while xmin < -j*space*cos(pi/6) - cellsize(d)[1]
+            d_temp = translation(d, -j*disp2)
+            plot_obstacle!(d_temp)
+            i = 1
+            while ymin < -i*space - cellsize(d_temp)[2]
+                plot_obstacle!(translation(d_temp, -i*disp1))
+                i +=1
+            end
+
+            k = 1
+            while ymax > k*space + cellsize(d_temp)[4]
+                plot_obstacle!(translation(d_temp, k*disp1))
+                k +=1
+            end
+            j +=1
+        end
+
+
+        j = 1
+        while xmax > j*space*cos(pi/6) + cellsize(d)[3]
+            d_temp = translation(d, j*disp2)
+            plot_obstacle!(d_temp)
+            i = 1
+            while ymin < -i*space - cellsize(d_temp)[2]
+                plot_obstacle!(translation(d_temp, -i*disp1))
+                i +=1
+            end
+
+            k = 1
+            while ymax > k*space + cellsize(d_temp)[4]
+                plot_obstacle!(translation(d_temp, k*disp1))
+                k +=1
+            end
+            j +=1
+        end
     end
+
+    PyPlot.xlim(xmin, xmax)
+    PyPlot.ylim(ymin, ymax)
+    PyPlot.gca()[:set_aspect]("equal")
 end
