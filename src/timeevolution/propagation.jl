@@ -17,11 +17,9 @@ const sixsqrt = 6sqrt(2)
 @inline timeprec_forward(::MagneticParticle{T}, ::Obstacle{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::MagneticParticle{BigFloat}, ::Obstacle) = BigFloat(1e-12)
 
-# Used in relocate:
 @inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
 @inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
-
 
 # Used in check of skip intersection, in `realangle` and collision with Semicircle:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
@@ -305,7 +303,7 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
                 push!(rt, Inf)
                 return (rt, rpos, rvel, p.omega)
             end
-            #If not pinned, continue (do not write for PeriodicWall)
+            #If not pinned, do not write for PeriodicWall
             continue
         else
             push!(rpos, pos + p.current_cell)

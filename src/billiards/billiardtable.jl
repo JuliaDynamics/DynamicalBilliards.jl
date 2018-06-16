@@ -64,7 +64,6 @@ eltype(::Billiard{T}) where {T} = T
 
 @inline isperiodic(bd) = any(x -> typeof(x) <: PeriodicWall, bd.obstacles)
 
-# total arclength
 @inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
 #######################################################################################
@@ -82,7 +81,7 @@ for f in (:distance, :distance_init)
             for obst in bd
                 d::T = distance(p, obst)
                 d < dmin && (dmin = d)
-            end#obstacle loop
+            end
             return dmin
         end
     end
@@ -137,7 +136,7 @@ function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
 
     #2. velocity
     φ = T(2π*rand())
-    vel = SV{T}(sin(φ), cos(φ)) #TODO:Change to sincos for julia 0.7
+    vel = SV{T}(sincos(φ)...)
 
     #3. current_cell (does nothing)
     cc = zero(SV{T})
