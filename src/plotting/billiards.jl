@@ -75,8 +75,8 @@ end
 function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
     hexagonal = false, ax = (figure(); gca()))
 
-    xmin = floor(minimum(round.(xt,3))); xmax = ceil(maximum(round.(xt,3)))
-    ymin = floor(minimum(round.(yt,3))); ymax = ceil(maximum(round.(yt,3)))
+    xmin = floor(minimum(xt,3)); xmax = ceil(maximum(xt,3))
+    ymin = floor(minimum(yt,3)); ymax = ceil(maximum(yt,3))
 
     plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
 
@@ -114,13 +114,20 @@ end
 
 function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
-    # Get distance between billiards
+    PyPlot.xlim(xmin, xmax)
+    PyPlot.ylim(ymin, ymax)
+    PyPlot.gca()[:set_aspect]("equal")
+
     v = 1
     while !(typeof(bd[v]) <: PeriodicWall); v += 1; end
-    space = norm(bd[v].sp - bd[v].ep)*cos(π/6)*2
+    space = norm(bd[v].sp - bd[v].ep)*√3
 
+    sin6, cos6 = sincos(π/6)
     disp1 = SVector(0.0, space)
-    disp2 = SVector(space*cos(π/6), space*sin(π/6))
+    disp2 = SVector(space*cos6, space*sin6)
+    Δ = space/2
+
+    xmin -= Δ; ymin -= Δ; ymax += Δ; xmax += Δ
 
     toplot = nonperiodic(bd)
 
@@ -128,44 +135,40 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     for d in toplot
 
         j = 0
-        while xmin < -j*space*cos(pi/6) - cellsize(d)[1]
+        while xmin < -j*space*cos6
             d_temp = translation(d, -j*disp2)
             plot_obstacle!(d_temp)
             i = 1
-            while ymin < -i*space - cellsize(d_temp)[2]
+            while ymin < -i*space
                 plot_obstacle!(translation(d_temp, -i*disp1))
-                i +=1
+                i += 1
             end
 
             k = 1
-            while ymax > k*space + cellsize(d_temp)[4]
+            while ymax > k*space
                 plot_obstacle!(translation(d_temp, k*disp1))
-                k +=1
+                k += 1
             end
-            j +=1
+            j += 1
         end
 
-
         j = 1
-        while xmax > j*space*cos(pi/6) + cellsize(d)[3]
+        while xmax > j*space*cos6
             d_temp = translation(d, j*disp2)
             plot_obstacle!(d_temp)
             i = 1
-            while ymin < -i*space - cellsize(d_temp)[2]
+            while ymin < -i*space
                 plot_obstacle!(translation(d_temp, -i*disp1))
-                i +=1
+                i += 1
             end
 
             k = 1
-            while ymax > k*space + cellsize(d_temp)[4]
+            while ymax > k*space
                 plot_obstacle!(translation(d_temp, k*disp1))
-                k +=1
+                k += 1
             end
-            j +=1
+            j += 1
         end
     end
 
-    PyPlot.xlim(xmin, xmax)
-    PyPlot.ylim(ymin, ymax)
-    PyPlot.gca()[:set_aspect]("equal")
 end
