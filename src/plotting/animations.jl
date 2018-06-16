@@ -14,7 +14,7 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
   * `ray-splitter` : (Optional) Tuple of [`RaySplitters`](@ref),
       that enable ray-splitting processes during evolution.
 ### Keyword Arguments
-  * `newfig = true` : Creates a new figure at the function call, and plots
+  * `ax = (figure(); gca())` : Creates a new figure at the function call, and plots
     the billiard in that figure.
   * `sleeptime` : Time passed to `sleep()` between each collision.
   * `col_to_plot` : How many previous collisions are shown during the animation.
@@ -27,14 +27,14 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
     A direct movie (like creating a .mp4) of the animation cannot be made automatically,
     since the animation process mutates the particle.
   * `savename` : Name (*including path*) of the figures to be produced. The ending
-    "\_i.png" will be attached to all figures.
+    "_i.png" will be attached to all figures.
 
 The function returns `a, b, c`. Do `a[:remove](), b[:remove](), c[:remove]()` to clear
 the particle out of the figure.
 """
-function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = Dict();
+function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = nothing;
     sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
-    particle_kwargs = nothing, orbit_kwargs = nothing, newfig = true)
+    particle_kwargs = nothing, orbit_kwargs = nothing, ax = (figure(); gca()))
 
     p = deepcopy(par)
     if newfig == true
@@ -51,7 +51,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = Dict
 
     while i < colnumber
 
-    if raysplit == Dict()
+    if raysplit == nothing
         xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1)...)
     else
         xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1, raysplit)...)
