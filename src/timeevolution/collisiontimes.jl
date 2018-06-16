@@ -249,30 +249,20 @@ end
 ## next_collision
 #######################################################################################
 # metaprogramming
-@inline next_collision(p::AbstractParticle, bd::Billiard) =
-    next_collision(p, bd.obstacles)
-
-@generated function next_collision(p::AbstractParticle{T}, bd::TUP) where {T, TUP}
-    L = fieldcount(TUP)
-
-    out = quote
-        i = 0; ind = 0
-        tmin = T(Inf)
-    end
-
+@generated function next_collision(p, bd::Billiard{T, L, BT}) where {T, L, BT}
+    out = :(i = 0; ind = 0; tmin = T(Inf))
     for j=1:L
-        push!(out.args,
-              quote
-                  let x = bd[$j]
-                tcol = collisiontime(p, x)
-                # Set minimum time:
-                if tcol < tmin
-                  tmin = tcol
-                  ind = $j
-                end
-              end
-          end
-              )
+        push!(out.args, quote
+                            let x = bd[$j]
+                                tcol = collisiontime(p, x)
+                                # Set minimum time:
+                                if tcol < tmin
+                                  tmin = tcol
+                                  ind = $j
+                                end
+                            end
+                        end
+                        )
     end
     push!(out.args, :(return tmin, ind))
     return out
