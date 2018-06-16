@@ -59,10 +59,10 @@ getindex(bd::Billiard, i) = bd.obstacles[i]
 # Iteration:
 iterate(bd::Billiard) = iterate(bd.obstacles)
 iterate(bd::Billiard, state) = iterate(bd.obstacles, state)
+length(::Billiard{T, L}) where {T, L} = L
+eltype(::Billiard{T}) where {T} = T
 
-eltype(bd::Billiard{T}) where {T} = T
-
-isperiodic(bd) = any(x -> typeof(x) <: PeriodicWall, bd.obstacles)
+@inline isperiodic(bd) = any(x -> typeof(x) <: PeriodicWall, bd.obstacles)
 
 # total arclength
 @inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
