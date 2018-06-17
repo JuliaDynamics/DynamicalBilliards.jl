@@ -15,7 +15,7 @@ Arc = PyPlot.matplotlib[:patches][:Arc]
 
 """
     plot_obstacle!(obst::Obstacle; kwargs...)
-Plot given obstacle on the current `PyPlot` figure.
+Plot given obstacle on the current `PyPlot` axes.
 
 The default arguments for each type of obstacle have been chosen for maximum
 clarity and consistency.

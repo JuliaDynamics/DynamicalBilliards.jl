@@ -82,7 +82,7 @@ function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
 
     if plot_orbit
         sca(ax)
-        plot(xt, yt, color = "blue")
+        plot(xt, yt, color = "C0")
     end
 end
 

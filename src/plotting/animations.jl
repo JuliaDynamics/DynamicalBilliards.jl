@@ -2,19 +2,17 @@ using PyPlot
 export animate_evolution
 
 """
-```julia
-animate_evolution(p, bd, colnumber[, raysplitters]; kwargs...)
-```
+    animate_evolution(p, bd, colnumber[, raysplitters]; kwargs...)
 Animate the evolution of the particle, plotting the orbit from collision to collision.
 
 ### Arguments
-  * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
+  * `p::AbstractParticle` : The particle to be evolved.
   * `bd::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter` : (Optional) Tuple of [`RaySplitters`](@ref),
       that enable ray-splitting processes during evolution.
 ### Keyword Arguments
-  * `ax = (figure(); gca())` : Creates a new figure at the function call, and plots
+  * `newfig = true` : Creates a new figure at the function call, and plots
     the billiard in that figure.
   * `sleeptime` : Time passed to `sleep()` between each collision.
   * `col_to_plot` : How many previous collisions are shown during the animation.
@@ -29,12 +27,12 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
   * `savename` : Name (*including path*) of the figures to be produced. The ending
     "_i.png" will be attached to all figures.
 
-The function returns `a, b, c`. Do `a[:remove](), b[:remove](), c[:remove]()` to clear
+The function returns `a, b, c`. Do `a[:remove](); b[:remove](); c[:remove]()` to clear
 the particle out of the figure.
 """
 function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = nothing;
     sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
-    particle_kwargs = nothing, orbit_kwargs = nothing, ax = (figure(); gca()))
+    particle_kwargs = nothing, orbit_kwargs = nothing, newfig = true)
 
     p = deepcopy(par)
     if newfig == true
@@ -51,54 +49,54 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
 
     while i < colnumber
 
-    if raysplit == nothing
-        xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1)...)
-    else
-        xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1, raysplit)...)
-    end
-
-    if i < col_to_plot
-        push!(xdata, xt)
-        push!(ydata, yt)
-    else
-        shift!(xdata); shift!(ydata)
-        push!(xdata, xt); push!(ydata, yt)
-    end
-
-    xpd = Float64[]
-    for el in xdata; append!(xpd, el); end
-
-    ypd = Float64[]
-    for el in ydata; append!(ypd, el); end
-
-    if i == 0
-        if orbit_kwargs != nothing
-            line, = plot(xpd, ypd; orbit_kwargs...)
+        if raysplit == nothing
+            xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1)...)
         else
-            line, = plot(xpd, ypd; color = "blue")
+            xt, yt, vxt, vyt, ts = construct(evolve!(p, bd, 1, raysplit)...)
         end
-    end
-    line[:set_xdata](xpd)
-    line[:set_ydata](ypd)
 
-    if particle_kwargs != nothing
-        point, quiv = plot_particle(p; particle_kwargs...)
-    else
-        point, quiv = plot_particle(p)
-    end
+        if i < col_to_plot
+            push!(xdata, xt)
+            push!(ydata, yt)
+        else
+            shift!(xdata); shift!(ydata)
+            push!(xdata, xt); push!(ydata, yt)
+        end
 
-    if savefigs
-        s = savename*"_$(i+1).png"
-        savefig(s, bbox_inches="tight")
-    end
+        xpd = Float64[]
+        for el in xdata; append!(xpd, el); end
+
+        ypd = Float64[]
+        for el in ydata; append!(ypd, el); end
+
+        if i == 0
+            if orbit_kwargs != nothing
+                line, = plot(xpd, ypd; orbit_kwargs...)
+            else
+                line, = plot(xpd, ypd; color = "C0")
+            end
+        end
+        line[:set_xdata](xpd)
+        line[:set_ydata](ypd)
+
+        if particle_kwargs != nothing
+            point, quiv = plot_particle(p; particle_kwargs...)
+        else
+            point, quiv = plot_particle(p)
+        end
+
+        if savefigs
+            s = savename*"_$(i+1).png"
+            savefig(s, bbox_inches="tight")
+        end
 
 
-    sleep(sleeptime)
-    if i < colnumber - 1
-        point[:remove]()
-        quiv[:remove]()
-    end
-    i+=1
+        sleep(sleeptime)
+        if i < colnumber - 1
+            point[:remove]()
+            quiv[:remove]()
+        end
+        i+=1
     end
     reset_billiard!(bd)
     return line, point, quiv
