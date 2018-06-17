@@ -54,13 +54,14 @@ end
 ####################################################
 # Plotting Routines (loaded when `Using PyPlot`)   #
 ####################################################
-using Requires
-@require PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee" begin
+# using Requires
+# @require PyPlot="d330b81b-6aea-500a-939a-2ce795aea3ee" begin
+using PyPlot
     dir = joinpath(@__DIR__, "plotting")
     for f in readdir(dir)
         include(joinpath(dir, f))
     end
-end
+# end
 
 
 

@@ -1,81 +1,5 @@
-using PyPlot, StaticArrays
-export plot_billiard, billiard_julia
-
-
-"""
-```julia
-plot_billiard(bd::Billiard)
-```
-Plot all obstacles in `bd` using the default arguments, set
-`xlim` and `ylim` to be 10% larger than `cellsize` and
-set the axis aspect ratio to equal.
-
-```julia
-plot_billiard(bd, xmin, ymin, xmax, ymax)
-```
-Plot the given (periodic) billiard `bd` on the current PyPlot figure, repeatedly
-plotting from `(xmin, ymin)` to `(xmax, ymax)`. Only works for rectangular billiards.
-
-```julia
-plot_billiard(bd, xt::Vector, yt::Vector; plot_orbit = true)
-```
-Plot the given (periodic) billiard `bd` along with a particle trajectory defined
-by `xt` and `yt`, on the current PyPlot figure. Only works for rectangular billiards.
-
-Sets limits automatically. Set the keyword argument `plot_orbit = false` to not
-plot the orbit defined by `(xt, yt)`.
-"""
-function plot_billiard(bd::Billiard{T}) where {T}
-  for obst in bd
-    plot_obstacle(obst)
-  end
-  xmin, ymin, xmax, ymax = cellsize(bd)
-  dx = xmax - xmin; dy = ymax - ymin
-  PyPlot.xlim(xmin - 0.1dx, xmax + 0.1dx)
-  PyPlot.ylim(ymin - 0.1dy, ymax + 0.1dy)
-  PyPlot.gca()[:set_aspect]("equal")
-end
-
-
-function plot_billiard(bd, xmin, ymin, xmax, ymax)
-  # Cell limits:
-  cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
-  dcx = cellxmax - cellxmin
-  dcy = cellymax - cellymin
-  # Obstacles to plot:
-  toplot = Obstacle{eltype(bd)}[]
-  for obst in bd
-    typeof(obst) <: PeriodicWall && continue
-    push!(toplot, obst)
-  end
-  # Find displacement vectors (they will multiply dcx, dcy)
-  dx = (floor((xmin - cellxmin)/dcx):1:ceil((xmax - cellxmax)/dcx))*dcx
-  dy = (floor((ymin - cellymin)/dcy):1:ceil((ymax - cellymax)/dcy))*dcy
-  # Plot displaced Obstacles
-  for x in dx
-    for y in dy
-      disp = SVector(x,y)
-      for obst in toplot
-        plot_obstacle(translation(obst, disp))
-      end
-    end
-  end
-  # Set limits etc.
-  PyPlot.xlim(xmin, xmax)
-  PyPlot.ylim(ymin, ymax)
-  PyPlot.gca()[:set_aspect]("equal")
-end
-
-function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector; plot_orbit = true)
-  xmin = floor(minimum(round.(xt,3))); xmax = ceil(maximum(round.(xt,3)))
-  ymin = floor(minimum(round.(yt,3))); ymax = ceil(maximum(round.(yt,3)))
-  if plot_orbit
-    plot(xt, yt, color = "blue")
-  end
-
-  plot_billiard(bd, xmin, ymin, xmax, ymax)
-end
-
+using PyPlot, StaticArrays, InteractiveUtils
+export plot_billiard
 
 """
     translation(obst::Obstacle, vector)
@@ -84,58 +8,171 @@ translated by `vector`.
 """
 function translation end
 
-for T in subdypes(Circular)
+for T in subtypes(Circular)
   @eval translation(d::$T, vec) = ($T)(d.c .+ vec, d.r)
 end
 
-for T in subdypes(Wall)
+for T in subtypes(Wall)
   @eval translation(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
+end
+
+periodicerror() = throw(ArgumentError(
+"The billiard must be periodic, i.e. has at least two `PeriodicWall` obstacles"
+))
+
+function nonperiodic(bd::Billiard)
+    toplot = Obstacle{eltype(bd)}[]
+    for obst in bd
+        typeof(obst) <: PeriodicWall && continue
+        push!(toplot, obst)
+    end
+    return toplot
 end
 
 
 """
-```julia
-billiard_julia(; plotit = true)
-```
-Return the awesome "Julia-logo" billiard shown in the introduction
-of DynamicalBilliards.jl.
+    plot_billiard(bd::Billiard; ax = (figure(); gca()))
+Plot all obstacles in `bd` using the default arguments, set
+`xlim` and `ylim` to be 20% larger than `cellsize` and
+set the axis aspect ratio to equal.
 
-By default it also plots the billiard in a new `PyPlot.figure()` using the correct colors.
+    plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = false, ax = (figure(); gca()))
+Plot the given **periodic** billiard `bd`, repeatedly
+plotting from `(xmin, ymin)` to `(xmax, ymax)`.
+Works for either rectangular periodic billiards, or hexagonal ones. Use
+keyword `hexagonal` to denote which one you want.
+
+    plot_billiard(bd, xt::Vector, yt::Vector; hexagonal = false, ax = (figure(); gca()))
+Plot the given **periodic** billiard `bd` using the limits defined
+by `xt` and `yt`.
+
+Set the keyword argument `plot_orbit = false` to not
+plot the orbit defined by `(xt, yt)` and only use the limits.
 """
-function billiard_julia(; plotit = true)
-
-  bdr = billiard_rectangle()
-
-  r = 0.165
-  ewidth = 6.0
-  redcent = [0.28, 0.32]
-  red = Disk(redcent, r, "Red dot")
-  purple = Disk([1 - redcent[1], redcent[2]], r, "Purple dot")
-  green = Disk([0.5, 1 - redcent[2]], r, "Green dot")
-  bd = Billiard(bdr.obstacles..., red, purple, green)
-
-  if plotit == true
-    PyPlot.figure()
-    for w in bd
-      plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
+function plot_billiard(bd::Billiard{T}; ax = (figure(); gca())) where {T}
+    sca(ax)
+    for obst in bd; plot_obstacle!(obst); end
+    xmin, ymin, xmax, ymax = cellsize(bd)
+    dx = xmax - xmin; dy = ymax - ymin
+    ax[:set_aspect]("equal")
+    if !isinf(xmin) && !isinf(xmax)
+        xlim(xmin - 0.1dx, xmax + 0.1dx)
     end
-    plot_obstacle(red; edgecolor = (203/255, 60/255, 51/255),
-    facecolor = (213/255, 99/255, 92/255), linewidth = ewidth)
-    plot_obstacle(purple; edgecolor = (149/255, 88/255, 178/255),
-    facecolor = (170/255, 121/255, 193/255), linewidth = ewidth)
-    plot_obstacle(green, edgecolor = (56/255, 152/255, 38/255),
-    facecolor = (96/255, 173/255, 81/255), linewidth = ewidth)
+    if !isinf(ymin) && !isinf(ymax)
+        ylim(ymin - 0.1dy, ymax + 0.1dy)
+    end
+end
 
-    # particle edge color
-    # darkblue = (64/255, 99/255, 216/255)
-    # lightblue = (102/255, 130/255, 223/255)
+function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
+    hexagonal = false, ax = (figure(); gca()))
 
-    PyPlot.axis("off")
-    PyPlot.tight_layout()
+    isperiodic(bd) || periodicerror()
+    sca(ax)
+
+    if hexagonal
+        plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
+    else
+        plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
+    end
+end
+
+function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
+    hexagonal = false, ax = (figure(); gca()))
+
+    xmin = floor(minimum(xt,3)); xmax = ceil(maximum(xt,3))
+    ymin = floor(minimum(yt,3)); ymax = ceil(maximum(yt,3))
+
+    plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
+
+    if plot_orbit
+        sca(ax)
+        plot(xt, yt, color = "C0")
+    end
+end
+
+function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
+
+    # Cell limits:
+    cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
+    dcx = cellxmax - cellxmin
+    dcy = cellymax - cellymin
+
+    # Find displacement vectors
+    dx = (floor((xmin - cellxmin)/dcx):1:ceil((xmax - cellxmax)/dcx)) * dcx
+    dy = (floor((ymin - cellymin)/dcy):1:ceil((ymax - cellymax)/dcy)) * dcy
+
+    # Plot displaced Obstacles
+    toplot = nonperiodic(bd)
+    for x in dx
+        for y in dy
+            disp = SVector(x,y)
+            for obst in toplot
+                plot_obstacle!(translation(obst, disp))
+            end
+        end
+    end
+    PyPlot.xlim(xmin, xmax)
+    PyPlot.ylim(ymin, ymax)
     PyPlot.gca()[:set_aspect]("equal")
-    PyPlot.xlim(-0.1,1.1)
-    PyPlot.ylim(-0.1,1.1)
-  end
+end
 
-  return bd
+function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
+
+    PyPlot.xlim(xmin, xmax)
+    PyPlot.ylim(ymin, ymax)
+    PyPlot.gca()[:set_aspect]("equal")
+
+    v = 1
+    while !(typeof(bd[v]) <: PeriodicWall); v += 1; end
+    space = norm(bd[v].sp - bd[v].ep)*√3
+
+    sin6, cos6 = sincos(π/6)
+    disp1 = SVector(0.0, space)
+    disp2 = SVector(space*cos6, space*sin6)
+    Δ = space/2
+
+    xmin -= Δ; ymin -= Δ; ymax += Δ; xmax += Δ
+
+    toplot = nonperiodic(bd)
+
+    # Plot all obstacles
+    for d in toplot
+
+        j = 0
+        while xmin < -j*space*cos6
+            d_temp = translation(d, -j*disp2)
+            plot_obstacle!(d_temp)
+            i = 1
+            while ymin < -i*space
+                plot_obstacle!(translation(d_temp, -i*disp1))
+                i += 1
+            end
+
+            k = 1
+            while ymax > k*space
+                plot_obstacle!(translation(d_temp, k*disp1))
+                k += 1
+            end
+            j += 1
+        end
+
+        j = 1
+        while xmax > j*space*cos6
+            d_temp = translation(d, j*disp2)
+            plot_obstacle!(d_temp)
+            i = 1
+            while ymin < -i*space
+                plot_obstacle!(translation(d_temp, -i*disp1))
+                i += 1
+            end
+
+            k = 1
+            while ymax > k*space
+                plot_obstacle!(translation(d_temp, k*disp1))
+                k += 1
+            end
+            j += 1
+        end
+    end
+
 end

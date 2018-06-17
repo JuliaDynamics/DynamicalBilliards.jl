@@ -126,7 +126,7 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
     S = typeof(convert(AbstractFloat, r))
     bd = Obstacle{S}[]
-    verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] + center for i in 1:sides]
+    verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] .+ center for i in 1:sides]
 
     if setting == "standard"
         T = InfiniteWall
@@ -144,9 +144,8 @@ function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standa
     end
 
     for i in eachindex(verteces)
-        N = length(verteces)
         starting = verteces[i]
-        ending = verteces[mod1(i+1, N)]
+        ending = verteces[mod1(i+1, sides)]
         # Normal vector must look at where the particle is coming from
         w = ending - starting
         if setting == "periodic"
@@ -167,7 +166,7 @@ Create a sinai-like billiard, which is a hexagon of outer radius `R`, containing
 at its center (given by `center`) a disk of radius `r`. The `setting` keyword
 is passed to `billiard_polygon`.
 """
-function billiard_hexagonal_sinai(r::Real, R::Real, center = [0,0];
+function billiard_hexagonal_sinai(r::Real = 0.5, R::Real = 1.0, center = [0,0];
     setting = "standard")
     r, R = promote(r, R)
     T = typeof(r); center = T[center...]

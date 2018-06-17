@@ -1,5 +1,4 @@
 export Billiard, randominside
-import Base:iterate
 #######################################################################################
 ## Billiard Table
 #######################################################################################
@@ -55,14 +54,14 @@ function Billiard(bd::Vararg{Obstacle})
 end
 
 
-getindex(bd::Billiard, i) = bd.obstacles[i]
+Base.getindex(bd::Billiard, i) = bd.obstacles[i]
 # Iteration:
-iterate(bd::Billiard) = iterate(bd.obstacles)
-iterate(bd::Billiard, state) = iterate(bd.obstacles, state)
-length(::Billiard{T, L}) where {T, L} = L
-eltype(::Billiard{T}) where {T} = T
+Base.iterate(bd::Billiard) = iterate(bd.obstacles)
+Base.iterate(bd::Billiard, state) = iterate(bd.obstacles, state)
+Base.length(::Billiard{T, L}) where {T, L} = L
+Base.eltype(::Billiard{T}) where {T} = T
 
-@inline isperiodic(bd) = any(x -> typeof(x) <: PeriodicWall, bd.obstacles)
+@inline isperiodic(bd) = count(x -> typeof(x) <: PeriodicWall, bd.obstacles) ≥ 2
 
 @inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
