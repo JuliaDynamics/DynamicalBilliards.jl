@@ -54,9 +54,13 @@ function plot_billiard(bd::Billiard{T}; ax = (figure(); gca())) where {T}
     for obst in bd; plot_obstacle!(obst); end
     xmin, ymin, xmax, ymax = cellsize(bd)
     dx = xmax - xmin; dy = ymax - ymin
-    xlim(xmin - 0.1dx, xmax + 0.1dx)
-    ylim(ymin - 0.1dy, ymax + 0.1dy)
     ax[:set_aspect]("equal")
+    if !isinf(xmin) && !isinf(xmax)
+        xlim(xmin - 0.1dx, xmax + 0.1dx)
+    end
+    if !isinf(ymin) && !isinf(ymax)
+        ylim(ymin - 0.1dy, ymax + 0.1dy)
+    end
 end
 
 function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;

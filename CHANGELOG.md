@@ -5,14 +5,15 @@
   * Reduced a lot of allocations done all over the place. In most places allocations
     done are now exactly zero! ZEROOOOOOOOOOOO
   * Fixed many instances of broadcasting with static vectors (which is bad).
-  * Utilized the `Unrolled` package and other kind of stability and performance features!
+  * Utilized metaprogramming to manually unroll some loops.
 
+* Hexagonal periodic plotting.
 * Lyapunov exponents for magnetic particles are now possible!
 * Added boundary map computation function which works
   for any billiard and any particle. It assumes that the obstacles are
   sorted counter clockwise.
   * Added `arclength`, `totallength`
-  * Added `plot_boundarymap` that plots the poincare section and the obstacle boundaries.
+  * Added `plot_boundarymap` that plots the boundary map and the obstacle boundaries.
 * Added Poincare surface of section function, which computes intersections with
   arbitrary planes!
 * It is now possible to affect many different obstacles during ray-splitting!
@@ -23,7 +24,9 @@
 * added `evolve` function that simply deepcopies particle.
 * Added convenience function to compute the mean collision time in a billiard.
 
-## Syntax changes
+## Syntax and other changes
+* Default colors for plotting have been changed (random obstacles are purple,
+  particle orbit is `"C0"`).
 * new function `bounce!` that propagates a particle from one collision to the
   next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
   of saving stuff. All high level functions use `bounce!`.

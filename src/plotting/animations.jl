@@ -59,7 +59,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
             push!(xdata, xt)
             push!(ydata, yt)
         else
-            shift!(xdata); shift!(ydata)
+            popfirst!(xdata); popfirst!(ydata)
             push!(xdata, xt); push!(ydata, yt)
         end
 
@@ -80,9 +80,9 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
         line[:set_ydata](ypd)
 
         if particle_kwargs != nothing
-            point, quiv = plot_particle(p; particle_kwargs...)
+            point, quiv = plot_particle!(p; particle_kwargs...)
         else
-            point, quiv = plot_particle(p)
+            point, quiv = plot_particle!(p)
         end
 
         if savefigs
