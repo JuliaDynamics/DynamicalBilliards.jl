@@ -37,7 +37,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
     p = deepcopy(par)
     if newfig == true
         fig = figure()
-        plot_billiard(bd)
+        plot_billiard(bd; ax = gca())
     end
 
     sleeptime == 0 && (sleeptime = 1e-3)

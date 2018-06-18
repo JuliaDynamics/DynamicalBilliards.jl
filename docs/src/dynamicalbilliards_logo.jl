@@ -2,7 +2,8 @@ using DynamicalBilliards, PyPlot
 using DynamicalBilliards: cross2D
 
 # %%
-function billiards_logo(h=1.0, α=0.8, r=0.18, off=0.25)
+h = 1.0; α = 0.8; r = 0.18; off = 0.25
+# function billiards_logo(h=1.0, α=0.8, r=0.18, off=0.25)
 
     cos6 = cos(π/6)
     β = (h - cos6*α)/cos6
@@ -43,11 +44,9 @@ function billiards_logo(h=1.0, α=0.8, r=0.18, off=0.25)
     red = Antidot(center_of_mass .+ R*offset, r, "red")
     purple = RandomDisk(center_of_mass .+ R*R*offset, r, "purple")
 
-    return Billiard(green, red, purple, frame...)
-end
-
-bd = billiards_logo(1.0, 0.8, 0.18, 0.25)
-plot_billiard(bd)
+    bd = Billiard(green, red, purple, frame...)
+# end
+# bd = billiards_logo(1.0, 0.8, 0.18, 0.25)
 
 
 # %% Raysplitting functions for the red circle:
@@ -60,13 +59,16 @@ transmission_p = (p) -> (φ, pflag, ω) -> begin
     end
 end
 newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
-raya = RaySplitter([2], transmission_p(0.9), refraction, newoantidot)
+raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
 
 # %% Create and animate particle:
-p = randominside(bd, 2.0)
+p = randominside(bd, 3.5)
 
 cd()
 mkpath("billiardanim")
 cd("billiardanim")
 
-animate_evolution(p, bd, 500, raya; savefigs = true, savename="logo")
+plot_billiard(bd)
+axis("off")
+
+animate_evolution(p, bd, 500, raya; newfig = false, savefigs = true, savename="logo")
