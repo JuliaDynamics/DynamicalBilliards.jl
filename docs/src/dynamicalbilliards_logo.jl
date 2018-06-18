@@ -63,5 +63,10 @@ newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
 raya = RaySplitter([2], transmission_p(0.9), refraction, newoantidot)
 
 # %% Create and animate particle:
-p = randominside(bd, 1.0)
-animate_evolution(p, bd, 500, raya)
+p = randominside(bd, 2.0)
+
+cd()
+mkpath("billiardanim")
+cd("billiardanim")
+
+animate_evolution(p, bd, 500, raya; savefigs = true, savename="logo")

@@ -51,13 +51,34 @@ struct RaySplitter{T, Φ, Ω, A}
     affect::A
 end
 
-function RaySplitter(idxs, tr, ref, newangular = (ω, pflag) -> ω; affect = (i) -> i)
+@inline default_affect(i) = i
+@inline default_angular(ω, pflag) = ω
+
+function RaySplitter(idxs, tr, ref, newangular = default_angular;
+                                    affect = default_affect)
     for i ∈ idxs
         i ∈ affect(i) || throw(ArgumentError(
         "All indices that correspond to this RaySplitter must also be affected!"))
     end
     typeof(idxs) == Int && (idxs = [idxs])
     return RaySplitter(sort(idxs), tr, ref, newangular, affect)
+end
+
+#pretty print:
+function Base.show(io::IO, ::MIME"text/plain", ray::RaySplitter)
+    ps = 15
+    angtext = ray.newω == default_angular ? "default" : "$(ray.newω)"
+    afftext = ray.affect == default_affect ? "default" : "$(ray.affect)"
+    print(io, "RaySplitter for indices $(ray.oidx)"*"\n",
+    rpad(" transmission: ", ps)*"$(ray.transmission)\n",
+    rpad(" refraction: ", ps)*"$(ray.refraction)\n",
+    rpad(" new angular: ", ps)*angtext*"\n",
+    rpad(" affect: ", ps)*afftext*"\n"
+    )
+end
+
+function Base.show(io::IO, ray::RaySplitter)
+    print(io, "RaySplitter for indices $(ray.oidx)")
 end
 
 
@@ -357,7 +378,7 @@ function reset_billiard!(bd::Billiard)
 end
 
 """
-    isphysical(raysplitters::Tuple; only_mandatory = false)
+    isphysical(raysplitter(s))
 Return `true` if the given `raysplitters` have physically
 plausible properties.
 
@@ -368,11 +389,9 @@ Specifically, check if (φ is the incidence angle, θ the refraction angle):
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ) at ω = 0
 * Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, pflag), !pflag) ≈ ω
-
-The first property is mandatory to hold for any setting and is always checked.
-The rest are checked if `only_mandatory = false`.
 """
-function isphysical(rays::Tuple; only_mandatory = false)
+isphysical(ray::RaySplitter) = isphysical((ray,))
+function isphysical(rays::Tuple)
   for (i, ray) in enumerate(rays)
     scatter = ray.refraction
     tr = ray.transmission
@@ -393,7 +412,6 @@ function isphysical(rays::Tuple; only_mandatory = false)
             println(es)
             return false
           end
-          if !only_mandatory
             # Check symmetry:
             if ω==0
               if !isapprox(θ, -scatter(-φ, pflag, ω))
@@ -422,7 +440,6 @@ function isphysical(rays::Tuple; only_mandatory = false)
               println(es)
               return false
             end
-          end
         end#φ range
       end#ω range
     end#pflag range

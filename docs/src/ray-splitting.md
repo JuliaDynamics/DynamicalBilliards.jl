@@ -66,7 +66,9 @@ transmission_p = (p) -> (φ, pflag, ω) -> begin
 end
 ```
 Notice also how we defined the function in such a way that critical refraction is
-respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0`.
+respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0`. Although this is necessary from a
+physical perspective, the code does take care of it by clamping the
+refraction angle (see below).
 
 Lastly, for this example we will use magnetic propagation. We define functions
 such that the antidots also reverse the direction of the magnetic field
@@ -77,8 +79,8 @@ newowall = ((x, bool) -> bool ? 0.5x : 2.0x)
 
 Now we create the [`RaySplitter`](@ref) instances we want
 ```julia
-raywall = RaySplitter([3], transmission_p(0.5), refraction; newangular = newowall)
-raya = RaySplitter([1, 2], transmission_p(0.8), refraction; newangular = newoantidot)
+raywall = RaySplitter([3], transmission_p(0.5), refraction, newowall)
+raya = RaySplitter([1, 2], transmission_p(0.8), refraction, newoantidot)
 ```
 Because we want to use same functions for both antidots, we gave
 both indices in `raya`, `[1, 2]` (which are the indices of the antidots in the
@@ -100,7 +102,7 @@ will produce
 ![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif)
 
 
-!!! note "Resetting the billiard"
+!!! warning "Resetting the billiard"
     Notice that evolving a particle inside a billiard always mutates the billiard
     if ray-splitting is used. This means that you should always set the fields
     `pflag` of some obstacles to the values you desire after *each* call
@@ -112,8 +114,7 @@ will produce
 
 !!! important "Angle of refraction is clamped"
     Internally we clamp the output of the angle of refraction function to
-    `-π/2 + 0.1 ≤ θ ≤ π/2 - 0.1`. This is so that the relocating algorithm does not fall
-    into an infinite loop.
+    `-π/2 + 0.1 ≤ θ ≤ π/2 - 0.1`. This is so that the relocating algorithm does not fall into an infinite loop.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
@@ -141,11 +142,10 @@ process. Let $T$ denote the transmission function, $\theta$ the refraction funct
 
 
 ## Physics of the Ray-Splitting Functions
-If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen. As it has already been discussed, the condition of total internal reflection must be taken care of by the user.
+If `T` is the transmission probability function, then the condition for transmission is simply: `T(φ, pflag, ω) > rand()`. If it returns `true`, transmission (i.e. ray-splitting) will happen.
 
-The functions given to [`RaySplitter`](@ref) should have some properties in order to have physical meaning. One of these properties is absolutely **mandatory** for this package to work properly, and is the property of total internal reflection, i.e. if the refraction angle is calculated to be greater/equal than π/2, no transmission can happen. As mentioned previously, internally the refraction angle is clamped so you can say that this condition is *asserted*. 
-
-In order to test if the `RaySplitter` you have defined has physical meaning, the function `isphysical()` is provided
+The functions given to [`RaySplitter`](@ref) should have some properties in order to have physical meaning.
+In order to test if the `RaySplitter` you have defined has physical meaning, the function `isphysical` is provided
 ```@docs
 isphysical
 ```
