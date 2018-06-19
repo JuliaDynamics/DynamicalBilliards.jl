@@ -1,25 +1,6 @@
 using PyPlot, StaticArrays, InteractiveUtils
 export plot_billiard
 
-"""
-    translation(obst::Obstacle, vector)
-Create a copy of the given obstacle with its position
-translated by `vector`.
-"""
-function translation end
-
-for T in subtypes(Circular)
-  @eval translation(d::$T, vec) = ($T)(d.c .+ vec, d.r)
-end
-
-for T in subtypes(Wall)
-  @eval translation(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
-end
-
-periodicerror() = throw(ArgumentError(
-"The billiard must be periodic, i.e. has at least two `PeriodicWall` obstacles"
-))
-
 function nonperiodic(bd::Billiard)
     toplot = Obstacle{eltype(bd)}[]
     for obst in bd
@@ -28,6 +9,10 @@ function nonperiodic(bd::Billiard)
     end
     return toplot
 end
+
+periodicerror() = throw(ArgumentError(
+"The billiard must be periodic, i.e. has at least two `PeriodicWall` obstacles"
+))
 
 
 """
@@ -90,8 +75,18 @@ function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
 
     if plot_orbit
         sca(ax)
+        scatter(xt[1], yt[1], color = "black")
         plot(xt, yt, color = "C0")
     end
+
+    cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
+    dcx = cellxmax - cellxmin
+    dcy = cellymax - cellymin
+    PyPlot.xlim(xmin - dcx/2, xmax + dcx/2)
+    PyPlot.ylim(ymin - dcy/2, ymax + dcy/2)
+    PyPlot.gca()[:set_aspect]("equal")
+
+    return nothing
 end
 
 function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
@@ -111,16 +106,13 @@ function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
         for y in dy
             disp = SVector(x,y)
             for obst in toplot
-                plot_obstacle!(translation(obst, disp))
+                plot_obstacle!(translate(obst, disp))
             end
         end
     end
-    PyPlot.xlim(xmin, xmax)
-    PyPlot.ylim(ymin, ymax)
-    PyPlot.gca()[:set_aspect]("equal")
 end
 
-function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
+function plot_periodic_hexagon2(bd, xmin, ymin, xmax, ymax)
 
 
 
@@ -146,17 +138,17 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
         j = 0
         while xmin < -j*space*cos6
-            d_temp = translation(d, -j*disp2)
+            d_temp = translate(d, -j*disp2)
             plot_obstacle!(d_temp)
             i = 1
             while ymin < -i*space
-                plot_obstacle!(translation(d_temp, -i*disp1))
+                plot_obstacle!(translate(d_temp, -i*disp1))
                 i += 1
             end
 
             k = 1
             while ymax > k*space
-                plot_obstacle!(translation(d_temp, k*disp1))
+                plot_obstacle!(translate(d_temp, k*disp1))
                 k += 1
             end
             j += 1
@@ -164,21 +156,58 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
         j = 1
         while xmax > j*space*cos6
-            d_temp = translation(d, j*disp2)
+            d_temp = translate(d, j*disp2)
             plot_obstacle!(d_temp)
             i = 1
             while ymin < -i*space
-                plot_obstacle!(translation(d_temp, -i*disp1))
+                plot_obstacle!(translate(d_temp, -i*disp1))
                 i += 1
             end
 
             k = 1
             while ymax > k*space
-                plot_obstacle!(translation(d_temp, k*disp1))
+                plot_obstacle!(translate(d_temp, k*disp1))
                 k += 1
             end
             j += 1
         end
     end
 
+end
+
+
+
+
+function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
+
+    v = 1
+    while !(typeof(bd[v]) <: PeriodicWall); v += 1; end
+    space = norm(bd[v].sp - bd[v].ep)*√3
+
+    basis_a = space*SVector(0.0, 1.0)
+    basis_b = space*SVector(√3/2, 1/2)
+    basis_c = space*SVector(√3, 0.0)
+
+    PyPlot.xlim(xmin - space/2, xmax + space/2)
+    PyPlot.ylim(ymin, ymax)
+    PyPlot.gca()[:set_aspect]("equal")
+
+    # Cell limits:
+    cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
+    dcx = cellxmax - cellxmin
+    dcy = cellymax - cellymin
+    jmin = Int((ymin - cellymin - dcy/2)÷space) - 1
+    jmax = Int((ymax - cellymax + dcy/2)÷space) + 1
+    imin = Int((xmin - cellxmin - dcx/2)÷(√3*space)) - 1
+    imax = Int((xmax - cellxmax + dcx/2)÷(√3*space)) + 1
+
+    obstacles = nonperiodic(bd)
+    for d in obstacles
+        for j ∈ jmin:jmax
+            for i ∈ imin:imax
+                plot_obstacle!(translate(d, j*basis_a + i*basis_c))
+                plot_obstacle!(translate(d, j*basis_a + i*basis_c + basis_b))
+            end
+        end
+    end
 end
