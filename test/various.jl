@@ -137,3 +137,76 @@ function meancoltimes(partnum=500; printinfo=true)
     end
     return
 end
+
+function _coordinates(bd, partnum=500; tolerance = 1e-5)
+    intervals = arcintervals(bd)
+    @testset "real -> boundary -> real" begin
+        for i ∈ 1:partnum
+            #create real position & velocity on boundary
+            p = randominside(bd);
+            tmin, i = next_collision(p, bd)
+            relocate!(p, bd[i], tmin)
+
+            #transform to Boundary coordinates
+            ξ = intervals[i] + arclength(p, bd[i])
+            sφ = sin(DynamicalBilliards.incidence_angle(p, bd[i]))
+            
+            #transform back to real space coordinates
+            rpos, rvel, ri = real_coordinates(ξ, sφ, bd, return_obstacle=true,
+                                              intervals = intervals)
+
+            @test i == ri
+            @test norm(rpos-p.pos) < tolerance
+            @test norm(rvel-p.vel) < tolerance
+        end
+    end
+    
+    @testset "boundary -> real -> boundary" begin
+        for i ∈ 1:partnum
+            #create arclength & angle of incidence
+            ξ = rand()*intervals[end]
+            sφ = 2*rand() - 1.0
+            
+            #transform to real coordinates
+            pos, vel, i = real_coordinates(ξ, sφ, bd, return_obstacle=true,
+                                           intervals = intervals)
+            p = Particle(pos, vel, SVector(0.0,0.0))
+            #transform back to Birkhoff coordinates
+            rξ = arclength(pos, bd[i]) + intervals[i]
+            rsφ = sin(DynamicalBilliards.incidence_angle(p, bd[i]))
+
+            @test rξ <= intervals[end] && rξ >= 0
+            
+            @test abs(rξ - ξ) < tolerance
+            @test abs(rsφ - sφ) < tolerance
+        end
+    end
+end
+
+function coordinates(partnum=500; printinfo=true)
+    tim = time()
+
+    tolerance = 1e-10
+    
+    @testset "Mushroom" begin
+        bd = billiard_mushroom()
+        _coordinates(bd, partnum, tolerance = tolerance)
+    end
+
+    @testset "Stadium" begin
+        bd = billiard_mushroom()
+        _coordinates(bd, partnum, tolerance = tolerance)
+    end
+
+    if printinfo
+        println(
+            """Results:
++ real_coordinates and arclength return sane 
+  results on mushrooms and stadiums
++ real_coordinates and arclength are inverse
+  functions of each other
+""")
+    end
+    return
+end
+    
