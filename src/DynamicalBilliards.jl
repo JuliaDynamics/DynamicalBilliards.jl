@@ -29,9 +29,13 @@ include("billiards/standard_billiards.jl")
 include("timeevolution/collisiontimes.jl")
 include("timeevolution/propagation.jl")
 
+include("maps/coordinates.jl")
+include("maps/boundarymap.jl")
+include("maps/phasespacetools.jl")
+
 include("highleveltimes.jl")
-include("poincaresos.jl")
 include("lyapunov_spectrum.jl")
+
 
 include("mushroomtools.jl")
 export MushroomTools
