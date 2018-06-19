@@ -68,7 +68,7 @@ function boundarymap(bd::Billiard{T}, t, par::AbstractParticle{T},
         if typeof(bd[i]) <: PeriodicWall
             continue # do not write output if collision with with PeriodicWall
         else
-            push!(pparams, arclength(p, bd[i]) + intervals[i][1])
+            push!(pparams, arclength(p, bd[i]) + intervals[i])
             push!(pangles, reflection_angle(p, bd[i]))
             # set counter
             count += increment_counter(t, t_to_write)

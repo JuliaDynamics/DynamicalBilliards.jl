@@ -26,22 +26,17 @@ end
 
 ## BILLIARD-LEVEL FUNCTIONS ####################################################
 
+#TODO:Better docstring
 """
     arcintervals(bd::Billiard)
-Generate an array of `SVector`s, with the `i`th `SVector` containing the arc
-length intervals corresponding to the `i`th `Obstacle` in `bd`.
+Generates an `SVector`, with the `i`th and `i+1`th entry containing the arc
+length interval corresponding to the `i`th `Obstacle` in `bd`.
 
 Used by [`boundarymap`](@ref) to compute arc lengths.
 """
 function arcintervals(bd::Billiard{T, D}) where {T, D}
-    intervals = Vector{SVector{2,T}}(undef, D)
-    current = zero(T)
-    for i ∈ 1:D
-        l = totallength(bd[i]) + current
-        intervals[i] = SVector{2,T}(current, l)
-        current = l
-    end
-    return intervals
+    intervals = SVector{D+1,T}(0, map(x->totallength(x), bd.obstacles)...)
+    return cumsum(intervals)
 end
 
 ## OBSTACLE-LEVEL FUNCTIONS ####################################################
