@@ -90,26 +90,24 @@ coordinates.
 Returns position and velocity vectors in real space. If `return_obstacle` is 
 the index of the obstacle corresponding to this position is also returned.
 """
-function real_coordinates(ξ, sφ, bd::Billiard{T};
-                          return_obstacle::Bool = false) where T
+function real_coordinates(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
+                          intervals = arcintervals(bd)
+                          ) where T
     
     abs(sφ) > 1 && throw(DomainError(sφ, "|sin φ| must not be larger than 1"))
-    lower = zero(T)
-    upper = lower
+    
     for (i, obst) ∈ enumerate(bd)
         
-        upper = lower + totallength(obst)
-
-        if ξ <= upper
-            pos = real_pos(ξ - lower, obst)
+        if ξ <= intervals[i+1]
+            pos = real_pos(ξ - intervals[i], obst)
+            
             #calculate velocity
             cφ = cos(asin(sφ))
             n = normalvec(obst, pos)
             vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
+            
             return return_obstacle ? (pos, vel, i) : (pos, vel)
         end
-        lower = upper
-
     end
 
     throw(DomainError(ξ ,"ξ is too large for this billiard!"))

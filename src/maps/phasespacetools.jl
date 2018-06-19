@@ -22,7 +22,8 @@ on the full, three dimensional phase-space. Use the function
 [`phasespace_portion`](@ref) for that!
 """
 function boundarymap_portion(bd::Billiard{T}, t,
-                             par::AbstractParticle{T}, δξ, δφ = δξ) where {T}
+                             par::AbstractParticle{T}, δξ, δφ = δξ;
+                             intervals = arcintervals(bd)) where {T}
     
     p = deepcopy(par)
 
@@ -30,7 +31,7 @@ function boundarymap_portion(bd::Billiard{T}, t,
     t_to_write = zero(T)
 
     d = Dict{SV{Int}, Int}()
-    intervals = arcintervals(bd)
+   
     while count < t
         i, tmin = bounce!(p,bd)
         t_to_write += tmin
@@ -82,8 +83,11 @@ function phasespace_portion(bd::Billiard{T}, t,
 
     PT = typeof(par)
 
-    r, dict = boundarymap_portion(bd, t, par, δξ, δφ)
-
+    r, dict = boundarymap_portion(bd, t, par, δξ, δφ,
+                                  intervals = arcintervals(bd))
+    
+    ints =  arcintervals(bd)
+    
     maxξ = ceil(Int, totallength(bd)/δξ)
     maxφ = ceil(Int, 2/δφ)
 
@@ -100,7 +104,8 @@ function phasespace_portion(bd::Billiard{T}, t,
         φc = (φcell - 0.5)*δφ - 1
 
         #convert to real space
-        pos, vel, i = real_coordinates(ξc, φc, bd, return_obstacle=true)
+        pos, vel, i = real_coordinates(ξc, φc, bd, return_obstacle=true,
+                                       intervals = ints)
 
         #set dummy coordinates
         dummy.pos = pos
