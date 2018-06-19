@@ -44,8 +44,6 @@ work with `DynamicalBilliards`:
 1. [`normalvec`](@ref)
 2. [`distance`](@ref) (with arguments `(position, obstacle)`)
 3. [`collisiontime`](@ref) with `Particle`
-2. Trivial `collisiontime` method with `MagneticParticle` that returns `error()`
-   (see optional methods)
 
 Assuming that upon collision a specular reflection happens, then you don't need
 to define a method for [`resolvecollision!`](@ref).
@@ -127,8 +125,8 @@ and properly initializes particles with [`randominside`](@ref)!
 ## Optional Methods
 
 1. [`collisiontime`](@ref) with `MagneticParticle` : enables magnetic propagation
-2. `plot_obstacle` : enables plotting (used in `plot_billiard`)
-3. [`arclength`](@ref) so that the [`boundarymap`](@ref) can be computed.
+2. [`plot_obstacle!`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
+3. [`to_bcoords`](@ref) so that the [`boundarymap`](@ref) can be computed.
 
 The `collisiontime` method for `MagneticParticle` is very easy in this case, because
 it is almost identical with the method for the general `Circular` obstacle:
@@ -170,31 +168,14 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
 end
 ```
 
-Then, we add swag by writing a method for `plot_obstacle`:
-```julia
-Arc = PyPlot.matplotlib[:patches][:Arc]
-function plot_obstacle(d::Semicircle; kwargs...)
-  theta1 = atan2(d.facedir[2], d.facedir[1])*180/π + 90
-  theta2 = theta1 + 180
-  s1 = Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2,
-  edgecolor = (0,0.6,0), linewidth = 2.0, kwargs...)
-  PyPlot.gca()[:add_artist](s1)
-  PyPlot.show()
-end
-```
+Then, we add swag by writing a method for `plot_obstacle!`:
+
+# TODO: REWRITE
+
 (this method is in the `/plotting/obstacles.jl` file and is loaded on-demand
 when `using PyPlot`)
 
-Finally, we also add a method to the [`arclength`](@ref) function, so that
+Finally, we also add a method to the [`to_bcoords`](@ref) function, so that
 we can compute the [`boundarymap`](@ref) of billiards containing our new obstacle
-```julia
-function arclength(pos, o::Semicircle)
-    #project pos on open face
-    chrd = SVector{2}(-o.facedir[2], o.facedir[1]) #tangent to open face
-    d = (pos - o.c)/o.r
-    x = dot(d, chrd)
-    r =  acos(clamp(x, -1, 1))*o.r
-    return r
-end
-```
-and we are done!
+
+# TODO: REWRITE!

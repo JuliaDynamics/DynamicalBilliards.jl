@@ -5,7 +5,7 @@
 ##
 ################################################################################
 
-export arcintervals, arclength, real_coordinates
+export arcintervals, to_bcoords, from_bcoords
 
 #this function only exists because incidence_angle from raysplitting.jl only works
 #if you pass the particle *before* collision, which I cannot do because of bounce!
@@ -42,26 +42,26 @@ end
 ## OBSTACLE-LEVEL FUNCTIONS ####################################################
 
 """
-    arclength(p::AbstractParticle, o::Obstacle)
-    arclength(pos::SVector{2,T}, o::Obstacle)
+    to_bcoords(p::AbstractParticle, o::Obstacle)
+    to_bcoords(pos::SVector{2,T}, o::Obstacle)
 Returns the boundary coordinate of the particle on the obstacle,
 assuming that the particle position is on the obstacle.
 
 The boundary coordinate is measured as:
 * the distance from start point to end point in `Wall`s
 * the arc length measured counterclockwise from the open face in `Semicircle`s
-* the arc length measured counterclockwise from the rightmost point 
+* the arc length measured counterclockwise from the rightmost point
   in `Circular`s
 """
-arclength(p::AbstractParticle, o) = arclength(p.pos, o)
+to_bcoords(p::AbstractParticle, o) = to_bcoords(p.pos, o)
 
 # walls
-arclength(pos::SV, o::Wall) = norm(pos - o.sp)
+to_bcoords(pos::SV, o::Wall) = norm(pos - o.sp)
 
 # semicircles
-function arclength(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
+function to_bcoords(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
     #project pos on open face
-    chrd = SV{T}(-o.facedir[2],o.facedir[1]) 
+    chrd = SV{T}(-o.facedir[2],o.facedir[1])
     d = (pos - o.c)/o.r
     x = dot(d, chrd)
     r =  acos(clamp(x, -1, 1))*o.r
@@ -70,7 +70,7 @@ end
 
 
 # other circulars
-function arclength(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
+function to_bcoords(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
     d = (pos - o.c)/o.r
     r = acos(clamp(d[1], -1, 1))*o.r
     return r
@@ -78,34 +78,34 @@ end
 
 
 ################################################################################
-## real_coordinates
+## from_bcoords
 ################################################################################
 
 ## BILLIARD-LEVEL FUNCTIONS ####################################################
 
 """
-    real_coordinates(ξ, sφ, bd::Billiard; return_obstacle = false)
-Converts Birkhoff coordinates `ξ` and `sφ` on the Billiard `bd` to real space 
-coordinates. 
-Returns position and velocity vectors in real space. If `return_obstacle` is 
+    from_bcoords(ξ, sφ, bd::Billiard; return_obstacle = false)
+Converts Birkhoff coordinates `ξ` and `sφ` on the Billiard `bd` to real space
+coordinates.
+Returns position and velocity vectors in real space. If `return_obstacle` is
 the index of the obstacle corresponding to this position is also returned.
 """
-function real_coordinates(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
+function from_bcoords(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
                           intervals = arcintervals(bd)
                           ) where T
-    
+
     abs(sφ) > 1 && throw(DomainError(sφ, "|sin φ| must not be larger than 1"))
-    
+
     for (i, obst) ∈ enumerate(bd)
-        
+
         if ξ <= intervals[i+1]
             pos = real_pos(ξ - intervals[i], obst)
-            
+
             #calculate velocity
             cφ = cos(asin(sφ))
             n = normalvec(obst, pos)
             vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
-            
+
             return return_obstacle ? (pos, vel, i) : (pos, vel)
         end
     end
@@ -119,8 +119,8 @@ end
 #walls
 """
     real_pos(ξ, o::Obstacle)
-Converts the arclength `ξ` relative to the Obstacle `o` into a real space 
-position vector. 
+Converts the to_bcoords `ξ` relative to the Obstacle `o` into a real space
+position vector.
 """
 real_pos(ξ, o::Wall) = o.sp + ξ*normalize(o.ep - o.sp)
 
@@ -133,4 +133,3 @@ end
 
 #other circulars
 real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cossin(ξ/o.r))
-

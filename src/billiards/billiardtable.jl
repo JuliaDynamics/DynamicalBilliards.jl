@@ -23,13 +23,8 @@ Construct a `Billiard` from given `obstacles` (tuple, vector, varargs).
 
 If you want to use the [`boundarymap`](@ref) function, then it is expected to
 provide the obstacles of the billiard in sorted order, such that the boundary
-coordinate (measured using [`arclength`](@ref))
+coordinate (measured using [`to_bcoords`](@ref))
 around the billiard is increasing counter-clockwise.
-
-The boundary coordinate is measured as:
-* the distance from start point to end point in `Wall`s
-* the arc length measured counterclockwise from the open face in `Semicircle`s
-* the arc length measured counterclockwise from the rightmost point in `Circular`s
 """
 function Billiard(bd::Union{AbstractVector, Tuple})
 

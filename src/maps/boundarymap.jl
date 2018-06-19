@@ -1,10 +1,9 @@
 export boundarymap
-export psos!, psos
+export psos
 
 #######################################################################################
 ## Boundary Map
 #######################################################################################
-
 """
     boundarymap(bd::Billiard, t, particles)
 Compute the boundary map of the

@@ -148,11 +148,11 @@ function _coordinates(bd, partnum=500; tolerance = 1e-5)
             relocate!(p, bd[i], tmin)
 
             #transform to Boundary coordinates
-            ξ = intervals[i] + arclength(p, bd[i])
+            ξ = intervals[i] + to_bcoords(p, bd[i])
             sφ = sin(DynamicalBilliards.incidence_angle(p, bd[i]))
             
             #transform back to real space coordinates
-            rpos, rvel, ri = real_coordinates(ξ, sφ, bd, return_obstacle=true,
+            rpos, rvel, ri = from_bcoords(ξ, sφ, bd, return_obstacle=true,
                                               intervals = intervals)
 
             @test i == ri
@@ -163,16 +163,16 @@ function _coordinates(bd, partnum=500; tolerance = 1e-5)
     
     @testset "boundary -> real -> boundary" begin
         for i ∈ 1:partnum
-            #create arclength & angle of incidence
+            #create to_bcoords & angle of incidence
             ξ = rand()*intervals[end]
             sφ = 2*rand() - 1.0
             
             #transform to real coordinates
-            pos, vel, i = real_coordinates(ξ, sφ, bd, return_obstacle=true,
+            pos, vel, i = from_bcoords(ξ, sφ, bd, return_obstacle=true,
                                            intervals = intervals)
             p = Particle(pos, vel, SVector(0.0,0.0))
             #transform back to Birkhoff coordinates
-            rξ = arclength(pos, bd[i]) + intervals[i]
+            rξ = to_bcoords(pos, bd[i]) + intervals[i]
             rsφ = sin(DynamicalBilliards.incidence_angle(p, bd[i]))
 
             @test rξ <= intervals[end] && rξ >= 0
@@ -201,9 +201,9 @@ function coordinates(partnum=500; printinfo=true)
     if printinfo
         println(
             """Results:
-+ real_coordinates and arclength return sane 
++ from_bcoords and to_bcoords return sane 
   results on mushrooms and stadiums
-+ real_coordinates and arclength are inverse
++ from_bcoords and to_bcoords are inverse
   functions of each other
 """)
     end
