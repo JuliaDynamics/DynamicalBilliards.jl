@@ -48,6 +48,7 @@ end
 
 """
     arclength(p::AbstractParticle, o::Obstacle)
+    arclength(pos::SVector{2,T}, o::Obstacle)
 Returns the boundary coordinate of the particle on the obstacle,
 assuming that the particle position is on the obstacle.
 
@@ -88,11 +89,14 @@ end
 ## BILLIARD-LEVEL FUNCTIONS ####################################################
 
 """
-    real_coordinates(ξ, sφ, bd::Billiard)
-Given an [`arclength`](
+    real_coordinates(ξ, sφ, bd::Billiard; return_obstacle = false)
+Converts Birkhoff coordinates `ξ` and `sφ` on the Billiard `bd` to real space 
+coordinates. 
+Returns position and velocity vectors in real space. If `return_obstacle` is 
+the index of the obstacle corresponding to this position is also returned.
 """
 function real_coordinates(ξ, sφ, bd::Billiard{T};
-                          return_obst::Bool = false) where T
+                          return_obstacle::Bool = false) where T
     
     abs(sφ) > 1 && throw(DomainError(sφ, "|sin φ| must not be larger than 1"))
     lower = zero(T)
@@ -102,8 +106,12 @@ function real_coordinates(ξ, sφ, bd::Billiard{T};
         upper = lower + totallength(obst)
 
         if ξ <= upper
-            ret = real_coordinates(ξ - lower, sφ, obst)
-            return return_obst ? (ret..., i) : ret
+            pos = real_pos(ξ - lower, obst)
+            #calculate velocity
+            cφ = cos(asin(sφ))
+            n = normalvec(obst, pos)
+            vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
+            return return_obstacle ? (pos, vel, i) : (pos, vel)
         end
         lower = upper
 
@@ -114,26 +122,20 @@ end
 
 ## OBSTACLE-LEVEL FUNCTIONS ####################################################
 
-"""
-    real_coordinates(ξ, sφ, o::Obstacle)
-Given an [`arclength`](
-"""
-function real_coordinates(ξ, sφ, o::Obstacle{T}) where T
-    pos = real_pos(ξ, o)
-    cφ = cos(asin(sφ))
-    n = normalvec(o, pos)
-    vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
-    return pos,vel
-end
 
-#walls 
+#walls
+"""
+    real_pos(ξ, o::Obstacle)
+Converts the arclength `ξ` relative to the Obstacle `o` into a real space 
+position vector. 
+"""
 real_pos(ξ, o::Wall) = o.sp + ξ*normalize(o.ep - o.sp)
 
 #semicircles
 function real_pos(ξ, o::Semicircle{T}) where T
     sξ, cξ = sincos(ξ/o.r)
     chrd = SV{T}(-o.facedir[2], o.facedir[1])
-    return o.c - sξ*o.facedir + cξ*chrd
+    return o.c - o.r*(sξ*o.facedir - cξ*chrd)
 end
 
 #other circulars

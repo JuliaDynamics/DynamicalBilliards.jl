@@ -22,7 +22,7 @@ In the last case `n` random particles are produced in the billiard table using
 The measurement direction of the arclengths of the individual obstacles
 is dictated by `bd`, see [`Billiard`](@ref) for more.
 
-Return
+Returns
 * the arclengths at the collisions `ξs`
 * the sines of the incidence angles at the collisions `sφs`
 * obstacle arclength `intervals`

@@ -100,7 +100,7 @@ function phasespace_portion(bd::Billiard{T}, t,
         φc = (φcell - 0.5)*δφ - 1
 
         #convert to real space
-        pos, vel, i = real_coordinates(ξc, φc, bd, return_obst=true)
+        pos, vel, i = real_coordinates(ξc, φc, bd, return_obstacle=true)
 
         #set dummy coordinates
         dummy.pos = pos
