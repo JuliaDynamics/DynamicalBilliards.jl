@@ -31,11 +31,13 @@ of `Vector`. The `i` inner vector corresponds to the results of the
 `i` initial condition/particle.
 
 The returned values of this function are can be used in conjuction with the
-function `plot_boundarymap` (requires `using PyPlot`) to plot the boundary map
+function [`plot_boundarymap`](@ref) (requires `using PyPlot`) to plot the boundary map
 in an intuitive way.
 
 *Notice* - this function only works for normal specular reflection. Random reflections
 or ray-splitting will give unexpected results.
+
+See also [`to_bcoords`](@ref), [`boundarymap_portion`](@ref).
 """
 function boundarymap(bd::Billiard{T}, t,
                      ps::Vector{<:AbstractParticle{T}}) where {T}

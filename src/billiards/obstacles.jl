@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Semicircle, totallength
+normalvec, distance, cellsize, Semicircle
 
 #######################################################################################
 ## Circles
@@ -325,16 +325,6 @@ assumed to be very close to the obstacle's boundary).
 @inline normalvec(a::Antidot, pos) =
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
-
-
-"""
-    totallength(o::Obstacle)
-Return the total length of `o`.
-"""
-@inline totallength(o::Wall) = norm(o.ep - o.sp)
-@inline totallength(o::Semicircle) = π*o.r
-@inline totallength(o::Circular) = 2π*o.r
-
 
 
 #######################################################################################

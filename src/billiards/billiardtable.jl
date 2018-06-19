@@ -58,8 +58,6 @@ Base.eltype(::Billiard{T}) where {T} = T
 
 @inline isperiodic(bd) = count(x -> typeof(x) <: PeriodicWall, bd.obstacles) ≥ 2
 
-@inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
-
 #######################################################################################
 ## Distances
 #######################################################################################

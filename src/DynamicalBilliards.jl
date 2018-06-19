@@ -36,7 +36,6 @@ include("maps/phasespacetools.jl")
 include("highleveltimes.jl")
 include("lyapunov_spectrum.jl")
 
-
 include("mushroomtools.jl")
 export MushroomTools
 
