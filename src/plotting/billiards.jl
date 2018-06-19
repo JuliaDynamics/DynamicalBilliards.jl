@@ -70,6 +70,10 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
     sca(ax)
 
     if hexagonal
+        n = count(x -> typeof(x) <: PeriodicWall, bd)
+        n != 6 && throw(ArgumentError("Hexagonally periodic billiards have "*
+        "exactly 6 periodic walls arranged as a perfect hexagon. Use the "*
+        "function `billiard_polygon(6, r, R, setting = \"periodic\")`."))
         plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     else
         plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
@@ -77,10 +81,10 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
 end
 
 function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
-    hexagonal = false, ax = (figure(); gca()))
+    hexagonal = false, ax = (figure(); gca()), plot_orbit = true)
 
-    xmin = floor(minimum(xt,3)); xmax = ceil(maximum(xt,3))
-    ymin = floor(minimum(yt,3)); ymax = ceil(maximum(yt,3))
+    xmin = minimum(xt); xmax = maximum(xt)
+    ymin = minimum(yt); ymax = maximum(yt)
 
     plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
 
@@ -118,9 +122,7 @@ end
 
 function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
-    PyPlot.xlim(xmin, xmax)
-    PyPlot.ylim(ymin, ymax)
-    PyPlot.gca()[:set_aspect]("equal")
+
 
     v = 1
     while !(typeof(bd[v]) <: PeriodicWall); v += 1; end
@@ -129,9 +131,13 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     sin6, cos6 = sincos(π/6)
     disp1 = SVector(0.0, space)
     disp2 = SVector(space*cos6, space*sin6)
-    Δ = space/2
+    Δ = space
 
     xmin -= Δ; ymin -= Δ; ymax += Δ; xmax += Δ
+
+    PyPlot.xlim(xmin, xmax)
+    PyPlot.ylim(ymin, ymax)
+    PyPlot.gca()[:set_aspect]("equal")
 
     toplot = nonperiodic(bd)
 
