@@ -1,5 +1,5 @@
 export to_bcoords, from_bcoords, arcintervals
-
+export boundarymap
 #######################################################################################
 ## Arclengths
 #######################################################################################
@@ -152,3 +152,90 @@ function from_bcoords(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
 
     throw(DomainError(ξ ,"ξ is too large for this billiard!"))
 end
+
+
+
+#######################################################################################
+## Boundary Map
+#######################################################################################
+"""
+    boundarymap(bd::Billiard, t, particles)
+Compute the boundary map of the
+billiard `bd` by evolving each particle for total amount `t` (either float for
+time or integer for collision number). See below for the returned values.
+
+`particles` can be:
+* A single particle.
+* A `Vector` of particles.
+* An integer `n` optionally followed by an angular velocity `ω`.
+
+In the last case `n` random particles are produced in the billiard table using
+[`randominside`](@ref). If `ω` is also given, then the particles are magnetic.
+
+The measurement direction of the arclengths of the individual obstacles
+is dictated by `bd`, see [`Billiard`](@ref) for more.
+
+Returns
+* the arclengths at the collisions `ξs`
+* the sines of the incidence angles at the collisions `sφs`
+* obstacle arclength `intervals`
+
+If `particles` is not a single particle then both `ξs` and `sφs` are vectors
+of `Vector`. The `i` inner vector corresponds to the results of the
+`i` initial condition/particle.
+
+The returned values of this function are can be used in conjuction with the
+function [`plot_boundarymap`](@ref) (requires `using PyPlot`) to plot the boundary map
+in an intuitive way.
+
+*Notice* - this function only works for normal specular reflection. Random reflections
+or ray-splitting will give unexpected results.
+
+See also [`to_bcoords`](@ref), [`boundarymap_portion`](@ref).
+"""
+function boundarymap(bd::Billiard{T}, t,
+                     ps::Vector{<:AbstractParticle{T}}) where {T}
+
+    params = Vector{T}[]
+    sines = Vector{T}[]
+    intervals = arcintervals(bd)
+    for p ∈ ps
+        pparams, psines = boundarymap(bd, t, p, intervals)
+        push!(params, pparams)
+        push!(sines, psines)
+    end
+    return params, sines, intervals
+end
+
+function boundarymap(bd::Billiard{T}, t, par::AbstractParticle{T},
+                     intervals = arcintervals(bd)) where {T}
+
+    p = deepcopy(par)
+    pparams = T[]
+    pangles = T[]
+    count = zero(T)
+    t_to_write = zero(T)
+
+    while count < t
+        i, tmin = bounce!(p,bd)
+        t_to_write += tmin
+
+        if typeof(bd[i]) <: PeriodicWall
+            continue # do not write output if collision with with PeriodicWall
+        else
+            push!(pparams, arclength(p, bd[i]) + intervals[i])
+            push!(pangles, reflection_angle(p, bd[i]))
+            # set counter
+            count += increment_counter(t, t_to_write)
+            t_to_write = zero(T)
+        end
+    end #time, or collision number, loop
+    return pparams, sin.(pangles), intervals
+end
+
+
+boundarymap(bd::Billiard, t, n::Int) =
+    boundarymap(bd, t, [randominside(bd) for i ∈ 1:n])
+
+boundarymap(bd::Billiard, t, n::Int, ω::AbstractFloat) =
+    boundarymap(bd, t, [randominside(bd, ω) for i ∈ 1:n])
