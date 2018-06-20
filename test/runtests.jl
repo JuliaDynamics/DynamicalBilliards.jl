@@ -52,4 +52,4 @@ print("\nDynamicalBilliards tests ended (successfully) at: ")
 println(Dates.format(now(), "HH:MM:s"))
 t = time() - t
 println("Total time required was:")
-println(round(t, 3), " seconds, or ", round(t/60, digits=3), " minutes")
+println(round(t, digits=3), " seconds, or ", round(t/60, digits=3), " minutes")
