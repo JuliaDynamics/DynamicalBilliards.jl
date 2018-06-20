@@ -34,7 +34,7 @@ include("boundary/phasespacetools.jl")
 
 include("highleveltimes.jl")
 include("poincare.jl")
-include("lyapunov_spectrum.jl")""
+include("lyapunov_spectrum.jl")
 
 include("mushroomtools.jl")
 export MushroomTools

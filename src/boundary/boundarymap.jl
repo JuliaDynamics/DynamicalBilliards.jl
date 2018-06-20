@@ -65,8 +65,9 @@ The arc-coordinate `ξ` is measured as:
 See also [`arcintervals`](@ref) and [`from_bcoords`](@ref).
 """
 to_bcoords(p::AbstractParticle, o::Obstacle) = to_bcoords(p.pos, p.vel, o)
+
 function to_bcoords(pos::SV, vel::SV, o::Obstacle)
-    # n = normalvec(a, p.pos)
+    n = normalvec(o, pos)
     # prod = clamp(dot(p.vel, n), -1.0, 1.0)
     # φ = acos(prod)
     # cross2D(p.vel, n) < 0 && (φ *= -1)
@@ -104,11 +105,12 @@ real coordinates `pos, vel`.
 This function is the inverse of [`to_bcoords`](@ref).
 """
 function from_bcoords(ξ::T, sφ::T, o::Obstacle{T}) where {T}
+    pos = real_pos(ξ, o)
     cφ = cos(asin(sφ))
-    n = normalvec(obst, pos)
+    n = normalvec(o, pos)
     vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
 
-    return real_pos(ξ, o), vel
+    return pos, vel
 end
 
 """
@@ -129,7 +131,7 @@ real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cossin(ξ/o.r))
 
 
 
-# Old Lukas function:
+# billiard level function, needed for phasespace_portion
 function from_bcoords(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
                           intervals = arcintervals(bd)
                           ) where T
@@ -139,13 +141,7 @@ function from_bcoords(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
     for (i, obst) ∈ enumerate(bd)
 
         if ξ <= intervals[i+1]
-            pos = real_pos(ξ - intervals[i], obst)
-
-            #calculate velocity
-            cφ = cos(asin(sφ))
-            n = normalvec(obst, pos)
-            vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
-
+            pos, vel  = from_bcoords(ξ - intervals[i], sφ, obst)
             return return_obstacle ? (pos, vel, i) : (pos, vel)
         end
     end
@@ -212,7 +208,7 @@ function boundarymap(bd::Billiard{T}, t, par::AbstractParticle{T},
 
     p = deepcopy(par)
     pparams = T[]
-    pangles = T[]
+    psines = T[]
     count = zero(T)
     t_to_write = zero(T)
 
@@ -223,14 +219,15 @@ function boundarymap(bd::Billiard{T}, t, par::AbstractParticle{T},
         if typeof(bd[i]) <: PeriodicWall
             continue # do not write output if collision with with PeriodicWall
         else
-            push!(pparams, arclength(p, bd[i]) + intervals[i])
-            push!(pangles, reflection_angle(p, bd[i]))
+            ξ, sφ = to_bcoords(p, bd[i])
+            push!(pparams, ξ + intervals[i])
+            push!(psines, sφ)
             # set counter
             count += increment_counter(t, t_to_write)
             t_to_write = zero(T)
         end
     end #time, or collision number, loop
-    return pparams, sin.(pangles), intervals
+    return pparams, psines, intervals
 end
 
 

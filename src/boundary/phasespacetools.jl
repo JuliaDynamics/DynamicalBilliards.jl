@@ -40,8 +40,8 @@ function boundarymap_portion(bd::Billiard{T}, t,
             continue # do not write output if collision with with PeriodicWall
         else
             # get Birkhoff coordinates
-            ξ = to_bcoords(p, bd[i]) + intervals[i][1]
-            sφ = sin(reflection_angle(p, bd[i]))
+            ξ, sφ = to_bcoords(p, bd[i])
+            ξ += intervals[i]
 
             # compute index & increment dictionary entry
             ind = SV{Int}(floor(Int, ξ/δξ), floor(Int, (sφ + 1)/δφ))
