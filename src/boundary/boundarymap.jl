@@ -62,17 +62,13 @@ The arc-coordinate `ξ` is measured as:
 * the arc length measured counterclockwise from the rightmost point
   in `Circular`s
 
-See also [`arcintervals`](@ref) and [`from_bcoords`](@ref).
+See also [`arcintervals`](@ref) and [`from_bcoords`](@ref), which is the inverse
+function.
 """
 to_bcoords(p::AbstractParticle, o::Obstacle) = to_bcoords(p.pos, p.vel, o)
 
 function to_bcoords(pos::SV, vel::SV, o::Obstacle)
     n = normalvec(o, pos)
-    # prod = clamp(dot(p.vel, n), -1.0, 1.0)
-    # φ = acos(prod)
-    # cross2D(p.vel, n) < 0 && (φ *= -1)
-    # sinφ = sin(φ)
-
     sinφ = cross2D(vel, n)
     ξ = _ξ(pos, o)
     return ξ, sinφ
@@ -132,20 +128,14 @@ real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cossin(ξ/o.r))
 
 
 # billiard level function, needed for phasespace_portion
-function from_bcoords(ξ, sφ, bd::Billiard{T}; return_obstacle::Bool = false,
-                          intervals = arcintervals(bd)
-                          ) where T
-
-    abs(sφ) > 1 && throw(DomainError(sφ, "|sin φ| must not be larger than 1"))
+function from_bcoords(ξ, sφ, bd::Billiard{T}, intervals = arcintervals(bd)) where T
 
     for (i, obst) ∈ enumerate(bd)
-
         if ξ <= intervals[i+1]
             pos, vel  = from_bcoords(ξ - intervals[i], sφ, obst)
-            return return_obstacle ? (pos, vel, i) : (pos, vel)
+            return pos, vel, i
         end
     end
-
     throw(DomainError(ξ ,"ξ is too large for this billiard!"))
 end
 
@@ -168,13 +158,14 @@ time or integer for collision number). See below for the returned values.
 In the last case `n` random particles are produced in the billiard table using
 [`randominside`](@ref). If `ω` is also given, then the particles are magnetic.
 
-The measurement direction of the arclengths of the individual obstacles
-is dictated by `bd`, see [`Billiard`](@ref) for more.
-
 Returns
 * the arclengths at the collisions `ξs`
 * the sines of the incidence angles at the collisions `sφs`
 * obstacle arclength `intervals`
+
+The measurement direction of the arclengths of the individual obstacles
+is dictated by their order in `bd`. The sine of the angle is computed
+*after* specular reflection has taken place.
 
 If `particles` is not a single particle then both `ξs` and `sφs` are vectors
 of `Vector`. The `i` inner vector corresponds to the results of the
