@@ -15,18 +15,20 @@ struct Semicircle{T<:AbstractFloat} <: Circular{T} # <: Obstacle{T}
     c::SVector{2,T} # this MUST be a static vector
     r::T
     facedir::SVector{2,T} # this MUST be a static vector
-    name::String
+    name::String # this is an OPTIONAL field
 end
 ```
 `c` is the center and `r` is the radius of the full circle. `facedir` is the direction
 which the semicircle is facing, which is also the direction of its "open" face.
-`name` is a final (mandatory) field that is there to easily identify which obstacle
-is which.
 
-Notice that the `struct` must be parameterized by `T<:AbstractFloat` (see
+`name` is an optional field, that allows one to easily identify which obstacle
+is which. It is also used when printing a [`Billiard`](@ref). If not used,
+then `string(typeof(obstacle))` is used instead.
+
+Notice that the `struct` **must be** parameterized by `T<:AbstractFloat` (see
 the [numerical precision](/physics/#numerical-precision) page for more).
 
-For convenience, I will also define:
+For convenience, we will also define:
 ```julia
 function Semicircle(
     c::AbstractVector{T}, r::Real, facedir, name = "Semicircle") where {T<:Real}
@@ -38,8 +40,7 @@ so that constructing a `Semicircle` is possible from arbitrary vectors.
 
 ## Necessary Methods
 The following functions must obtain methods for `Semicircle` (or any other custom
-`Obstacle`) in order for it to
-work with `DynamicalBilliards`:
+`Obstacle`) in order for it to work with `DynamicalBilliards`:
 
 1. [`normalvec`](@ref)
 2. [`distance`](@ref) (with arguments `(position, obstacle)`)
