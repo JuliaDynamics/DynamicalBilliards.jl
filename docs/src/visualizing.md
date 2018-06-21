@@ -1,7 +1,4 @@
-All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
-
-
-**REWORK THIS: INSTALL PYPLOT AND BUILD PROPER DODCSTRINGS**
+All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system.
 
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```@docs
@@ -17,32 +14,30 @@ animate_evolution
 ### Plotting some obstacles
 
 For example:
-```julia
-using DynamicalBilliards, PyPlot
-bd = billiard_sinai(0.3)
-# Plot disk:
-plot_obstacle!(bd[5])
-# Plot left wall:
-plot_obstacle!(bd[1])
-# Plot right wall with different settings:
-plot_obstacle!(bd[2]; linewidth = 3.0, linestyle = "dashed", color = (1.0, 0.5, 0.5))
-# Set limits for the purpose of the tutorial
-xlim(-0.1, 1.1); ylim(-0.1, 1.1)
-```
-will plot something like this:
+```@example 8
+using PyPlot, DynamicalBilliards
+b = billiard_polygon(6, 1)
+a = Antidot([0.0,0.0], 0.5)
+bd = Billiard(b.obstacles..., a)
 
-![Visualizing tutorial 1](http://i.imgur.com/lrDStnP.png)
+figure()
+plot_obstacle!(bd[end])
+plot_obstacle!(bd[1])
+plot_obstacle!(bd[2]; linewidth = 3.0, linestyle = "dashed", color = (0.0, 0.5, 0.5))
+
+PyPlot.xlim(-1, 1); PyPlot.ylim(-1, 1);
+
+savefig("obstacles_example.svg"); nothing # hide
+```
+![](obstacles_example.svg)
 
 If you want to quickly plot the entire billiard with default parameters, simply use the function `plot_billiard(bd)`:
-```julia
-bd = billiard_polygon(6, 1)
-a = Antidot([0.0,0.0], 0.5)
-bd = Billiard(bd.obstacles..., a)
-plot_billiard(bd)
-```
-which will plot something like this:
 
-![Visualizing tutorial 2](http://i.imgur.com/46AomXm.png)
+```@example 8
+plot_billiard(bd)
+savefig("billiard_example.svg"); nothing # hide
+```
+![](billiard_example.svg)
 
 `plot_billiard()` also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.
 
@@ -51,17 +46,17 @@ which will plot something like this:
 ### Plotting particles
 
 Following the above example, we create and plot a particle using the function `plot_particle`:
-```julia
+```@example 8
 p = randominside(bd)
-plot_particle(p)
+plot_particle!(p)
 # Plot one more particle with purple color,
 # pentagon shape and bigger size (default is s=30):
 p2 = randominside(bd)
-plot_particle(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
+plot_particle!(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
+savefig("particles_example.svg"); nothing # hide
 ```
-which should give you something like this (notice that the particle position and direction are random):
-
-![Visualizing tutorial 3](http://i.imgur.com/8a4ajfA.png)
+![](particles_example.svg)
+(notice that the particle position and direction are random)
 
 ## Color conventions
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:

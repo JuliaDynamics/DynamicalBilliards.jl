@@ -8,7 +8,7 @@ end
 
 #pretty print:
 
-_get_name(o::Obstacle) = :name ∈ fieldnames(o) ? o.name : string(typeof(o))
+_get_name(o::Obstacle) = :name ∈ fieldnames(typeof(o)) ? o.name : string(typeof(o))
 function Base.show(io::IO, bd::Billiard{T,D,BT}) where {T, D, BT}
     s = "Billiard{$T} with $D obstacles:\n"
     for o in bd
@@ -57,6 +57,8 @@ end
 
 
 Base.getindex(bd::Billiard, i) = bd.obstacles[i]
+Base.lastindex(bd::Billiard) = length(bd.obstacles)
+Base.firstindex(bd::Billiard) = 1
 # Iteration:
 Base.iterate(bd::Billiard) = iterate(bd.obstacles)
 Base.iterate(bd::Billiard, state) = iterate(bd.obstacles, state)

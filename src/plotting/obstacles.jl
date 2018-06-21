@@ -30,7 +30,6 @@ function plot_obstacle!(d::Circular; kwargs...)
     circle1 = PyPlot.plt[:Circle](d.c, d.r;
         edgecolor = edgecolor, facecolor = facecolor, ls = obls(d), lw = 2.0, kwargs...)
     PyPlot.gca()[:add_artist](circle1)
-    PyPlot.show()
 end
 
 function plot_obstacle!(d::Semicircle; kwargs...)
@@ -40,7 +39,6 @@ function plot_obstacle!(d::Semicircle; kwargs...)
     s1 = Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
     lw = 2.0, kwargs...)
     PyPlot.gca()[:add_artist](s1)
-    PyPlot.show()
 end
 
 function plot_obstacle!(w::Wall; kwargs...)
@@ -53,6 +51,5 @@ function plot_obstacle!(w::Wall; kwargs...)
         PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
         color=obcolor(w),
         ls = obls(w), lw = 2.0, kwargs...)
-        PyPlot.show()
     end
 end

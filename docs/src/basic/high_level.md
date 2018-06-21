@@ -19,14 +19,14 @@ you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effo
 
 ---
 ## Billiard
-A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
+A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subdypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
 
 There is a [tutorial](/tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#standard-billiards-library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
 In this page we will be using the Bunimovich billiard as an example:
-```@example 1
+```@example 2
 using DynamicalBilliards
-bt = billiard_bunimovich() # using default arguments
+bd = billiard_bunimovich()
 ```
 
 ## Particles
@@ -39,23 +39,17 @@ Currently there are two types of particles:
 
 There are two ways to create a particle. The first one is to provide the
 constructor with some initial conditions:
-```@example 1
+```@example 2
 x0 = rand(); y0 = rand();
-φ0 = 2π*rand() # an angle is enough
+φ0 = 2π*rand()
 p = Particle(x0, y0, φ0)
 ```
 
 To create a `MagneticParticle` simply provide the constructor with one more number,
 the angular velocity:
-```julia
+```@example 2
 ω = 0.5
 mp = MagneticParticle(x0, y0, φ0, ω)
-```
-```
-MagneticParticle{Float64}
-position: [0.324647, 0.142048]
-velocity: [0.573107, 0.81948]
-ang. velocity: 0.5
 ```
 
 
@@ -74,24 +68,15 @@ randominside
 ---
 
 For example:
-```julia
-p = randominside(bt)
+```@example 2
+p = randominside(bd)
 ```
-```
-Particle{Float64}
-position: [0.274096, 0.612643]
-velocity: [-0.178995, 0.98385]
-```
+
 and
-```julia
-mp = randominside(bt, ω)
+```@example 2
+mp = randominside(bd, ω)
 ```
-```
-MagneticParticle{Float64}
-position: [0.267054, 0.631786]
-velocity: [-0.500439, -0.865772]
-ang. velocity: 0.5
-```
+
 `randominside` always creates particles with same number type as the billiard.
 
 ## `evolve` & `construct`
@@ -104,33 +89,19 @@ evolve!
 Forget the ray-splitting part for now (see [Ray-Splitting](/ray-splitting)).
 
 Let's see an example:
-```julia
-ct, poss, vels = evolve(p, bt, 100)
+```@example 2
+ct, poss, vels = evolve(p, bd, 100)
 for i in 1:5
   println(round(ct[i], digits=3), "  ", poss[i], "  ", vels[i])
 end
 ```
-```
-0.0    [0.274096, 0.612643]  [-0.178995, 0.98385]
-0.394  [0.203623, 1.0]  [-0.178995, -0.98385]
-1.016  [0.0216906, 0.0]  [-0.178995, 0.98385]
-0.991  [-0.155718, 0.975134]  [0.438064, -0.898944]
-1.085  [0.319474, 0.0]  [0.438064, 0.898944]
-```
 
 Similarly, for magnetic propagation
-```julia
-ct, poss, vels, ω = evolve(mp, bt, 100)
+```@example 2
+ct, poss, vels, ω = evolve(mp, bd, 100)
 for i in 1:10
   println(round(ct[i], digits=3), "  ", poss[i], "  ", vels[i])
 end
-```
-```
-0.0    [0.267054, 0.631786]  [-0.500439, -0.865772]
-0.677  [0.0329496, 2.94431e-13]  [-0.184546, 0.982824]
-0.947  [-0.351508, 0.855587]  [0.783478, -0.621419]
-1.959  [1.4997, 0.517318]  [-0.971386, 0.237507]
-1.905  [-0.283005, 0.0878011]  [0.338364, 0.941015]
 ```
 
 The above return types are helpful in some applications. In other applications however
@@ -143,7 +114,7 @@ construct
 The function is especially useful when one wants immediately the timeseries instead
 of the output of `evolve!`. Because of the simple syntax
 ```julia
-xt, yt, vxt, vyt, t = construct(evolve(p, bt, 100)...)
+xt, yt, vxt, vyt, t = construct(evolve(p, bd, 100)...)
 
 # print as a matrix:
 hcat(xt, yt, vxt, vyt, t)[1:5, :]
@@ -162,7 +133,7 @@ the angular velocity. So that it is possible to do the same process for magnetic
 propagation as well (plus, it is also useful in ray-splitting).
 ```julia
 # evolve the magnetic particle instead:
-xt, yt, vxt, vyt, t = construct(evolve(mp, bt, 100)...)
+xt, yt, vxt, vyt, t = construct(evolve(mp, bd, 100)...)
 
 # print as a matrix:
 hcat(xt, yt, vxt, vyt, t)[1:5, :]
@@ -193,13 +164,13 @@ reveals the mixed nature of the phase-space:
 ```julia
 using DynamicalBilliards, PyPlot
 t = 100; r = 0.15
-bt = billiard_sinai(r, setting = "periodic")
+bd = billiard_sinai(r, setting = "periodic")
 
 # the direction of the normal vector is IMPORTANT!!!
 # (always keep in mind that ω > 0  means counter-clockwise rotation!)
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
 
-posvector, velvector = psos(bt, plane, t, 10000, 2.0)
+posvector, velvector = psos(bd, plane, t, 10000, 2.0)
 
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions
@@ -251,11 +222,11 @@ escapetime
 For example, the default implementation of the mushroom billiard has a "door" at the
 bottom of the stem. Thus,
 ```julia
-bt = billiard_mushroom()
+bd = billiard_mushroom()
 et = zeros(100)
 for i ∈ 1:100
-    p = randominside(bt)
-    et[i] = escapetime(p, bt, 10000)
+    p = randominside(bd)
+    et[i] = escapetime(p, bd, 10000)
 end
 println("Out of 100 particles, $(count(x-> x != Inf, et)) escaped")
 println("Mean escape time was $(mean(et[et .!= Inf]))")
@@ -266,7 +237,7 @@ Mean escape time was 4.436943929428599
 ```
 Of course, `escapetime` works with `MagneticParticle` as well
 ```julia
-escapetime(randominside(bt, 1.0), bt, 10000)
+escapetime(randominside(bd, 1.0), bd, 10000)
 ```
 ```
 87.17643414941281
