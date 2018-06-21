@@ -40,6 +40,9 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
 
+**TEST: CONTENTS**
+```@contents
+```
 ---
 
 

@@ -24,16 +24,9 @@ A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Part
 There is a [tutorial](/tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#standard-billiards-library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
 In this page we will be using the Bunimovich billiard as an example:
-```julia
+```@example 1
 using DynamicalBilliards
 bt = billiard_bunimovich() # using default arguments
-```
-```
-Billiard{Float64} with 4 obstacles:
-  Bottom wall
-  Right semicircle
-  Top wall
-  Left semicircle
 ```
 
 ## Particles
@@ -46,16 +39,12 @@ Currently there are two types of particles:
 
 There are two ways to create a particle. The first one is to provide the
 constructor with some initial conditions:
-```julia
+```@example 1
 x0 = rand(); y0 = rand();
 φ0 = 2π*rand() # an angle is enough
 p = Particle(x0, y0, φ0)
 ```
-```
-Particle{Float64}
-position: [0.324647, 0.142048]
-velocity: [0.573107, 0.81948]
-```
+
 To create a `MagneticParticle` simply provide the constructor with one more number,
 the angular velocity:
 ```julia

@@ -128,7 +128,7 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 ## Optional Methods
 
 1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
-1. [`collisiontime`](@ref) with `MagneticParticle` : enables magnetic propagation
+1. [`collisiontime`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
 2. [`plot_obstacle!`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
 3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
@@ -145,7 +145,7 @@ end
 ```
 
 
-The [`collisiontime`](@ref) method for [`MagneticParticle`](@ref) is also
+The [`collisiontime`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also
 easy in this case, because
 it is almost identical with the method for the general [`Circular`](@ref) obstacle:
 ```julia
