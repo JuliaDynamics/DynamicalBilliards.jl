@@ -7,10 +7,12 @@ struct Billiard{T, D, O<:Tuple}
 end
 
 #pretty print:
+
+_get_name(o::Obstacle) = :name ∈ fieldnames(o) ? o.name : string(typeof(o))
 function Base.show(io::IO, bd::Billiard{T,D,BT}) where {T, D, BT}
     s = "Billiard{$T} with $D obstacles:\n"
     for o in bd
-        s*="  $(o.name)\n"
+        s*="  $(_get_name(o))\n"
     end
     print(io, s)
 end
