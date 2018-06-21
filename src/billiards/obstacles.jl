@@ -3,6 +3,7 @@ InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
 normalvec, distance, cellsize, Semicircle
 export translate
 
+using InteractiveUtils
 #######################################################################################
 ## Circles
 #######################################################################################

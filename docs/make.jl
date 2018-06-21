@@ -1,6 +1,6 @@
 using DynamicalBilliards
 
-using Documenter
+using Documenter, PyPlot
 
 makedocs(modules=[DynamicalBilliards], doctest=false)
 
