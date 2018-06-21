@@ -54,14 +54,14 @@ end
 
 @inline function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Nothing where {T}
     n = normalvec(r, p.pos)
-    φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
+    φ = atan(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
     return nothing
 end
 
 @inline function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Nothing where {T}
     n = normalvec(r, p.pos)
-    φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
+    φ = atan(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cossin(φ)...)
     return nothing
 end
@@ -152,14 +152,14 @@ particle should end up at.
 
 @inline function propagate!(p::MagneticParticle{T}, t::Real)::Nothing where {T}
     ω = p.omega; r = 1/ω
-    φ0 = atan2(p.vel[2], p.vel[1])
+    φ0 = atan(p.vel[2], p.vel[1])
     sinωtφ, cosωtφ = sincos(ω*t + φ0)
     p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
     p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
 end
 @inline function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
-    ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
+    ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
     p.pos = newpos
     p.vel = SVector{2, T}(cossin(ω*t + φ0)...)
     return
@@ -176,7 +176,7 @@ position.
 @inline function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
     ω = p.omega; r = 1/ω
-    φ0 = atan2(p.vel[2], p.vel[1])
+    φ0 = atan(p.vel[2], p.vel[1])
     # Propagate:
     sφ0, cφ0 = sincos(φ0)
     sωφ0, cωφ0 = sincos(ω*t + φ0)
@@ -367,7 +367,7 @@ vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
     ct = cumsum(t)
 
     for i in 2:length(t)
-        φ0 = atan2(vels[i-1][2], vels[i-1][1])
+        φ0 = atan(vels[i-1][2], vels[i-1][1])
         x0 = poss[i-1][1]; y0 = poss[i-1][2]
         colt=t[i]
 

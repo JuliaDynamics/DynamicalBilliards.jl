@@ -134,7 +134,7 @@ process. Let $T$ denote the transmission function, $\theta$ the refraction funct
 
 7.  Set `obstacle.pflag = !obstacle.pflag` for *all* obstacles affected by the current `RaySplitter`. This reverses $\vec{n}$ to $-\vec{n}$ as well! So from now on $\vec{n}$ is the opposite than what it was at the beginning of the algorithm!
 
-8.  Find the refraction angle in absolute space. First find $a = \text{atan2}(n_y, n_x)$ and then set $\Theta = a + \theta$.
+8.  Find the refraction angle in absolute space. First find $a = \text{atan}(n_y, n_x)$ and then set $\Theta = a + \theta$.
 
 9. Perform refraction, i.e. set the particle velocity to the direction of $\Theta$.
 

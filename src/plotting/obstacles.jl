@@ -34,7 +34,7 @@ function plot_obstacle!(d::Circular; kwargs...)
 end
 
 function plot_obstacle!(d::Semicircle; kwargs...)
-    theta1 = atan2(d.facedir[2], d.facedir[1])*180/π + 90
+    theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = obcolor(d)
     s1 = Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,

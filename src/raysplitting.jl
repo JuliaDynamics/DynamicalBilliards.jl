@@ -195,7 +195,7 @@ function resolvecollision!(p::AbstractParticle{T}, bd::Billiard{T}, colidx::Int,
         end
         # Raysplit Algorithm step 8: find transmission angle in real-space angles
         n = normalvec(a, p.pos) #notice that this is reversed! It's the new normalvec!
-        Θ = theta + atan2(n[2], n[1])
+        Θ = theta + atan(n[2], n[1])
 
         # Raysplit Algorithm step 9: Perform refraction
         p.vel = SVector{2,T}(cos(Θ), sin(Θ))
@@ -333,7 +333,7 @@ vels::Vector{SVector{2,T}}, omegas::Vector{T}, dt=0.01) where T
 
     for i in 2:length(t)
         ω = omegas[i-1]
-        φ0 = atan2(vels[i-1][2], vels[i-1][1])
+        φ0 = atan(vels[i-1][2], vels[i-1][1])
         x0 = poss[i-1][1]; y0 = poss[i-1][2]
         colt=t[i]
 
