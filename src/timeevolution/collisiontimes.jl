@@ -248,7 +248,14 @@ end
 #######################################################################################
 ## next_collision
 #######################################################################################
-# metaprogramming
+"""
+    next_collision(p::AbstractParticle, bd::Billiard) -> tmin, i
+Compute the [`collisiontime`](@ref) across all obstacles in `bd`, find the minimum
+one and return this time as well as the index of the obstacle that the time
+corresponds to.
+"""
+function next_collision end
+
 @generated function next_collision(p, bd::Billiard{T, L, BT}) where {T, L, BT}
     out = :(i = 0; ind = 0; tmin = T(Inf))
     for j=1:L
@@ -267,55 +274,3 @@ end
     push!(out.args, :(return tmin, ind))
     return out
 end
-
-
-# Using Unrolled
-# # """
-# #     next_collision(p, bd) -> (tmin, index)
-# # Return the minimum collision time out of all `collisiontime(p, obst)` for `obst ∈ bd`,
-# # as well as the `index` of the corresponding obstacle.
-# # """
-# # function next_collision(p::AbstractParticle{T}, bd::Tuple)::Tuple{T,Int} where {T}
-# #     findmin(unrolled_map(x -> collisiontime(p, x), bd))
-# # end
-#
-
-
-#= OTher attempts:
-function next_collision(
-    p::AbstractParticle{T}, bd::Tuple)::Tuple{T,Int} where {T}
-    tmin::T = T(Inf)
-    ind::Int = 0
-    for i in eachindex(bd)
-        tcol::T = collisiontime(p, bd[i])
-        # Set minimum time:
-        if tcol < tmin
-            tmin = tcol
-            ind = i
-        end
-    end#obstacle loop
-    return tmin, ind
-end
-
-# function next_collision(
-#     p::AbstractParticle{T}, bd::Tuple)::Tuple{T,Int} where {T}
-#     findmin(map(x -> collisiontime(p, x), bd))
-# end
-#
-# using Unrolled
-@unroll function next_collision2(p::AbstractParticle{T}, bd::Tuple) where {T}
-    tmin::T = T(Inf)
-    ind::Int = 0
-    i::Int = 0
-    @unroll for obst in bd
-        tcol::T = collisiontime(p, obst)
-        i+=1
-        # Set minimum time:
-        if tcol < tmin
-            tmin = tcol
-            ind = i
-        end
-    end#obstacle loop
-    return tmin, ind
-end
-=#

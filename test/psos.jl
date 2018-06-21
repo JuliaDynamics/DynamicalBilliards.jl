@@ -1,6 +1,50 @@
 using DynamicalBilliards
 using Test
 
+function coordinates_test(partnum = 500; printinfo = true)
+    tim = time()
+    @testset "Coordinate changes" begin
+        @testset "Sinai" begin
+            bd = billiard_sinai()
+            aints = arcintervals(bd)
+            for i in 1:partnum
+                p = randominside(bd)
+                i, tmin = bounce!(p, bd)
+                ξ, sφ = to_bcoords(p, bd[i])
+                pos, vel = from_bcoords(ξ, sφ, bd[i])
+
+                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
+            end
+        end
+        @testset "Stadium" begin
+
+            bd = billiard_stadium()
+            aints = arcintervals(bd)
+            for i in 1:partnum
+                p = randominside(bd)
+                i, tmin = bounce!(p, bd)
+                ξ, sφ = to_bcoords(p, bd[i])
+                pos, vel = from_bcoords(ξ, sφ, bd[i])
+
+                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
+            end
+        end
+    end
+
+    if printinfo
+        println(
+            """
+Results:
++ from_bcoords is the inverse function of to_bcoords
+  on Sinai and stadium billiards
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
+    end
+end
+
+
 function stadium_bm(partnum=10; printinfo = true)
     tim = time()
     partnum = max(partnum, 100)
@@ -25,14 +69,14 @@ function stadium_bm(partnum=10; printinfo = true)
             end
         end
         @test *(A...)
-        if printinfo
-            println("""
-            Results:
-            + boundarymap works
-            + billiard_bunimovich uniformly fills its boundarymap
-            + Required time: $(round(time()-tim, digits=3)) sec
-            """)
-        end
+    end
+    if printinfo
+        println("""
+Results:
++ boundarymap works
++ billiard_bunimovich uniformly fills its boundarymap
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
     end
 end
 
@@ -71,15 +115,15 @@ function cut_psos(partnum=10; printinfo = true)
             end
         end
     end
-if printinfo
-println("""
+    if printinfo
+        println("""
 Results:
 + Poincare section through cut works
 + Pinned particles correctly detected
 + positions and velocities are within correct bounds
 + Required time: $(round(time()-tim, digits=3)) sec
 """)
-end
+    end
 end
 
 
@@ -124,15 +168,15 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
 
         end
     end
-if printinfo
-println("""
+    if printinfo
+        println("""
 Results:
 + `boundarymap_portion` works
 + Mushroom boundary map ratios are replicated correctly
 + Bunimovich stadium always gives ratio of 1.0
 + Required time: $(round(time()-tim, digits=3)) sec
 """)
-end
+    end
 end
 
 
@@ -176,13 +220,13 @@ function phasespace_portion_test(partnum = 10; printinfo = true)
 
         end
     end
-if printinfo
-println("""
+    if printinfo
+        println("""
 Results:
 + `phasespace_portion` works
 + Mushroom phase space ratios are replicated correctly
 + Bunimovich stadium always gives ratio of 1.0
 + Required time: $(round(time()-tim, digits=3)) sec
 """)
-end
+    end
 end

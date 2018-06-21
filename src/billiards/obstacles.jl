@@ -1,8 +1,8 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Semicircle,
-arclength, totallength, real_pos, real_coordinates
+normalvec, distance, cellsize, Semicircle
 export translate
+
 #######################################################################################
 ## Circles
 #######################################################################################
@@ -326,70 +326,6 @@ assumed to be very close to the obstacle's boundary).
 @inline normalvec(a::Antidot, pos) =
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
-
-#######################################################################################
-## Arclengths
-#######################################################################################
-
-"""
-    arclength(p::AbstractParticle, o::Obstacle)
-Returns the boundary coordinate of the particle on the obstacle,
-assuming that the particle position is on the obstacle.
-
-The boundary coordinate is measured as:
-* the distance from start point to end point in `Wall`s
-* the arc length measured counterclockwise from the open face in `Semicircle`s
-* the arc length measured counterclockwise from the rightmost point in `Circular`s
-"""
-arclength(p::AbstractParticle, o) = arclength(p.pos, o)
-arclength(pos::SV, o::Wall) = norm(pos - o.sp)
-
-function arclength(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
-    #projecting pos to x Axis
-    d = (pos - o.c)/o.r
-    r = acos(clamp(d[1], -1, 1))*o.r
-    return r
-end
-
-function arclength(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
-    #project pos on open face
-    chrd = SV(-o.facedir[2],o.facedir[1]) #tangent to open face
-    d = (pos - o.c)/o.r
-    x = dot(d, chrd)
-    r =  acos(clamp(x, -1, 1))*o.r
-    return r
-end
-
-#######################################################################################
-## real_coordinates
-#######################################################################################
-
-function real_coordinates(ξ, sφ, o::Obstacle{T}) where T
-    pos = real_pos(ξ, o)
-    cφ = cos(asin(sφ))
-    n = normalvec(o, pos)
-    vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
-    return pos,vel
-end
-
-
-real_pos(ξ, o::Wall) = o.sp + ξ*normalize(o.ep - o.sp)
-
-#TODO: Use `sincos` for julia 0.7
-real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cos(ξ/o.r), sin(ξ/o.r))
-
-function real_pos(ξ, o::Semicircle{T}) where T
-    θshift = acos(-o.facedir[2])
-    return o.c .+ SV{T}(cos(ξ/o.r + θshift), sin(ξ/o.r + θshift))
-end
-"""
-    totallength(o::Obstacle)
-Return the total length of `o`.
-"""
-@inline totallength(o::Wall) = norm(o.ep - o.sp)
-@inline totallength(o::Semicircle) = π*o.r
-@inline totallength(o::Circular) = 2π*o.r
-
 
 
 #######################################################################################

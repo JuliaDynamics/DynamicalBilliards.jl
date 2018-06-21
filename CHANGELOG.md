@@ -12,7 +12,7 @@
 * Added boundary map computation function which works
   for any billiard and any particle. It assumes that the obstacles are
   sorted counter clockwise.
-  * Added `arclength`, `totallength`
+  * Added `to_bcoords`, `totallength`
   * Added `plot_boundarymap` that plots the boundary map and the obstacle boundaries.
 * Added Poincare surface of section function, which computes intersections with
   arbitrary planes!

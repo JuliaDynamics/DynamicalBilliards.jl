@@ -29,8 +29,11 @@ include("billiards/standard_billiards.jl")
 include("timeevolution/collisiontimes.jl")
 include("timeevolution/propagation.jl")
 
+include("boundary/boundarymap.jl")
+include("boundary/phasespacetools.jl")
+
 include("highleveltimes.jl")
-include("poincaresos.jl")
+include("poincare.jl")
 include("lyapunov_spectrum.jl")
 
 include("mushroomtools.jl")
@@ -56,11 +59,11 @@ end
 ####################################################
 # using Requires
 # @require PyPlot="d330b81b-6aea-500a-939a-2ce795aea3ee" begin
-using PyPlot
-    dir = joinpath(@__DIR__, "plotting")
-    for f in readdir(dir)
-        include(joinpath(dir, f))
-    end
+# using PyPlot
+#     dir = joinpath(@__DIR__, "plotting")
+#     for f in readdir(dir)
+#         include(joinpath(dir, f))
+#     end
 # end
 
 
