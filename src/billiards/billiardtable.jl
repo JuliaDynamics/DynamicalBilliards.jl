@@ -106,7 +106,7 @@ function real_coordinates(ξ, sφ, bt::Billiard{T}; return_obst::Bool = false) w
         #println("\tbounds: $lower:$upper")
         if ξ <= upper
             ret = real_coordinates(ξ - lower, sφ, obst)
-            return return_obst?(ret..., i):ret
+            return return_obst ? (ret..., i) : ret
         end
         lower = upper
         #println("\tNEXT!")
