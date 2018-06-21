@@ -13,10 +13,6 @@ function coordinates_test(partnum = 500; printinfo = true)
                 ξ, sφ = to_bcoords(p, bd[i])
                 pos, vel = from_bcoords(ξ, sφ, bd[i])
 
-                #print differences for debug reasons
-                println("pdiff\t", p.pos - pos, "\n")
-                println("vdiff\t", p.vel - vel, "\n\n")
-
                 @test *(isapprox.(p.pos, pos, atol=1e-8)...)
                 @test *(isapprox.(p.vel, vel, atol=1e-8)...)
             end
@@ -30,10 +26,6 @@ function coordinates_test(partnum = 500; printinfo = true)
                 i, tmin = bounce!(p, bd)
                 ξ, sφ = to_bcoords(p, bd[i])
                 pos, vel = from_bcoords(ξ, sφ, bd[i])
-
-                #print differences for debug reasons
-                println("pdiff\t", p.pos - pos, "\n")
-                println("vdiff\t", p.vel - vel, "\n\n")
 
                 @test *(isapprox.(p.pos, pos, atol=1e-8)...)
                 @test *(isapprox.(p.vel, vel, atol=1e-8)...)
