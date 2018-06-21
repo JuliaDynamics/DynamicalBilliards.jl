@@ -13,18 +13,6 @@ Return the total boundary length of `o`.
 
 @inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
-#this function only exists because incidence_angle from raysplitting.jl only works
-#if you pass the particle *before* collision, which I cannot do because of bounce!
-function reflection_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
-    n = normalvec(a, p.pos)
-    inverse_dot = clamp(dot(p.vel, n), -1.0, 1.0)
-    φ = acos(inverse_dot)
-    if cross2D(p.vel, n) < 0
-        φ *= -1
-    end
-    return φ
-end
-
 """
     arcintervals(bd::Billiard) -> s
 Generate a vector `s`, with entries being the delimiters of the
@@ -102,9 +90,9 @@ This function is the inverse of [`to_bcoords`](@ref).
 """
 function from_bcoords(ξ::T, sφ::T, o::Obstacle{T}) where {T}
     pos = real_pos(ξ, o)
-    cφ = cos(asin(sφ))
+    cφ = sqrt(1-sφ^2)  # = cos(asin(sφ))
     n = normalvec(o, pos)
-    vel = SV{T}(-n[1]*cφ + n[2]*sφ, -n[1]*sφ - n[2]*cφ)
+    vel = SV{T}(n[1]*cφ + n[2]*sφ, -n[1]*sφ + n[2]*cφ)
 
     return pos, vel
 end
@@ -123,7 +111,6 @@ function real_pos(ξ, o::Semicircle{T}) where T
 end
 
 real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cossin(ξ/o.r))
-
 
 
 
