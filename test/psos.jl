@@ -1,6 +1,23 @@
 using DynamicalBilliards
 using Test
 
+function coordinates_test(partnum = 500; printinfo = true)
+    tim = time()
+    @testset "Coordinate changes" begin
+    bd = billiard_sinai()
+    aints = arcintervals(bd)
+        for i in 1:partnum
+            p = randominside(bd)
+            i, tmin = bounce!(p, bd)
+            ξ, sφ = to_bcoords(p, bd[i])
+            pos, vel = from_bcoords(ξ, sφ, bd[i])
+            @test p.pos .≈ pos
+            @test p.vel .≈ vel
+        end
+    end
+end
+
+
 function stadium_bm(partnum=10; printinfo = true)
     tim = time()
     partnum = max(partnum, 100)

@@ -248,6 +248,14 @@ end
 #######################################################################################
 ## next_collision
 #######################################################################################
+"""
+    next_collision(p::AbstractParticle, bd::Billiard) -> tmin, i
+Compute the [`collisiontime`](@ref) across all obstacles in `bd`, find the minimum
+one and return this time as well as the index of the obstacle that the time
+corresponds to.
+"""
+function next_collision end
+
 @generated function next_collision(p, bd::Billiard{T, L, BT}) where {T, L, BT}
     out = :(i = 0; ind = 0; tmin = T(Inf))
     for j=1:L
