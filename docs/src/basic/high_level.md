@@ -193,38 +193,6 @@ hcat(xt, yt, vxt, vyt, t)[1:5, :]
     which represents "total amount". If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total number of collisions.
 
 
-## Boundary Maps
-Boundary maps can be obtained with the high level function
-```@docs
-boundarymap
-```
----
-For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
-```julia
-using DynamicalBilliards
-
-bt = billiard_mushroom()
-
-n = 100 # how many particles to create
-
-ξς, φς, ις = boundarymap(bt, 10000, n)
-
-using PyPlot # enables plot_boundarymap function
-
-colors = ["C$(rand(1:9))" for i in 1:n] # random colors
-
-figure()
-plot_boundarymap(ξς, φς, ις, color = colors)
-```
-![Boundary map](https://i.imgur.com/RO9UZa9.png)
-
-And of course similarly for magnetic fields
-```julia
-ξς, φς, ις = boundarymap(bt, 10000, n, 1.0) # angular velocity last argument
-figure()
-plot_boundarymap(ξς, φς, ις, color = colors)
-```
-![Boundary map with magnetic field](https://i.imgur.com/YoW1FVD.png)
 
 ## Poincaré Sections
 ```@docs

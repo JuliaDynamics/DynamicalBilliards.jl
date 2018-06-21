@@ -35,6 +35,7 @@ docs_dir: 'build'
 pages:
 - Introduction: index.md
 - High Level API: basic/high_level.md
+- Phase Spaces: basic/phasespaces.md
 - Visualizing: visualizing.md
 - Low Level API: basic/low_level.md
 - Tutorials:

@@ -9,7 +9,7 @@ Animate the evolution of the particle, plotting the orbit from collision to coll
   * `p::AbstractParticle` : The particle to be evolved.
   * `bd::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
-  * `ray-splitter` : (Optional) Tuple of [`RaySplitters`](@ref),
+  * `ray-splitter` : (Optional) Tuple of [`RaySplitter`](@ref),
       that enable ray-splitting processes during evolution.
 ### Keyword Arguments
   * `newfig = true` : Creates a new figure at the function call, and plots

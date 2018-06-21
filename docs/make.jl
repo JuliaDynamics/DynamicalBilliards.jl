@@ -2,7 +2,7 @@ using DynamicalBilliards
 
 using Documenter, PyPlot
 
-makedocs(modules=[DynamicalBilliards], doctest=false)
+makedocs(modules=[DynamicalBilliards], doctest=false, root = @__DIR__)
 
 deploydocs(
     deps   = Deps.pip("Tornado>=4.0.0,<5.0.0", "mkdocs",

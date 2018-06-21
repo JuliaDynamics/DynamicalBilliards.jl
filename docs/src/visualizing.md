@@ -4,16 +4,14 @@ All plotting functionality of `DynamicalBilliards` lies within a few well-define
 **REWORK THIS: INSTALL PYPLOT AND BUILD PROPER DODCSTRINGS**
 
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
-```julia
-plot_obstacle(obst::Obstacle; kwargs...)
-plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
-plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
-plot_billiard(bd::Vector{Obstacle})
-plot_billiard(bd, xt::Vector, yt::Vector; plot_orbit = true)
-animate_evolution(p, bd, colnumber[, ray-splitter]; kwargs)
-plot_boundarymap(ξς, φς)
+```@docs
+plot_obstacle!
+plot_particle!
+plot_cyclotron!
+plot_billiard
+animate_evolution
 ```
-and each has a detailed documentation string.
+
 ## Examples
 
 ### Plotting some obstacles
@@ -157,3 +155,8 @@ plot_particle(p)
 ```
 will produce something like this:
 ![Periodic Billiard plot](http://i.imgur.com/rOpU7sl.png)
+
+## Boundary Map plots
+```@docs
+plot_boundarymap
+```

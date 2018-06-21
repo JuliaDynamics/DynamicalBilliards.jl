@@ -40,7 +40,8 @@ Convert the real coordinates `pos, vel` to
 boundary coordinates (also known as Birkhoff coordinates)
 `ξ, sφ`, assuming that `pos` is on the obstacle.
 
-`ξ` is the arc-coordinate, i.e. it parameterizes the arclength. `sφ` is the
+`ξ` is the arc-coordinate, i.e. it parameterizes the arclength of the
+obstacle. `sφ` is the
 sine of the angle between the velocity vector and the vector normal
 to the obstacle.
 
@@ -50,7 +51,11 @@ The arc-coordinate `ξ` is measured as:
 * the arc length measured counterclockwise from the rightmost point
   in `Circular`s
 
-See also [`arcintervals`](@ref) and [`from_bcoords`](@ref), which is the inverse
+Notice that this function returns the *local* arclength. To get the global
+arclength parameterizing an entire billiard, simply do
+`ξ += arcintervals(bd)[i]` if the index of obstacle `o` is `i`.
+
+See also [`from_bcoords`](@ref), which is the inverse
 function.
 """
 to_bcoords(p::AbstractParticle, o::Obstacle) = to_bcoords(p.pos, p.vel, o)
@@ -75,7 +80,7 @@ end
 
 function _ξ(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
     d = (pos - o.c)/o.r
-    if d[2] > 0 
+    if d[2] > 0
         r = acos(clamp(d[1], -1, 1))
     else
         r = π + acos(-clamp(d[1], -1, 1))
@@ -120,7 +125,11 @@ real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cossin(ξ/o.r))
 
 
 
-# billiard level function, needed for phasespace_portion
+"""
+    from_bcoords(ξ, sφ, bd::Billiard, intervals = arcintervals(bd))
+Same as above, but now `ξ` is considered to be the global arclength,
+parameterizing the entire billiard, instead of a single obstacle.
+"""
 function from_bcoords(ξ, sφ, bd::Billiard{T}, intervals = arcintervals(bd)) where T
 
     for (i, obst) ∈ enumerate(bd)
