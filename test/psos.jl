@@ -17,8 +17,8 @@ function coordinates_test(partnum = 500; printinfo = true)
                 println("pdiff\t", p.pos - pos, "\n")
                 println("vdiff\t", p.vel - vel, "\n\n")
 
-                @test *((p.pos .≈ pos)...)
-                @test *((p.vel .≈ vel)...)
+                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
             end
         end
         @testset "Stadium" begin
@@ -35,8 +35,8 @@ function coordinates_test(partnum = 500; printinfo = true)
                 println("pdiff\t", p.pos - pos, "\n")
                 println("vdiff\t", p.vel - vel, "\n\n")
 
-                @test *((p.pos .≈ pos)...)
-                @test *((p.vel .≈ vel)...)
+                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
             end
         end
     end
