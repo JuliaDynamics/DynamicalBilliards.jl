@@ -1,30 +1,33 @@
 All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system on the current PyPlot figure.
 
+
+**REWORK THIS: INSTALL PYPLOT AND BUILD PROPER DODCSTRINGS**
+
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```julia
 plot_obstacle(obst::Obstacle; kwargs...)
 plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
 plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
-plot_billiard(bt::Vector{Obstacle})
-plot_billiard(bt, xt::Vector, yt::Vector; plot_orbit = true)
-animate_evolution(p, bt, colnumber[, ray-splitter]; kwargs)
+plot_billiard(bd::Vector{Obstacle})
+plot_billiard(bd, xt::Vector, yt::Vector; plot_orbit = true)
+animate_evolution(p, bd, colnumber[, ray-splitter]; kwargs)
 plot_boundarymap(ξς, φς)
 ```
 and each has a detailed documentation string.
+## Examples
 
-## Plotting the Billiard Table
+### Plotting some obstacles
 
-The function `plot_obstacle(obst::Obstacle; kwargs...)` plots the given obstacle on the current PyPlot figure. The `kwargs...` are keywords passed directly into `PyPlot`'s constructors (like e.g. `linewidth = 2.0`).
 For example:
 ```julia
 using DynamicalBilliards, PyPlot
-bt = billiard_sinai(0.3)
+bd = billiard_sinai(0.3)
 # Plot disk:
-plot_obstacle(bt[5])
+plot_obstacle!(bd[5])
 # Plot left wall:
-plot_obstacle(bt[1])
+plot_obstacle!(bd[1])
 # Plot right wall with different settings:
-plot_obstacle(bt[2]; linewidth = 3.0, linestyle = "dashed", color = (1.0, 0.5, 0.5))
+plot_obstacle!(bd[2]; linewidth = 3.0, linestyle = "dashed", color = (1.0, 0.5, 0.5))
 # Set limits for the purpose of the tutorial
 xlim(-0.1, 1.1); ylim(-0.1, 1.1)
 ```
@@ -32,12 +35,12 @@ will plot something like this:
 
 ![Visualizing tutorial 1](http://i.imgur.com/lrDStnP.png)
 
-If you want to quickly plot the entire billiard without changing the settings, simply use the function `plot_billiard(bt)`:
+If you want to quickly plot the entire billiard with default parameters, simply use the function `plot_billiard(bd)`:
 ```julia
-bt = billiard_polygon(6, 1)
+bd = billiard_polygon(6, 1)
 a = Antidot([0.0,0.0], 0.5)
-bt = Billiard(bt.obstacles..., a)
-plot_billiard(bt)
+bd = Billiard(bd.obstacles..., a)
+plot_billiard(bd)
 ```
 which will plot something like this:
 
@@ -47,15 +50,15 @@ which will plot something like this:
 
 
 
-## Plotting particles
+### Plotting particles
 
 Following the above example, we create and plot a particle using the function `plot_particle`:
 ```julia
-p = randominside(bt)
+p = randominside(bd)
 plot_particle(p)
 # Plot one more particle with purple color,
 # pentagon shape and bigger size (default is s=30):
-p2 = randominside(bt)
+p2 = randominside(bd)
 plot_particle(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
 ```
 which should give you something like this (notice that the particle position and direction are random):
@@ -78,12 +81,12 @@ The default plotting settings have been chosen for maximum clarity and consisten
 
 The function `animate_evolution` is provided to animate the evolution of a particle from collision to collision:
 ```julia
-animate_evolution(p, bt, colnumber[, ray-splitter]; kwargs...)
+animate_evolution(p, bd, colnumber[, ray-splitter]; kwargs...)
 ```
 
 Arguments:
   * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bt::Billiard` : The billiard.
+  * `bd::Billiard` : The billiard.
   * `colnumber::Int` : Number of collisions to evolve the particle for.
   * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
       that enables ray-splitting processes during evolution.
@@ -112,13 +115,13 @@ Automatic output into an animated image (e.g. ".gif" format) is not yet supporte
 Let's animate a particle inside a simple pentagon with magnetic field:
 
 ```julia
-bt = billiard_polygon(5, 1)
+bd = billiard_polygon(5, 1)
 a = Disk([0.0,0.0], 0.4)
-bt = (bt.obstacles..., a)
-p = randominside(bt, 1.0)
+bd = (bd.obstacles..., a)
+p = randominside(bd, 1.0)
 
 savedir = tempdir()
-animate_evolution(p, bt, 50; savefigs = true, savename = savedir)
+animate_evolution(p, bd, 50; savefigs = true, savename = savedir)
 ```
 
 This code produced 50 ".png" images which were later combined
@@ -132,8 +135,8 @@ In order to plot periodic billiards, you have need to call a different method of
 also have to specify the limits of plotting. The
 methods provided are:
 ```julia
-plot_billiard(bt, xmin, ymin, xmax, ymax)
-plot_billiard(bt, xt::Vector{T}, yt::Vector{T})
+plot_billiard(bd, xmin, ymin, xmax, ymax)
+plot_billiard(bd, xt::Vector{T}, yt::Vector{T})
 ```
 The last one conveniently plots the combo of particle-trajectory and
 periodic-billiard taking care of all the details internally. Give the keyword
@@ -143,16 +146,14 @@ For example, the following code
 ```julia
 using DynamicalBilliards, PyPlot
 r = 0.25
-bt = billiard_rectangle(2, 1; setting = "periodic")
+bd = billiard_rectangle(2, 1; setting = "periodic")
 d = Disk([0.5, 0.5], r)
 d2 = Disk([1.5, 0.5], r/2)
-bt = Billiard(bt.obstacles..., d, d2)
-p = randominside(bt)
-xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 50)...)
-plot_billiard(bt, xt, yt)
+bd = Billiard(bd.obstacles..., d, d2)
+p = randominside(bd)
+xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 50)...)
+plot_billiard(bd, xt, yt)
 plot_particle(p)
 ```
 will produce something like this:
 ![Periodic Billiard plot](http://i.imgur.com/rOpU7sl.png)
-
-Animations for periodic billiards are not supported yet.

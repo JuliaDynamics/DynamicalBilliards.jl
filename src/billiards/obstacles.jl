@@ -1,6 +1,7 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
 normalvec, distance, cellsize, Semicircle
+export translate
 
 #######################################################################################
 ## Circles
@@ -450,4 +451,23 @@ function cellsize(a::Semicircle{T}) where {T}
     xmin, ymin = a.c .- a.r
     xmax, ymax = a.c .+ a.r
     return xmin, ymin, xmax, ymax
+end
+
+
+####################################################
+## Translations
+####################################################
+"""
+    translate(obst::Obstacle, vector)
+Create a copy of the given obstacle with its position
+translated by `vector`.
+"""
+function translate end
+
+for T in subtypes(Circular)
+  @eval translate(d::$T, vec) = ($T)(d.c .+ vec, d.r)
+end
+
+for T in subtypes(Wall)
+  @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
 end
