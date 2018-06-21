@@ -75,8 +75,12 @@ end
 
 function _ξ(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
     d = (pos - o.c)/o.r
-    r = acos(clamp(d[1], -1, 1))*o.r
-    return r
+    if d[2] > 0 
+        r = acos(clamp(d[1], -1, 1))
+    else
+        r = π + acos(-clamp(d[1], -1, 1))
+    end
+    return r*o.r
 end
 
 
