@@ -94,11 +94,8 @@ incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
 @inline resolvecollision!(p::Particle, o::Obstacle) = specular!(p, o)
 @inline resolvecollision!(p::Particle, o::PeriodicWall) = periodicity!(p, o)
-function resolvecollision!(p::MagneticParticle, o::Obstacle)
-    specular!(p, o)
-    p.center = find_cyclotron(p)
-    return
-end
+@inline resolvecollision!(p::MagneticParticle, o::Obstacle) = specular!(p, o)
+
 resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
 
 

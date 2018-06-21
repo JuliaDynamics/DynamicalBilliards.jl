@@ -101,7 +101,7 @@ This function is the inverse of [`to_bcoords`](@ref).
 """
 function from_bcoords(ξ::T, sφ::T, o::Obstacle{T}) where {T}
     pos = real_pos(ξ, o)
-    cφ = sqrt(1-sφ^2)  # = cos(asin(sφ))
+    cφ = sqrt(1-sφ^2) # = cos(asin(sφ))
     n = normalvec(o, pos)
     vel = SV{T}(n[1]*cφ + n[2]*sφ, -n[1]*sφ + n[2]*cφ)
 

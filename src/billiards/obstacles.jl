@@ -442,15 +442,15 @@ function cellsize(a::Antidot{T}) where {T}
         xmin = ymin = T(Inf)
         xmax = ymax = T(-Inf)
     else
-        xmin, ymin = a.c .- a.r
-        xmax, ymax = a.c .+ a.r
+        xmin, ymin = a.c - a.r
+        xmax, ymax = a.c + a.r
     end
     return xmin, ymin, xmax, ymax
 end
 
 function cellsize(a::Semicircle{T}) where {T}
-    xmin, ymin = a.c .- a.r
-    xmax, ymax = a.c .+ a.r
+    xmin, ymin = a.c - a.r
+    xmax, ymax = a.c + a.r
     return xmin, ymin, xmax, ymax
 end
 

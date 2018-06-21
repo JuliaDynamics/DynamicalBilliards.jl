@@ -47,18 +47,21 @@ The following functions must obtain methods for `Semicircle` (or any other custo
 3. [`collisiontime`](@ref) with `Particle`
 
 Assuming that upon collision a specular reflection happens, then you don't need
-to define a method for [`resolvecollision!`](@ref).
+to define a method for [`resolvecollision!`](@ref). You can however define
+custom methods for [`resolvecollision!`](@ref), which is what we have done e.g.
+for [`RandomDisk`](@ref).
 
 The first method is very simple, just do:
 ```julia
+import DynamicalBilliards: normalvec, distance, collisiontime
 normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 ```
-Since the function is only used during `distance` and
-`resolvecollision!` and since we will be writing explicit methods for the first,
+Since the function is only used during [`distance`](@ref) and
+[`resolvecollision!`](@ref) and since we will be writing explicit methods for the first,
 we don't have to care about
 what happens when the particle is far away from the boundary.
 
-The `distance` method is a bit tricky. Since the type already subtypes `Circular`,
+The [`distance`](@ref) method is a bit tricky. Since the type already subtypes `Circular`,
 the following definition from `DynamicalBilliards` applies:
 ```julia
 distance(pos::AbstractVector, d::Circular) = norm(pos - d.c) - d.r
@@ -72,7 +75,7 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     # Check on which half of circle is the particle
     v1 = pos .- s.c
     nn = dot(v1, s.facedir)
-    if nn ≤ 0 # I am "inside semicircle
+    if nn ≤ 0 # I am "inside semicircle"
         return s.r - norm(pos - s.c)
     else # I am on the "other side"
         end1 = SV(s.c[1] + s.r*s.facedir[2], s.c[2] - s.r*s.facedir[1])
@@ -118,19 +121,33 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
 end
 ```
 
-And that is all. The obstacle now works perfectly fine for straight propagation
-and properly initializes particles with [`randominside`](@ref)!
+And that is all. The obstacle now works perfectly fine for straight propagation.
 
 
 
 ## Optional Methods
 
+1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collisiontime`](@ref) with `MagneticParticle` : enables magnetic propagation
 2. [`plot_obstacle!`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
-3. [`to_bcoords`](@ref) so that the [`boundarymap`](@ref) can be computed.
+3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
+4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
-The `collisiontime` method for `MagneticParticle` is very easy in this case, because
-it is almost identical with the method for the general `Circular` obstacle:
+The [`cellsize`](@ref) method is kinda trivial:
+```julia
+import DynamicalBilliards: cellsize, plot_obstacle!, to_bcoords, from_bcoords
+
+function cellsize(a::Semicircle{T}) where {T}
+    xmin, ymin = a.c - a.r
+    xmax, ymax = a.c + a.r
+    return xmin, ymin, xmax, ymax
+end
+```
+
+
+The [`collisiontime`](@ref) method for [`MagneticParticle`](@ref) is also
+easy in this case, because
+it is almost identical with the method for the general [`Circular`](@ref) obstacle:
 ```julia
 function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     ω = p.omega
@@ -171,12 +188,48 @@ end
 
 Then, we add swag by writing a method for `plot_obstacle!`:
 
-# TODO: REWRITE
+```julia
+using PyPlot
 
-(this method is in the `/plotting/obstacles.jl` file and is loaded on-demand
-when `using PyPlot`)
+Arc = PyPlot.matplotlib[:patches][:Arc]
 
-Finally, we also add a method to the [`to_bcoords`](@ref) function, so that
-we can compute the [`boundarymap`](@ref) of billiards containing our new obstacle
+function plot_obstacle!(d::Semicircle; kwargs...)
+    theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
+    theta2 = theta1 + 180
+    edgecolor = DynamicalBilliards.obcolor(d)
+    s1 = Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
+    lw = 2.0, kwargs...)
+    PyPlot.gca()[:add_artist](s1)
+    PyPlot.show()
+end
+```
 
-# TODO: REWRITE!
+
+Finally, we also add a methods for [`to_bcoords`](@ref) and [`from_bcoords`](@ref).
+
+```julia
+function to_bcoords(pos::SV, vel::SV, o::Obstacle)
+    n = normalvec(o, pos)
+    sinφ = cross2D(vel, n)
+
+    #project pos on open face
+    chrd = SV{T}(-o.facedir[2],o.facedir[1])
+    d = (pos - o.c)/o.r
+    x = dot(d, chrd)
+    ξ =  acos(clamp(x, -1, 1))*o.r
+
+    return ξ, sinφ
+end
+
+function real_pos(ξ, o::Semicircle{T}) where T
+    sξ, cξ = sincos(ξ/o.r)
+    chrd = SV{T}(-o.facedir[2], o.facedir[1])
+    pos =  o.c - o.r*(sξ*o.facedir - cξ*chrd)
+
+    cφ = cos(asin(sφ))
+    n = normalvec(o, pos)
+    vel = SV{T}(n[1]*cφ + n[2]*sφ, -n[1]*sφ + n[2]*cφ)
+
+    return pos, vel
+end
+```
