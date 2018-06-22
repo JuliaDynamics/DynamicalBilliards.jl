@@ -14,7 +14,8 @@ notifications:
     on_failure: always
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.clone(pwd())'
+  - julia -e 'using Pkg; ENV["PYTHON"]=""; Pkg.add("PyCall"); Pkg.build("PyCall")'
+  - julia -e 'Pkg.clone(pwd())'
   - julia -e 'Pkg.test("DynamicalBilliards")'
 after_success:
   - test $TRAVIS_OS_NAME = "linux" && julia -e 'Pkg.add("Documenter"); Pkg.add("PyPlot")'
