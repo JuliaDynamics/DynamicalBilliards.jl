@@ -54,7 +54,7 @@ and one for the "real" coordinates (3D space):
 boundarymap_portion
 phasespace_portion
 ```
-For example, for mushroom billiards the ratio of the regular-to-total phase space is known **analytically** for both the full 3D [1] space as well as the boundary 2D [2] space:
+For example, for mushroom billiards the ratio of the chaotic-to-total phase space is known **analytically** for both the full 3D [1] space as well as the boundary 2D [2] space:
 $$
 formulas from Lukas Thesis
 $$
@@ -70,11 +70,11 @@ bd = billiard_mushroom(l, w, r)
 p = MushroomTools.randomchaotic(l, w, r)
 
 ratio, dic = boundarymap_portion(bd, t, p, 0.01)
-trueratio =  MushroomTools.g_c_2D(l,w,r)
+trueratio = MushroomTools.g_c_2D(l,w,r)
 println("2D numeric - theory: $(abs(ratio - trueratio))")
 
 ratio = phasespace_portion(bd, t, p, 0.01)
-trueratio =  MushroomTools.g_c_3D(l,w,r)
+trueratio = MushroomTools.g_c_3D(l,w,r)
 println("3D numeric - theory: $(abs(ratio - trueratio))")
 ```
 Of course, increasing evolution time or decreasing boxsize will bring higher accuracy.
