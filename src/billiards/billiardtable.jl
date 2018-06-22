@@ -7,10 +7,12 @@ struct Billiard{T, D, O<:Tuple}
 end
 
 #pretty print:
+
+_get_name(o::Obstacle) = :name ∈ fieldnames(typeof(o)) ? o.name : string(typeof(o))
 function Base.show(io::IO, bd::Billiard{T,D,BT}) where {T, D, BT}
     s = "Billiard{$T} with $D obstacles:\n"
     for o in bd
-        s*="  $(o.name)\n"
+        s*="  $(_get_name(o))\n"
     end
     print(io, s)
 end
@@ -21,10 +23,15 @@ end
     Billiard(obstacles...)
 Construct a `Billiard` from given `obstacles` (tuple, vector, varargs).
 
-If you want to use the [`boundarymap`](@ref) function, then it is expected to
-provide the obstacles of the billiard in sorted order, such that the boundary
-coordinate (measured using [`to_bcoords`](@ref))
-around the billiard is increasing counter-clockwise.
+For functions like [`boundarymap`](@ref),
+it is expected (if possible) that the obstacles of the billiard are sorted,
+such that the arc-coordinate `ξ` around the billiard is increasing counter-clockwise.
+
+`ξ` is measured as:
+* the distance from start point to end point in `Wall`s
+* the arc length measured counterclockwise from the open face in `Semicircle`s
+* the arc length measured counterclockwise from the rightmost point
+  in `Circular`s
 """
 function Billiard(bd::Union{AbstractVector, Tuple})
 
@@ -50,6 +57,8 @@ end
 
 
 Base.getindex(bd::Billiard, i) = bd.obstacles[i]
+Base.lastindex(bd::Billiard) = length(bd.obstacles)
+Base.firstindex(bd::Billiard) = 1
 # Iteration:
 Base.iterate(bd::Billiard) = iterate(bd.obstacles)
 Base.iterate(bd::Billiard, state) = iterate(bd.obstacles, state)

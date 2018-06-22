@@ -1,11 +1,35 @@
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BinDeps]]
+deps = ["Compat", "Libdl", "SHA", "URIParser"]
+git-tree-sha1 = "160d5d926e83e0970dd549ad9fe0ac3e8107e83c"
+uuid = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
+version = "0.8.8"
+
+[[ColorTypes]]
+deps = ["FixedPointNumbers", "Test"]
+git-tree-sha1 = "eb9923f30264ee2c78d8c20c59797583cffdf105"
+uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
+version = "0.7.0"
+
+[[Colors]]
+deps = ["ColorTypes", "FixedPointNumbers", "InteractiveUtils", "Printf", "Reexport", "Test"]
+git-tree-sha1 = "cec56a50029f40f4c13e4f25bf84964fde31905a"
+uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
+version = "0.9.0"
+
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Test", "UUIDs", "Unicode"]
 git-tree-sha1 = "f3e87ca1e2df8e1e4f82ea504fddf0b9b0894f61"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "0.69.0"
+
+[[Conda]]
+deps = ["BinDeps", "Compat", "JSON", "Libdl", "VersionParsing"]
+git-tree-sha1 = "6358e179fb9ad0af5ca9cd4d7c691c413cc121f2"
+uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
+version = "0.8.1"
 
 [[Dates]]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -16,8 +40,26 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 [[Distributed]]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
+[[FixedPointNumbers]]
+deps = ["Pkg", "Test"]
+git-tree-sha1 = "53fae3f45b6782dad91e932d941b0bf862110641"
+uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+version = "0.5.1"
+
 [[InteractiveUtils]]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[JSON]]
+deps = ["Compat", "Nullables", "Sockets", "Unicode"]
+git-tree-sha1 = "e2f6776e8bfd310b2ade13fba1faf99d8967d58f"
+uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+version = "0.17.2"
+
+[[LaTeXStrings]]
+deps = ["Compat"]
+git-tree-sha1 = "dc1037473312c432f92b2c7460cb1e01075279b3"
+uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+version = "1.0.0"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -28,11 +70,23 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 [[LinearAlgebra]]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
+[[MacroTools]]
+deps = ["Compat"]
+git-tree-sha1 = "f5c87f9af1c1b0aea42080672dea169f936a83fb"
+uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+version = "0.4.1"
+
 [[Markdown]]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[Nullables]]
+deps = ["Compat"]
+git-tree-sha1 = "23258f849603ad4fed3ce7dbcb8c0658920fa5ef"
+uuid = "4d1e1d77-625e-5b40-9113-a560ec7a8ecd"
+version = "0.0.5"
 
 [[Pkg]]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -40,17 +94,37 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 [[Printf]]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
+[[PyCall]]
+deps = ["Compat", "Conda", "MacroTools", "VersionParsing"]
+git-tree-sha1 = "dcb6e67213f812d75100cbf87e9c0fd6aebc01f5"
+uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+version = "1.17.1"
+
+[[PyPlot]]
+deps = ["Colors", "Compat", "LaTeXStrings", "PyCall", "Test"]
+git-tree-sha1 = "075229e51733bf635ba152e1bfa931d4643b6580"
+uuid = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+version = "2.5.0"
+
 [[REPL]]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[Random]]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
+[[Reexport]]
+git-tree-sha1 = "caba582b2e9ef39b9cfff911aa13c5ca1b9a9896"
+uuid = "189a3867-3050-52da-a836-e630ba90ab69"
+version = "0.1.0"
+
 [[Requires]]
 deps = ["Test"]
 git-tree-sha1 = "36e27b810e096ab501655e4b841b779cd9adaf33"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "0.5.0"
+
+[[SHA]]
+uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -73,8 +147,20 @@ version = "0.7.1"
 [[Test]]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[[URIParser]]
+deps = ["Compat", "Unicode"]
+git-tree-sha1 = "0f9c5e2d14e03fbd00696f9394e288bdd5adacbc"
+uuid = "30578b45-9adc-5946-b283-645ec420af67"
+version = "0.3.1"
+
 [[UUIDs]]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[VersionParsing]]
+deps = ["Compat"]
+git-tree-sha1 = "e8524bb636735227fd9d750dfa81f98db8bc5b0c"
+uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
+version = "1.1.1"

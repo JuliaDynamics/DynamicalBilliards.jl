@@ -2,45 +2,45 @@ using PyPlot
 export animate_evolution
 
 """
-    animate_evolution(p, bd, colnumber[, raysplitters]; kwargs...)
-Animate the evolution of the particle, plotting the orbit from collision to collision.
-
-### Arguments
-  * `p::AbstractParticle` : The particle to be evolved.
-  * `bd::Billiard` : The billiard.
-  * `colnumber::Int` : Number of collisions to evolve the particle for.
-  * `ray-splitter` : (Optional) Tuple of [`RaySplitters`](@ref),
-      that enable ray-splitting processes during evolution.
 ### Keyword Arguments
   * `newfig = true` : Creates a new figure at the function call, and plots
     the billiard in that figure.
-  * `sleeptime` : Time passed to `sleep()` between each collision.
-  * `col_to_plot` : How many previous collisions are shown during the animation.
+  * `disable_axis = false` : Turn off the axis of the figure.
+  * `framerate = 5` : Time between frames, both during showing animation and
+    during saving it.
+  * `col_to_plot = 5` : How many previous collisions are shown during the animation.
   * `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.
     Keywords passed into `plot_particle()`.
   * `orbit_kwargs` : Either a Dict{Symbol, Any} or a Vector of Tuple{Symbol, Any}.
     Keywords passed into `PyPlot.plot()` which plots the orbit of the particle
     (`line` object).
-  * `savefigs::Bool` : If `true` save .png figures of each frame of the animation
-    A direct movie (like creating a .mp4) of the animation cannot be made automatically,
-    since the animation process mutates the particle.
-  * `savename` : Name (*including path*) of the figures to be produced. The ending
-    "_i.png" will be attached to all figures.
+  * `savename = nothing` : If `nothing`, nothing is saved.
+    If you give a string instead (filename *including path*) an animation `.mp4`
+    will be saved with name `savename.mp4`. **This requires the `ffmpeg` to be
+    accessible from the command line.**
+  * `deletefigs = true` : When producing the animation, each frame is saved
+    (in the same folder) but then deleted after the animation is created. You
+    can choose to keep them by passing `false`.
+  * `figsize = (7.2, 7.2)` : `PyPlot` figure size.
 
 The function returns `a, b, c`. Do `a[:remove](); b[:remove](); c[:remove]()` to clear
 the particle out of the figure.
 """
 function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = nothing;
-    sleeptime = 0.1, col_to_plot = 5, savefigs = false, savename = "",
-    particle_kwargs = nothing, orbit_kwargs = nothing, newfig = true)
+    framerate = 5, col_to_plot = 5, savename = nothing,
+    particle_kwargs = NamedTuple(), orbit_kwargs = NamedTuple(), newfig = true,
+    disable_axis = false, deletefigs = true,
+    figsize = (7.2, 7.2))
 
     p = deepcopy(par)
     if newfig == true
-        fig = figure()
+        fig = figure(figsize = (7.2, 7.2))
         plot_billiard(bd; ax = gca())
     end
 
-    sleeptime == 0 && (sleeptime = 1e-3)
+    disable_axis && axis("off")
+
+    sleeptime = 1/framerate
     i=0
     xdata = Vector{Float64}[]
     ydata = Vector{Float64}[]
@@ -70,26 +70,17 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
         for el in ydata; append!(ypd, el); end
 
         if i == 0
-            if orbit_kwargs != nothing
-                line, = plot(xpd, ypd; orbit_kwargs...)
-            else
-                line, = plot(xpd, ypd; color = "C0")
-            end
+            line, = plot(xpd, ypd; orbit_kwargs...)
         end
         line[:set_xdata](xpd)
         line[:set_ydata](ypd)
 
-        if particle_kwargs != nothing
-            point, quiv = plot_particle!(p; particle_kwargs...)
-        else
-            point, quiv = plot_particle!(p)
-        end
+        point, quiv = plot_particle!(p; particle_kwargs...)
 
-        if savefigs
+        if savename != nothing
             s = savename*"_$(i+1).png"
-            savefig(s, bbox_inches="tight")
+            savefig(s, dpi = 100)
         end
-
 
         sleep(sleeptime)
         if i < colnumber - 1
@@ -98,6 +89,16 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
         end
         i+=1
     end
-    reset_billiard!(bd)
+    if savename != nothing
+        anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
+        -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v baseline -level 3.0 $(savename).mp4`
+        run(anim)
+
+        if deletefigs
+            for i in 1:colnumber
+                rm(savename*"_$(i).png")
+            end
+        end
+    end
     return line, point, quiv
 end

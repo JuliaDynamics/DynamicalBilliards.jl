@@ -59,8 +59,6 @@ FiniteWall
 ```@docs
 normalvec
 cellsize
-to_bcoords
-totallength
 translate
 ```
 
