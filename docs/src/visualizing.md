@@ -11,29 +11,32 @@ animate_evolution
 
 ## Examples
 
-### Plotting some obstacles
+### Plotting Obstacles with keywords
+```@example obstacles
+using DynamicalBilliards, PyPlot
 
-For example:
+bd = billiard_sinai()
+
+plot_obstacle!(bd[2])
+plot_obstacle!(bd[4], color = "blue", linestyle = "dotted", lw = 5.0)
+plot_obstacle!(bd[1], facecolor = "yellow", edgecolor = "black")
+savefig("rand_obstacles.svg"); nothing # hide
+```
+![](rand_obstacles.svg)
+
+### Plotting a Billiard
+
 ```@example 8
-using PyPlot, DynamicalBilliards
+using DynamicalBilliards
 b = billiard_polygon(6, 1)
 a = Antidot([0.0,0.0], 0.5)
 bd = Billiard(b.obstacles..., a)
-
-figure()
-plot_obstacle!(bd[end])
-plot_obstacle!(bd[1])
-plot_obstacle!(bd[2]; linewidth = 3.0, linestyle = "dashed", color = (0.0, 0.5, 0.5))
-
-PyPlot.xlim(-1, 1); PyPlot.ylim(-1, 1);
-
-savefig("obstacles_example.svg"); nothing # hide
 ```
-![](obstacles_example.svg)
 
 If you want to quickly plot the entire billiard with default parameters, simply use the function `plot_billiard(bd)`:
 
 ```@example 8
+using PyPlot
 plot_billiard(bd)
 savefig("billiard_example.svg"); nothing # hide
 ```
