@@ -19,7 +19,7 @@ evolves visited boxes are counted. The returned ratio is this count divided
 by the total boxes of size `(δξ, δφ)` needed to cover the boundary map.
 
 **Important:** This portion **does not** equate the portion the particle's orbit covers
-on the full, three dimensional phase-space. Use the function
+on the full, three dimensional phase space. Use the function
 [`phasespace_portion`](@ref) for that!
 """
 function boundarymap_portion(bd::Billiard{T}, t,
