@@ -65,6 +65,7 @@ function psos(
         # Now "bounce" the particle normally:
         tmin = relocate!(p, bd[i], tmin)
         resolvecollision!(p, bd[i])
+        typeof(par) <: MagneticParticle && (p.center = find_cyclotron(p))
 
         count += increment_counter(t, tmin)
     end
