@@ -51,11 +51,18 @@ function plot_boundarymap(ξs, sφs, intervals; ax = PyPlot.gca(),
 
         #non-labelled major tics at every obstacle border
         ax2[:xaxis][:set_major_formatter](matplotlib[:ticker][:NullFormatter]())
-        ax2[:set_xticks]([0,map(x->x[2],intervals)...])
+        ax2[:set_xticks](intervals)
 
         #zero-length minor tics in between borders, labelled with the obstacle index
-        ax2[:xaxis][:set_minor_locator](matplotlib[:ticker][:FixedLocator](map(x->mean(x), intervals)))
-        ax2[:xaxis][:set_minor_formatter](matplotlib[:ticker][:FixedFormatter](map(x->dec(x),1:length(intervals))))
+        ax2[:xaxis][:set_minor_locator](matplotlib[:ticker][:FixedLocator](
+            [mean((intervals[i], intervals[i+1])) for i in 1:length(intervals)-1]
+        ))
+              
+        
+        ax2[:xaxis][:set_minor_formatter](
+            matplotlib[:ticker][:FixedFormatter](map(x->dec(x),1:length(intervals)))
+        )
+        
         ax2[:tick_params](axis="x", which="minor", length=0)#
 
         ax2[:set_xlabel]("obstacle index")

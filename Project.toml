@@ -1,8 +1,12 @@
 name = "DynamicalBilliards"
 repo = "https://github.com/JuliaDynamics/DynamicalBilliards.jl.git"
 uuid = "4986ee89-4ee5-5cef-b6b8-e49ba721d7a5"
+version = "2.0.0"
 
 [deps]
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"

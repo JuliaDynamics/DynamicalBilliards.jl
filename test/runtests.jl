@@ -40,16 +40,17 @@ t = time()
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
     type_stability, lyapunov_spectrum,
-    lyapunov_magnetic, escape_times, stadium_psos, cut_psos, meancoltimes,
-    boundarymap_portion_test, raysplit_straight, raysplit_magnetic)
+    lyapunov_magnetic, escape_times, stadium_bm, cut_psos, coordinates_test,
+    boundarymap_portion_test, phasespace_portion_test, meancoltimes,
+    raysplit_straight, raysplit_magnetic)
 
 for f in fnames
     println()
+    println("Running $f")
     f(partnum, printinfo=printinfo)
 end
 
-print("\nDynamicalBilliards tests ended (successfully) at: ")
-println(Dates.format(now(), "HH:MM:s"))
+print("\nDynamicalBilliards tests ended (successfully)")
 t = time() - t
 println("Total time required was:")
-println(round(t, 3), " seconds, or ", round(t/60, digits=3), " minutes")
+println(round(t, digits = 3), " seconds, or ", round(t/60, digits=3), " minutes")

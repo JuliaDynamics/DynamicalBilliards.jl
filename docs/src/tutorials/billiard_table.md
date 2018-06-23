@@ -4,7 +4,7 @@ Billiard
 ```
 ---
 
-A billiard `bt` is a wrapper of a `Tuple` of `Obstacles`.
+A `Billiard` is a wrapper of a `Tuple` of `Obstacles`.
 The abstract Type `Obstacle{T}` is the supertype of all objects that a particle may collide with, with global billiard precision of type `T`.
 
 There are many premade functions that construct well-known billiards, like the periodic Sinai billiard.
@@ -13,7 +13,7 @@ You can find all of them at the [Standard Billiards Library](/basic/high_level/#
 To create a custom billiard from scratch, it is often convenient to start with an empty `Vector{Obstacle{T}}`:
 ```julia
 using DynamicalBilliards
-bt = Obstacle{Float64}[]  # T<: AbstractFloat
+bd = Obstacle{Float64}[]  # T<: AbstractFloat
 ```
 and then you create your obstacles one by one and add them to it. All obstacles that are already defined in the package
 can be found at the [Obstacles page](/basic/library/#obstacles) of the library. The function [`billiard_polygon`](@ref) creates a polygonal billiard table.
@@ -37,7 +37,7 @@ for i in eachindex(hexver)
   w = ending - starting
   normal = [-w[2], w[1]]
   wall = InfiniteWall(starting, ending, normal, "wall $i")
-  push!(bt, wall)
+  push!(bd, wall)
 end
 ```
 
@@ -46,11 +46,11 @@ The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the 
 We add a disk by specifying a center and radius (and optionally a name):
 ```julia
 d = Disk([0,0], 0.8)
-push!(bt, d)
+push!(bd, d)
 # Make the structure required:
-billiard = Billiard(bt)
+billiard = Billiard(bd)
 ```
-To make sure the billiard looks as you would expect, use the function `plot_billiard(bt)`. Create a particle inside that billiard and evolve it:
+To make sure the billiard looks as you would expect, use the function `plot_billiard(bd)`. Create a particle inside that billiard and evolve it:
 ```julia
 using PyPlot
 plot_billiard(billiard)

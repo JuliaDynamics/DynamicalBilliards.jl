@@ -51,7 +51,11 @@ struct RaySplitter{T, Φ, Ω, A}
     affect::A
 end
 
-function RaySplitter(idxs, tr, ref, newangular = (ω, pflag) -> ω; affect = (i) -> i)
+@inline default_affect(i) = i
+@inline default_angular(ω, pflag) = ω
+
+function RaySplitter(idxs, tr, ref, newangular = default_angular;
+                                    affect = default_affect)
     for i ∈ idxs
         i ∈ affect(i) || throw(ArgumentError(
         "All indices that correspond to this RaySplitter must also be affected!"))
@@ -60,16 +64,33 @@ function RaySplitter(idxs, tr, ref, newangular = (ω, pflag) -> ω; affect = (i)
     return RaySplitter(sort(idxs), tr, ref, newangular, affect)
 end
 
+#pretty print:
+function Base.show(io::IO, ::MIME"text/plain", ray::RaySplitter)
+    ps = 15
+    angtext = ray.newω == default_angular ? "default" : "$(ray.newω)"
+    afftext = ray.affect == default_affect ? "default" : "$(ray.affect)"
+    print(io, "RaySplitter for indices $(ray.oidx)"*"\n",
+    rpad(" transmission: ", ps)*"$(ray.transmission)\n",
+    rpad(" refraction: ", ps)*"$(ray.refraction)\n",
+    rpad(" new angular: ", ps)*angtext*"\n",
+    rpad(" affect: ", ps)*afftext*"\n"
+    )
+end
+
+function Base.show(io::IO, ray::RaySplitter)
+    print(io, "RaySplitter for indices $(ray.oidx)")
+end
+
 
 """
-    raysplit_indices(bt::Billiard, raysplitters::Tuple)
+    raysplit_indices(bd::Billiard, raysplitters::Tuple)
 Create a vector of integers. The `i`th entry tells you which entry of the
 `raysplitters` tuple is associated with the `i`th obstacle of the billiard.
 
 If the `i`th entry is `0`, this means that the obstacle does not do raysplitting.
 """
-function raysplit_indices(bt::Billiard, raysplitters::Tuple)
-    O = zeros(Int, length(bt.obstacles))
+function raysplit_indices(bd::Billiard, raysplitters::Tuple)
+    O = zeros(Int, length(bd.obstacles))
     for (k, rayspl) ∈ enumerate(raysplitters)
         O[rayspl.oidx] .= k
     end
@@ -79,15 +100,15 @@ end
 allaffected(ray::RaySplitter) = union(ray.affect(i) for i in ray.oidx)
 
 """
-    acceptable_raysplitter(raysplitters, bt::Billiard)
+    acceptable_raysplitter(raysplitters, bd::Billiard)
 Return `true` if the given `raysplitters`
-can be used in conjuction with given billiard `bt`.
+can be used in conjuction with given billiard `bd`.
 """
-function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
+function acceptable_raysplitter(raysplitters::Tuple, bd::Billiard)
 
     for ray in raysplitters
         for i in (ray.oidx ∪ ray.affect(ray.oidx))
-            if !supports_raysplitting(bt[i])
+            if !supports_raysplitting(bd[i])
                 error("Obstacle at index $i of given billiard table"*
                 " does not have a field `pflag`"*
                 " and therefore does not support ray-splitting."*
@@ -96,7 +117,7 @@ function acceptable_raysplitter(raysplitters::Tuple, bt::Billiard)
         end
     end
 
-    idx = raysplit_indices(bt, raysplitters)
+    idx = raysplit_indices(bd, raysplitters)
 
     # Make sure that no indices are shared in the corresponding obstacles
     vecs = [ray.oidx for ray in raysplitters]
@@ -154,10 +175,10 @@ end
 
 angleclamp(φ::T) where {T} = clamp(φ, -π/2 + T(0.1), π/2 - T(0.1))
 
-function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
+function resolvecollision!(p::AbstractParticle{T}, bd::Billiard{T}, colidx::Int,
     trans::Bool, rayspl::RaySplitter) where {T<:AbstractFloat}
 
-    a = bt[colidx]
+    a = bd[colidx]
     ismagnetic = typeof(p) <: MagneticParticle
     ω = ismagnetic ? p.omega : T(0)
 
@@ -170,11 +191,11 @@ function resolvecollision!(p::AbstractParticle{T}, bt::Billiard{T}, colidx::Int,
         # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
         # for all obstacles dictated by the RaySplitter
         for oi ∈ rayspl.affect(colidx)
-            bt[oi].pflag = ! bt[oi].pflag
+            bd[oi].pflag = ! bd[oi].pflag
         end
         # Raysplit Algorithm step 8: find transmission angle in real-space angles
         n = normalvec(a, p.pos) #notice that this is reversed! It's the new normalvec!
-        Θ = theta + atan2(n[2], n[1])
+        Θ = theta + atan(n[2], n[1])
 
         # Raysplit Algorithm step 9: Perform refraction
         p.vel = SVector{2,T}(cos(Θ), sin(Θ))
@@ -195,28 +216,28 @@ end
 # raysplitters is a tuple of RaySplitter. raysidx is a vector that given the obstacle
 # index it tells you which raysplitter to choose from the tuple OR to not
 # do raysplitting at all (for returned index 0)
-function bounce!(p::AbstractParticle{T}, bt::Billiard{T},
+function bounce!(p::AbstractParticle{T}, bd::Billiard{T},
     raysidx::Vector{Int}, raysplitters::Tuple) where {T}
 
-    tmin::T, i::Int = next_collision(p, bt)
-    #=debug=# false && println("Colt. with Left antidot = $(collisiontime(p, bt[1]))")
-    #=debug=# false && println("Min. col. t with $(bt[i].name) = $tmin")
+    tmin::T, i::Int = next_collision(p, bd)
+    #=debug=# false && println("Colt. with Left antidot = $(collisiontime(p, bd[1]))")
+    #=debug=# false && println("Min. col. t with $(bd[i].name) = $tmin")
     #=debug=# false && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
     if tmin == Inf
         return i, tmin, p.pos, p.vel
     elseif raysidx[i] != 0
         propagate!(p, tmin)
-        trans = istransmitted(p, bt[i], raysplitters[raysidx[i]].transmission)
+        trans = istransmitted(p, bd[i], raysplitters[raysidx[i]].transmission)
         #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
-        #=debug=# false && println("Currently, pflag is $(bt[i].pflag)")
+        #=debug=# false && println("Currently, pflag is $(bd[i].pflag)")
         #=debug=# false && trans && println("(pflag will be reversed!)")
         #=debug=# false && println()
-        newt = relocate_rayspl!(p, bt[i], trans)
-        resolvecollision!(p, bt, i, trans,  raysplitters[raysidx[i]])
+        newt = relocate_rayspl!(p, bd[i], trans)
+        resolvecollision!(p, bd, i, trans,  raysplitters[raysidx[i]])
         tmin += newt
     else
-        tmin = relocate!(p, bt[i], tmin)
-        resolvecollision!(p, bt[i])
+        tmin = relocate!(p, bd[i], tmin)
+        resolvecollision!(p, bd[i])
     end
     typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))
     return i, tmin, p.pos, p.vel
@@ -225,20 +246,20 @@ end
 #####################################################################################
 # Evolve raysplitting
 #####################################################################################
-evolve!(p, bt, t, ray::RaySplitter; warning = false) =
-    evolve!(p, bt, t, (ray, ); warning = warning)
-function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple;
+evolve!(p, bd, t, ray::RaySplitter; warning = false) =
+    evolve!(p, bd, t, (ray, ); warning = warning)
+function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple;
     warning = false) where {T}
 
     if t <= 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
     # Check if raysplitters are acceptable
-    acceptable_raysplitter(raysplitters, bt)
+    acceptable_raysplitter(raysplitters, bd)
 
     ismagnetic = typeof(p) <: MagneticParticle
 
-    raysidx = raysplit_indices(bt, raysplitters)
+    raysidx = raysplit_indices(bd, raysplitters)
 
     rt = T[]; push!(rt, 0)
     rpos = SVector{2,T}[]; push!(rpos, p.pos)
@@ -261,7 +282,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
             end
         end
 
-        i, tmin, pos, vel = bounce!(p, bt, raysidx, raysplitters)
+        i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
         t_to_write += tmin
 
         if ismagnetic && tmin == Inf
@@ -271,7 +292,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t, raysplitters::Tuple
             return (rt, rpos, rvel, omegas)
         end
 
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             # Pinned particle:
             if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")
@@ -312,7 +333,7 @@ vels::Vector{SVector{2,T}}, omegas::Vector{T}, dt=0.01) where T
 
     for i in 2:length(t)
         ω = omegas[i-1]
-        φ0 = atan2(vels[i-1][2], vels[i-1][1])
+        φ0 = atan(vels[i-1][2], vels[i-1][1])
         x0 = poss[i-1][1]; y0 = poss[i-1][2]
         colt=t[i]
 
@@ -346,18 +367,18 @@ function supports_raysplitting(obst::Obstacle)
 end
 
 """
-    reset_billiard!(bt)
+    reset_billiard!(bd)
 Sets the `pflag` field of all ray-splitting obstacles of a billiard table
 to `true`.
 """
-function reset_billiard!(bt::Billiard)
-    for obst in bt
+function reset_billiard!(bd::Billiard)
+    for obst in bd
         supports_raysplitting(obst) && (obst.pflag = true)
     end
 end
 
 """
-    isphysical(raysplitters::Tuple; only_mandatory = false)
+    isphysical(raysplitter(s))
 Return `true` if the given `raysplitters` have physically
 plausible properties.
 
@@ -368,11 +389,9 @@ Specifically, check if (φ is the incidence angle, θ the refraction angle):
 * Refraction angle is odd function: θ(φ) ≈ -θ(-φ) at ω = 0
 * Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ
 * Magnetic conservation is true: (ω_new(ω_new(ω, pflag), !pflag) ≈ ω
-
-The first property is mandatory to hold for any setting and is always checked.
-The rest are checked if `only_mandatory = false`.
 """
-function isphysical(rays::Tuple; only_mandatory = false)
+isphysical(ray::RaySplitter) = isphysical((ray,))
+function isphysical(rays::Tuple)
   for (i, ray) in enumerate(rays)
     scatter = ray.refraction
     tr = ray.transmission
@@ -393,7 +412,6 @@ function isphysical(rays::Tuple; only_mandatory = false)
             println(es)
             return false
           end
-          if !only_mandatory
             # Check symmetry:
             if ω==0
               if !isapprox(θ, -scatter(-φ, pflag, ω))
@@ -422,7 +440,6 @@ function isphysical(rays::Tuple; only_mandatory = false)
               println(es)
               return false
             end
-          end
         end#φ range
       end#ω range
     end#pflag range

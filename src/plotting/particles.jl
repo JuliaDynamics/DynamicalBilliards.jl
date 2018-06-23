@@ -1,14 +1,13 @@
 using PyPlot, StaticArrays
-export plot_cyclotron, plot_particle
+export plot_cyclotron!, plot_particle!
 
 """
-```julia
-plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
-```
+    plot_cyclotron!(p::MagneticParticle; use_cell=true, kwargs...)
 Plot the circle traced by the free particle motion. Optionally use `p.current_cell` for
-the particle's position. The user provided `kwargs...` are passed onto `PyPlot.plt[:Circle]()`.
+the particle's position. The user provided `kwargs...`
+are passed onto `PyPlot.plt[:Circle]`.
 """
-function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
+function plot_cyclotron!(p::MagneticParticle; use_cell=true, kwargs...)
   ω = p.omega
   pos = use_cell ? p.pos + p.current_cell : p.pos
   c = pos - (1/ω)*[p.vel[2], -p.vel[1]]
@@ -21,17 +20,16 @@ function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
 end
 
 """
-```julia
-plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
-```
-Plot given particle on the current `PyPlot` figure. Optionally use `p.current_cell` for
-the particle's position. Given `kwargs...` are passed onto `PyPlot.scatter()`.
+    plot_particle!(p::AbstractParticle; use_cell=true, kwargs...)
+Plot given particle on the current `PyPlot` axes. Optionally use `p.current_cell` for
+the particle's position. Given `kwargs...` are passed onto `PyPlot.scatter`.
 
-The particle is represented as a small ball (`PyPlot.scatter()`) and a small arrow (`PyPlot.quiver()`).
-All `kwargs...` are given to `scatter()` but if a keyword argument `color` is given,
-it is also passed to `quiver()`.
+The particle is represented as a small ball (`PyPlot.scatter`) and a small arrow
+(`PyPlot.quiver`).
+All `kwargs...` are given to `scatter` but if a keyword argument `color` is given,
+it is also passed to `quiver`.
 """
-function plot_particle(p::AbstractParticle; use_cell=true, kwargs...)
+function plot_particle!(p::AbstractParticle; use_cell=true, kwargs...)
   pos = use_cell ? p.pos + p.current_cell : p.pos
   kwargs = Dict(kwargs)
   # Set same color for arrow and point:

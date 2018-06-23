@@ -1,7 +1,51 @@
 using DynamicalBilliards
 using Test
 
-function stadium_psos(partnum=10; printinfo = true)
+function coordinates_test(partnum = 500; printinfo = true)
+    tim = time()
+    @testset "Coordinate changes" begin
+        @testset "Sinai" begin
+            bd = billiard_sinai()
+            aints = arcintervals(bd)
+            for i in 1:partnum
+                p = randominside(bd)
+                i, tmin = bounce!(p, bd)
+                ξ, sφ = to_bcoords(p, bd[i])
+                pos, vel = from_bcoords(ξ, sφ, bd[i])
+
+                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
+            end
+        end
+        @testset "Stadium" begin
+
+            bd = billiard_stadium()
+            aints = arcintervals(bd)
+            for i in 1:partnum
+                p = randominside(bd)
+                i, tmin = bounce!(p, bd)
+                ξ, sφ = to_bcoords(p, bd[i])
+                pos, vel = from_bcoords(ξ, sφ, bd[i])
+
+                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
+            end
+        end
+    end
+
+    if printinfo
+        println(
+            """
+Results:
++ from_bcoords is the inverse function of to_bcoords
+  on Sinai and stadium billiards
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
+    end
+end
+
+
+function stadium_bm(partnum=10; printinfo = true)
     tim = time()
     partnum = max(partnum, 100)
     @testset "PSOS: Stadium Billiard" begin
@@ -25,14 +69,14 @@ function stadium_psos(partnum=10; printinfo = true)
             end
         end
         @test *(A...)
-        if printinfo
-            println("""
-            Results:
-            + boundarymap works
-            + billiard_bunimovich uniformly fills its boundarymap
-            + Required time: $(round(time()-tim, digits=3)) sec
-            """)
-        end
+    end
+    if printinfo
+        println("""
+Results:
++ boundarymap works
++ billiard_bunimovich uniformly fills its boundarymap
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
     end
 end
 
@@ -44,7 +88,7 @@ function cut_psos(partnum=10; printinfo = true)
         plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
         @testset "pinned particle" begin
             p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
-            a, b = psos(bt,plane, t, p)
+            a, b = psos(bt, plane, t, p)
             @test length(a) == length(b) == 1
 
             p = MagneticParticle(0.1, 0.5, -π/2, 1/0.05)
@@ -55,7 +99,7 @@ function cut_psos(partnum=10; printinfo = true)
         @testset "psos ω = $ω" for ω ∈ [0, 0.5, 1.0]
             for i in 1:partnum
                 p = ω == 0 ? randominside(bt) : randominside(bt, ω)
-                a, b = psos(bt,plane, t, p)
+                a, b = psos(bt, plane, t, p)
                 for j in 1:length(a)
                     @test a[j][1] ≈ 0.5
                     @test 0 < a[j][2] < 1
@@ -73,12 +117,12 @@ function cut_psos(partnum=10; printinfo = true)
     end
     if printinfo
         println("""
-        Results:
-        + Poincare section through cut works
-        + Pinned particles correctly detected
-        + positions and velocities are within correct bounds
-        + Required time: $(round(time()-tim, digits=3)) sec
-        """)
+Results:
++ Poincare section through cut works
++ Pinned particles correctly detected
++ positions and velocities are within correct bounds
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
     end
 end
 
@@ -124,14 +168,65 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
 
         end
     end
-
     if printinfo
         println("""
-        Results:
-        + Poincare section through cut works
-        + Pinned particles correctly detected
-        + positions and velocities are within correct bounds
-        + Required time: $(round(time()-tim, digits=3)) sec
-        """)
+Results:
++ `boundarymap_portion` works
++ Mushroom boundary map ratios are replicated correctly
++ Bunimovich stadium always gives ratio of 1.0
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
+    end
+end
+
+
+function phasespace_portion_test(partnum = 10; printinfo = true)
+    tim = time()
+    @testset "Bunimovich" begin
+        t = 1000000.0
+        bt = billiard_bunimovich()
+        @testset "ω = $ω" for ω in [0.0, 0.1]
+            for i in 1:min(partnum, 20)
+                p = ω == 0 ? randominside(bt) : randominside(bt, ω)
+                φ = π/4 * rand() # so that we never find bouncing walls
+                p.vel = (cos(φ), sin(φ))
+                ratio = phasespace_portion(bt,t, randominside(bt), 0.1)
+                @test ratio == 1.0
+            end
+        end
+    end
+    @testset "Mushroom" begin
+        t = 1000000.0
+        l = 1.0; r = 1.0
+        @testset "w = $w" for w ∈ [0.2, 0.4]
+            bt = billiard_mushroom(l, w, r)
+            @testset "regular" begin
+                for i in 1:min(partnum, 10)
+                    p = MushroomTools.randomregular(l, w, r)
+                    ratio = phasespace_portion(bt,t, p, 0.1)
+                    trueratio =  MushroomTools.g_r_3D(l,w,r)
+                    # Only one regular particle covers very small amount of space:
+                    @test ratio < trueratio
+                end
+            end
+            @testset "chaotic" begin
+                for i in 1:min(partnum, 10)
+                    p = MushroomTools.randomchaotic(l, w, r)
+                    ratio = phasespace_portion(bt, t, p, 0.1)
+                    trueratio =  MushroomTools.g_c_3D(l,w,r)
+                    @test trueratio - 0.1 ≤ ratio ≤ trueratio + 0.1
+                end
+            end
+
+        end
+    end
+    if printinfo
+        println("""
+Results:
++ `phasespace_portion` works
++ Mushroom phase space ratios are replicated correctly
++ Bunimovich stadium always gives ratio of 1.0
++ Required time: $(round(time()-tim, digits=3)) sec
+""")
     end
 end

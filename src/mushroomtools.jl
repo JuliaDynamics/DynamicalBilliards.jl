@@ -1,7 +1,7 @@
 """
     MushroomTools
 Module containing many functions helpful in simulating (perfect) mushroom
-billiards, see [`billiard_mushrrom`](@ref).
+billiards, see [`billiard_mushroom`](@ref).
 Contains stuff like initializing efficiently regular or chaotic particles
 and functions that return the corresponding chaotic or regular phase-space volumes
 or portions.
@@ -11,7 +11,7 @@ Made by Lukas Hupe.
 module MushroomTools
 
 using DynamicalBilliards
-using DynamicalBilliards: SV
+using DynamicalBilliards: SV, cossin
 using LinearAlgebra
 
 #="""

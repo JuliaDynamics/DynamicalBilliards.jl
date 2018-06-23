@@ -17,11 +17,9 @@ const sixsqrt = 6sqrt(2)
 @inline timeprec_forward(::MagneticParticle{T}, ::Obstacle{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::MagneticParticle{BigFloat}, ::Obstacle) = BigFloat(1e-12)
 
-# Used in relocate:
 @inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
 @inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
-
 
 # Used in check of skip intersection, in `realangle` and collision with Semicircle:
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
@@ -56,14 +54,14 @@ end
 
 @inline function specular!(p::AbstractParticle{T}, r::RandomDisk{T})::Nothing where {T}
     n = normalvec(r, p.pos)
-    φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
+    φ = atan(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cos(φ), sin(φ))
     return nothing
 end
 
 @inline function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Nothing where {T}
     n = normalvec(r, p.pos)
-    φ = atan2(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
+    φ = atan(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
     p.vel = SVector{2,T}(cossin(φ)...)
     return nothing
 end
@@ -96,11 +94,8 @@ incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
 @inline resolvecollision!(p::Particle, o::Obstacle) = specular!(p, o)
 @inline resolvecollision!(p::Particle, o::PeriodicWall) = periodicity!(p, o)
-function resolvecollision!(p::MagneticParticle, o::Obstacle)
-    specular!(p, o)
-    p.center = find_cyclotron(p)
-    return
-end
+@inline resolvecollision!(p::MagneticParticle, o::Obstacle) = specular!(p, o)
+
 resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
 
 
@@ -154,14 +149,14 @@ particle should end up at.
 
 @inline function propagate!(p::MagneticParticle{T}, t::Real)::Nothing where {T}
     ω = p.omega; r = 1/ω
-    φ0 = atan2(p.vel[2], p.vel[1])
+    φ0 = atan(p.vel[2], p.vel[1])
     sinωtφ, cosωtφ = sincos(ω*t + φ0)
     p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
     p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
 end
 @inline function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
-    ω = p.omega; φ0 = atan2(p.vel[2], p.vel[1])
+    ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
     p.pos = newpos
     p.vel = SVector{2, T}(cossin(ω*t + φ0)...)
     return
@@ -178,7 +173,7 @@ position.
 @inline function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
     ω = p.omega; r = 1/ω
-    φ0 = atan2(p.vel[2], p.vel[1])
+    φ0 = atan(p.vel[2], p.vel[1])
     # Propagate:
     sφ0, cφ0 = sincos(φ0)
     sωφ0, cωφ0 = sincos(ω*t + φ0)
@@ -187,10 +182,10 @@ position.
 end
 
 """
-    bounce!(p::AbstractParticle, bt::Billiard) -> i, t, pos, vel
+    bounce!(p::AbstractParticle, bd::Billiard) -> i, t, pos, vel
 "Bounce" the particle (advance for one collision) in the billiard.
 
-Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
+Specifically, find the [`next_collision`](@ref) of `p` with `bd`,
 [`relocate!`](@ref) the particle correctly,
 [`resolvecollision!`](@ref) with the colliding obstacle and finally return:
 
@@ -201,23 +196,23 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bt`,
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
 ```julia
-bounce!(p, bt, raysplit::Dict) -> i, t, pos, vel
+bounce!(p, bd, raysplit::Dict) -> i, t, pos, vel
 ```
 Ray-splitting version of `bounce!`.
 """
-function bounce!(p::AbstractParticle{T}, bt::Billiard{T}) where {T}
-    tmin::T, i::Int = next_collision(p, bt)
-    o = bt[i]
+function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
+    tmin::T, i::Int = next_collision(p, bd)
+    o = bd[i]
     tmin = relocate!(p, o, tmin)
     resolvecollision!(p, o)
     return i, tmin, p.pos, p.vel
 end
 
-function bounce!(p::MagneticParticle{T}, bt::Billiard{T}) where {T}
-    tmin::T, i::Int = next_collision(p, bt)
+function bounce!(p::MagneticParticle{T}, bd::Billiard{T}) where {T}
+    tmin::T, i::Int = next_collision(p, bd)
     if tmin != Inf
-        tmin = relocate!(p, bt[i], tmin)
-        resolvecollision!(p, bt[i])
+        tmin = relocate!(p, bd[i], tmin)
+        resolvecollision!(p, bd[i])
     end
     p.center = find_cyclotron(p)
     return i, tmin, p.pos, p.vel
@@ -228,8 +223,8 @@ end
 # Evolve & Construct
 #####################################################################################
 """
-    evolve!(p::AbstractParticle, bt::Billiard, t)
-Evolve the given particle `p` inside the billiard `bt`. If `t` is of type
+    evolve!(p::AbstractParticle, bd::Billiard, t)
+Evolve the given particle `p` inside the billiard `bd`. If `t` is of type
 `AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
 Return the states of the particle between collisions.
@@ -255,19 +250,19 @@ from the state `poss[i], vels[i]`. That is why `ct[1]` is always 0 since
 `poss[1], vels[1]` are the initial conditions. The angular velocity `ω[i]` is the one
 the particle has while propagating from state `poss[i], vels[i]` to `i+1`.
 
-Notice that at any point, the velocity vector `vels[i]` is the one obtained *after*
+Notice that at any point, the velocity vector `vels[i]` is the one obdained *after*
 the specular reflection of the `i-1`th collision.
 The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
-    evolve!(p, bt, t, raysplitters)
+    evolve!(p, bd, t, raysplitters)
 
 To implement ray-splitting, the `evolve!` function is supplemented with a
 fourth argument, `raysplitters` which is a tuple of [`RaySplitter`](@ref) instances.
 For more information and instructions on using ray-splitting
 please visit the official documentation.
 """
-function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
+function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
     warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
@@ -285,7 +280,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
 
     while count < t
 
-        i, tmin, pos, vel = bounce!(p, bt)
+        i, tmin, pos, vel = bounce!(p, bd)
         t_to_write += tmin
 
         if ismagnetic && tmin == Inf
@@ -296,7 +291,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
             return (rt, rpos, rvel, p.omega)
         end
 
-        if typeof(bt[i]) <: PeriodicWall
+        if typeof(bd[i]) <: PeriodicWall
             # Pinned particle:
             if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")
@@ -305,7 +300,7 @@ function evolve!(p::AbstractParticle{T}, bt::Billiard{T}, t;
                 push!(rt, Inf)
                 return (rt, rpos, rvel, p.omega)
             end
-            #If not pinned, continue (do not write for PeriodicWall)
+            #If not pinned, do not write for PeriodicWall
             continue
         else
             push!(rpos, pos + p.current_cell)
@@ -369,7 +364,7 @@ vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
     ct = cumsum(t)
 
     for i in 2:length(t)
-        φ0 = atan2(vels[i-1][2], vels[i-1][1])
+        φ0 = atan(vels[i-1][2], vels[i-1][1])
         x0 = poss[i-1][1]; y0 = poss[i-1][2]
         colt=t[i]
 
