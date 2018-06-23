@@ -40,12 +40,13 @@ t = time()
 fnames = (
     straight_sinai, straight_periodic, magnetic_sinai, magnetic_periodic,
     type_stability, lyapunov_spectrum,
-    lyapunov_magnetic, escape_times, stadium_bm, cut_psos, coordinates_test, 
+    lyapunov_magnetic, escape_times, stadium_bm, cut_psos, coordinates_test,
     boundarymap_portion_test, phasespace_portion_test, meancoltimes,
     raysplit_straight, raysplit_magnetic)
 
 for f in fnames
     println()
+    println("Running $f")
     f(partnum, printinfo=printinfo)
 end
 
