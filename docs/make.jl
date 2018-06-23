@@ -10,6 +10,5 @@ deploydocs(
     "mkdocs-material" ,"python-markdown-math", "pygments", "pymdown-extensions"),
     repo   = "github.com/JuliaDynamics/DynamicalBilliards.jl.git",
     julia  = "nightly",
-    osname = "linux",
-    latest = "0.7"
+    osname = "linux"
 )
