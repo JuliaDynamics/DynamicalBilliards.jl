@@ -3,15 +3,15 @@
 `DynamicalBilliards` is an easy-to-use, modular and extendable Julia package for
 dynamical billiards in two dimensions.
 
-!!! warn "Version 2.0 incoming!"
-    We are currently finishing the development of v2.0 of `DynamicalBilliards` which will bring massive performance increase, a lot of new features and unfortunately some breaking changes! You can view the [changelog](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/CHANGELOG.md) to prepare for up coming changes.
+!!! tldr "Welcome to `DynamicalBilliards` v2.0!"
+    The new version v2.0 of `DynamicalBilliards` brings massive performance increase, a ton of new features, a more intuitive and simpler low-level interface, automated animation production and much more stuff (also some minor breaking changes)!
+    You can view the [changelog](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/CHANGELOG.md) for more.
 
-    Consider doing `Pkg.checkout("DynamicalBilliards")` to get huge performance
-    benefits and a big amount of new features!
-
+    v2.0 also drops support for all Julia versions less than 0.7.
 
 !!! tip "Julia Billiard animation"
-    Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard"!
+    Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
+    the logo of our package!
 
 ## About Billiards
 
@@ -29,12 +29,13 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
   through an obstacle given arbitrary transmission and refraction
   laws. This is also known as a "semiclassical billiard".
 * [Poincaré surfaces of section](high_level/#poincare-sections) (intersections with arbitrary plane).
-* [Boundary maps](basic/high_level/#boundary-maps).
+* [Boundary maps](basic/phasespaces).
 * [Escape times](basic/high_level/#escape-times) & [mean collision times](basic/high_level/#mean-collision-times).
 * [Lyapunov exponents](lyapunovs).
-* Easy to use low-level interface.
+* Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [phase spaces](basic/phasespaces/#phase-space-portions) section.
+* Easy to use [low-level interface](basic/low_level).
 * Specialized tools for [mushroom billiards](mushroomtools).
-* Full support for visualizing and animating billiards and motion in billiards.
+* Full support for [visualizing and animating](visualizing) billiards and motion in billiards.
 * Brutal tests that confirm the package works and overcomes numerical precision issues.
 
 This package does not support finite-sized particles and, as a result, there is

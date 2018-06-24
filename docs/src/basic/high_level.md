@@ -9,17 +9,17 @@ In general, the workflow of `DynamicalBilliards` follows these simple steps:
 3. Get the output you want by using one of the high level functions.
 
 Adding more complexity in your billiard does not add complexity in your code. For example, to implement a ray-splitting billiard
-you only need to define one additional variable, a dictionary `Dict{Int, Vector{Function}}`.
+you only need to define one additional variable, a [`RaySplitter`](@ref) and pass it to the high level functions.
 
-After reading through this basic usage page,
-you will be able to use all aspects of `DynamicalBilliards.jl` with minimal effort.
+After reading through this page,
+you will be able to use almost all aspects of `DynamicalBilliards.jl` with minimal effort.
 
 !!! tip "Visualizations"
     Visualizing the billiards, particles and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing](/visualizing) page.
 
 ---
 ## Billiard
-A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subdypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
+A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
 
 There is a [tutorial](/tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#standard-billiards-library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
@@ -30,7 +30,7 @@ bd = billiard_bunimovich()
 ```
 
 ## Particles
-A "particle" is that thingy that moves around in the billiard. It always moves with velocity measure 1, by convention.
+A "particle" is that thingy that moves around in the billiard. It always moves with velocity of measure 1, by convention.
 
 Currently there are two types of particles:
 
@@ -161,7 +161,7 @@ psos
 ---
 For example, the surface of section in the periodic Sinai billiard with magnetic field
 reveals the mixed nature of the phase-space:
-```julia
+```@example 2
 using DynamicalBilliards, PyPlot
 t = 100; r = 0.15
 bd = billiard_sinai(r, setting = "periodic")
@@ -189,8 +189,11 @@ for i in 1:length(posvector)
     end
 end
 xlabel("\$y\$"); ylabel("\$v_y\$")
+savefig("psos.svg"); nothing # hide
 ```
-![PSOS 1](https://i.imgur.com/WoTB4HR.png)
+![](psos.svg)
+
+<!-- ![PSOS 1](https://i.imgur.com/WoTB4HR.png) -->
 
 !!! note "`psos` operates on the unit cell"
     The `psos` function always calculates the crossings *within* the unit cell of
@@ -207,7 +210,29 @@ with
 y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
 ```
 which gives
-![PSOS 2](https://i.imgur.com/BYDF6oG.png)
+```@setup 2
+figure() # hide
+for i in 1:length(posvector) # hide
+    poss = posvector[i] # hide
+    vels = velvector[i] # hide
+    L = length(poss) # hide
+    if L > 0 # hide
+      y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss] # hide
+        vy = [a[2] for a in vels] # hide
+        y = unique(round.(y, 4)) # hide
+        vy = unique(round.(vy, 4)) # hide
+        col = length(y) == 1 ? "C1" : "C0"
+        plot(y, vy, ls = "None", color = col, ms = 1.0, alpha = 0.5, marker = "o")
+    end
+end
+xlabel("\$y\$"); ylabel("\$v_y\$")
+```
+```@example 2
+savefig("psos2.svg"); nothing # hide
+```
+![](psos2.svg)
+
+<!-- ![PSOS 2](https://i.imgur.com/BYDF6oG.png) -->
 
 
 ## Escape Times
@@ -221,7 +246,7 @@ escapetime
 
 For example, the default implementation of the mushroom billiard has a "door" at the
 bottom of the stem. Thus,
-```julia
+```@example 2
 bd = billiard_mushroom()
 et = zeros(100)
 for i ∈ 1:100
@@ -231,17 +256,12 @@ end
 println("Out of 100 particles, $(count(x-> x != Inf, et)) escaped")
 println("Mean escape time was $(mean(et[et .!= Inf]))")
 ```
-```
-Out of 100 particles, 11 escaped
-Mean escape time was 4.436943929428599
-```
+
 Of course, `escapetime` works with `MagneticParticle` as well
-```julia
+```@example 2
 escapetime(randominside(bd, 1.0), bd, 10000)
 ```
-```
-87.17643414941281
-```
+
 
 ## Mean Collision Times
 Because the computation of a mean collision time (average time between collisions
@@ -249,6 +269,12 @@ in a billiard) is often a useful quantity, the following function computes it
 ```@docs
 meancollisiontime
 ```
+For example,
+```@example 2
+bd = billiard_sinai()
+meancollisiontime(randominside(bd), bd, 10000.0)
+```
+
 
 ## Standard Billiards Library
 ```@docs

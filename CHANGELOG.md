@@ -7,6 +7,7 @@
   * Fixed many instances of broadcasting with static vectors (which is bad).
   * Utilized metaprogramming to manually unroll some loops.
 
+* **Symver will now be properly respected from 2.0 onwards**.
 * Hexagonal periodic plotting.
 * Lyapunov exponents for magnetic particles are now possible!
 * Added boundary map computation function which works
@@ -14,6 +15,8 @@
   sorted counter clockwise.
   * Added `to_bcoords`, `totallength`
   * Added `plot_boundarymap` that plots the boundary map and the obstacle boundaries.
+* Added robust coordinate change transformation from 3D real space to 2D boundary space, see `to_bcoords`, `from_bcoords` and `arclengths`.
+* Added two novel high-level functions that compute the phase-space portion an orbit covers as the particle evolves: `boundarymap_portion` and `phasespace_portion`.
 * Added Poincare surface of section function, which computes intersections with
   arbitrary planes!
 * It is now possible to affect many different obstacles during ray-splitting!
@@ -23,22 +26,22 @@
   significantly reduced the total lines of code.
 * added `evolve` function that simply deepcopies particle.
 * Added convenience function to compute the mean collision time in a billiard.
+* New low-level function `bounce!` that propagates a particle from one collision to the
+  next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
+  of saving stuff. All high level functions use `bounce!`.
 
 ## Syntax and other changes
 * Default colors for plotting have been changed (random obstacles are purple,
   particle orbit is `"C0"`).
-* new function `bounce!` that propagates a particle from one collision to the
-  next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
-  of saving stuff. All high level functions use `bounce!`.
-* Overhauled what a "billiard table" is: Now, called simply `Billiard` is a
+* **[BREAKING]** Overhauled what a "billiard table" is: Now, called simply `Billiard` is a
   dedicated struct that stores the obstacles as a tuple. This means that
   all functions do not accept a `Vector{Obstacle}` anymore but rather a `Billiard`.
-* `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
+* **[BREAKING]** `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
   multiple dispatch and reduce code repetition.
-* `realangle` now only takes one intersection and simply returns the real angle.
-* `animate_evolution` now does not have `!` at the end, because it deepcopies the
+* **[BREAKING]** `realangle` now only takes one intersection and simply returns the real angle.
+* **[BREAKING]** `animate_evolution` now does not have `!` at the end, because it deepcopies the
   particle.
-* Re-worked ray-splitting: We now use the `RaySplitter` struct. See docs.
+* **[BREAKING]** Re-worked ray-splitting: We now use the `RaySplitter` struct. See docs.
 
 ---
 

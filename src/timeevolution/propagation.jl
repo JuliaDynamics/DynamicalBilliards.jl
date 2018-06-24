@@ -329,7 +329,7 @@ timeseries of the position and velocity, as well as the time vector.
 In case of not given `ω` (or `ω == 0`), straight construction takes place.
 In case of `ω != 0` or `ω::Vector` magnetic construction takes place.
 
-The additional optional argument of `dt` (only valid for Magnetic construction)
+The additional optional argument of `dt` (only valid for magnetic construction)
 is the timestep with which the timeseries are constructed.
 
 Return:
