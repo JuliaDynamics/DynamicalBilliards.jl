@@ -77,3 +77,12 @@ relocate!
 specular!
 periodicity!
 ```
+
+!!! warn "Cyclotron center is a field of `MagneticParticle`"
+    For almost all operations involving a `MagneticParticle`, the center of
+    the cyclotron is required. In order to compute this center only when it
+    physically changes, we have made it a field of the `struct`.
+
+    This means that after changing the position or velocity of the particle,
+    this center must be changed by doing `mp.center = find_cyclotron(mp)`.
+    The [`bounce!`](@ref) function takes care of that in the most opportune moment, but if you want to write your own specific low level function, do not forget this point!
