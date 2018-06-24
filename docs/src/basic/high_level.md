@@ -170,7 +170,7 @@ bd = billiard_sinai(r, setting = "periodic")
 # (always keep in mind that ω > 0  means counter-clockwise rotation!)
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
 
-posvector, velvector = psos(bd, plane, t, 10000, 2.0)
+posvector, velvector = psos(bd, plane, t, 1000, 2.0)
 
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions
@@ -180,12 +180,16 @@ for i in 1:length(posvector)
         #plot y vs vy
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
-        # Make results of pinned orbits have only one entry (for plotting speed):
-        y = unique(round.(y, 4))
-        vy = unique(round.(vy, 4))
-        # color pinned orbits differently:
-        col = length(y) == 1 ? "C1" : "C0"
-        plot(y, vy, ls = "None", color = col, ms = 1.0, alpha = 0.5, marker = "o")
+        # Deduce if particle is pinned or not:
+        ispinned = length(unique(round.(y, 4))) == 1
+        if ispinned
+            y = [y[1]]
+            vy = [vy[1]]
+            col = "C1"
+        else
+            col = "C0"
+        end
+        plot(y, vy, ls = "None", color = col, ms = 2.0, alpha = 0.75, marker = "o")
     end
 end
 xlabel("\$y\$"); ylabel("\$v_y\$")
@@ -212,17 +216,22 @@ y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
 which gives
 ```@setup 2
 figure() # hide
-for i in 1:length(posvector) # hide
-    poss = posvector[i] # hide
-    vels = velvector[i] # hide
-    L = length(poss) # hide
-    if L > 0 # hide
-      y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss] # hide
-        vy = [a[2] for a in vels] # hide
-        y = unique(round.(y, 4)) # hide
-        vy = unique(round.(vy, 4)) # hide
-        col = length(y) == 1 ? "C1" : "C0"
-        plot(y, vy, ls = "None", color = col, ms = 1.0, alpha = 0.5, marker = "o")
+for i in 1:length(posvector)
+    poss = posvector[i] # vector of positions
+    vels = velvector[i] # vector of velocities at the section
+    L = length(poss)
+    if L > 0
+        y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
+        vy = [a[2] for a in vels]
+        ispinned = length(unique(round.(y, 4))) == 1
+        if ispinned
+            y = [y[1]]
+            vy = [vy[1]]
+            col = "C1"
+        else
+            col = "C0"
+        end
+        plot(y, vy, ls = "None", color = col, ms = 2.0, alpha = 0.75, marker = "o")
     end
 end
 xlabel("\$y\$"); ylabel("\$v_y\$")
