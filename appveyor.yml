@@ -13,7 +13,7 @@ notifications:
     to:
       - datseris.george@gmail.com
     on_build_success: false
-    on_build_failure: true
+    on_build_failure: false
     on_build_status_changed: false
 
 install:
