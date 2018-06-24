@@ -20,7 +20,7 @@ boundarymap
 ```
 ---
 For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
-```julia
+```@example coords
 using DynamicalBilliards
 
 bd = billiard_mushroom()
@@ -35,16 +35,22 @@ colors = ["C$(rand(1:9))" for i in 1:n] # random colors
 
 figure()
 plot_boundarymap(ξς, φς, ις, color = colors)
+savefig("boundarymap.svg"); nothing # hide
 ```
-![Boundary map](https://i.imgur.com/RO9UZa9.png)
+![](boundarymap.svg)
+
+<!-- ![Boundary map](https://i.imgur.com/RO9UZa9.png) -->
 
 And of course similarly for magnetic fields
-```julia
+```@example coords
 ξς, φς, ις = boundarymap(bd, 10000, n, 1.0) # angular velocity last argument
 figure()
 plot_boundarymap(ξς, φς, ις, color = colors)
+savefig("boundarymapmag.svg"); nothing # hide
 ```
-![Boundary map with magnetic field](https://i.imgur.com/YoW1FVD.png)
+![](boundarymapmag.svg)
+
+<!-- ![Boundary map with magnetic field](https://i.imgur.com/YoW1FVD.png) -->
 
 ## Phase Space Portions
 It is possible to compute the portion of phase space covered by a particle as it
@@ -80,11 +86,12 @@ println("3D numeric - theory: $(abs(ratio - trueratio))")
 Of course, increasing evolution time or decreasing boxsize will bring higher accuracy.
 
 ## Chaotic vs. Regular boundary map animation
+A simple 1-2 sentences summary
 ```
 script that produces it
 ```
 
-figure. No comments or explanations.
+animation file.
 
 To be done by Lukas Hupe.
 

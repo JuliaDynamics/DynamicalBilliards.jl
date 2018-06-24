@@ -21,7 +21,8 @@ export animate_evolution
   * `deletefigs = true` : When producing the animation, each frame is saved
     (in the same folder) but then deleted after the animation is created. You
     can choose to keep them by passing `false`.
-  * `figsize = (7.2, 7.2)` : `PyPlot` figure size.
+  * `figsize = (7.2, 7.2)` : `PyPlot` figure size. Width and height multiplied by
+    100 must be divisible by 2.
 
 The function returns `a, b, c`. Do `a[:remove](); b[:remove](); c[:remove]()` to clear
 the particle out of the figure.
