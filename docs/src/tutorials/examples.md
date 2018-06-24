@@ -57,19 +57,12 @@ and produces:
 
 
 ## Mean Free Path of the Lorentz Gas
-```julia
+```@example tut3
 using DynamicalBilliards
 bt = billiard_lorentz(0.2) #alias for billiard_sinai(setting = "periodic")
-mfp = 0.0
-for i in 1:1000
-  p = randominside(bt)
-  ct, poss, vels = evolve!(p, bt, 10000.0)
-  #skip first two entries because they are not "full" collisions:
-  mfp += mean(ct[3:end])
-end
-mfp /= 1000
+mfp = meancollisiontime(randominside(bt), bt, 1000000.0)
 ```
-gives the value of `2.1899...` which is very close to the analytic result:
+The result is very close to the analytic result:
 
 ``\text{m.f.p.} =  \frac{1-\pi r^2 }{2r} \stackrel{r=0.2}{=} 2.18584 ``
 
@@ -80,8 +73,8 @@ which you can find for example [here](http://www.cmls.polytechnique.fr/perso/gol
 directions. For example, the following code produces a billiard that is periodic
 in only the x-direction:
 
-```julia
-using DynamicalBilliards
+```@example tut3
+using DynamicalBilliards, PyPlot
 o = 0.0; x = 2.0; y=1.0
 bt = Obstacle{Float64}[]
 
@@ -94,19 +87,22 @@ sp = [o,y]; ep = [x, y]; n = [o,-y]
 topw2 = InfiniteWall(sp, ep, n, "Top wall")
 sp = [o,o]; ep = [x, o]; n = [o,y]
 botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
-push!(bt, leftw, rightw, topw2, botw2)
 
 r = 0.25
 d = Disk([0.5, 0.5], r)
 d2 = Disk([1.5, 0.5], r/2)
 push!(bt, d, d2)
 
-p = randominside(bt, 0.5)
-xt, yt, vxt, vyt, t = construct(evolve!(p, bt, 25)...)
-plot_billiard(bt)
-plot(xt, yt)
-plot_particle(p)
-```
-Result:
+bd = Billiard(leftw, rightw, topw2, botw2, d, d2)
 
-![Semi-Periodic Billiard](http://i.imgur.com/Dbxmq8y.png)
+p = randominside(bd)
+p.pos = [0.311901, 0.740439]
+p.vel = [0.548772, 0.835972]
+xt, yt, vxt, vyt, t = construct(evolve(p, bd, 25)...)
+plot_billiard(bd, xt, yt)
+scatter(xt[1], yt[1])
+scatter(xt[end], yt[end], color = "black")
+ylim(0,y)
+savefig("xperiodic.svg"); nothing # hide
+```
+![](xperiodic.svg)

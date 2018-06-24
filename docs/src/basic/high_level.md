@@ -181,7 +181,7 @@ for i in 1:length(posvector)
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
         # Deduce if particle is pinned or not:
-        ispinned = length(unique(round.(y, 4))) == 1
+        ispinned = length(unique(round.(y, digits = 4))) == 1
         if ispinned
             y = [y[1]]
             vy = [vy[1]]
@@ -223,7 +223,7 @@ for i in 1:length(posvector)
     if L > 0
         y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
         vy = [a[2] for a in vels]
-        ispinned = length(unique(round.(y, 4))) == 1
+        ispinned = length(unique(round.(y, digits = 4))) == 1
         if ispinned
             y = [y[1]]
             vy = [vy[1]]

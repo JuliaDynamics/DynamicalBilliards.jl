@@ -78,7 +78,7 @@ specular!
 periodicity!
 ```
 
-!!! warn "Cyclotron center is a field of `MagneticParticle`"
+!!! warning "Cyclotron center is a field of `MagneticParticle`"
     For almost all operations involving a `MagneticParticle`, the center of
     the cyclotron is required. In order to compute this center only when it
     physically changes, we have made it a field of the `struct`.
