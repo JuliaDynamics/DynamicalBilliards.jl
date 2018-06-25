@@ -16,7 +16,7 @@ btr =  billiard_rectangle(x, y)
 sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
 a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
 a2 = Antidot([3x/4, y/2], 0.15, "Right Antidot")
-bt = Billiard(a1, a2, sw, btr...)
+bd = Billiard(a1, a2, sw, btr...)
 ```
 
 ```@example ray

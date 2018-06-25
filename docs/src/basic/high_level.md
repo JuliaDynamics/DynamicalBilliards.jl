@@ -201,6 +201,7 @@ y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
 ```
 which gives
 ```@setup 2
+using DynamicalBilliards, PyPlot
 figure()
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions

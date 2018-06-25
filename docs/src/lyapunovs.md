@@ -43,7 +43,7 @@ for (i, space) in enumerate(spaces)
 end
 figure()
 plot(spaces, lyap_time, "*-")
-xlabel("\$w\$"); ylabel("\$\lambda_1\$")
+xlabel("\$w\$"); ylabel("\$\\lambda_1\$")
 savefig("lyapos.svg"); nothing # hide
 ```
 ![](lyapos.svg)

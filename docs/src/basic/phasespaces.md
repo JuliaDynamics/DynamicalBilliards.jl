@@ -27,13 +27,13 @@ bd = billiard_mushroom()
 
 n = 100 # how many particles to create
 
-ξς, φς, ις = boundarymap(bd, 1000, n)
+ξς, φς, ις = boundarymap(bd, 100, n)
 
 using PyPlot # enables plot_boundarymap function
 
 colors = ["C$(rand(1:9))" for i in 1:n] # random colors
 
-figure()
+figure(figsize = (10,8))
 plot_boundarymap(ξς, φς, ις, color = colors)
 savefig("boundarymap.svg"); nothing # hide
 ```
@@ -43,8 +43,8 @@ savefig("boundarymap.svg"); nothing # hide
 
 And of course similarly for magnetic fields
 ```@example coords
-ξς, φς, ις = boundarymap(bd, 10000, n, 1.0) # angular velocity last argument
-figure()
+ξς, φς, ις = boundarymap(bd, 100, n, 1.0) # angular velocity last argument
+figure(figsize = (10,8))
 plot_boundarymap(ξς, φς, ις, color = colors)
 savefig("boundarymapmag.svg"); nothing # hide
 ```
@@ -61,9 +61,11 @@ boundarymap_portion
 phasespace_portion
 ```
 For example, for mushroom billiards the ratio of the chaotic-to-total phase space is known **analytically** for both the full 3D [1] space as well as the boundary 2D [2] space:
+
 $$
 formulas from Lukas Thesis
 $$
+
 We can easily confirm those formulas:
 ```@example phasespace
 using DynamicalBilliards
@@ -83,7 +85,7 @@ ratio = phasespace_portion(bd, t, p, 0.01)
 trueratio = MushroomTools.g_c_3D(l,w,r)
 println("3D numeric - theory: $(abs(ratio - trueratio))")
 ```
-Of course, increasing evolution time or decreasing boxsize will bring higher accuracy.
+Of course, increasing evolution time and decreasing boxsize will bring higher accuracy.
 
 ## Chaotic vs. Regular boundary map animation
 A simple 1-2 sentences summary
@@ -99,6 +101,6 @@ To be done by Lukas Hupe.
 
 ## References
 
-[1] : [A. H. Barnett & T. Betcke, *Quantum mushroom billiards*, Chaos, 17(4) (20017)](https://doi.org/10.1063/1.2816946)
+[1] : A. H. Barnett & T. Betcke, *Quantum mushroom billiards*, [Chaos, 17(4) (20017)](https://doi.org/10.1063/1.2816946)
 
 [2] : Lukas Hupe, B.Sc. Thesis (2018), *to be published*

@@ -136,7 +136,7 @@ d2 = Antidot([0.62/2, 0.5], 0.25)
 bd = Billiard(bd..., d, d2)
 
 p = randominside(bd, 0.2)
-xt, yt = construct(evolve(p, bd, 15)...)
+xt, yt = construct(evolve(p, bd, 20)...)
 
 xmin = minimum(xt); xmax = maximum(xt)
 ymin = minimum(yt); ymax = maximum(yt)
@@ -151,3 +151,4 @@ savefig("hexperiodic.svg"); nothing # hide
 ```@docs
 plot_boundarymap
 ```
+Examples are shown in the [phase spaces](basic/phasespaces.md) section.
