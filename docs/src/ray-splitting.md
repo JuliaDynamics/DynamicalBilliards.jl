@@ -9,7 +9,7 @@ The first step is that an [`Obstacle`](@ref) that supports ray-splitting is requ
 The normal vector as well as the distance from boundary change sign depending on the value of `pflag`. The obstacles [`Antidot`](@ref) and [`SplitterWall`](@ref) are the equivalents of disk and wall for ray-splitting.
 
 Let's create a billiard with a bunch of ray-splitting obstacles!
-```julia
+```@example ray
 using DynamicalBilliards
 x, y = 2.0, 1.0
 btr =  billiard_rectangle(x, y)
@@ -18,23 +18,15 @@ a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
 a2 = Antidot([3x/4, y/2], 0.15, "Right Antidot")
 bt = Billiard(a1, a2, sw, btr...)
 ```
-```
-Billiard{Float64} with 7 obstacles:
-  Left Antidot
-  Right Antidot
-  Splitter wall
-  Bottom wall
-  Right wall
-  Top wall
-  Left wall
-```
 
-and plot it:
-```julia
+```@example ray
 using PyPlot
 plot_billiard(bt)
+savefig("raybil.svg"); nothing # hide
 ```
-![Ray-splitting billiard](https://i.imgur.com/UKsyURY.png)
+![](raybil.svg)
+
+<!-- ![Ray-splitting billiard](https://i.imgur.com/UKsyURY.png) -->
 
 ## 2. The `RaySplitter` structure
 In the second step, you have to define 2+1 functions: transmission probability,
@@ -50,13 +42,13 @@ Continuing from the above billiard, let's also create some `RaySplitter` instanc
 for it.
 
 First define a refraction function
-```julia
+```@example ray
 refraction = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
 ```
 Then, a transmission probability function. In this example, we want to create a
 function that given some factor `p`, it returns a probability weighted with
 `p` in one direction of ray-splitting and `1-p` in another direction.
-```julia
+```@example ray
 transmission_p = (p) -> (φ, pflag, ω) -> begin
     if pflag
         p*exp(-(φ)^2/2(π/8)^2)
@@ -71,14 +63,14 @@ physical perspective, the code does take care of it by clamping the
 refraction angle (see below).
 
 Lastly, for this example we will use magnetic propagation. We define functions
-such that the antidots also reverse the direction of the magnetic field
-```julia
+such that the antidots also reverse the direction and magnitude of the magnetic field.
+```@example ray
 newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
 newowall = ((x, bool) -> bool ? 0.5x : 2.0x)
 ```
 
 Now we create the [`RaySplitter`](@ref) instances we want
-```julia
+```@example ray
 raywall = RaySplitter([3], transmission_p(0.5), refraction, newowall)
 raya = RaySplitter([1, 2], transmission_p(0.8), refraction, newoantidot)
 ```
@@ -91,15 +83,22 @@ The third step is trivial. After you have created your `RaySplitter`(s),
 you simply pass them into `evolve` or `animate_evolution` as a fourth argument!
 If you have many instances of `RaySplitter` you pass a tuple of them.
 
-For example, doing
-```julia
+For example,
+```@example ray
 p = randominside(bt, 1.0)
 raysplitters = (raywall, raya)
 xt, yt, vxt, vyt, tt = construct(evolve(p, bt, 1000.0, raysplitters)...)
-animate_evolution(p, bt, 100, raysplitters)
+plot_billiard(bd)
+plot(xt, yt)
+savefig("rayorbit.svg"); nothing # hide
 ```
-will produce
-![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif)
+![](rayorbit.svg)
+
+You can see that at some points the particle crossed the boundaries of the
+red obstacles, which allow for ray splitting. It is even cooler to animate
+this motion using [`animate_evolution`](@ref)!
+<!-- will produce
+![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif) -->
 
 
 !!! warning "Resetting the billiard"
@@ -155,7 +154,7 @@ Here we will show an application of *inverse* billiards, where particles go in a
 of a billiard, while taking advantage of the existence of a magnetic field outside to return.
 
 As always, we define the ray-splitting functions:
-```julia
+```@example ray
 using DynamicalBilliards, PyPlot
 trans(args...) = 1.0 # always perfect transmission
 refra(φ, pflag, ω) = pflag ? 0.8φ : 1.25φ # refraction angle
@@ -163,20 +162,20 @@ neww(ω, pflag) = pflag ? 2.0 : 0.4
 ```
 Now, when we define the [`RaySplitter`](@ref) instance we will choose a different
 value for `affect`:
-```julia
+```@example ray
 ray = RaySplitter([1,2,3,4], trans, refra, neww, affect = (i) -> SVector(1,2,3,4))
 ```
 
 We initialize a simple rectangular billiard and a particle
 ```julia
 bt = billiard_rectangle(setting = "ray-splitting")
-p = randominside(bt, 0.4)
+p = randominside(bt, 0.4);
 ```
 
 and we animate its evolution, by first zooming out of the billiard
 ```julia
 plot_billiard(bt)
 xlim(-1, 2); ylim(-1, 2);
-animate_evolution(p, bt, 100, (ray,); newfig = false)
+animate_evolution(p, bt, 100, (ray,); newfig = false, savename = "ray_anim")
 ```
 ![Inverse magnetic billiard](https://i.imgur.com/R1LNtjt.gif)

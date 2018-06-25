@@ -57,19 +57,19 @@ function plot_boundarymap(ξs, sφs, intervals; ax = PyPlot.gca(),
         ax2[:xaxis][:set_minor_locator](matplotlib[:ticker][:FixedLocator](
             [mean((intervals[i], intervals[i+1])) for i in 1:length(intervals)-1]
         ))
-              
-        
+
+
         ax2[:xaxis][:set_minor_formatter](
-            matplotlib[:ticker][:FixedFormatter](map(x->dec(x),1:length(intervals)))
+            matplotlib[:ticker][:FixedFormatter](map(x->string(x),1:length(intervals)))
         )
-        
+
         ax2[:tick_params](axis="x", which="minor", length=0)#
 
         ax2[:set_xlabel]("obstacle index")
 
         return (ax, ax2)
     end
-
+    tight_layout()
     return ax
 end
 
@@ -106,5 +106,6 @@ function plot_boundarymap_portion(d, δξ, δφ = δξ; ax = nothing, cb::Bool =
     plot = ax[:pcolormesh](ξs, φs, data; kwargs...)
 
     cb && colorbar(plot)
+    tight_layout()
     return ax
 end

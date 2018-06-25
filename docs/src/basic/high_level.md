@@ -113,38 +113,23 @@ construct
 ---
 The function is especially useful when one wants immediately the timeseries instead
 of the output of `evolve!`. Because of the simple syntax
-```julia
+```@example 2
 xt, yt, vxt, vyt, t = construct(evolve(p, bd, 100)...)
 
 # print as a matrix:
 hcat(xt, yt, vxt, vyt, t)[1:5, :]
 ```
-```
-5×5 Array{Float64,2}:
-  0.274096   0.612643  -0.178995   0.98385   0.0     
-  0.203623   1.0       -0.178995  -0.98385   0.393715
-  0.0216906  0.0       -0.178995   0.98385   1.41013
- -0.155718   0.975134   0.438064  -0.898944  2.40127
-  0.319474   0.0        0.438064   0.898944  3.48603
-```
+
 
 This nicely reveals why in the case of magnetic propagation `evolve!` also returns
 the angular velocity. So that it is possible to do the same process for magnetic
 propagation as well (plus, it is also useful in ray-splitting).
-```julia
+```@example 2
 # evolve the magnetic particle instead:
 xt, yt, vxt, vyt, t = construct(evolve(mp, bd, 100)...)
 
 # print as a matrix:
 hcat(xt, yt, vxt, vyt, t)[1:5, :]
-```
-```
-5×5 Array{Float64,2}:
- 0.267054  0.631786  -0.500439  -0.865772  0.0
- 0.262071  0.623116  -0.496104  -0.868263  0.01
- 0.257132  0.614421  -0.491756  -0.870733  0.02
- 0.252236  0.605701  -0.487397  -0.873181  0.03
- 0.247384  0.596957  -0.483025  -0.875607  0.04
 ```
 
 
@@ -161,7 +146,7 @@ psos
 ---
 For example, the surface of section in the periodic Sinai billiard with magnetic field
 reveals the mixed nature of the phase-space:
-```@example 2
+```@example psos
 using DynamicalBilliards, PyPlot
 t = 100; r = 0.15
 bd = billiard_sinai(r, setting = "periodic")
@@ -172,6 +157,7 @@ plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
 
 posvector, velvector = psos(bd, plane, t, 1000, 2.0)
 
+figure()
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions
     vels = velvector[i] # vector of velocities at the section
@@ -215,7 +201,7 @@ y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
 ```
 which gives
 ```@setup 2
-figure() # hide
+figure()
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions
     vels = velvector[i] # vector of velocities at the section
@@ -259,8 +245,8 @@ bottom of the stem. Thus,
 bd = billiard_mushroom()
 et = zeros(100)
 for i ∈ 1:100
-    p = randominside(bd)
-    et[i] = escapetime(p, bd, 10000)
+    particle = randominside(bd)
+    et[i] = escapetime(particle, bd, 10000)
 end
 println("Out of 100 particles, $(count(x-> x != Inf, et)) escaped")
 println("Mean escape time was $(mean(et[et .!= Inf]))")

@@ -103,6 +103,7 @@ plot_billiard(bd, xt, yt)
 scatter(xt[1], yt[1])
 scatter(xt[end], yt[end], color = "black")
 ylim(0,y)
+xlim(floor(minimum(xt)), ceil(maximum(xt)))
 savefig("xperiodic.svg"); nothing # hide
 ```
 ![](xperiodic.svg)

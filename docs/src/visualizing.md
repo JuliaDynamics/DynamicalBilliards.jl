@@ -17,9 +17,10 @@ using DynamicalBilliards, PyPlot
 
 bd = billiard_sinai()
 
-plot_obstacle!(bd[2])
-plot_obstacle!(bd[4], color = "blue", linestyle = "dotted", lw = 5.0)
-plot_obstacle!(bd[1], facecolor = "yellow", edgecolor = "black")
+figure()
+plot_obstacle!(bd[2]);
+plot_obstacle!(bd[4], color = "blue", linestyle = "dotted", lw = 5.0);
+plot_obstacle!(bd[1], facecolor = "yellow", edgecolor = "black");
 savefig("rand_obstacles.svg"); nothing # hide
 ```
 ![](rand_obstacles.svg)
@@ -59,6 +60,7 @@ plot_particle!(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
 savefig("particles_example.svg"); nothing # hide
 ```
 ![](particles_example.svg)
+
 (notice that the particle position and direction are random)
 
 ## Color conventions
@@ -75,39 +77,9 @@ The default plotting settings have been chosen for maximum clarity and consisten
 
 ## Animating the motion of a particle
 
-The function `animate_evolution` is provided to animate the evolution of a particle from collision to collision:
-```julia
-animate_evolution(p, bd, colnumber[, ray-splitter]; kwargs...)
-```
+**PRODUCE NEW ANIMATION, put it in the "tutorials" repo.**
 
-Arguments:
-  * `p::AbstractParticle` : The particle to be evolved (gets mutated!).
-  * `bd::Billiard` : The billiard.
-  * `colnumber::Int` : Number of collisions to evolve the particle for.
-  * `ray-splitter::Dict{Int, Any}` : (Optional) Ray-splitting dictionary
-      that enables ray-splitting processes during evolution.
-
-Keyword Arguments:
-  * `newfig = true` : Creates a new figure at the function call, and plots
-    the billiard in that figure.
-  * `sleeptime` : Time passed to `sleep()` between each collision.
-  * `col_to_plot` : How many previous collisions are shown during the animation.
-  * `particle_kwargs` : Either a Dict{Symbol, Any} or a vector of Tuple{Symbol, Any}.
-    Keywords passed into `plot_particle()`.
-  * `orbit_kwargs` : Either a Dict{Symbol, Any} or a Vector of Tuple{Symbol, Any}.
-    Keywords passed into `PyPlot.plot()` which plots the orbit of the particle
-    (`line` object).
-  * `savefigs::Bool` : If `true` save .png figures of each frame of the animation
-    A direct movie (like creating a .mp4) of the animation cannot be made automatically,
-    since the animation process mutates the particle.
-  * `savename` : Name (*including path*) of the figures to be produced. The ending
-    "\_i.png" will be attached to all figures.
-
-The function returns `a, b, c`. Do `a[:remove](), b[:remove](), c[:remove]()` to clear
-the particle out of the figure.
-
-Automatic output into an animated image (e.g. ".gif" format) is not yet supported.
-
+The function [`animate_evolution`](@ref) is provided to animate the evolution of a particle from collision to collision.
 Let's animate a particle inside a simple pentagon with magnetic field:
 
 ```julia
@@ -127,7 +99,7 @@ into a single ".gif" animation:
 
 ## Periodic Billiards
 In order to plot periodic billiards, you have need to call a different method of
-[`plot_billiard`](/basic/library/#DynamicalBilliards.plot_billiard), since now you
+[`plot_billiard`](@ref), since now you
 also have to specify the limits of plotting. The
 methods provided are:
 ```julia
@@ -139,20 +111,41 @@ periodic-billiard taking care of all the details internally. Give the keyword
 `plot_orbit = false` if you do not want to plot the orbit defined by `(xt, yt)`.
 
 For example, the following code
-```julia
+```@example 8
 using DynamicalBilliards, PyPlot
 r = 0.25
 bd = billiard_rectangle(2, 1; setting = "periodic")
-d = Disk([0.5, 0.5], r)
+d = RandomDisk([0.5, 0.5], r)
 d2 = Disk([1.5, 0.5], r/2)
 bd = Billiard(bd.obstacles..., d, d2)
 p = randominside(bd)
-xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 50)...)
+xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 20)...)
 plot_billiard(bd, xt, yt)
-plot_particle(p)
+plot_particle!(p)
+savefig("rectperiodic.svg"); nothing # hide
 ```
-will produce something like this:
-![Periodic Billiard plot](http://i.imgur.com/rOpU7sl.png)
+![](rectperiodic.svg)
+
+And, you can also periodically plot billiards with hexagonal periodicity. Only give
+the keyword argument `hexagonal = true` to [`plot_billiard`](@ref). As an example:
+
+```@example 8
+bd = billiard_hexagonal_sinai(0.3, 1.50; setting = "periodic")
+d = RandomDisk([0.62, 0], 0.2)
+d2 = Antidot([0.62/2, 0.5], 0.25)
+bd = Billiard(bd..., d, d2)
+
+p = randominside(bd, 0.2)
+xt, yt = construct(evolve(p, bd, 15)...)
+
+xmin = minimum(xt); xmax = maximum(xt)
+ymin = minimum(yt); ymax = maximum(yt)
+
+plot_billiard(bd, xt, yt; hexagonal = true)
+savefig("hexperiodic.svg"); nothing # hide
+```
+![](hexperiodic.svg)
+
 
 ## Boundary Map plots
 ```@docs

@@ -73,7 +73,7 @@ Additional information on how to define your own `Obstacle` sub-type is given in
 If you make *any* billiard system that you think is cool and missing from this package, you are more than welcome to submit a PR extending the Standard Billiards Library with your contribution!
 
 ## Obstacle order
-!!! info "The obstacle order matters."
+!!! info "Obstacle order."
     The order that the obstacles are given to the constructor is important for the
     function [`boundarymap`](@ref). For any other functionality it is irrelevant.
 

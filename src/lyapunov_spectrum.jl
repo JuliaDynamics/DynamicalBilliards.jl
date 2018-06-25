@@ -220,14 +220,6 @@ end
 ################################################################################
 ## HIGH-LEVEL FUNCTION
 ################################################################################
-
-"""
-    lyapunovspectrum!(p::AbstractParticle, bd::Billiard, t::Float)
-Returns the finite time lyapunov exponents (averaged over time `t`)
-for a given particle in a billiard table.
-
-Returns zeros for pinned particles.
-"""
 function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::AbstractFloat;
     warning::Bool = false) where {T<:AbstractFloat}
 
@@ -288,7 +280,10 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
 end
 
 """
-    lyapunovspectrum(p::AbstractParticle, bd::Billiard, t)
-Non-mutating version of [`lyapunovspectrum!`](@ref)
+    lyapunovspectrum(p::AbstractParticle, bd::Billiard, t::Float)
+Returns the finite time lyapunov exponents (averaged over time `t`)
+for a given particle in a billiard table.
+
+Returns zeros for pinned particles.
 """
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(deepcopy(p), args...)

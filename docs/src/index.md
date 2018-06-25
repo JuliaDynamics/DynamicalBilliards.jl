@@ -91,9 +91,9 @@ The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl
 
 Plotting is done through the `PyPlot` module. All plotting functions are brought
 into scope when `using PyPlot` is done.
----
 
 ---
+
 ## Support
 If you are having problems with `DynamicalBilliards.jl` do not hesitate to seek for support! There are numerous ways to do that:
 

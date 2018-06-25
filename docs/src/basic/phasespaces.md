@@ -27,7 +27,7 @@ bd = billiard_mushroom()
 
 n = 100 # how many particles to create
 
-ξς, φς, ις = boundarymap(bd, 10000, n)
+ξς, φς, ις = boundarymap(bd, 1000, n)
 
 using PyPlot # enables plot_boundarymap function
 
