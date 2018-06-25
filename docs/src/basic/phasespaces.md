@@ -26,8 +26,9 @@ using DynamicalBilliards
 bd = billiard_mushroom()
 
 n = 100 # how many particles to create
+t = 200 # how long to evolve each one
 
-ξς, φς, ις = boundarymap(bd, 100, n)
+ξς, φς, ις = boundarymap(bd, t, n)
 
 using PyPlot # enables plot_boundarymap function
 
@@ -43,7 +44,7 @@ savefig("boundarymap.svg"); nothing # hide
 
 And of course similarly for magnetic fields
 ```@example coords
-ξς, φς, ις = boundarymap(bd, 100, n, 1.0) # angular velocity last argument
+ξς, φς, ις = boundarymap(bd, t, n, 1.0) # angular velocity last argument
 figure(figsize = (10,8))
 plot_boundarymap(ξς, φς, ις, color = colors)
 savefig("boundarymapmag.svg"); nothing # hide

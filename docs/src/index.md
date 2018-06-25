@@ -22,7 +22,10 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 ## Features
 
 * Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles. **Arbitrary** billiard shapes can be made and no shape is "hard coded".
-* Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table. During magnetic propagation the particle orbit is a circle instead of a line! All features exist for both types of propagation!
+* Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table.
+    * During magnetic propagation the particle orbit is a circle instead of a line!
+    * All features exist for both types of propagation!
+    * See the [high level API](basic/high_level) to get started!
 * Support for creating [random initial conditions](basic/high_level/#random-initial-conditions) in an arbitrary
   billiard.
 * [Ray-splitting implementation](ray-splitting): a particle may propagate
@@ -40,23 +43,6 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 This package does not support finite-sized particles and, as a result, there is
 also no support for collision between particles.
-
----
-
-
-## Usage
-It is highly suggested to first read the [High Level API](/basic/high_level).
-
-See the [Visualizing](visualizing) page for plotting, animating, etc.
-
-For more advanced usage see the [Low Level API](/basic/low_level) and all other
-sections of this documentation.
-
-The discussion about [numerical precision](/physics/#numerical-precision) is done in the [Physics](/physics) page.
-
-The [Lyapunov Exponents](/lyapunovs) page has info on how to compute the Lyapunov
-spectrum of a billiard.
-
 
 ---
 

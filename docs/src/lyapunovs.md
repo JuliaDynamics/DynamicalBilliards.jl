@@ -32,7 +32,7 @@ t = 5000.0
 radius = 1.0
 
 spaces = 2.0:0.1:4.4 #Distances between adjacent disks
-lyap_time = zeros(spaces) #Array where the exponents will be stored
+lyap_time = zero(spaces) #Array where the exponents will be stored
 
 for (i, space) in enumerate(spaces)
     bd = billiard_polygon(6, space/(sqrt(3)); setting = "periodic")

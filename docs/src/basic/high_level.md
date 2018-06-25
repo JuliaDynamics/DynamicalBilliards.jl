@@ -183,8 +183,6 @@ savefig("psos.svg"); nothing # hide
 ```
 ![](psos.svg)
 
-<!-- ![PSOS 1](https://i.imgur.com/WoTB4HR.png) -->
-
 !!! note "`psos` operates on the unit cell"
     The `psos` function always calculates the crossings *within* the unit cell of
     a periodic billiard. This means that no information about the "actual" position
@@ -200,35 +198,30 @@ with
 y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
 ```
 which gives
-```@setup 2
-using DynamicalBilliards, PyPlot
-figure()
-for i in 1:length(posvector)
-    poss = posvector[i] # vector of positions
-    vels = velvector[i] # vector of velocities at the section
-    L = length(poss)
-    if L > 0
-        y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
-        vy = [a[2] for a in vels]
-        ispinned = length(unique(round.(y, digits = 4))) == 1
-        if ispinned
-            y = [y[1]]
-            vy = [vy[1]]
-            col = "C1"
-        else
-            col = "C0"
-        end
-        plot(y, vy, ls = "None", color = col, ms = 2.0, alpha = 0.75, marker = "o")
-    end
-end
-xlabel("\$y\$"); ylabel("\$v_y\$")
-```
-```@example 2
+```@example psos
+figure() # hide
+for i in 1:length(posvector)  # hide
+    poss = posvector[i] # hide
+    vels = velvector[i] # hide
+    L = length(poss) # hide
+    if L > 0 # hide
+        y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss] # hide
+        vy = [a[2] for a in vels] # hide
+        ispinned = length(unique(round.(y, digits = 4))) == 1 # hide
+        if ispinned # hide
+            y = [y[1]] # hide
+            vy = [vy[1]] # hide
+            col = "C1" # hide
+        else # hide
+            col = "C0" # hide
+        end # hide
+        plot(y, vy, ls = "None", color = col, ms = 2.0, alpha = 0.75, marker = "o") # hide
+    end # hide
+end # hide
+xlabel("\$y\$"); ylabel("\$v_y\$") # hide
 savefig("psos2.svg"); nothing # hide
 ```
 ![](psos2.svg)
-
-<!-- ![PSOS 2](https://i.imgur.com/BYDF6oG.png) -->
 
 
 ## Escape Times

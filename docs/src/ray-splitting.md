@@ -12,16 +12,16 @@ Let's create a billiard with a bunch of ray-splitting obstacles!
 ```@example ray
 using DynamicalBilliards
 x, y = 2.0, 1.0
-btr =  billiard_rectangle(x, y)
+bdr =  billiard_rectangle(x, y)
 sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
 a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
 a2 = Antidot([3x/4, y/2], 0.15, "Right Antidot")
-bd = Billiard(a1, a2, sw, btr...)
+bd = Billiard(a1, a2, sw, bdr...)
 ```
 
 ```@example ray
 using PyPlot
-plot_billiard(bt)
+plot_billiard(bd)
 savefig("raybil.svg"); nothing # hide
 ```
 ![](raybil.svg)
@@ -76,7 +76,7 @@ raya = RaySplitter([1, 2], transmission_p(0.8), refraction, newoantidot)
 ```
 Because we want to use same functions for both antidots, we gave
 both indices in `raya`, `[1, 2]` (which are the indices of the antidots in the
-billiard `bt`).
+billiard `bd`).
 
 ## 3. Evolution with Ray-Splitting
 The third step is trivial. After you have created your `RaySplitter`(s),
@@ -85,9 +85,9 @@ If you have many instances of `RaySplitter` you pass a tuple of them.
 
 For example,
 ```@example ray
-p = randominside(bt, 1.0)
+p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
-xt, yt, vxt, vyt, tt = construct(evolve(p, bt, 1000.0, raysplitters)...)
+xt, yt, vxt, vyt, tt = construct(evolve(p, bd, 1000.0, raysplitters)...)
 plot_billiard(bd)
 plot(xt, yt)
 savefig("rayorbit.svg"); nothing # hide
@@ -108,7 +108,7 @@ this motion using [`animate_evolution`](@ref)!
     to `evolve`. If you use the function [`randominside`](@ref) you must definitely
     do this!
 
-    The function `reset_billiard!(bt)` turns all `pflag`s to `true`.
+    The function `reset_billiard!(bd)` turns all `pflag`s to `true`.
 
 
 !!! important "Angle of refraction is clamped"
@@ -168,14 +168,14 @@ ray = RaySplitter([1,2,3,4], trans, refra, neww, affect = (i) -> SVector(1,2,3,4
 
 We initialize a simple rectangular billiard and a particle
 ```julia
-bt = billiard_rectangle(setting = "ray-splitting")
-p = randominside(bt, 0.4);
+bd = billiard_rectangle(setting = "ray-splitting")
+p = randominside(bd, 0.4);
 ```
 
 and we animate its evolution, by first zooming out of the billiard
 ```julia
-plot_billiard(bt)
+plot_billiard(bd)
 xlim(-1, 2); ylim(-1, 2);
-animate_evolution(p, bt, 100, (ray,); newfig = false, savename = "ray_anim")
+animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "ray_anim")
 ```
 ![Inverse magnetic billiard](https://i.imgur.com/R1LNtjt.gif)
