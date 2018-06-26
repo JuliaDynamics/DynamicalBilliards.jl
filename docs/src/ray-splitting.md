@@ -87,7 +87,7 @@ For example,
 ```@example ray
 p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
-xt, yt, vxt, vyt, tt = construct(evolve(p, bd, 1000.0, raysplitters)...)
+xt, yt, vxt, vyt, tt = construct(evolve(p, bd, 100, raysplitters)...)
 plot_billiard(bd)
 plot(xt, yt)
 savefig("rayorbit.svg"); nothing # hide
@@ -97,8 +97,10 @@ savefig("rayorbit.svg"); nothing # hide
 You can see that at some points the particle crossed the boundaries of the
 red obstacles, which allow for ray splitting. It is even cooler to animate
 this motion using [`animate_evolution`](@ref)!
-<!-- will produce
-![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif) -->
+
+**NEED NEW FIGURE WIEH NEW COLORS**
+
+![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif)
 
 
 !!! warning "Resetting the billiard"
