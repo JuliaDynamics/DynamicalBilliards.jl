@@ -63,6 +63,10 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
     else
         plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
     end
+
+    xlim(xmin, xmax)
+    ylim(ymin, ymax)
+    return
 end
 
 function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
