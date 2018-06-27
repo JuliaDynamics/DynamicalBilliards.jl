@@ -89,11 +89,20 @@ function cut_psos(partnum=10; printinfo = true)
         @testset "pinned particle" begin
             p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
             a, b = psos(bt, plane, t, p)
+            @test typeof(a) <: Vector{<:SVector}
             @test length(a) == length(b) == 1
 
             p = MagneticParticle(0.1, 0.5, -π/2, 1/0.05)
             a, b = psos(bt,plane, t, p)
+            @test typeof(a) <: Vector{<:SVector}
             @test length(a) == length(b) == 0
+
+            # case of pinned but does cross periodic walls *and* section
+            bd = billiard_sinai(;setting = "periodic")
+            p = MagneticParticle(0.0, 1.0, -π/2, 0.44*2)
+            a, b = psos(bd, plane, t, p)
+            @test typeof(a) <: Vector{<:SVector}
+            @test length(a) == length(b) == 1
         end
 
         @testset "psos ω = $ω" for ω ∈ [0, 0.5, 1.0]
