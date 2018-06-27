@@ -40,16 +40,14 @@ function psos(
     rvel = SV{T}[]
     count = zero(t)
 
-    # periodic = isperiodic(bd)
-    # ismagnetic = typeof(p) <: MagneticParticle
-    # ismagnetic && (absω = abs(p.omega))
-    # t_to_write = zero(T)
+    periodic = isperiodic(bd)
+    check_for_pinned = typeof(p) <: MagneticParticle
+    check_for_pinned && (cyclotron_time = 2π/abs(p.omega))
+    t_to_write = zero(T)
 
     while count < t
         # compute collision times
         tmin::T, i::Int = next_collision(p, bd)
-
-        # if periodic && typeof(bd[i]) <: PeriodicWall
 
         tplane = collisiontime(p, plane)
 
@@ -62,10 +60,23 @@ function psos(
         end
 
         tmin == Inf && break
+
+        if check_for_pinned
+            if typeof(bd[i]) <: PeriodicWall
+                t_to_write += tmin
+            else
+                t_to_write = zero(T)
+            end
+        end
+
         # Now "bounce" the particle normally:
         tmin = relocate!(p, bd[i], tmin)
         resolvecollision!(p, bd[i])
         typeof(par) <: MagneticParticle && (p.center = find_cyclotron(p))
+
+        if check_for_pinned && t_to_write ≥ cyclotron_time
+            return [rpos[1]], [rvel[1]]
+        end
 
         count += increment_counter(t, tmin)
     end
