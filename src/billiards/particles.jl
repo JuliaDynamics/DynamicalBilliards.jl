@@ -55,6 +55,7 @@ print(io, "Particle{$T}\n",
 MagneticParticle(ic::AbstractVector{T}, ω::Real) # where ic = [x0, y0, φ0]
 MagneticParticle(x0, y0, φ0, ω)
 MagneticParticle(pos::SVector, vel::SVector, ω)
+MagneticParticle(p::AbstractParticle, ω)
 ```
 Create a *magnetic* particle with initial conditions `x0, y0, φ0` and angular
 velocity `ω`. It propagates as a circle instead of a line.
@@ -95,6 +96,8 @@ function MagneticParticle(pos::SV{T}, vel::SV{T}, ω::T) where {T}
     S = T<:Integer ? Float64 : T
     return MagneticParticle(pos, vel, SVector{2,S}(0,0), convert(S,ω))
 end
+
+MagneticParticle(p::AbstractParticle, ω) = MagneticParticle(p.pos, p.vel, p.current_cell, ω)
 
 show(io::IO, p::MagneticParticle{T}) where {T} =
 print(io, "MagneticParticle{$T}\n",
