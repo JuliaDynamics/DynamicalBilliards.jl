@@ -72,9 +72,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[MacroTools]]
 deps = ["Compat"]
-git-tree-sha1 = "f5c87f9af1c1b0aea42080672dea169f936a83fb"
+git-tree-sha1 = "18c17737f3d375b86b495144ba7ab359ab3dca57"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.4.1"
+version = "0.4.2"
 
 [[Markdown]]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
@@ -140,9 +140,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[StaticArrays]]
 deps = ["Compat", "InteractiveUtils", "LinearAlgebra", "Random"]
-git-tree-sha1 = "a114d61f0ffe541c3ae2cddef4b44c844cebb4bf"
+git-tree-sha1 = "39adecbac9304fe6991920bd10fc67b67766275f"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.7.1"
+version = "0.7.2"
 
 [[Test]]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
