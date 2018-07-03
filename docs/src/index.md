@@ -15,17 +15,20 @@ dynamical billiards in two dimensions.
 
 ## About Billiards
 
-A dynamical billiard is a system where a particle is propagating as a straight line from obstacle to obstacle, performing specular reflection at the boundary of the obstacles. Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
+A dynamical billiard is a system where a particle is propagating inside a domain,
+bouncing from obstacle to obstacle by a specular reflection at the boundary of the obstacles. This basic idea can be extended in many ways, one of which is replacing the particle orbit from a straight line to a circle.
 
+Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
 The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. Also, the [scholarpedia](http://www.scholarpedia.org/article/Dynamical_billiards) entry is a good read on the subject.
 
 ## Features
 
-* Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles. **Arbitrary** billiard shapes can be made and no shape is "hard coded".
+* Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles. Arbitrary billiard shapes can be made and no shape is "hard coded".
 * Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table.
     * During magnetic propagation the particle orbit is a circle instead of a line!
     * All features exist for both types of propagation!
     * See the [high level API](basic/high_level) to get started!
+
 * Support for creating [random initial conditions](basic/high_level/#random-initial-conditions) in an arbitrary
   billiard.
 * [Ray-splitting implementation](ray-splitting): a particle may propagate
@@ -72,8 +75,8 @@ or if you use BibTeX:
 
 ## Installation
 
-This package is registered, simply use `Pkg.add("DynamicalBilliards")` to install it.
-The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `Pkg.add()`.
+This package is registered, simply use `] add DynamicalBilliards` to install it.
+The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `add`.
 
 Plotting is done through the `PyPlot` module. All plotting functions are brought
 into scope when `using PyPlot` is done.
