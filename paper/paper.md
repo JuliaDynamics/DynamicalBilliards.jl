@@ -13,7 +13,7 @@ authors:
 affiliations:
  - name: Max Planck Institute for Dynamics and Self-Organization
    index: 1
-date: 26 October 2017
+date: 03 July 2018
 bibliography: paper.bib
 ---
 
@@ -26,19 +26,27 @@ be extended. It is accompanied by a [detailed documentation archive](https://jul
 The package is mainly used to simulate any kind of two-dimensional system where particle motion is interrupted by collisions, e.g., a gas infused with big molecules.
 
 # Features
-The features of the DynamicalBilliards.jl, as of version v1.6.1, are:
+The features of the DynamicalBilliards.jl, as of version v2.0.0, are:
 
-* Modular creation of a billiard table by putting together well-defined obstacles.
-* Creation of random initial conditions in any user-created billiard table.
-* Propagation of point particles in such billiard tables.
-* Propagation of point particles in such billiard tables in magnetic fields.
-* Exact calculation of the collision times, collision positions, velocities etc..
-* Calculation of escape times of particles.
-* Rich implementation of Ray-splitting billiards: A particle may propagate through an obstacle, given some arbitrary transmission probability.
-* Calculation of Lyapunov exponents of trajectories (currently available only for propagation without magnetic fields).
-* Flexible speed; users can trade between accuracy and speed.
-* Extensive visualization library for plotting and animating particles and billiards.
+* Modular creation of a billiard from well defined obstacles. Arbitrary billiard shapes can be made and no shape is "hard coded".
+* Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table.
 
+    * During magnetic propagation the particle orbit is a circle instead of a line!
+    * All features exist for both types of propagation!
+
+* Support for creating random initial conditions in an arbitrary billiard.
+* Ray-splitting implementation: a particle may propagate
+  through an obstacle given arbitrary transmission and refraction
+  laws. This is also known as a "semiclassical billiard".
+* Poincaré surfaces of section (intersections with arbitrary plane).
+* Boundary maps.
+* Escape times & mean collision times.
+* Lyapunov exponents.
+* Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves.
+* Easy to use low-level interface.
+* Specialized tools for mushroom billiards.
+* Full support for visualizing and animating billiards and motion in billiards.
+* Brutal tests that confirm the package works and overcomes numerical precision issues.
 
 # Description
 Billiard systems have been used extensively in scientific research and played a
@@ -69,8 +77,9 @@ a gas of periodically located large molecules (green color). Because the mass an
 # Acknowledgements
 This package is mainly developed by George Datseris. However, this development would not have been possible without significant help from other people (updated 05/05/2018):
 
-1. [Lukas Hupe](https://github.com/lhupe)(@lhupe) Contributed the lyapunov spectrum calculation for magnetic propagation, implemented the boundary map function and did other contributions in bringing this package to version 2.0 (see [here](https://github.com/JuliaDynamics/DynamicalBilliards.jl/projects/1)).
-1. [Diego Tapias](https://github.com/dapias) (@dapias) Contributed the lyapunov spectrum calculation method for straight propagation.
+1. [Lukas Hupe](https://github.com/lhupe)(@lhupe) Contributed the Lyapunov spectrum calculation for magnetic propagation, implemented the boundary map function, the
+phase-space portion algorithm and did other contributions in bringing this package to version 2.0 (see [here](https://github.com/JuliaDynamics/DynamicalBilliards.jl/projects/1)).
+1. [Diego Tapias](https://github.com/dapias) (@dapias) Contributed the Lyapunov spectrum calculation method for straight propagation, which was then re-written.
 1. [David. P. Sanders](https://github.com/dpsanders) (`@dpsanders`) and [Ragnar Fleischmann](https://www.ds.mpg.de/person/20199/118124) contributed in fruitful discussions about the programming and physics of Billiard systems all-around.
 2. [Christopher Rackauckas](https://github.com/ChrisRackauckas) (`@ChrisRackauckas`) helped set-up the continuous integration, testing, documentation publishing and all around package development-related concepts.
 3. [Tony Kelman](https://github.com/tkelman) (`@tkelman`) helped significantly in the package publication process, especially in making it work correctly without destroying METADATA.jl.
