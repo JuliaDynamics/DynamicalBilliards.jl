@@ -46,6 +46,7 @@ function plot_billiard(bd::Billiard{T}; ax = (figure(); gca())) where {T}
     if !isinf(ymin) && !isinf(ymax)
         ylim(ymin - 0.1dy, ymax + 0.1dy)
     end
+    return nothing
 end
 
 function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
@@ -54,19 +55,21 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
     isperiodic(bd) || periodicerror()
     sca(ax)
 
+    n = count(x -> typeof(x) <: PeriodicWall, bd)
     if hexagonal
-        n = count(x -> typeof(x) <: PeriodicWall, bd)
         n != 6 && throw(ArgumentError("Hexagonally periodic billiards have "*
         "exactly 6 periodic walls arranged as a perfect hexagon. Use the "*
         "function `billiard_polygon(6, r, R, setting = \"periodic\")`."))
         plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     else
+        n != 4 && throw(ArgumentError("Rectangular periodic billiards must have "*
+        "exactly 4 periodic walls."))
         plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
     end
 
     xlim(xmin, xmax)
     ylim(ymin, ymax)
-    return
+    return nothing
 end
 
 function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
@@ -115,72 +118,6 @@ function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
         end
     end
 end
-
-function plot_periodic_hexagon2(bd, xmin, ymin, xmax, ymax)
-
-
-
-    v = 1
-    while !(typeof(bd[v]) <: PeriodicWall); v += 1; end
-    space = norm(bd[v].sp - bd[v].ep)*√3
-
-    sin6, cos6 = sincos(π/6)
-    disp1 = SVector(0.0, space)
-    disp2 = SVector(space*cos6, space*sin6)
-    Δ = space
-
-    xmin -= Δ; ymin -= Δ; ymax += Δ; xmax += Δ
-
-    PyPlot.xlim(xmin, xmax)
-    PyPlot.ylim(ymin, ymax)
-    PyPlot.gca()[:set_aspect]("equal")
-
-    toplot = nonperiodic(bd)
-
-    # Plot all obstacles
-    for d in toplot
-
-        j = 0
-        while xmin < -j*space*cos6
-            d_temp = translate(d, -j*disp2)
-            plot_obstacle!(d_temp)
-            i = 1
-            while ymin < -i*space
-                plot_obstacle!(translate(d_temp, -i*disp1))
-                i += 1
-            end
-
-            k = 1
-            while ymax > k*space
-                plot_obstacle!(translate(d_temp, k*disp1))
-                k += 1
-            end
-            j += 1
-        end
-
-        j = 1
-        while xmax > j*space*cos6
-            d_temp = translate(d, j*disp2)
-            plot_obstacle!(d_temp)
-            i = 1
-            while ymin < -i*space
-                plot_obstacle!(translate(d_temp, -i*disp1))
-                i += 1
-            end
-
-            k = 1
-            while ymax > k*space
-                plot_obstacle!(translate(d_temp, k*disp1))
-                k += 1
-            end
-            j += 1
-        end
-    end
-
-end
-
-
-
 
 function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
