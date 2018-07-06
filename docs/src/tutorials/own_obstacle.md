@@ -146,8 +146,7 @@ end
 
 
 The [`collisiontime`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also
-easy in this case, because
-it is almost identical with the method for the general [`Circular`](@ref) obstacle:
+tricky, however it is almost identical with the method for the general [`Circular`](@ref) obstacle:
 ```julia
 function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     ω = p.omega
@@ -163,27 +162,27 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     h = sqrt(rc^2 - a^2)
     # Collision points (always 2):
     I1 = SVector{2, T}(
-    pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
-    pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d)
+        pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d
+    )
     I2 = SVector{2, T}(
-    pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
-    pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d)
+        pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d
+    )
     # Only consider intersections on the "correct" side of Semicircle:
-    II = SVector{2,T}[]
-    if dot(I1-o.c, o.facedir) < 0 #intersection 1 is OUT
-        push!(II, I1)
-    end
-    if dot(I2-o.c, o.facedir) < 0
-        push!(II, I2)
-    end
-    if length(II) == 0
+    cond1 = dot(I1-o.c, o.facedir) < 0
+    cond2 = dot(I2-o.c, o.facedir) < 0
+    if cond1 || cond2
+        # Calculate real angle until intersection:
+        θ1 = cond1 ? realangle(p, o, I1) : T(Inf)
+        θ2 = cond2 ? realangle(p, o, I2) : T(Inf)
+        # Collision time, equiv. to arc-length until collision point:
+        return min(θ1, θ2)*rc
+    else
         return Inf
     end
-    # Calculate real time until intersection:
-    θ = realangle(p, o, II, pc, rc)
-    # Collision time, equiv. to arc-length until collision point:
-    return θ*rc
 end
+
 ```
 
 Then, we add swag by writing a method for `plot_obstacle!`:
@@ -204,32 +203,5 @@ function plot_obstacle!(d::Semicircle; kwargs...)
 end
 ```
 
-
 Finally, we also add a methods for [`to_bcoords`](@ref) and [`from_bcoords`](@ref).
-
-```julia
-function to_bcoords(pos::SV, vel::SV, o::Obstacle)
-    n = normalvec(o, pos)
-    sinφ = cross2D(vel, n)
-
-    #project pos on open face
-    chrd = SV{T}(-o.facedir[2],o.facedir[1])
-    d = (pos - o.c)/o.r
-    x = dot(d, chrd)
-    ξ =  acos(clamp(x, -1, 1))*o.r
-
-    return ξ, sinφ
-end
-
-function real_pos(ξ, o::Semicircle{T}) where T
-    sξ, cξ = sincos(ξ/o.r)
-    chrd = SV{T}(-o.facedir[2], o.facedir[1])
-    pos =  o.c - o.r*(sξ*o.facedir - cξ*chrd)
-
-    cφ = cos(asin(sφ))
-    n = normalvec(o, pos)
-    vel = SV{T}(n[1]*cφ + n[2]*sφ, -n[1]*sφ + n[2]*cφ)
-
-    return pos, vel
-end
-```
+For them, see the [relevant source file](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/src/boundary/boundarymap.jl).

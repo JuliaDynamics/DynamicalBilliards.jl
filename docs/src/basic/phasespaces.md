@@ -88,18 +88,6 @@ println("3D numeric - theory: $(abs(ratio - trueratio))")
 ```
 Of course, increasing evolution time and decreasing boxsize will bring higher accuracy.
 
-## Chaotic vs. Regular boundary map animation
-A simple 1-2 sentences summary
-```
-script that produces it
-```
-
-animation file.
-
-To be done by Lukas Hupe.
-
----
-
 ## References
 
 [1] : A. H. Barnett & T. Betcke, *Quantum mushroom billiards*, [Chaos, 17(4) (20017)](https://doi.org/10.1063/1.2816946)

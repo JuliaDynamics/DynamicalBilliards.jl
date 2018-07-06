@@ -43,13 +43,13 @@ for it.
 
 First define a refraction function
 ```@example ray
-refraction = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
+refraction(φ, pflag, ω) = pflag ? 0.5φ : 2.0φ
 ```
 Then, a transmission probability function. In this example, we want to create a
 function that given some factor `p`, it returns a probability weighted with
 `p` in one direction of ray-splitting and `1-p` in another direction.
 ```@example ray
-transmission_p = (p) -> (φ, pflag, ω) -> begin
+transmission_p(p) = (φ, pflag, ω) -> begin
     if pflag
         p*exp(-(φ)^2/2(π/8)^2)
     else
@@ -65,8 +65,8 @@ refraction angle (see below).
 Lastly, for this example we will use magnetic propagation. We define functions
 such that the antidots also reverse the direction and magnitude of the magnetic field.
 ```@example ray
-newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
-newowall = ((x, bool) -> bool ? 0.5x : 2.0x)
+newoantidot(x, bool) =  bool ? -2.0x : -0.5x
+newowall(x, bool) = bool ? 0.5x : 2.0x
 ```
 
 Now we create the [`RaySplitter`](@ref) instances we want
@@ -90,6 +90,7 @@ raysplitters = (raywall, raya)
 xt, yt, vxt, vyt, tt = construct(evolve(p, bd, 100, raysplitters)...)
 plot_billiard(bd)
 plot(xt, yt)
+scatter(xt[1], yt[1], color = "black")
 savefig("rayorbit.svg"); nothing # hide
 ```
 ![](rayorbit.svg)
@@ -175,6 +176,8 @@ p = randominside(bd, 0.4);
 ```
 
 and we animate its evolution, by first zooming out of the billiard
+
+**NEW FIGURE NEW COLORS**
 ```julia
 plot_billiard(bd)
 xlim(-1, 2); ylim(-1, 2);
