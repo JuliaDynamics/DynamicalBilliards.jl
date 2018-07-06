@@ -51,6 +51,10 @@ to define a method for [`resolvecollision!`](@ref). You can however define
 custom methods for [`resolvecollision!`](@ref), which is what we have done e.g.
 for [`RandomDisk`](@ref).
 
+!!! note "Use `import`!"
+    Notice that you have to properly `import` the methods to extend them. For example,
+    do `import DynamicalBilliards: normalvec, distance, collision` time.
+
 The first method is very simple, just do:
 ```julia
 import DynamicalBilliards: normalvec, distance, collisiontime
@@ -185,19 +189,18 @@ end
 
 ```
 
-Then, we add swag by writing a method for `plot_obstacle!`:
+Then, we add swag by writing a method for [`plot_obstacle!`](@ref):
 
 ```julia
 using PyPlot
-
-Arc = PyPlot.matplotlib[:patches][:Arc]
 
 function plot_obstacle!(d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = DynamicalBilliards.obcolor(d)
-    s1 = Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
-    lw = 2.0, kwargs...)
+    s1 = PyPlot.matplotlib[:patches][:Arc](
+        d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
+        lw = 2.0, kwargs...)
     PyPlot.gca()[:add_artist](s1)
     PyPlot.show()
 end
