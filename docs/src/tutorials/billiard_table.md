@@ -60,7 +60,7 @@ plot_billiard(billiard)
 p = randominside(billiard, ω)
 xt, yt, vxt, vyt, t = construct(evolve!(p, billiard, 100)...)
 plot(xt, yt)
-plot_particle!(p)
+plot_particle(p)
 savefig("tut1.svg"); nothing # hide
 ```
 ![](tut1.svg)

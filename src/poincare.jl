@@ -31,6 +31,10 @@ crossings of the `plane` such that `dot(velocity, normal) < 0` are allowed, with
 Return the positions `poss` and velocities `vels` at the instances of crossing
 the `plane`. If given more than one particle, the result is a vector of vectors
 of vectors.
+
+*Notice* - This function can handle pinned particles.
+If a pinned particle can intersect with the `plane`, then the intersection is returned.
+If however it can't then empty vectors are returned.
 """
 function psos(
     bd::Billiard{T}, plane::InfiniteWall{T}, t, par::AbstractParticle{T}) where {T}
@@ -75,7 +79,13 @@ function psos(
         typeof(par) <: MagneticParticle && (p.center = find_cyclotron(p))
 
         if check_for_pinned && t_to_write ≥ cyclotron_time
-            return [rpos[1]], [rvel[1]]
+            tplane = collisiontime(p, plane)
+            if tplane == Inf
+                return SV{T}[], SV{T}[]
+            else
+                psos_pos, psos_vel = propagate_posvel(p.pos, p, tplane)
+                return [psos_pos], [psos_vel]
+            end
         end
 
         count += increment_counter(t, tmin)

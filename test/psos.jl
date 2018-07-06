@@ -87,11 +87,14 @@ function cut_psos(partnum=10; printinfo = true)
         bt = billiard_sinai()
         plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
         @testset "pinned particle" begin
+
+            # case of pinned that crosses plane but not walls
             p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
             a, b = psos(bt, plane, t, p)
             @test typeof(a) <: Vector{<:SVector}
             @test length(a) == length(b) == 1
 
+            # case of pinned that doesn't cross anything
             p = MagneticParticle(0.1, 0.5, -π/2, 1/0.05)
             a, b = psos(bt,plane, t, p)
             @test typeof(a) <: Vector{<:SVector}

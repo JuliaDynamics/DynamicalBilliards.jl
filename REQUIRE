@@ -1,4 +1,5 @@
 julia
+Statistics
 StaticArrays
 Requires
 PyPlot

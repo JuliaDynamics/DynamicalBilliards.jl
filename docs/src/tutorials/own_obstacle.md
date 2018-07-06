@@ -133,13 +133,13 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 
 1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collisiontime`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
-2. [`plot_obstacle!`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
+2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
 3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
 The [`cellsize`](@ref) method is kinda trivial:
 ```julia
-import DynamicalBilliards: cellsize, plot_obstacle!, to_bcoords, from_bcoords
+import DynamicalBilliards: cellsize, plot_obstacle, to_bcoords, from_bcoords
 
 function cellsize(a::Semicircle{T}) where {T}
     xmin, ymin = a.c - a.r
@@ -189,12 +189,12 @@ end
 
 ```
 
-Then, we add swag by writing a method for [`plot_obstacle!`](@ref):
+Then, we add swag by writing a method for [`plot_obstacle`](@ref):
 
 ```julia
 using PyPlot
 
-function plot_obstacle!(d::Semicircle; kwargs...)
+function plot_obstacle(d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = DynamicalBilliards.obcolor(d)

@@ -2,9 +2,9 @@ All plotting functionality of `DynamicalBilliards` lies within a few well-define
 
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```@docs
-plot_obstacle!
-plot_particle!
-plot_cyclotron!
+plot_obstacle
+plot_particle
+plot_cyclotron
 plot_billiard
 animate_evolution
 ```
@@ -18,9 +18,9 @@ using DynamicalBilliards, PyPlot
 bd = billiard_sinai()
 
 figure()
-plot_obstacle!(bd[2]);
-plot_obstacle!(bd[4], color = "blue", linestyle = "dotted", lw = 5.0);
-plot_obstacle!(bd[1], facecolor = "yellow", edgecolor = "black");
+plot_obstacle(bd[2]);
+plot_obstacle(bd[4], color = "blue", linestyle = "dotted", lw = 5.0);
+plot_obstacle(bd[1], facecolor = "yellow", edgecolor = "black");
 savefig("rand_obstacles.svg"); nothing # hide
 ```
 ![](rand_obstacles.svg)
@@ -52,11 +52,11 @@ savefig("billiard_example.svg"); nothing # hide
 Following the above example, we create and plot a particle using the function `plot_particle`:
 ```@example 8
 p = randominside(bd)
-plot_particle!(p)
+plot_particle(p)
 # Plot one more particle with purple color,
 # pentagon shape and bigger size (default is s=30):
 p2 = randominside(bd)
-plot_particle!(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
+plot_particle(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
 savefig("particles_example.svg"); nothing # hide
 ```
 ![](particles_example.svg)
@@ -66,7 +66,6 @@ savefig("particles_example.svg"); nothing # hide
 ## Color conventions
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:
 * Particles are black.
-* Particle orbits/trajectories are blue.
 * Reflecting obstacles (e.g. `Disk`, `FiniteWall` etc.) are green.
 * Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are purple.
 * Ray-splitting obstacles are red with dashed linestyle.
@@ -74,6 +73,8 @@ The default plotting settings have been chosen for maximum clarity and consisten
   (if and when plotted).
 * Doors (`InfiniteWall` with `isdoor=true`) are plotted with alternating black and
   cyan dashed lines.
+
+Particle orbits use matplotlib's color cycle (first one is blue).
 
 ## Animating the motion of a particle
 
@@ -121,7 +122,7 @@ bd = Billiard(bd.obstacles..., d, d2)
 p = randominside(bd)
 xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 20)...)
 plot_billiard(bd, xt, yt)
-plot_particle!(p)
+plot_particle(p)
 savefig("rectperiodic.svg"); nothing # hide
 ```
 ![](rectperiodic.svg)

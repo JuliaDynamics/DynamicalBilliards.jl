@@ -156,6 +156,7 @@ bd = billiard_sinai(r, setting = "periodic")
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
 
 posvector, velvector = psos(bd, plane, t, 1000, 2.0)
+c(a) = length(a) == 1 ? "C1" : "C0"
 
 figure()
 for i in 1:length(posvector)
@@ -166,16 +167,8 @@ for i in 1:length(posvector)
         #plot y vs vy
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
-        # Deduce if particle is pinned or not:
-        ispinned = length(unique(round.(y, digits = 4))) == 1
-        if ispinned
-            y = [y[1]]
-            vy = [vy[1]]
-            col = "C1"
-        else
-            col = "C0"
-        end
-        plot(y, vy, ls = "None", color = col, ms = 2.0, alpha = 0.75, marker = "o")
+
+        plot(y, vy, ls = "None", color = c(y), ms = 2.0, alpha = 0.75, marker = "o")
     end
 end
 xlabel("\$y\$"); ylabel("\$v_y\$")
@@ -210,6 +203,7 @@ escapetime
 For example, the default implementation of the mushroom billiard has a "door" at the
 bottom of the stem. Thus,
 ```@example 2
+using Statistics
 bd = billiard_mushroom()
 et = zeros(100)
 for i ∈ 1:100

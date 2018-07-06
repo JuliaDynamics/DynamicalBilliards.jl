@@ -76,7 +76,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
         line[:set_xdata](xpd)
         line[:set_ydata](ypd)
 
-        point, quiv = plot_particle!(p; particle_kwargs...)
+        point, quiv = plot_particle(p; particle_kwargs...)
 
         if savename != nothing
             s = savename*"_$(i+1).png"
