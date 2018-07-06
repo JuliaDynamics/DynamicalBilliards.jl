@@ -197,32 +197,6 @@ with
 ```julia
 y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss]
 ```
-which gives
-```@example psos
-figure() # hide
-for i in 1:length(posvector)  # hide
-    poss = posvector[i] # hide
-    vels = velvector[i] # hide
-    L = length(poss) # hide
-    if L > 0 # hide
-        y = [a[2] < 0.5 ? a[2] + 1 : a[2]  for a in poss] # hide
-        vy = [a[2] for a in vels] # hide
-        ispinned = length(unique(round.(y, digits = 4))) == 1 # hide
-        if ispinned # hide
-            y = [y[1]] # hide
-            vy = [vy[1]] # hide
-            col = "C1" # hide
-        else # hide
-            col = "C0" # hide
-        end # hide
-        plot(y, vy, ls = "None", color = col, ms = 2.0, alpha = 0.75, marker = "o") # hide
-    end # hide
-end # hide
-xlabel("\$y\$"); ylabel("\$v_y\$") # hide
-savefig("psos2.svg"); nothing # hide
-```
-![](psos2.svg)
-
 
 ## Escape Times
 It is very easy to create your own function that calculates an "escape time": the time until the particle leaves the billiard by meeting a specified condition. There is also a high-level function for this though:

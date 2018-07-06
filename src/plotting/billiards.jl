@@ -62,8 +62,8 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
         "function `billiard_polygon(6, r, R, setting = \"periodic\")`."))
         plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     else
-        n != 4 && throw(ArgumentError("Rectangular periodic billiards must have "*
-        "exactly 4 periodic walls."))
+        n ∉ (2, 4) && throw(ArgumentError("Rectangular periodic billiards must have "*
+        "exactly 2 or 4 periodic walls."))
         plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
     end
 
