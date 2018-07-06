@@ -30,7 +30,7 @@ install:
 
 build_script:
   - C:\projects\julia\bin\julia -e "versioninfo();
-      using Pkg; ENV[\"PYTHON\"]=\"\"; Pkg.add(\"PyCall\"); Pkg.build()"
+      using Pkg; Pkg.build()"
 
 test_script:
   - C:\projects\julia\bin\julia -e "using Pkg; Pkg.test()"
