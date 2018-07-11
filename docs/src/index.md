@@ -25,10 +25,9 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 * Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles. Arbitrary billiard shapes can be made and no shape is "hard coded".
 * Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table.
-
-    * During magnetic propagation the particle orbit is a circle instead of a line!
-    * All features exist for both types of propagation!
-    * See the [high level API](basic/high_level) to get started!
+  * During magnetic propagation the particle orbit is a circle instead of a line!
+  * All features exist for both types of propagation!
+  * See the [high level API](basic/high_level) to get started!
 
 * Support for creating [random initial conditions](basic/high_level/#random-initial-conditions) in an arbitrary
   billiard.

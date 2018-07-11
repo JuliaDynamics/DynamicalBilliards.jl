@@ -2,15 +2,15 @@ using DynamicalBilliards
 
 using Documenter, PyPlot
 
-cd(Pkg.dir("DynamicalBilliards")*"/docs")
-mkpath("src/anim")
-
-download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/penta.mp4?raw=true",
-        "src/anim/penta.mp4")
-download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/inverse.mp4?raw=true",
-        "src/anim/inverse.mp4")
-download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/ray.mp4?raw=true",
-        "src/anim/ray.mp4")
+# cd(Pkg.dir("DynamicalBilliards")*"/docs")
+# mkpath("src/anim")
+#
+# download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/penta.mp4?raw=true",
+#         "src/anim/penta.mp4")
+# download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/inverse.mp4?raw=true",
+#         "src/anim/inverse.mp4")
+# download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/ray.mp4?raw=true",
+#         "src/anim/ray.mp4")
 
 makedocs(modules=[DynamicalBilliards], doctest=false, root = @__DIR__)
 close("all")
