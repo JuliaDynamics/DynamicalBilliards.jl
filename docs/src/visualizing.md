@@ -90,8 +90,8 @@ p = randominside(bd, 1.0)
 animate_evolution(p, bd, 50; savename = "penta")
 ```
 
-<video controls="controls">
-<source src="/anim/penta.mp4" type="video/mp4">
+<video width="100%" height="auto" controls>
+<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/penta.mp4?raw=true" type="video/mp4">
 </video>
 
 ## Periodic Billiards

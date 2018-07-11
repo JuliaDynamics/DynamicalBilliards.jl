@@ -99,9 +99,10 @@ You can see that at some points the particle crossed the boundaries of the
 red obstacles, which allow for ray splitting. It is even cooler to animate
 this motion using [`animate_evolution`](@ref)!
 
-<video controls="controls">
-<source src="/anim/ray.mp4" type="video/mp4">
+<video width="100%" height="auto" controls>
+<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/ray.mp4?raw=true" type="video/mp4">
 </video>
+
 
 !!! warning "Resetting the billiard"
     Notice that evolving a particle inside a billiard always mutates the billiard
@@ -182,5 +183,5 @@ animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/inverse.mp4?raw=true" type="video/mp4">
+<source src="anim/inverse.mp4" type="video/mp4">
 </video>
