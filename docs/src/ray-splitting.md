@@ -182,5 +182,5 @@ animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
 ```
 
 <video controls="controls">
-<source src="/anim/inverse.mp4" type="video/mp4">
+<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/inverse.mp4?raw=true" type="video/mp4">
 </video>
