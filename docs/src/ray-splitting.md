@@ -99,10 +99,9 @@ You can see that at some points the particle crossed the boundaries of the
 red obstacles, which allow for ray splitting. It is even cooler to animate
 this motion using [`animate_evolution`](@ref)!
 
-**NEED NEW FIGURE WIEH NEW COLORS**
-
-![Ray-splitting animation](https://i.imgur.com/xSC5RN6.gif)
-
+<video controls="controls">
+<source src="/anim/ray.mp4" type="video/mp4">
+</video>
 
 !!! warning "Resetting the billiard"
     Notice that evolving a particle inside a billiard always mutates the billiard
@@ -181,4 +180,7 @@ plot_billiard(bd)
 xlim(-1, 2); ylim(-1, 2);
 animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
 ```
-![Inverse magnetic billiard](https://i.imgur.com/R1LNtjt.gif)
+
+<video controls="controls">
+<source src="/anim/inverse.mp4" type="video/mp4">
+</video>
