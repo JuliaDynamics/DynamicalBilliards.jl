@@ -78,25 +78,22 @@ Particle orbits use matplotlib's color cycle (first one is blue).
 
 ## Animating the motion of a particle
 
-**PRODUCE NEW ANIMATION, put it in the "tutorials" repo.**
-
 The function [`animate_evolution`](@ref) is provided to animate the evolution of a particle from collision to collision.
 Let's animate a particle inside a simple pentagon with magnetic field:
 
 ```julia
 bd = billiard_polygon(5, 1)
 a = Disk([0.0,0.0], 0.4)
-bd = (bd.obstacles..., a)
+bd = Billiard(bd.obstacles..., a)
 p = randominside(bd, 1.0)
 
-savedir = tempdir()
-animate_evolution(p, bd, 50; savefigs = true, savename = savedir)
+animate_evolution(p, bd, 50; savename = "penta")
 ```
 
-This code produced 50 ".png" images which were later combined
-into a single ".gif" animation:
 
-![Visualizing Animation 1](http://i.imgur.com/UyiW2N2.gif)
+<video controls="controls">
+<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/f2a75673fcba637d0d1cbf970e1d37da04393c64/billiard_animations/penta.mp4" type="video/mp4">
+</video>
 
 ## Periodic Billiards
 In order to plot periodic billiards, you have need to call a different method of
@@ -137,7 +134,7 @@ d2 = Antidot([0.62/2, 0.5], 0.25)
 bd = Billiard(bd..., d, d2)
 
 p = randominside(bd, 0.2)
-xt, yt = construct(evolve(p, bd, 20)...)
+xt, yt = construct(evolve(p, bd, 10)...)
 
 xmin = minimum(xt); xmax = maximum(xt)
 ymin = minimum(yt); ymax = maximum(yt)

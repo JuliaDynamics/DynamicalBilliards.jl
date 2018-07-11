@@ -176,11 +176,9 @@ p = randominside(bd, 0.4);
 ```
 
 and we animate its evolution, by first zooming out of the billiard
-
-**NEW FIGURE NEW COLORS**
 ```julia
 plot_billiard(bd)
 xlim(-1, 2); ylim(-1, 2);
-animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "ray_anim")
+animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
 ```
 ![Inverse magnetic billiard](https://i.imgur.com/R1LNtjt.gif)

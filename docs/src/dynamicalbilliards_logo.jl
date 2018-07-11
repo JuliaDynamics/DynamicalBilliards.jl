@@ -65,10 +65,10 @@ raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
 p = randominside(bd, 3.5)
 
 cd()
-mkpath("billiardanim")
-cd("billiardanim")
+mkpath("dynamicalbilliards")
+cd("dynamicalbilliards")
 
 plot_billiard(bd)
 axis("off")
 
-animate_evolution(p, bd, 500, raya; newfig = false, savefigs = true, savename="logo")
+animate_evolution(p, bd, 500, raya; newfig = false, savename="logo")
