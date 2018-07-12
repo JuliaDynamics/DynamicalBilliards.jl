@@ -6,9 +6,9 @@ The "Julia-logo" billiard animation was made with:
 ```julia
 using DynamicalBilliards, PyPlot
 figure()
-bt = billiard_rectangle()
+bd = billiard_rectangle()
 # Plot walls:
-for w in bt
+for w in bd
   plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
 end
 
@@ -29,7 +29,7 @@ plot_obstacle(green, edgecolor = (56/255, 152/255, 38/255),
 facecolor = (96/255, 173/255, 81/255), linewidth = ewidth)
 
 # Create billiard
-bt = Billiard(bt.obstacles..., red, purple, green)
+bd = Billiard(bd.obstacles..., red, purple, green)
 
 # Set axis
 axis("off")
@@ -39,7 +39,7 @@ xlim(-0.1,1.1)
 ylim(-0.1,1.1)
 
 # Create a particle
-p = randominside(bt, 2.0)
+p = randominside(bd, 2.0)
 # particle colors
 darkblue = (64/255, 99/255, 216/255)
 lightblue = (102/255, 130/255, 223/255)
@@ -48,7 +48,7 @@ okwargs = Dict(:linewidth => 2.0, :color => lightblue)
 pkwargs = Dict(:color => darkblue, :s => 150.0)
 
 # create the animation:
-animate_evolution(p, bt, 200; col_to_plot = 7,
+animate_evolution(p, bd, 200; col_to_plot = 7,
 particle_kwargs = pkwargs, orbit_kwargs = okwargs, newfig = false)
 ```
 and produces:
@@ -59,8 +59,8 @@ and produces:
 ## Mean Free Path of the Lorentz Gas
 ```@example tut3
 using DynamicalBilliards
-bt = billiard_lorentz(0.2) #alias for billiard_sinai(setting = "periodic")
-mfp = meancollisiontime(randominside(bt), bt, 1000000.0)
+bd = billiard_lorentz(0.2) #alias for billiard_sinai(setting = "periodic")
+mfp = meancollisiontime(randominside(bd), bd, 1000000.0)
 ```
 The result is very close to the analytic result:
 
@@ -76,7 +76,7 @@ in only the x-direction:
 ```@example tut3
 using DynamicalBilliards, PyPlot
 o = 0.0; x = 2.0; y=1.0
-bt = Obstacle{Float64}[]
+bd = Obstacle{Float64}[]
 
 sp = [o,o]; ep = [o, y]; n = [x,o]
 leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
@@ -91,7 +91,7 @@ botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
 r = 0.25
 d = Disk([0.5, 0.5], r)
 d2 = Disk([1.5, 0.5], r/2)
-push!(bt, d, d2)
+push!(bd, d, d2)
 
 bd = Billiard(leftw, rightw, topw2, botw2, d, d2)
 

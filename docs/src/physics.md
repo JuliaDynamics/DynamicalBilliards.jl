@@ -41,8 +41,8 @@ Adjusting the global precision of `DynamicalBilliards` is very easy and can be d
 two ways:
 
 1. Choose the floating precision you would like, by initializing your billiard table
-   with parametric type `T`, e.g. `bt = billiard_sinai(Float16(0.3))`. This choice
-   will propagate to the entire `bt`, all particles resulting from `randominside()`,
+   with parametric type `T`, e.g. `bd = billiard_sinai(Float16(0.3))`. This choice
+   will propagate to the entire `bd`, all particles resulting from `randominside()`,
    **as well as the entire evolution process**.
 2. Re-define the functions `timeprec(T)` and `timeprec_forward(T)`. Decreasing their
    values will make the evolution process slower, but the resulting numbers given by
@@ -71,7 +71,7 @@ vectors have the initial conditions, repeated once.
 of magnetic propagation, e.g. `warning = true`. This optional argument throws a `warn()` message whenever a pinned particle is evolved.
 
 !!! warning "Using `construct()`"
-    When using the syntax `construct(evolve!(p, bt, t)...)` be sure that there
+    When using the syntax `construct(evolve!(p, bd, t)...)` be sure that there
     aren't any pinned particles given to evolve. If there are any,
     construct will result in an error.
 
@@ -97,7 +97,7 @@ then one simply has to adjust the values of `ω` given in the code with
 After getting the timeseries from `construct()`:
 ```julia
 # These are the "code"-data. |v| = 1 always
-ct, poss, vels, omegas = evolve!(p, bt, ttotal, ray_splt)
+ct, poss, vels, omegas = evolve!(p, bd, ttotal, ray_splt)
 xt, yt, vxt, vyt, t = construct(ct, poss, vels, omegas)
 ```
 you only need to make some final adjustment on the `vxt, vyt`. The position and time data
