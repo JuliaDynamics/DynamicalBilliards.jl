@@ -16,8 +16,8 @@ export animate_evolution
     (`line` object).
   * `savename = nothing` : If `nothing`, nothing is saved.
     If you give a string instead (filename *including path*) an animation `.mp4`
-    will be saved with name `savename.mp4`. **This requires the `ffmpeg` to be
-    accessible from the command line.**
+    will be saved with name `savename.mp4`. **This requires
+    [`ffmpeg`](https://www.ffmpeg.org) to be accessible from the command line.**
   * `deletefigs = true` : When producing the animation, each frame is saved
     (in the same folder) but then deleted after the animation is created. You
     can choose to keep them by passing `false`.
