@@ -25,7 +25,7 @@ h = 1.0; α = 0.8; r = 0.18; off = 0.25
 
     for i in 2:6
         s = iseven(i) ? β : α
-        T = iseven(i) ? RandomWall : InfiniteWall
+        T = InfiniteWall #iseven(i) ? RandomWall : InfiniteWall
         sp = frame[i-1].ep
         ep = sp + s*dirs[i]
         normal = (w = ep .- sp; [-w[2], w[1]])
@@ -68,7 +68,8 @@ cd()
 mkpath("dynamicalbilliards")
 cd("dynamicalbilliards")
 
-plot_billiard(bd)
+figure(figsize = (14,14))
+plot_billiard(bd; ax = gca())
 axis("off")
-
-animate_evolution(p, bd, 500, raya; newfig = false, savename="logo")
+animate_evolution(p, bd, 500, raya;
+newfig = false, savename="logo", deletefigs = false, col_to_plot = 7);

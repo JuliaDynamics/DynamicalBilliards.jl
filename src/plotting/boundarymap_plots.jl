@@ -55,7 +55,7 @@ function plot_boundarymap(ξs, sφs, intervals; ax = PyPlot.gca(),
 
         #zero-length minor tics in between borders, labelled with the obstacle index
         ax2[:xaxis][:set_minor_locator](matplotlib[:ticker][:FixedLocator](
-            [mean((intervals[i], intervals[i+1])) for i in 1:length(intervals)-1]
+            [(intervals[i] + intervals[i+1])/2 for i in 1:length(intervals)-1]
         ))
 
 

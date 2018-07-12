@@ -35,7 +35,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
 
     p = deepcopy(par)
     if newfig == true
-        fig = figure(figsize = (7.2, 7.2))
+        fig = figure(figsize = figsize)
         plot_billiard(bd; ax = gca())
     end
 
@@ -92,7 +92,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
     end
     if savename != nothing
         anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
-        -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v baseline -level 3.0 $(savename).mp4`
+        -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
         run(anim)
 
         if deletefigs
