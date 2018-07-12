@@ -63,12 +63,12 @@ phasespace_portion
 ```
 For example, for mushroom billiards the ratio of the chaotic-to-total phase space is known **analytically** for both the full 3D [1] space as well as the boundary 2D [2] space:
 
-$$
+```math
 \begin{aligned}
-  g_\text{c_3D} &= \frac{2 \, \pi r^{2} - 4 \, r^{2} \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l w + \sqrt{4 \, r^{2} - w^{2}} w}{2 \, {\left(\pi r^{2} + 2 \, l w\right)}}\\
+  g_\text{c, 3D} &= \frac{2 \, \pi r^{2} - 4 \, r^{2} \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l w + \sqrt{4 \, r^{2} - w^{2}} w}{2 \, {\left(\pi r^{2} + 2 \, l w\right)}}\\
   g_\text{c, 2D} &= \frac{\pi w + 2 \, w \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l + 4 \, r - 2 \, \sqrt{4 \, r^{2} - w^{2}}}{2 \, {\left(\pi r + 2 \, l + 2 \, r\right)}}
 \end{aligned}
-$$
+```
 
 We can easily confirm those formulas:
 ```@example phasespace
