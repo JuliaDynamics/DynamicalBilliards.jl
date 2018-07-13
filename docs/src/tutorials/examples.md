@@ -2,59 +2,88 @@ This section has some examples of usage of `DynamicalBilliards`, with some brief
 comments.
 
 ## Julia-logo Billiard
-The "Julia-logo" billiard animation was made with:
+The "Julia-logo-billiard" animation that is the logo of our package was made with:
 ```julia
 using DynamicalBilliards, PyPlot
-figure()
-bd = billiard_rectangle()
-# Plot walls:
-for w in bd
-  plot_obstacle(w; color = (0,0,0, 1), linewidth = 3.0)
+using DynamicalBilliards: cross2D
+
+# %%
+h = 1.0; α = 0.8; r = 0.18; off = 0.25
+# function billiards_logo(h=1.0, α=0.8, r=0.18, off=0.25)
+
+    cos6 = cos(π/6)
+    β = (h - cos6*α)/cos6
+    t = α + 2β
+    center_of_mass = [0.0, √3*t/6]
+    startloc = [-α/2, 0.0]
+
+    # create directions of the hexagonal 6:
+    hexvert = [(cos(2π*i/6), sin(2π*i/6)) for i in 1:6]
+    dirs = [SVector{2}(hexvert[i] .- hexvert[mod1(i+1, 6)]) for i in 1:6]
+
+    frame = Obstacle{Float64}[]
+
+    sp = startloc
+    ep = startloc + α*dirs[1]
+    normal = (w = ep .- sp; [-w[2], w[1]])
+    push!(frame, InfiniteWall(sp, ep, normal, "frame 1"))
+
+
+    for i in 2:6
+        s = iseven(i) ? β : α
+        T = InfiniteWall #iseven(i) ? RandomWall : InfiniteWall
+        sp = frame[i-1].ep
+        ep = sp + s*dirs[i]
+        normal = (w = ep .- sp; [-w[2], w[1]])
+        push!(frame, T(sp, ep, normal, "frame $(i)"))
+    end
+
+
+    # Radii of circles that compose the Julia logo
+    offset = [0.0, off]
+
+    R = [cos(2π/3) -sin(2π/3);
+         sin(2π/3)  cos(2π/3)]
+
+
+    green = Disk(center_of_mass .+ offset, r, "green")
+    red = Antidot(center_of_mass .+ R*offset, r, "red")
+    purple = RandomDisk(center_of_mass .+ R*R*offset, r, "purple")
+
+    bd = Billiard(green, red, purple, frame...)
+# end
+# bd = billiards_logo(1.0, 0.8, 0.18, 0.25)
+
+
+# %% Raysplitting functions for the red circle:
+refraction = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
+transmission_p = (p) -> (φ, pflag, ω) -> begin
+    if pflag
+        p*exp(-(φ)^2/2(π/8)^2)
+    else
+        abs(φ) < π/4 ? (1-p)*exp(-(φ)^2/2(π/4)^2) : 0.0
+    end
 end
+newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
+raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
 
-# Create and plot the 3 disks:
-r = 0.165
-ewidth = 6.0
-redcent = [0.28, 0.32]
-red = Disk(redcent, r, "red")
-plot_obstacle(red; edgecolor = (203/255, 60/255, 51/255),
-facecolor = (213/255, 99/255, 92/255), linewidth = ewidth)
+# %% Create and animate particle:
+p = randominside(bd, 3.5)
 
-purple = Disk([1 - redcent[1], redcent[2]], r, "purple")
-plot_obstacle(purple; edgecolor = (149/255, 88/255, 178/255),
-facecolor = (170/255, 121/255, 193/255), linewidth = ewidth)
+cd()
+mkpath("dynamicalbilliards")
+cd("dynamicalbilliards")
 
-green = Disk([0.5, 1 - redcent[2]], r, "green")
-plot_obstacle(green, edgecolor = (56/255, 152/255, 38/255),
-facecolor = (96/255, 173/255, 81/255), linewidth = ewidth)
-
-# Create billiard
-bd = Billiard(bd.obstacles..., red, purple, green)
-
-# Set axis
+figure(figsize = (14,14))
+plot_billiard(bd; ax = gca())
 axis("off")
-tight_layout()
-gca()[:set_aspect]("equal")
-xlim(-0.1,1.1)
-ylim(-0.1,1.1)
-
-# Create a particle
-p = randominside(bd, 2.0)
-# particle colors
-darkblue = (64/255, 99/255, 216/255)
-lightblue = (102/255, 130/255, 223/255)
-
-okwargs = Dict(:linewidth => 2.0, :color => lightblue)
-pkwargs = Dict(:color => darkblue, :s => 150.0)
-
-# create the animation:
-animate_evolution(p, bd, 200; col_to_plot = 7,
-particle_kwargs = pkwargs, orbit_kwargs = okwargs, newfig = false)
+animate_evolution(p, bd, 500, raya;
+newfig = false, savename="logo", deletefigs = false, col_to_plot = 7);
 ```
-and produces:
 
-![Julia-logo billiard animation](http://i.imgur.com/EtKof48.gif)
-
+<video width="100%" height="auto" controls>
+<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/DynamicalBilliards_billiard_animation.mp4?raw=true" type="video/mp4">
+</video>
 
 ## Mean Free Path of the Lorentz Gas
 ```@example tut3

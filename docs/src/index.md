@@ -1,4 +1,4 @@
-![DynamicalBilliards Logo: The Julia billiard](http://i.imgur.com/NKgzYrt.gif)
+![DynamicalBilliards v2.0 Logo: The Julia billiard](https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/DynamicalBilliards_logo_animated.gif?raw=true)
 
 `DynamicalBilliards` is an easy-to-use, modular and extendable Julia package for
 dynamical billiards in two dimensions.
@@ -9,14 +9,16 @@ dynamical billiards in two dimensions.
 
     v2.0 also drops support for all Julia versions less than 0.7.
 
-!!! tip "Julia Billiard animation"
+    *we also have a cool new logo*
+
+!!! tip "Julia Billiard logo animation"
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
     the logo of our package!
 
 ## About Billiards
 
 A dynamical billiard is a system where a particle is propagating inside a domain,
-bouncing from obstacle to obstacle by a specular reflection at the boundary of the obstacles. This basic idea can be extended in many ways, one of which is replacing the particle orbit from a straight line to a circle.
+bouncing from obstacle to obstacle (i.e. the *boundary* of the domain) by a specular reflection at the boundary of the obstacles. This basic idea can be extended in many ways, one of which is replacing the particle orbit from a straight line to a circle.
 
 Billiard systems have been used extensively in mathematics, nonlinear dynamics and chaos and played an important role in the development of nonlinear science.
 The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many examples of different types of billiards. Also, the [scholarpedia](http://www.scholarpedia.org/article/Dynamical_billiards) entry is a good read on the subject.
@@ -38,6 +40,7 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 * [Boundary maps](basic/phasespaces).
 * [Escape times](basic/high_level/#escape-times) & [mean collision times](basic/high_level/#mean-collision-times).
 * [Lyapunov exponents](lyapunovs).
+* Support for both [coordinate systems](basic/phasespaces/#coordinate-systems): 3D real space and boundary coordinates.
 * Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [phase spaces](basic/phasespaces/#phase-space-portions) section.
 * Easy to use [low-level interface](basic/low_level).
 * Specialized tools for [mushroom billiards](mushroomtools).
@@ -51,7 +54,7 @@ also no support for collision between particles.
 
 ## Citing
 If you have used this package for research that resulted in a publication, please be
-kind enough to cite the paper associated with DynamicalBilliards.jl. The DOI is
+kind enough to cite the paper associated with `DynamicalBilliards`. The DOI is
 https://doi.org/10.21105/joss.00458 and you can cite as:
 
 >G. Datseris, [The Journal of Open Source Software **2**, 458
@@ -84,14 +87,14 @@ into scope when `using PyPlot` is done.
 ---
 
 ## Support
-If you are having problems with `DynamicalBilliards.jl` do not hesitate to seek for support! There are numerous ways to do that:
+If you are having problems with `DynamicalBilliards` do not hesitate to seek for support! There are numerous ways to do that:
 
 1. Visit our [official chatroom](https://gitter.im/JuliaDynamics/Lobby) on Gitter: https://gitter.im/JuliaDynamics/Lobby
 2. Open a new issue at our [GitHub issues page](https://github.com/JuliaDynamics/DynamicalBilliards.jl/issues).
 
 ---
 ## Contributing
-Everyone is welcomed to contribute to `DynamicalBilliards.jl`! If you have some new
+Everyone is welcomed to contribute to `DynamicalBilliards`! If you have some new
 algorithm, types of Obstacles or anything new to add, do not hesitate! For formal
 questions about e.g. structuring of code it is best to contact us through the [gitter
 chatroom](https://gitter.im/JuliaDynamics/Lobby) or by opening a new Pull Request and asking for a review of your code.
