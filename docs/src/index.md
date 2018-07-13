@@ -47,8 +47,7 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 * Full support for [visualizing and animating](visualizing) billiards and motion in billiards.
 * Brutal tests that confirm the package works and overcomes numerical precision issues.
 
-This package does not support finite-sized particles and, as a result, there is
-also no support for collision between particles.
+This package does not support finite-sized particles and, as a result, there is also no support for collision between particles.
 
 ---
 
