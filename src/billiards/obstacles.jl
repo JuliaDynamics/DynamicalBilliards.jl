@@ -371,12 +371,10 @@ end
     norm(pos - d.c) - d.r
 
 @inline function distance(
-    pos::AbstractVector{T}, a::Antidot{T}, pflag::Bool)::T where {T}
+    pos::AbstractVector{T}, a::Antidot{T})::T where {T}
     d = norm(pos - a.c) - a.r
     a.pflag ? d : -d
 end
-@inline distance(pos::AbstractVector{T}, a::Antidot{T}) where {T} =
-    distance(pos, a, a.pflag)
 
 function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     # Check on which half of circle is the particle
