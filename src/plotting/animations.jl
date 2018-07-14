@@ -1,4 +1,3 @@
-using PyPlot
 export animate_evolution
 
 """
@@ -35,11 +34,11 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
 
     p = deepcopy(par)
     if newfig == true
-        fig = figure(figsize = figsize)
-        plot_billiard(bd; ax = gca())
+        fig = PyPlot.figure(figsize = figsize)
+        plot_billiard(bd; ax = PyPlot.gca())
     end
 
-    disable_axis && axis("off")
+    disable_axis && PyPlot.axis("off")
 
     sleeptime = 1/framerate
     i=0
@@ -71,7 +70,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
         for el in ydata; append!(ypd, el); end
 
         if i == 0
-            line, = plot(xpd, ypd; orbit_kwargs...)
+            line, = PyPlot.plot(xpd, ypd; orbit_kwargs...)
         end
         line[:set_xdata](xpd)
         line[:set_ydata](ypd)
@@ -80,7 +79,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
 
         if savename != nothing
             s = savename*"_$(i+1).png"
-            savefig(s, dpi = 100)
+            PyPlot.savefig(s, dpi = 100)
         end
 
         sleep(sleeptime)

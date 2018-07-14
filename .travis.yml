@@ -14,7 +14,7 @@ notifications:
     on_failure: never
 
 script:
-  - julia -e 'using Pkg; ENV["PYTHON"]=""; py="PyCall"; Pkg.add(py); Pkg.build();# Pkg.test(; coverage=true)'
+  - julia -e 'using Pkg; ENV["PYTHON"]=""; py="PyCall"; Pkg.add(py); Pkg.build(); Pkg.test(; coverage=true)'
 
 after_success:
   - test $TRAVIS_OS_NAME = "linux" && julia -e 'ENV["PYTHON"]=""; using Pkg; Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))'

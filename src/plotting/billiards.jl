@@ -1,4 +1,4 @@
-using PyPlot, StaticArrays, InteractiveUtils
+using InteractiveUtils
 export plot_billiard
 
 function nonperiodic(bd::Billiard)
@@ -34,23 +34,24 @@ by `xt` and `yt`.
 Set the keyword argument `plot_orbit = false` to not
 plot the orbit defined by `(xt, yt)` and only use the limits.
 """
-function plot_billiard(bd::Billiard{T}; ax = (figure(); gca())) where {T}
-    sca(ax)
+function plot_billiard(bd::Billiard{T};
+    ax = (PyPlot.figure(); PyPlot.gca())) where {T}
+    PyPlot.sca(ax)
     for obst in bd; plot_obstacle(obst); end
     xmin, ymin, xmax, ymax = cellsize(bd)
     dx = xmax - xmin; dy = ymax - ymin
     ax[:set_aspect]("equal")
     if !isinf(xmin) && !isinf(xmax)
-        xlim(xmin - 0.1dx, xmax + 0.1dx)
+        PyPlot.xlim(xmin - 0.1dx, xmax + 0.1dx)
     end
     if !isinf(ymin) && !isinf(ymax)
-        ylim(ymin - 0.1dy, ymax + 0.1dy)
+        PyPlot.ylim(ymin - 0.1dy, ymax + 0.1dy)
     end
     return nothing
 end
 
 function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
-    hexagonal = false, ax = (figure(); gca()))
+    hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()))
 
     isperiodic(bd) || periodicerror()
     sca(ax)
@@ -67,13 +68,13 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
         plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
     end
 
-    xlim(xmin, xmax)
-    ylim(ymin, ymax)
+    PyPlot.xlim(xmin, xmax)
+    PyPlot.ylim(ymin, ymax)
     return nothing
 end
 
 function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
-    hexagonal = false, ax = (figure(); gca()), plot_orbit = true)
+    hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()), plot_orbit = true)
 
     xmin = minimum(xt); xmax = maximum(xt)
     ymin = minimum(yt); ymax = maximum(yt)
@@ -81,9 +82,9 @@ function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
     plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
 
     if plot_orbit
-        sca(ax)
-        scatter(xt[1], yt[1], color = "black")
-        plot(xt, yt, color = "C0")
+        PyPlot.sca(ax)
+        PyPlot.scatter(xt[1], yt[1], color = "black")
+        PyPlot.plot(xt, yt, color = "C0")
     end
 
     cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)

@@ -1,4 +1,3 @@
-using PyPlot, StaticArrays
 export plot_obstacle
 
 obcolor(::Obstacle) = (0,0.6,0)
