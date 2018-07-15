@@ -43,6 +43,6 @@ pages:
 - Physics: physics.md
 - Low Level API: basic/low_level.md
 - Tutorials:
-  - Defining a Billiard Table: tutorials/billiard_table.md
+  - Defining a Billiard: tutorials/billiard_table.md
   - Creating your own Obstacle: tutorials/own_obstacle.md
   - Examples: tutorials/examples.md
