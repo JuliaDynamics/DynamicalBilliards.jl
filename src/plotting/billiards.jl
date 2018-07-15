@@ -54,7 +54,7 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
     hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()))
 
     isperiodic(bd) || periodicerror()
-    sca(ax)
+    PyPlot.sca(ax)
 
     n = count(x -> typeof(x) <: PeriodicWall, bd)
     if hexagonal
