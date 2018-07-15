@@ -61,6 +61,9 @@ and one for the "real" coordinates (3D space):
 boundarymap_portion
 phasespace_portion
 ```
+
+---
+
 For example, for mushroom billiards the ratio of the chaotic-to-total phase space is known **analytically** for both the full 3D [1] space as well as the boundary 2D [2] space:
 
 ```math
