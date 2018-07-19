@@ -2,15 +2,19 @@ export Billiard, randominside
 #######################################################################################
 ## Billiard Table
 #######################################################################################
-struct Billiard{T, D, O<:Tuple}
+struct Billiard{T, D, O<:Tuple, Y}
     obstacles::O
+    peridx::Y
 end
 
-#pretty print:
+@inline isperiodic(::Billiard{T,D,O,Nothing}) where {T,D,O} = false
+@inline isperiodic(::Billiard{T,D,O,Y}) where {T,D,O,Y} = true
 
+#pretty print:
 _get_name(o::Obstacle) = :name ∈ fieldnames(typeof(o)) ? o.name : string(typeof(o))
 function Base.show(io::IO, bd::Billiard{T,D,BT}) where {T, D, BT}
     s = "Billiard{$T} with $D obstacles:\n"
+    bd.peridx != nothing && (s = "Periodic "*s)
     for o in bd
         s*="  $(_get_name(o))\n"
     end
@@ -44,9 +48,19 @@ function Billiard(bd::Union{AbstractVector, Tuple})
         numbers. Found $T and $(eltype(bd[i])) instead."
         ))
     end
-
     tup = (bd...,)
-    return Billiard{T, D, typeof(tup)}(tup)
+    peridx = findall(x -> typeof(x) <: PeriodicWall, tup)
+    if isodd(length(peridx))
+        throw(ArgumentError(
+        "A billiard can only have an even number of `PeriodicWall`s, "*
+        "since they have to come in pairs."
+        ))
+    end
+    if length(peridx) == 0
+        return Billiard{T, D, typeof(tup), Nothing}(tup, nothing)
+    else
+        return Billiard{T, D, typeof(tup), Vector{Int}}(tup, peridx)
+    end
 end
 
 function Billiard(bd::Vararg{Obstacle})
@@ -64,8 +78,6 @@ Base.iterate(bd::Billiard) = iterate(bd.obstacles)
 Base.iterate(bd::Billiard, state) = iterate(bd.obstacles, state)
 Base.length(::Billiard{T, L}) where {T, L} = L
 Base.eltype(::Billiard{T}) where {T} = T
-
-@inline isperiodic(bd) = count(x -> typeof(x) <: PeriodicWall, bd.obstacles) ≥ 2
 
 #######################################################################################
 ## Distances

@@ -47,8 +47,8 @@ function escapetime!(
         i, tmin, pos, vel = bounce!(p, bd)
         t_to_write += tmin
 
-        if typeof(bd[i]) <: PeriodicWall
-            continue # do not write output if collision with with PeriodicWall
+        if isperiodic(bd) && i ∈ bd.peridx
+            continue
         else
             totalt += t_to_write
             i ∈ ei &&  break # the collision happens with a Door!
@@ -85,7 +85,7 @@ function meancollisiontime!(p::AbstractParticle{T}, bd::Billiard{T}, t)::T where
         tmin == Inf && return Inf
         t_to_write += tmin
 
-        if typeof(bd[i]) <: PeriodicWall
+        if isperiodic(bd) && i ∈ bd.peridx
             # Pinned particle:
             ismagnetic && t_to_write ≥ 2π/absω && return Inf
             #If not pinned, continue (do not write for PeriodicWall)

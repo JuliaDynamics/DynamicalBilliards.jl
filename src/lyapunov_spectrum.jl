@@ -256,7 +256,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
         t_pincheck += tmin
 
         #check for pinning
-        if typeof(bd[i]) <: PeriodicWall
+        if isperiodic(bd) && i ∈ bd.peridx
             # Pinned particle:
             if ismagnetic && t_pincheck ≥ 2π/absω
                 warning && warn("Pinned particle! (completed circle)")

@@ -66,7 +66,7 @@ function psos(
         tmin == Inf && break
 
         if check_for_pinned
-            if typeof(bd[i]) <: PeriodicWall
+            if isperiodic(bd) && i ∈ bd.peridx
                 t_to_write += tmin
             else
                 t_to_write = zero(T)

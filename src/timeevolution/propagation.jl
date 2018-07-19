@@ -291,7 +291,7 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
             return (rt, rpos, rvel, p.omega)
         end
 
-        if typeof(bd[i]) <: PeriodicWall
+        if isperiodic(bd) && i ∈ bd.peridx
             # Pinned particle:
             if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")

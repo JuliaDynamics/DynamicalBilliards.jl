@@ -162,7 +162,7 @@ function relocate_rayspl!(
     ineq = 2trans - 1
     newpos = p.pos; newt = zero(T)
     i = 1
-    # THE BUG IS IN THIS LOOP!!!!
+
     while ineq*distance(newpos, o) > 0
         newt += ineq*timeprec_rayspl(p)
         newpos = propagate_pos(p.pos, p, newt)
@@ -292,7 +292,7 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple
             return (rt, rpos, rvel, omegas)
         end
 
-        if typeof(bd[i]) <: PeriodicWall
+        if isperiodic(bd) && i ∈ bd.peridx
             # Pinned particle:
             if ismagnetic && t_to_write ≥ 2π/absω
                 warning && warn("Pinned particle in evolve! (completed circle)")

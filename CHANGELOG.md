@@ -6,6 +6,7 @@
     done are now exactly zero! ZEROOOOOOOOOOOO
   * Fixed many instances of broadcasting with static vectors (which is bad).
   * Utilized metaprogramming to manually unroll some loops.
+  * If a billiard is periodic it is now known at compile time.
 
 * **Symver will now be properly respected from 2.0 onwards**.
 * Hexagonal periodic plotting.
@@ -39,8 +40,7 @@
 * **[BREAKING]** `timeprec` now takes arguments `timeprec(::Particle, ::Obstacle)` to utilize better
   multiple dispatch and reduce code repetition.
 * **[BREAKING]** `realangle` now only takes one intersection and simply returns the real angle.
-* **[BREAKING]** `animate_evolution` now does not have `!` at the end, because it deepcopies the
-  particle.
+* **[BREAKING]** `animate_evolution` now does not have `!` at the end, because it deepcopies the particle.
 * **[BREAKING]** Re-worked ray-splitting: We now use the `RaySplitter` struct. See docs.
 
 ---
