@@ -1,6 +1,6 @@
 # High Level API
 
-`DynamicalBilliards` was created with easy-of-use as its main cornerstone.
+`DynamicalBilliards` was created with ease-of-use as its main cornerstone.
 With 3 simple steps, the user can get the output of the propagation of a particle in a billiard.
 
 In general, the workflow of `DynamicalBilliards` follows these simple steps:
