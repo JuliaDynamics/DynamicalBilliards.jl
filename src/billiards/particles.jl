@@ -32,6 +32,9 @@ mutable struct Particle{T<:AbstractFloat} <: AbstractParticle{T}
     end
 end
 
+Base.copy(p::Particle) =
+Particle(p.pos, p.vel, p.current_cell)
+
 function Particle(ic::AbstractVector{S}) where {S<:Real}
     T = S<:Integer ? Float64 : S
     φ0 = ic[3]
@@ -80,6 +83,9 @@ mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
         new{T}(pos, normalize(vel), current_cell, ω, abs(1/ω), c)
     end
 end
+
+Base.copy(p::MagneticParticle) =
+MagneticParticle(p.pos, p.vel, p.current_cell, p.omega, p.r, p.center)
 
 function MagneticParticle(ic::AbstractVector{T}, ω::Real) where {T<:Real}
     φ0 = ic[3]

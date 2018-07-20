@@ -110,12 +110,11 @@ Notice that the adjustment is increased geometrically; if one adjustment is not
 enough, the adjusted time is multiplied by a factor of 10. This happens as many
 times as necessary.
 """
-function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
-    sig = timeprec_sign(o)
+@muladd function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
     i = 1
-    while distance(newpos, o)*sig > 0
-        tmin = tmin + i*sig*timeprec(p, o)
+    while timeprec_sign(o, distance(newpos, o)) > 0
+        tmin = tmin + timeprec_sign(o, i)*timeprec(p, o)
         newpos = propagate_pos(p.pos, p, tmin)
         i *= 10
     end
@@ -123,8 +122,8 @@ function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
     return tmin
 end
 
-@inline timeprec_sign(::Obstacle) = -1
-@inline timeprec_sign(::PeriodicWall) = +1
+@inline timeprec_sign(::Obstacle, i) = -i
+@inline timeprec_sign(::PeriodicWall, i) = i
 
 
 
@@ -147,7 +146,7 @@ particle should end up at.
 @inline propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
 @inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
-@inline function propagate!(p::MagneticParticle{T}, t::Real)::Nothing where {T}
+@inline @muladd function propagate!(p::MagneticParticle{T}, t::Real) where {T}
     ω = p.omega; r = 1/ω
     φ0 = atan(p.vel[2], p.vel[1])
     sinωtφ, cosωtφ = sincos(ω*t + φ0)
@@ -155,7 +154,7 @@ particle should end up at.
     p.vel = SVector{2, T}(cosωtφ, sinωtφ)
     return
 end
-@inline function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
+@inline @muladd function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
     ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
     p.pos = newpos
     p.vel = SVector{2, T}(cossin(ω*t + φ0)...)
@@ -170,7 +169,7 @@ position.
 @inline propagate_pos(pos, p::Particle{T}, t::Real) where {T} =
     SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t)
 
-@inline function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
+@inline @muladd function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
     # "Initial" conditions
     ω = p.omega; r = 1/ω
     φ0 = atan(p.vel[2], p.vel[1])
@@ -200,7 +199,7 @@ bounce!(p, bd, raysplit::Dict) -> i, t, pos, vel
 ```
 Ray-splitting version of `bounce!`.
 """
-function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
+@inline function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bd)
     o = bd[i]
     tmin = relocate!(p, o, tmin)
@@ -208,11 +207,12 @@ function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
     return i, tmin, p.pos, p.vel
 end
 
-function bounce!(p::MagneticParticle{T}, bd::Billiard{T}) where {T}
+@inline function bounce!(p::MagneticParticle{T}, bd::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bd)
     if tmin != Inf
-        tmin = relocate!(p, bd[i], tmin)
-        resolvecollision!(p, bd[i])
+        o = bd[i]
+        tmin = relocate!(p, o, tmin)
+        resolvecollision!(p, o)
     end
     p.center = find_cyclotron(p)
     return i, tmin, p.pos, p.vel
@@ -319,7 +319,7 @@ end
     evolve(p, args...)
 Same as [`evolve!`](@ref) but deep-copies the particle instead.
 """
-evolve(p, args...) = evolve!(deepcopy(p), args...)
+evolve(p, args...) = evolve!(copy(p), args...)
 
 """
     construct(ct, poss, vels [, ω [, dt=0.01]]) -> xt, yt, vxt, vyt, t

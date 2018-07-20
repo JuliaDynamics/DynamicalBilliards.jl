@@ -29,7 +29,7 @@ A warning can be thrown if the result is `Inf`. Enable this using the keyword
 `warning = true`.
 """
 escapetime(p, bd, t; warning = false) =
-    escapetime!(deepcopy(p), bd, t; warning = warning)
+    escapetime!(copy(p), bd, t; warning = warning)
 
 function escapetime!(
     p::AbstractParticle{T}, bd::Billiard{T},
@@ -109,4 +109,4 @@ evolving for total amount `t` (either float for time or integer for collision nu
 Collision times are counted only between obstacles that are *not*
 [`PeriodicWall`](@ref).
 """
-meancollisiontime(p, bd, t) = meancollisiontime!(deepcopy(p), bd, t)
+meancollisiontime(p, bd, t) = meancollisiontime!(copy(p), bd, t)

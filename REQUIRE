@@ -4,3 +4,4 @@ LinearAlgebra
 InteractiveUtils
 StaticArrays 0.8.2
 Requires 0.5.2
+MuladdMacro 0.2.0

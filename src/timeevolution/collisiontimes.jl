@@ -36,15 +36,15 @@ function collisiontime(p::Particle{T}, w::FiniteWall{T}) where {T}
     end
 end
 
-function collisiontime(p::Particle{T}, d::Circular{T}) where {T}
+@muladd function collisiontime(p::Particle{T}, d::Circular{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     dotp >= 0.0 && return T(Inf)
 
     dc = p.pos - d.c
-    B = dot(p.vel, dc)         #pointing towards circle center: B < 0
-    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
-    Δ = B^2 - C
+    B = dot(p.vel, dc)           #pointing towards circle center: B < 0
+    C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
+    Δ = B*B - C
 
     Δ <= 0.0 && return T(Inf)
     sqrtD = sqrt(Δ)
@@ -54,7 +54,7 @@ function collisiontime(p::Particle{T}, d::Circular{T}) where {T}
     t <= 0.0 ? T(Inf) : t
 end
 
-function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
+@muladd function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
@@ -62,8 +62,8 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     end
 
     dc = p.pos - d.c
-    B = dot(p.vel, dc)         #velocity towards circle center: B < 0
-    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+    B = dot(p.vel, dc)           #velocity towards circle center: B < 0
+    C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
     Δ <= 0 && return T(Inf)
@@ -80,11 +80,11 @@ function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
     t <= 0.0 ? T(Inf) : t
 end
 
-function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
+@muladd function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
-    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+    C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
     Δ <= 0 && return Inf
@@ -102,7 +102,7 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
         end
     end
     # This check is necessary to not collide with the non-existing side
-    newpos = p.pos + p.vel .* t
+    newpos = p.pos + p.vel * t
     if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
         return Inf
     end
@@ -115,7 +115,7 @@ end
 #######################################################################################
 ## Magnetic particle
 #######################################################################################
-function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
+@muladd function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     ω = p.omega
     pc, pr = cyclotron(p)
     P0 = p.pos
@@ -124,15 +124,15 @@ function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     # Solve quadratic:
     a = dot(P2P1, P2P1)
     b = 2*dot(P2P1, P1P3)
-    c = dot(P1P3, P1P3) - pr^2
+    c = dot(P1P3, P1P3) - pr*pr
     Δ = b^2 -4*a*c
     # Check if line is completely outside (or tangent) of the circle:
     Δ ≤ 0.0 && return Inf
     # Intersection coefficients:
     u1 = (-b - sqrt(Δ))/2a
     u2 = (-b + sqrt(Δ))/2a
-    cond1 = (0.0 ≤ u1 ≤ 1.0)
-    cond2 = (0.0 ≤ u2 ≤ 1.0)
+    cond1 = 0.0 ≤ u1 ≤ 1.0
+    cond2 = 0.0 ≤ u2 ≤ 1.0
     # Check if the line is completely inside the circle:
     if cond1 || cond2
         # Calculate real angle until intersection:
@@ -145,7 +145,7 @@ function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
     end
 end
 
-function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
+@muladd function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c

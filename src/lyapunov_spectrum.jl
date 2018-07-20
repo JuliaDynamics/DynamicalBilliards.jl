@@ -286,4 +286,4 @@ for a given particle in a billiard table.
 
 Returns zeros for pinned particles.
 """
-lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(deepcopy(p), args...)
+lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(copy(p), args...)

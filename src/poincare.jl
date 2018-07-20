@@ -3,7 +3,7 @@ export psos
 propagate_posvel(pos, p::Particle{T}, t) where {T} =
     (SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t), p.vel)
 
-function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
+@muladd function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
     ω = p.omega
     φ0 = atan(p.vel[2], p.vel[1])
     s0, c0 = sincos(φ0)
@@ -39,7 +39,7 @@ If however it can't then empty vectors are returned.
 function psos(
     bd::Billiard{T}, plane::InfiniteWall{T}, t, par::AbstractParticle{T}) where {T}
 
-    p = deepcopy(par)
+    p = copy(par)
     rpos = SV{T}[]
     rvel = SV{T}[]
     count = zero(t)

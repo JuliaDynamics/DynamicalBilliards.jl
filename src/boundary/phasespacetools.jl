@@ -26,7 +26,7 @@ function boundarymap_portion(bd::Billiard{T}, t,
                              par::AbstractParticle{T}, δξ, δφ = δξ;
                              intervals = arcintervals(bd)) where {T}
 
-    p = deepcopy(par)
+    p = copy(par)
 
     count = zero(T)
     t_to_write = zero(T)
@@ -85,7 +85,7 @@ function phasespace_portion(bd::Billiard{T}, t,
     maxξ = ceil(Int, totallength(bd)/δξ)
     maxφ = ceil(Int, 2/δφ)
 
-    dummy = deepcopy(par)
+    dummy = copy(par)
     total = zero(T); visited = zero(T)
 
     for ξcell ∈ 1:maxξ-1, φcell ∈ 1:maxφ-1

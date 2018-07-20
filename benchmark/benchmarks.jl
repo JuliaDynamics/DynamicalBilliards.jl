@@ -45,7 +45,7 @@ end
 
 for (f, p) in zip(["straight", "magnetic"], particles)
     for (bname, bil) in zip(["mushroom", "psinai"], (bt, bt2))
-        ploc = deepcopy(p) #location mutation screws up tests for different bts
+        ploc = copy(p) #location mutation screws up tests for different bts
         SUITE["bounce!"][f][bname] =
             @benchmarkable bounce!($ploc, $bil)
     end
@@ -54,14 +54,14 @@ end
 let (f, p) = ("straight", particles[1])
     #resolvecollision! is indepent of particle type
     for o in obstacles
-        ploc = deepcopy(p)
+        ploc = copy(p)
         SUITE["resolvecollision!"][f][o.name] =
             @benchmarkable resolvecollision!($ploc, $o)
     end
 end
 
 for (f, p) in zip(["straight", "magnetic"], particles)
-    ploc = deepcopy(p)
+    ploc = copy(p)
     SUITE["propagate!"][f] =
         @benchmarkable propagate!($ploc, $proptime)
 end

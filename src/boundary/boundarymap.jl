@@ -199,7 +199,7 @@ end
 function boundarymap(bd::Billiard{T}, t, par::AbstractParticle{T},
                      intervals = arcintervals(bd)) where {T}
 
-    p = deepcopy(par)
+    p = copy(par)
     pparams = T[]
     psines = T[]
     count = zero(T)

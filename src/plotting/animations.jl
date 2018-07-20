@@ -35,7 +35,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
     disable_axis = false, deletefigs = true, dpi = 100,
     figsize = (7.2, 7.2))
 
-    p = deepcopy(par)
+    p = copy(par)
     if newfig == true
         fig = PyPlot.figure(figsize = figsize)
         plot_billiard(bd; ax = PyPlot.gca())
