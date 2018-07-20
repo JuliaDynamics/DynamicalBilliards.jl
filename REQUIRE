@@ -1,4 +1,6 @@
-julia
+julia 0.7-beta2
 Statistics
-StaticArrays
-Requires
+LinearAlgebra
+InteractiveUtils
+StaticArrays 0.8.2
+Requires 0.5.2

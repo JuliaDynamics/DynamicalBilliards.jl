@@ -2,13 +2,13 @@
 
 ## New Features!
 * **3 orders of magnitude performance gains on all functions!!!**
-  * Reduced a lot of allocations done all over the place. In most places allocations
-    done are now exactly zero! ZEROOOOOOOOOOOO
+  * Reduced a lot of allocations done all over the place. In most places allocations done are now exactly zero! ZEROOOOOOOOOOOO
   * Fixed many instances of broadcasting with static vectors (which is bad).
   * Utilized metaprogramming to manually unroll some loops.
-  * If a billiard is periodic it is now known at compile time.
+  * If a billiard is periodic it is now known at compile time. This gives massive performance benefits in functions like `evolve`, which have to check if the collision occured with periodic walls.
 
 * **Symver will now be properly respected from 2.0 onwards**.
+* Automatic saving of animations to video via `ffmpeg`!!!
 * Hexagonal periodic plotting.
 * Lyapunov exponents for magnetic particles are now possible!
 * Added boundary map computation function which works
@@ -18,20 +18,17 @@
   * Added `plot_boundarymap` that plots the boundary map and the obstacle boundaries.
 * Added robust coordinate change transformation from 3D real space to 2D boundary space, see `to_bcoords`, `from_bcoords` and `arclengths`.
 * Added two novel high-level functions that compute the phase-space portion an orbit covers as the particle evolves: `boundarymap_portion` and `phasespace_portion`.
-* Added Poincare surface of section function, which computes intersections with
-  arbitrary planes!
+* Added Poincare surface of section function, which computes intersections with arbitrary planes!
 * It is now possible to affect many different obstacles during ray-splitting!
-* Plotting is now available the moment the user does `using PyPlot`. Done through
-  the `Requires` module. The function `enableplotting()` does not exist anymore!
-* Re-organized all source code into a much more readable state, and as a result
-  significantly reduced the total lines of code.
+* Plotting is now available the moment the user does `using PyPlot`. Done through the `Requires` module. The function `enableplotting()` does not exist anymore!
+* Re-organized all source code into a much more readable state, and as a result significantly reduced the total lines of code.
 * added `evolve` function that simply deepcopies particle.
 * Added convenience function to compute the mean collision time in a billiard.
 * New low-level function `bounce!` that propagates a particle from one collision to the
   next. In essence does what `evolve!` does with `t=1`, but without creating a bunch
   of saving stuff. All high level functions use `bounce!`.
 
-## Syntax and other changes
+## Syntax and other breaking changes
 * Default colors for plotting have been changed (random obstacles are purple,
   particle orbit is `"C0"`).
 * **[BREAKING]** Overhauled what a "billiard table" is: Now, called simply `Billiard` is a
