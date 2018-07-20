@@ -12,7 +12,7 @@ Adding more complexity in your billiard does not add complexity in your code. Fo
 you only need to define one additional variable, a [`RaySplitter`](@ref) and pass it to the high level functions.
 
 After reading through this page,
-you will be able to use almost all aspects of `DynamicalBilliards.jl` with minimal effort.
+you will be able to use almost all aspects of `DynamicalBilliards` with minimal effort.
 
 !!! tip "Visualizations"
     Visualizing the billiards, particles and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing](/visualizing) page.

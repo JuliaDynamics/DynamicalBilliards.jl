@@ -13,26 +13,20 @@ Return a `RaySplitter` instance, used to perform raysplitting.
 that this `RaySplitter` corresponds to.
 
 `transmission`, `refraction` and `newangular` are **functions**. Let
-`φ` be the angle of incidence and `ω` be the angular velocity (before transmission).
+`φ` be the angle of incidence and `ω` be the angular velocit
+and `pflag` the propagation flag (before transmission).
 The functions have the following signatures:
 
-1. `transmission(φ, pflag, ω) -> T` : Transmission probability `T` depending on
-   whether the particle is inside or outside the obstacle (`pflag`) and optionally
-   depending on ω.
-2. `refraction(φ, pflag, ω) -> θ` : Refraction angle `θ`
-   depending on whether the particle is inside or outside the obstacle (`pflag`)
-   and optionally depending on `ω`. This angle is *relative* to the normal vector.
-3. `newangular(ω, pflag) -> newω` : New angular velocity after transmission.
-   Notice that `newangular` is an optional argument and defaults to `(ω, pflag) -> ω`.
+1. `transmission(φ, pflag, ω) -> T`, transmission probability.
+2. `refraction(φ, pflag, ω) -> θ`, refraction angle.
+   This angle is *relative* to the normal vector.
+3. `newangular(ω, pflag) -> newω`, new angular velocity after transmission.
 
 The above three functions use the **same convention**: the argument `pflag` is the
 one the obstacle has **before transmission**. For example, if a particle is
 outside an [`Antidot`](@ref) (with `pflag = true` here) and is transmitted inside
 the `Antidot` (`pflag` becomes `false` here), then all three functions will be
 given their second argument (the Boolean one) as `true`!
-
-Also notice that the call signature **must** be as stated, irrespectively of
-whether some of the arguments are used in the functions.
 
 `affect` is a function, and denotes which obstacles
 of the billiard are affected when transmission occurs at obstacle
