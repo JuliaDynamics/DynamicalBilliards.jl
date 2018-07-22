@@ -195,7 +195,7 @@ Specifically, find the [`next_collision`](@ref) of `p` with `bd`,
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
 ```julia
-bounce!(p, bd, raysplit::Dict) -> i, t, pos, vel
+bounce!(p, bd, raysplit) -> i, t, pos, vel
 ```
 Ray-splitting version of `bounce!`.
 """

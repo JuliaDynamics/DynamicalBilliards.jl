@@ -10,8 +10,8 @@ Firstly one defines a [`Billiard`](@ref) and optionally some [`RaySplitter`](@re
 2. Find the smallest time, and the obstacle corresponding to that.
 3. [`relocate!`](@ref) the particle, so that it is on the correct side of the obstacle to-be-collided with.
 4. (Optionally) check if there is transmission for ray-splitting: `T(φ) > rand()`
-    * If yes, perform the ray-splitting algorithm (see the [ray-splitting](ray-splitting) page).
-    * If not, then [`resolvecollision!`](@ref) of the particle with the obstacle.
+  * If yes, perform the ray-splitting algorithm (see the [ray-splitting](ray-splitting) page).
+  * If not, then [`resolvecollision!`](@ref) of the particle with the obstacle.
 
 5. Continue this loop for a given amount of time.
 
