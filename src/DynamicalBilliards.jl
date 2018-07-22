@@ -74,4 +74,23 @@ function __init__()
 end
 
 
+####################################################
+# Plotting Routines (loaded when `Using PyPlot`)   #
+####################################################
+if !isfile(joinpath(@__DIR__, "update_v2.0.0"))
+    printstyled(stdout,
+    """
+    Welcome to DynamicalBilliards v2.0!
+
+    The new version v2.0 of DynamicalBilliards brings massive performance
+    increase, a ton of new features, a more intuitive and simpler low-level interface,
+    automated animation production and much more stuff!
+
+    There are also a small amount of minor breaking changes! Please see the
+    updated documentation page as well as the changelog.
+    """; color = Base.info_color())
+    touch("update_v2.0.0")
+end
+
+
 end#module
