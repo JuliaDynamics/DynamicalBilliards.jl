@@ -78,18 +78,18 @@ end
 # Update messages #
 ###################
 if !isfile(joinpath(@__DIR__, "update_v2.0.0"))
-    printstyled(stdout,
-    """
-    \nWelcome to DynamicalBilliards v2.0!
+printstyled(stdout,
+"""
+\nWelcome to DynamicalBilliards v2.0!
 
-    The new version v2.0 of DynamicalBilliards brings massive performance
-    increase, a ton of new features, a more intuitive and simpler low-level interface,
-    automated animation production and much more stuff!
+The new version v2.0 of DynamicalBilliards brings massive performance
+increase, a ton of new features, a more intuitive and simpler low-level interface,
+automated animation production and much more stuff!
 
-    There are also a small amount of minor breaking changes! Please see the
-    updated documentation page as well as the changelog.\n
-    """; color = :light_magenta)
-    touch("update_v2.0.0")
+There are also a small amount of minor breaking changes! Please see the
+updated documentation page as well as the changelog.\n
+"""; color = :light_magenta)
+touch("update_v2.0.0")
 end
 
 
