@@ -1,3 +1,6 @@
+# master
+* Better limits of axis for periodic rectangular billiards.
+
 # v2.0
 
 ## New Features!

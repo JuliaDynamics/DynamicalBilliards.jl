@@ -27,7 +27,8 @@ plotting from `(xmin, ymin)` to `(xmax, ymax)`.
 Works for either rectangular periodic billiards, or hexagonal ones. Use
 keyword `hexagonal` to denote which one you want.
 
-    plot_billiard(bd, xt::Vector, yt::Vector; hexagonal = false, ax = (figure(); gca()))
+    plot_billiard(bd, xt::Vector, yt::Vector; hexagonal = false,
+    ax = (figure(); gca()), plot_orbit = true, orbit_color = "C0")
 Plot the given **periodic** billiard `bd` using the limits defined
 by `xt` and `yt`.
 
@@ -74,7 +75,8 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
 end
 
 function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
-    hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()), plot_orbit = true)
+    hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()),
+    plot_orbit = true, orbit_color = "C0")
 
     xmin = minimum(xt); xmax = maximum(xt)
     ymin = minimum(yt); ymax = maximum(yt)
@@ -84,16 +86,27 @@ function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
     if plot_orbit
         PyPlot.sca(ax)
         PyPlot.scatter(xt[1], yt[1], color = "black")
-        PyPlot.plot(xt, yt, color = "C0")
+        PyPlot.plot(xt, yt, color = orbit_color)
     end
 
     cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
     dcx = cellxmax - cellxmin
     dcy = cellymax - cellymin
-    PyPlot.xlim(xmin - dcx/2, xmax + dcx/2)
-    PyPlot.ylim(ymin - dcy/2, ymax + dcy/2)
-    PyPlot.gca()[:set_aspect]("equal")
 
+    if hexagonal
+        PyPlot.xlim(xmin - dcx/2, xmax + dcx/2)
+        PyPlot.ylim(ymin - dcy/2, ymax + dcy/2)
+        PyPlot.gca()[:set_aspect]("equal")
+    else
+        rr = xmin < 0 ? (div(xmin, dcx)-1) : (div(xmin, dcx))
+        ll = ymin < 0 ? (div(ymin, dcy)-1) : (div(ymin, dcy))
+
+        PyPlot.xlim(cellxmin + rr*dcx,
+        cellxmin + (div(xmax, dcx)+1)*dcx)
+        PyPlot.ylim(cellymin + ll*dcy,
+        cellymin + (div(ymax, dcy)+1)*dcy)
+        PyPlot.gca()[:set_aspect]("equal")
+    end
     return nothing
 end
 
