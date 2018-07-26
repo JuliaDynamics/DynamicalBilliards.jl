@@ -5,8 +5,13 @@ billiards, see [`billiard_mushroom`](@ref).
 Contains stuff like initializing efficiently regular or chaotic particles
 and functions that return the corresponding chaotic or regular phase-space volumes
 or portions.
+The functions [`V_3D_tot`](@ref) and [`V_3D_reg`](@results) use equations derived
+in ref. [1].
 
 Made by Lukas Hupe.
+
+## References
+[1] A. Barnett & T. Betcke, [Chaos **17**, 043125 (2007)](https://doi.org/10.1063/1.2816946).
 """
 module MushroomTools
 
@@ -43,8 +48,8 @@ end
 Return the total phasespace volume (3D) of a [`billiard_mushroom`](@ref)
 parameterized by `(l,w,r)`.
 """
-V_3D_tot(l,w,r) = 2π*(l*w/2 + (1/4)*π*r^2)
-V_3D_reg(l,w,r) = π*r^2*(acos(w/(2r)) - w/(2r)*sqrt(1 - (w^2)/(4r^2)))
+V_3D_tot(l,w,r) = 2π*(l*w + (1/2)*π*r^2)
+V_3D_reg(l,w,r) = 2π*r^2*(acos(w/(2r)) - w/(2r)*sqrt(1 - (w^2)/(4r^2)))
 
 """
     g_r_3D(l, w, r)
