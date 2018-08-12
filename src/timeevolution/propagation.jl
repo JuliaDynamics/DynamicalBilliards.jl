@@ -223,7 +223,7 @@ end
 # Evolve & Construct
 #####################################################################################
 """
-    evolve!(p::AbstractParticle, bd::Billiard, t)
+    evolve!([p::AbstractParticle,] bd::Billiard, t)
 Evolve the given particle `p` inside the billiard `bd`. If `t` is of type
 `AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
@@ -232,7 +232,8 @@ Return the states of the particle between collisions.
 The evolution takes into account the particle's Type.
 E.g. if `typeof(p) <: MagneticParticle` then magnetic evolution will take place.
 
-This function mutates the particle, use `evolve` otherwise.
+This function mutates the particle, use `evolve` otherwise. If a particle is
+not given, a random one is picked through [`randominside`](@ref).
 
 ### Returns
 
@@ -317,9 +318,11 @@ end
 
 """
     evolve(p, args...)
-Same as [`evolve!`](@ref) but deep-copies the particle instead.
+Same as [`evolve!`](@ref) but copies the particle instead.
 """
-evolve(p, args...) = evolve!(copy(p), args...)
+evolve(p::AbstractParticle, args...) = evolve!(copy(p), args...)
+evolve(bd::Billiard, args...; kwargs...) =
+    evolve!(randominside(bd), bd, args...; kwargs...)
 
 """
     construct(ct, poss, vels [, ω [, dt=0.01]]) -> xt, yt, vxt, vyt, t
