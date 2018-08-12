@@ -77,11 +77,12 @@ or if you use BibTeX:
 
 ## Installation
 
-This package is registered, simply use `] add DynamicalBilliards` to install it.
+This package is registered, simply use `]` to get into the package manager mode and then type `add DynamicalBilliards` to install it.
 The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `add`.
 
-Plotting is done through the `PyPlot` module. All plotting functions are brought
-into scope when `using PyPlot` is done.
+Plotting is done through the `PyPlot` module. All plotting functions are brought into scope when `using PyPlot` is done.
+
+To confirm the validity of your installation you can run the tests of `DynamicalBilliards`. This can be done via `] test DynamicalBilliards`.
 
 ---
 
