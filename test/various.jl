@@ -138,4 +138,12 @@ function meancoltimes(partnum=500; printinfo=true)
     return
 end
 
-    
+function noparticle_interafaces(partnum=500; printinfo=true)
+    partnum = 1
+    bd = billiard_mushroom()
+
+    @test typeof(escapetime(bd, 100)) == Float64
+    @test typeof(meancollisiontime(bd, 100)) == Float64
+    @test typeof(evolve(bd, 100)[1][1]) == Float64
+    @test typeof(lyapunovspectrum(bd, 100.0)[1]) == Float64
+end

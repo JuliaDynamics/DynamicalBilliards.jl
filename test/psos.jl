@@ -142,7 +142,7 @@ end
 function boundarymap_portion_test(partnum = 10; printinfo = true)
     tim = time()
     @testset "Bunimovich" begin
-        t = 1000000.0
+        t = 100000.0
         bt = billiard_bunimovich()
         @testset "ω = $ω" for ω in [0.0, 0.1]
             for i in 1:min(partnum, 20)
@@ -155,7 +155,7 @@ function boundarymap_portion_test(partnum = 10; printinfo = true)
         end
     end
     @testset "Mushroom" begin
-        t = 1000000.0
+        t = 100000.0
         l = 1.0; r = 1.0
         @testset "w = $w" for w ∈ [0.2, 0.4]
 
@@ -195,7 +195,7 @@ end
 function phasespace_portion_test(partnum = 10; printinfo = true)
     tim = time()
     @testset "Bunimovich" begin
-        t = 1000000.0
+        t = 100000.0
         bt = billiard_bunimovich()
         @testset "ω = $ω" for ω in [0.0, 0.1]
             for i in 1:min(partnum, 20)
@@ -208,7 +208,7 @@ function phasespace_portion_test(partnum = 10; printinfo = true)
         end
     end
     @testset "Mushroom" begin
-        t = 1000000.0
+        t = 100000.0
         l = 1.0; r = 1.0
         @testset "w = $w" for w ∈ [0.2, 0.4]
             bt = billiard_mushroom(l, w, r)

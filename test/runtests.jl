@@ -42,7 +42,7 @@ fnames = (
     type_stability, lyapunov_spectrum,
     lyapunov_magnetic, escape_times, stadium_bm, cut_psos, coordinates_test,
     boundarymap_portion_test, phasespace_portion_test, meancoltimes,
-    raysplit_straight, raysplit_magnetic)
+    raysplit_straight, raysplit_magnetic, noparticle_interafaces)
 
 for f in fnames
     println()
