@@ -62,7 +62,7 @@ end
 @inline function specular!(p::AbstractParticle{T}, r::RandomWall{T})::Nothing where {T}
     n = normalvec(r, p.pos)
     φ = atan(n[2], n[1]) + 0.95(π*rand() - π/2) #this cannot be exactly π/2
-    p.vel = SVector{2,T}(cossin(φ)...)
+    p.vel = SVector{2,T}(cossin(φ))
     return nothing
 end
 
@@ -157,7 +157,7 @@ end
 @inline @muladd function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
     ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
     p.pos = newpos
-    p.vel = SVector{2, T}(cossin(ω*t + φ0)...)
+    p.vel = SVector{2, T}(cossin(ω*t + φ0))
     return
 end
 
