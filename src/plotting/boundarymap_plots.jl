@@ -42,7 +42,7 @@ function plot_boundarymap(ξs, sφs, intervals;
     ax[:set_xlim](0,xmax)
     ax[:set_ylim](-1,1)
     ax[:set_xlabel]("\$\\xi\$")
-    ax[:set_ylabel]("\$\\sin(\\phi)\$")
+    ax[:set_ylabel]("\$\\sin(\\phi_n)\$")
 
     #number obstacles by index
     if obstacleindices
