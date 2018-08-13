@@ -1,5 +1,10 @@
 # master
+
+# v2.1
 * Better limits of axis for periodic rectangular billiards.
+* Added some methods for high level functions (like e.g. `evolve`) that if not given a particle they pick on from `randominide`.
+* Documentation improvements.
+* Bug fix in the expressions for the chaotic phase space volume of mushrooms.
 
 # v2.0
 

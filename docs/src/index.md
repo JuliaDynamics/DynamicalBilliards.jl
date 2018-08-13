@@ -77,16 +77,22 @@ or if you use BibTeX:
 
 ## Installation
 
-This package is registered, simply use `] add DynamicalBilliards` to install it.
+This package is registered, simply use `]` to get into the package manager mode and then type `add DynamicalBilliards` to install it.
 The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `add`.
 
-Plotting is done through the `PyPlot` module. All plotting functions are brought
-into scope when `using PyPlot` is done.
+To confirm the validity of your installation you can run the tests of `DynamicalBilliards`. This can be done via `] test DynamicalBilliards`.
+
+### Plotting
+Plotting is done through the `PyPlot` module. All plotting functions are brought into scope when `using PyPlot` is done.
+
+In addition, for animations using the function [`animate_evolution`](@ref) the
+`ffmpeg` software must be accessible from the command line.
+
 
 ---
 
 ## Support
-If you are having problems with `DynamicalBilliards` do not hesitate to seek for support! There are numerous ways to do that:
+If you are having any kind of problems with `DynamicalBilliards` do not hesitate to seek for support! There are numerous ways to do that:
 
 1. Visit our [official chatroom](https://gitter.im/JuliaDynamics/Lobby) on Gitter: https://gitter.im/JuliaDynamics/Lobby
 2. Open a new issue at our [GitHub issues page](https://github.com/JuliaDynamics/DynamicalBilliards.jl/issues).

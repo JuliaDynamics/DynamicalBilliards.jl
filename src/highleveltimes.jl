@@ -16,7 +16,7 @@ end
 
 
 """
-    escapetime(p, bd, maxiter; warning = false)
+    escapetime([p,] bd, maxiter; warning = false)
 Calculate the escape time of a particle `p` in the billiard `bd`, which
 is the time until colliding with any "door" in `bd`.
 As a "door" is considered any [`FiniteWall`](@ref) with
@@ -27,9 +27,13 @@ If the particle performs more than `maxiter` collisions without colliding with t
 
 A warning can be thrown if the result is `Inf`. Enable this using the keyword
 `warning = true`.
+
+If a particle is not given, a random one is picked through [`randominside`](@ref).
 """
 escapetime(p, bd, t; warning = false) =
     escapetime!(copy(p), bd, t; warning = warning)
+escapetime(bd::Billiard, t; kwargs...) =
+    escapetime(randominside(bd), bd, t; kwargs...)
 
 function escapetime!(
     p::AbstractParticle{T}, bd::Billiard{T},
@@ -102,11 +106,14 @@ function meancollisiontime!(p::AbstractParticle{T}, bd::Billiard{T}, t)::T where
 end
 
 """
-    meancollisiontime(p, bd, t) -> κ
+    meancollisiontime([p,] bd, t) -> κ
 Compute the mean collision time `κ` of the particle `p` in the billiard `bd` by
 evolving for total amount `t` (either float for time or integer for collision number).
 
 Collision times are counted only between obstacles that are *not*
 [`PeriodicWall`](@ref).
+
+If a particle is not given, a random one is picked through [`randominside`](@ref).
 """
 meancollisiontime(p, bd, t) = meancollisiontime!(copy(p), bd, t)
+meancollisiontime(bd::Billiard, t) = meancollisiontime(randominside(bd), bd, t)

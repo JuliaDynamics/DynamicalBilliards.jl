@@ -280,10 +280,14 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
 end
 
 """
-    lyapunovspectrum(p::AbstractParticle, bd::Billiard, t::Float)
+    lyapunovspectrum([p::AbstractParticle,] bd::Billiard, t::Float)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 
 Returns zeros for pinned particles.
+
+If a particle is not given, a random one is picked through [`randominside`](@ref).
 """
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(copy(p), args...)
+lyapunovspectrum(bd::Billiard, args...) =
+    lyapunovspectrum!(randominside(bd), bd, args...)
