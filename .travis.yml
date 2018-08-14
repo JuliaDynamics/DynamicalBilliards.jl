@@ -6,7 +6,8 @@ os:
 #   except:
 #     - 0.7
 julia:
-  - latest
+  - 1.0
+  - nightly
 notifications:
   email:
     on_success: never
