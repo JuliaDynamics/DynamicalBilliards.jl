@@ -106,7 +106,7 @@ function insidemushroom(pos::SV{T}, l::T, w::T, r::T) where {T <: AbstractFloat}
                 return true
             end
         elseif pos[2] <= l + r
-            if pos[1]^2 + (pos[2] - l)^2 <= r
+            if pos[1]^2 + (pos[2] - l)^2 <= r^2
                 return true
             end
         end
