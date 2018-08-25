@@ -1,8 +1,5 @@
 # master
 
-# v2.2
-* Standard billiards can now also be created with keyword arguments.
-
 # v2.1
 * Better limits of axis for periodic rectangular billiards.
 * Added some methods for high level functions (like e.g. `evolve`) that if not given a particle they pick on from `randominside`.

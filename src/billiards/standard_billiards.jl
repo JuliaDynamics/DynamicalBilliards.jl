@@ -18,8 +18,6 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 * "random" : The velocity is randomized upon collision.
 * "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
-billiard_rectangle(; x = 1.0, y = 1.0, kwargs...) =
-billiard_rectangle(x, y; kwargs...)
 function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
 
     x = convert(AbstractFloat, x)
@@ -81,8 +79,6 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "random" : The velocity is randomized upon collision.
 * "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
-billiard_sinai(; r = 0.25, x = 1.0, y = 1.0; kwargs...) =
-billiard_sinai(r, x, y; kwargs...)
 function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
     if (setting == "periodic") && (r>=x/2 || r>=y/2)
         es = "Disk radius too big for a periodic Sinai billiard.\n"
@@ -123,8 +119,6 @@ Note: `R` denotes the so-called outer radius, not the inner one.
   at the boundaries. Only available for `n=4` or `n=6`.
 * "random" : The velocity is randomized upon collision.
 """
-billiard_polygon(;sides = 5, r = 1.0, center = [0,0], kwargs...) =
-billiard_polygon(sides, r, center; kwargs...)
 function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
     S = typeof(convert(AbstractFloat, r))
     bd = Obstacle{S}[]
@@ -188,8 +182,6 @@ SplitterWall at `x/2` and two disks at each side, with respective radii `r1`, `r
 **Notice**: This function returns a billiard `bd` as well as a `rayspl`
 dictionary!
 """
-billiard_raysplitting_showcase(;x=2.0, y=1.0, r1=0.3, r2=0.2) =
-billiard_raysplitting_showcase(x, y, r1, r2)
 function billiard_raysplitting_showcase(x=2.0, y=1.0, r1=0.3, r2=0.2)
 
     r1≥x/4 || r2≥x/4 && throw(ArgumentError("Disks overlap with walls!"))
@@ -227,8 +219,6 @@ at `[0, l]`. The center of the stem is located at `sloc`.
 
 Optionally, the bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
 """
-billiard_mushroom(;l = 1.0, w = 0.2, r = 1.0, sloc = 0.0, door = true) =
-billiard_mushroom(l, w, r, sloc; door = door)
 function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     stem_location = 0.0; door = true)
 
@@ -269,7 +259,6 @@ are [`Semicircle`](@ref)s.
 
 `billiard_stadium` is an alias of `billiard_bunimovich`.
 """
-billiard_bunimovich(;l = 1.0, w = 1.0) = billiard_bunimovich(l, w)
 function billiard_bunimovich(l=1.0, w=1.0)
 
     l = convert(AbstractFloat, l)
