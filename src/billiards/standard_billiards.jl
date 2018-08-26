@@ -2,7 +2,7 @@ using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
-billiard_stadium, billiard_mushroom
+billiard_stadium, billiard_mushroom, billiard_logo
 
 ####################################################
 ## Famous/Standard Billiards
@@ -18,7 +18,8 @@ Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`
 * "random" : The velocity is randomized upon collision.
 * "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
-function billiard_rectangle(x=1.0, y=1.0; setting::String = "standard")
+function billiard_rectangle(x′ = 1.0, y′ = 1.0;
+    x = x′, y = y′, setting::String = "standard")
 
     x = convert(AbstractFloat, x)
     x, y = promote(x,y)
@@ -79,7 +80,9 @@ In the periodic case, the system is also known as "Lorentz Gas".
 * "random" : The velocity is randomized upon collision.
 * "ray-splitting" : All obstacles in the billiard allow for ray-splitting.
 """
-function billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
+function billiard_sinai(r′ = 0.25, x′ = 1.0, y′ = 1.0;
+    r = r′, x = x′, y = y′, setting = "standard")
+
     if (setting == "periodic") && (r>=x/2 || r>=y/2)
         es = "Disk radius too big for a periodic Sinai billiard.\n"
         es*= "Obstacles must not overlap with `PeriodicWall`s."
@@ -119,7 +122,9 @@ Note: `R` denotes the so-called outer radius, not the inner one.
   at the boundaries. Only available for `n=4` or `n=6`.
 * "random" : The velocity is randomized upon collision.
 """
-function billiard_polygon(sides::Int, r::Real, center = [0,0]; setting = "standard")
+function billiard_polygon(sides′::Int, r′::Real, center′ = [0,0];
+    sides::Int = sides′, r = r′, center = center′, setting = "standard")
+
     S = typeof(convert(AbstractFloat, r))
     bd = Obstacle{S}[]
     verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] .+ center for i in 1:sides]
@@ -162,8 +167,8 @@ Create a sinai-like billiard, which is a hexagon of outer radius `R`, containing
 at its center (given by `center`) a disk of radius `r`. The `setting` keyword
 is passed to `billiard_polygon`.
 """
-function billiard_hexagonal_sinai(r::Real = 0.5, R::Real = 1.0, center = [0,0];
-    setting = "standard")
+function billiard_hexagonal_sinai(r′::Real = 0.5, R′::Real = 1.0, center′ = [0,0];
+    r = r′, R = R′, center = center′, setting = "standard")
     r, R = promote(r, R)
     T = typeof(r); center = T[center...]
     bdr = billiard_polygon(6, R, center; setting = setting)
@@ -212,25 +217,23 @@ end
 
 
 """
-    billiard_mushroom(l = 1.0, w = 0.2, r = 1.0, sloc = 0.0; door = true)
-Create a mushroom billiard with cap radius `r`, stem width `w` and step
-height `l`. The center of the cap (which is Semicircle) is always
-at `[0, l]`. The center of the stem is located at `sloc`.
+    billiard_mushroom(sl = 1.0, sw = 0.2, cr = 1.0, sloc = 0.0; door = true)
+Create a mushroom billiard with stem length `sl`, stem width `sw` and
+cap radius `cr`. The center of the cap (which is Semicircle) is always
+at `[0, sl]`. The center of the stem is located at `sloc`.
 
 Optionally, the bottom-most `Wall` is a `Door` (see [`escapetime`](@ref)).
 """
 function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
-    stem_location = 0.0; door = true)
+    stem_location = 0.0; sl = stem_length, sw = stem_width, cr = cap_radious,
+    sloc = stem_location, door = true)
 
-    stloc = stem_location
-    sl = stem_length; sw = stem_width; cr = cap_radious
+    abs(sloc) + sw/2 > cr && error("Stem is outside the mushroom cap!")
 
-    abs(stloc) + sw/2 > cr && error("Stem is outside the mushroom cap!")
-
-    leftcorn = SV(-sw/2 + stloc, 0)
-    rightcorn = SV(sw/2 + stloc, 0)
-    upleftcorn = SV(-sw/2 + stloc, sl)
-    uprightcorn = SV(sw/2 + stloc, sl)
+    leftcorn = SV(-sw/2 + sloc, 0)
+    rightcorn = SV(sw/2 + sloc, 0)
+    upleftcorn = SV(-sw/2 + sloc, sl)
+    uprightcorn = SV(sw/2 + sloc, sl)
 
     stembot = FiniteWall(leftcorn, rightcorn, SV(0, sw), door, "Stem bottom")
     stemleft = FiniteWall(upleftcorn, leftcorn, SV(sw, 0), false, "Stem left")
@@ -272,3 +275,65 @@ function billiard_bunimovich(l=1.0, w=1.0)
 end
 
 billiard_stadium = billiard_bunimovich
+
+"""
+    billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25) -> bd, ray
+Create the billiard used as logo of `DynamicalBilliards` and return it
+along with the tuple of raysplitters.
+"""
+function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25)
+
+    cos6 = cos(π/6)
+    β = (h - cos6*α)/cos6
+    t = α + 2β
+    center_of_mass = [0.0, √3*t/6]
+    startloc = [-α/2, 0.0]
+
+    # create directions of the hexagonal 6:
+    hexvert = [(cos(2π*i/6), sin(2π*i/6)) for i in 1:6]
+    dirs = [SVector{2}(hexvert[i] .- hexvert[mod1(i+1, 6)]) for i in 1:6]
+
+    frame = Obstacle{Float64}[]
+
+    sp = startloc
+    ep = startloc + α*dirs[1]
+    normal = (w = ep .- sp; [-w[2], w[1]])
+    push!(frame, InfiniteWall(sp, ep, normal, "frame 1"))
+
+
+    for i in 2:6
+        s = iseven(i) ? β : α
+        T = InfiniteWall #iseven(i) ? RandomWall : InfiniteWall
+        sp = frame[i-1].ep
+        ep = sp + s*dirs[i]
+        normal = (w = ep .- sp; [-w[2], w[1]])
+        push!(frame, T(sp, ep, normal, "frame $(i)"))
+    end
+
+
+    # Radii of circles that compose the Julia logo
+    offset = [0.0, off]
+
+    R = [cos(2π/3) -sin(2π/3);
+         sin(2π/3)  cos(2π/3)]
+
+
+    green = Disk(center_of_mass .+ offset, r, "green")
+    red = Antidot(center_of_mass .+ R*offset, r, "red")
+    purple = RandomDisk(center_of_mass .+ R*R*offset, r, "purple")
+
+    bd = Billiard(green, red, purple, frame...)
+
+    # %% Raysplitting functions for the red circle:
+    refraction = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
+    transmission_p = (p) -> (φ, pflag, ω) -> begin
+        if pflag
+            p*exp(-(φ)^2/2(π/8)^2)
+        else
+            abs(φ) < π/4 ? (1-p)*exp(-(φ)^2/2(π/4)^2) : 0.0
+        end
+    end
+    newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
+    raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
+    return bd, raya
+end

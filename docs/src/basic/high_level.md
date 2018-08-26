@@ -235,14 +235,15 @@ meancollisiontime(randominside(bd), bd, 10000.0)
 
 ## Standard Billiards Library
 !!! tip "You can also use keywords!"
-    All standard billiards have a function version that accepts keyword arguments instead of positional arguments, for easy of use.
-    
+    All standard billiards have a function version that accepts keyword arguments instead of positional arguments, for ease of use.
+
 ```@docs
 billiard_rectangle
 billiard_sinai
 billiard_bunimovich
 billiard_mushroom
-billiard_lorentz
 billiard_polygon
 billiard_hexagonal_sinai
+billiard_raysplitting_showcase
+billiard_logo
 ```

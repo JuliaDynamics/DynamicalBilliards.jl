@@ -2,7 +2,7 @@ This section has some examples of usage of `DynamicalBilliards`, with some brief
 comments.
 
 ## Julia-logo Billiard
-The "Julia-logo-billiard" animation that is the logo of our package was made with:
+The "Julia-logo-billiard" animation that is the logo of our package was made with the following code. The function [`billiard_logo`](@ref) also exports the same result.
 ```julia
 using DynamicalBilliards, PyPlot
 using DynamicalBilliards: cross2D
