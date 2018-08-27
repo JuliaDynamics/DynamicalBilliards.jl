@@ -12,6 +12,9 @@ using Documenter, PyPlot
 # download("https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/ray.mp4?raw=true",
 #         "src/anim/ray.mp4")
 
+using Pkg
+pkg"add StaticArrays"
+
 makedocs(modules=[DynamicalBilliards], doctest=false, root = @__DIR__)
 close("all")
 
