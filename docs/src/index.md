@@ -21,7 +21,9 @@ using Pkg.API: installed
 ins = installed()
 function f()
 for pkg in ["DynamicalBilliards", "StaticArrays", "PyPlot"]
-  println(rpad(" * $(pkg) ", 30, "."), " $(ins[pkg])")
+  w = string(ins[pkg])
+  w[end] == '+' && (w = w[1:end-1])
+  println(rpad(" * $(pkg) ", 30, "."), " $(w)")
 end
 end
 ```
