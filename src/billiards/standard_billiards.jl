@@ -262,7 +262,7 @@ are [`Semicircle`](@ref)s.
 
 `billiard_stadium` is an alias of `billiard_bunimovich`.
 """
-function billiard_bunimovich(l=1.0, w=1.0)
+function billiard_bunimovich(l′=1.0, w′=1.0; l = l′, w = w′)
 
     l = convert(AbstractFloat, l)
     l, w = promote(l,w)
