@@ -13,8 +13,8 @@ function coordinates_test(partnum = 500; printinfo = true)
                 ξ, sφ = to_bcoords(p, bd[i])
                 pos, vel = from_bcoords(ξ, sφ, bd[i])
 
-                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
-                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
+                @test *(isapprox.(p.pos, pos, atol=1e-4)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-4)...)
             end
         end
         @testset "Stadium" begin
@@ -27,8 +27,8 @@ function coordinates_test(partnum = 500; printinfo = true)
                 ξ, sφ = to_bcoords(p, bd[i])
                 pos, vel = from_bcoords(ξ, sφ, bd[i])
 
-                @test *(isapprox.(p.pos, pos, atol=1e-8)...)
-                @test *(isapprox.(p.vel, vel, atol=1e-8)...)
+                @test *(isapprox.(p.pos, pos, atol=1e-4)...)
+                @test *(isapprox.(p.vel, vel, atol=1e-4)...)
             end
         end
     end

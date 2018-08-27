@@ -11,7 +11,7 @@ julia:
 notifications:
   email:
     on_success: never
-    on_failure: never
+    on_failure: always
 
 after_success:
   - test $TRAVIS_OS_NAME = "linux" && julia -e 'using Pkg; ENV["PYTHON"]=""; py="PyCall"; Pkg.add(py); Pkg.build(); Pkg.add("PyPlot")'
