@@ -147,7 +147,7 @@ function noparticle_interafaces(partnum=500; printinfo=true)
     @test typeof(lyapunovspectrum(bd, 100.0)[1]) == Float64
 end
 
-function ispinned(partnum=500; printinfo=true)
+function ispinned_tests(partnum=500; printinfo=true)
     bd = billiard_sinai()
     p = randominside(bd, 2.0)
     while !ispinned(p, bd)
