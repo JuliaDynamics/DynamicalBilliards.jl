@@ -255,9 +255,6 @@ Evolve the given particle `p` inside the billiard `bd`. If `t` is of type
 evolve for as many collisions as `t`.
 Return the states of the particle between collisions.
 
-The evolution takes into account the particle's Type.
-E.g. if `typeof(p) <: MagneticParticle` then magnetic evolution will take place.
-
 This function mutates the particle, use `evolve` otherwise. If a particle is
 not given, a random one is picked through [`randominside`](@ref).
 
@@ -306,9 +303,9 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
     t_to_write = zero(T)
 
     if ispinned(p, bd)
-        push!(rpos, pos)
-        push!(rvel, vel)
-        push!(rt, tmin)
+        push!(rpos, p.pos)
+        push!(rvel, p.vel)
+        push!(rt, Inf)
         return (rt, rpos, rvel, p.omega)
     end
 

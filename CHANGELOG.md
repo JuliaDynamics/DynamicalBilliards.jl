@@ -1,7 +1,6 @@
 # master
-# v2.3.1
-* Now you can write `p.ω` as well as `p.omega` for magnetic particles.
 # v2.3
+* Now you can write `p.ω` as well as `p.omega` for magnetic particles.
 * New `ispinned` function that returns Bool of whether a particle is pinned or not. Also works with periodic billiards.
 
 # v2.2
