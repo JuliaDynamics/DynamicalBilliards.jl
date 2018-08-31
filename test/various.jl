@@ -148,7 +148,7 @@ function noparticle_interafaces(partnum=500; printinfo=true)
 end
 
 function ispinned_tests(partnum=500; printinfo=true)
-    bd = billiard_sinai()
+    bd = billiard_sinai(;setting = "periodic")
     p = randominside(bd, 2.0)
     while !ispinned(p, bd)
         p = randominside(bd, 2.0)
