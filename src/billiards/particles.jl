@@ -93,7 +93,7 @@ function Base.getproperty(p::MagneticParticle, s::Symbol)
 end
 
 Base.copy(p::MagneticParticle{T}) where {T} =
-MagneticParticle{T}(p.pos, p.vel, p.current_cell, p.omega, p.r, p.center)
+MagneticParticle(p.pos, p.vel, p.current_cell, p.omega)
 
 function MagneticParticle(ic::AbstractVector{T}, ω::Real) where {T<:Real}
     φ0 = ic[3]
