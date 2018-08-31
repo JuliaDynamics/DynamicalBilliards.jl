@@ -1,5 +1,8 @@
 # master
 
+# v2.3
+* New `ispinned` function that returns Bool of whether a particle is pinned or not. Also works with periodic billiards.
+
 # v2.2
 * Standard billiards can now also be created with keyword arguments.
 * Logo billiard is now exported by the function `billiard_logo`.

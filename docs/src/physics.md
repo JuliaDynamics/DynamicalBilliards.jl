@@ -60,17 +60,21 @@ two ways:
 In the case of propagation with magnetic field, a particle may be "pinned" (collision-less):
 There are no possible collisions that take place and the particle will revolve in circles
 forever. This can happen for specific initial conditions depending on your billiard table
-and the angular velocity ω.
+and the angular velocity ω. The function [`ispinned`](@ref) shows you whether a particle meets the conditions.
+```@docs
+ispinned
+```
+---
 
 In such event, the convention followed by `DynamicalBilliards` is the following:
-`evolve!()` returns the expected output, however all returned vectors have only 2
+[`evolve!`](@ref) returns the expected output, however all returned vectors have only 2
 entries. The collision times always have the entries `0.0, Inf`. All other returned
 vectors have the initial conditions, repeated once.
 
-`evolve!()` can be given an additional `warning` keyword argument in the case
-of magnetic propagation, e.g. `warning = true`. This optional argument throws a `warn()` message whenever a pinned particle is evolved.
+[`evolve!`](@ref) can be given an additional `warning` keyword argument in the case
+of magnetic propagation, e.g. `warning = true` that throws a  message whenever a pinned particle is evolved.
 
-!!! warning "Using `construct()`"
+!!! warning "Using [`construct`](@ref)"
     When using the syntax `construct(evolve!(p, bd, t)...)` be sure that there
     aren't any pinned particles given to evolve. If there are any,
     construct will result in an error.

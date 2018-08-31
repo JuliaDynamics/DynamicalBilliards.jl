@@ -76,23 +76,20 @@ end
 #######################################################################################
 function meancollisiontime!(p::AbstractParticle{T}, bd::Billiard{T}, t)::T where {T}
 
-    κ = zero(T)
     ismagnetic = typeof(p) <: MagneticParticle
     ismagnetic && (absω = abs(p.omega))
+    ispinned(p, bd) && return Inf
+    tmin, i = next_collision(p, bd)
+    tmin == Inf && return Inf
 
-    count = zero(t); t_to_write = zero(T); colcount = 0
+    κ = zero(T); count = zero(t); t_to_write = zero(T); colcount = 0
 
     while count < t
-
         i, tmin, pos, vel = bounce!(p, bd)
 
-        tmin == Inf && return Inf
         t_to_write += tmin
 
         if isperiodic(bd) && i ∈ bd.peridx
-            # Pinned particle:
-            ismagnetic && t_to_write ≥ 2π/absω && return Inf
-            #If not pinned, continue (do not write for PeriodicWall)
             continue
         else
             κ += t_to_write

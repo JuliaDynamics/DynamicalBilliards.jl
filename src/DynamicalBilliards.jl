@@ -34,11 +34,11 @@ include("billiards/standard_billiards.jl")
 
 include("timeevolution/collisiontimes.jl")
 include("timeevolution/propagation.jl")
+include("timeevolution/highleveltimes.jl")
 
 include("boundary/boundarymap.jl")
 include("boundary/phasespacetools.jl")
 
-include("highleveltimes.jl")
 include("poincare.jl")
 include("lyapunov_spectrum.jl")
 
