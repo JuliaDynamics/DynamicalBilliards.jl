@@ -1,6 +1,6 @@
 export resolvecollision!, propagate!, evolve!, construct, specular!,
 periodicity!, propagate_pos, next_collision, relocate!,
-bounce!, evolve
+bounce!, evolve, ispinned
 
 #####################################################################################
 # Mathetical/Convenience Functions
@@ -220,8 +220,34 @@ end
 
 
 #####################################################################################
-# Evolve & Construct
+# ispinned, Evolve & Construct
 #####################################################################################
+"""
+    ispinned(p::MagneticParticle, bd::Billiard)
+Return `true` if the particle is pinned with respect to the billiard.
+Pinned particles either have no valid collisions (go in circles forever)
+or all their valid collisions are with periodic walls, which again means that
+they go in cirles for ever.
+"""
+ispinned(p::Particle, bd) = false
+function ispinned(par::MagneticParticle, bd::Billiard)
+    p = copy(par)
+    i, t = bounce!(p, bd)
+    t == Inf && return true
+    !isperiodic(bd) && return false
+    peridx = bd.peridx
+    i ∉ peridx && return false
+
+    # propagate until 2π/ω
+    counter = t; limit = 2π/abs(p.omega)
+    while counter ≤ limit
+        i, t = bounce!(p, bd)
+        i ∉ peridx && return false
+        counter += t
+    end
+    return true
+end
+
 """
     evolve!([p::AbstractParticle,] bd::Billiard, t)
 Evolve the given particle `p` inside the billiard `bd`. If `t` is of type
@@ -279,29 +305,19 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
     count = zero(t)
     t_to_write = zero(T)
 
+    if ispinned(p, bd)
+        push!(rpos, pos)
+        push!(rvel, vel)
+        push!(rt, tmin)
+        return (rt, rpos, rvel, p.omega)
+    end
+
     while count < t
 
         i, tmin, pos, vel = bounce!(p, bd)
         t_to_write += tmin
 
-        if ismagnetic && tmin == Inf
-            warning && warn("Pinned particle in evolve! (Inf. col. t)")
-            push!(rpos, pos)
-            push!(rvel, vel)
-            push!(rt, tmin)
-            return (rt, rpos, rvel, p.omega)
-        end
-
         if isperiodic(bd) && i ∈ bd.peridx
-            # Pinned particle:
-            if ismagnetic && t_to_write ≥ 2π/absω
-                warning && warn("Pinned particle in evolve! (completed circle)")
-                push!(rpos, rpos[end])
-                push!(rvel, rvel[end])
-                push!(rt, Inf)
-                return (rt, rpos, rvel, p.omega)
-            end
-            #If not pinned, do not write for PeriodicWall
             continue
         else
             push!(rpos, pos + p.current_cell)

@@ -139,11 +139,19 @@ function meancoltimes(partnum=500; printinfo=true)
 end
 
 function noparticle_interafaces(partnum=500; printinfo=true)
-    partnum = 1
     bd = billiard_mushroom()
 
     @test typeof(escapetime(bd, 100)) == Float64
     @test typeof(meancollisiontime(bd, 100)) == Float64
     @test typeof(evolve(bd, 100)[1][1]) == Float64
     @test typeof(lyapunovspectrum(bd, 100.0)[1]) == Float64
+end
+
+function ispinned(partnum=500; printinfo=true)
+    bd = billiard_sinai()
+    p = randominside(bd, 2.0)
+    while !ispinned(p, bd)
+        p = randominside(bd, 2.0)
+    end
+    @test ispinned(p, bd)
 end

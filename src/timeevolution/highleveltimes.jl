@@ -79,8 +79,10 @@ function meancollisiontime!(p::AbstractParticle{T}, bd::Billiard{T}, t)::T where
     κ = zero(T)
     ismagnetic = typeof(p) <: MagneticParticle
     ismagnetic && (absω = abs(p.omega))
+    ispinned(p, bd) && return Inf
 
     count = zero(t); t_to_write = zero(T); colcount = 0
+
 
     while count < t
 
