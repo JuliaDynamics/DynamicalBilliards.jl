@@ -129,6 +129,9 @@ end
 timeprec_rayspl(::Particle{T}) where {T} = timeprec(T)
 timeprec_rayspl(::MagneticParticle{T}) where {T} = timeprec_forward(T)
 
+const CLAMP = 0.1
+angleclamp(φ::T) where {T} = clamp(φ, -π/2 + T(CLAMP), π/2 - T(CLAMP))
+
 function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
     # Raysplit Algorithm step 1: Determine incidence angle (0 < φ < π/4)
     n = normalvec(a, p.pos)
@@ -167,7 +170,6 @@ function relocate_rayspl!(
     return newt
 end
 
-angleclamp(φ::T) where {T} = clamp(φ, -π/2 + T(0.1), π/2 - T(0.1))
 
 function resolvecollision!(p::AbstractParticle{T}, bd::Billiard{T}, colidx::Int,
     trans::Bool, rayspl::RaySplitter) where {T<:AbstractFloat}
