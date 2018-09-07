@@ -58,9 +58,8 @@ transmission_p(p) = (φ, pflag, ω) -> begin
 end
 ```
 Notice also how we defined the function in such a way that critical refraction is
-respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0`. Although this is necessary from a
-physical perspective, the code does take care of it by clamping the
-refraction angle (see below).
+respected, i.e. if `θ(φ) ≥ π/2` then `T(φ) = 0`. **This is necessary both from a
+physical perspective and so that the code works fine**.
 
 Lastly, for this example we will use magnetic propagation. We define functions
 such that the antidots also reverse the direction and magnitude of the magnetic field.
@@ -114,9 +113,8 @@ this motion using [`animate_evolution`](@ref)!
     The function `reset_billiard!(bd)` turns all `pflag`s to `true`.
 
 
-!!! important "Angle of refraction is clamped"
-    Internally we clamp the output of the angle of refraction function to
-    `-π/2 + 0.1 ≤ θ ≤ π/2 - 0.1`. This is so that the relocating algorithm does not fall into an infinite loop.
+!!! important "Angle of refraction is clamped for magnetic propagation."
+    Internally we clamp the output of the angle of refraction function in the case of magnetic propagation. Let `c = DynamicalBilliards.MAGNETIC_CLAMP`. Then, the clamping we do is `-π/2 + c ≤ θ ≤ π/2 - c`. This is so that the relocating algorithm does not fall into an infinite loop.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
