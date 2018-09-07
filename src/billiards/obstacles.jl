@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Semicircle
+normalvec, distance, cellsize, Semicircle, Ellipse
 export translate
 
 using InteractiveUtils
@@ -311,6 +311,37 @@ SplitterWall(sp, ep, n, true, name)
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
+#######################################################################################
+## Unique / Special
+#######################################################################################
+"""
+    Ellipse{T<:AbstractFloat}  <: Obstacle{T}
+Ellipse obstacle that also allows ray-splitting. The ellipse is always oriented
+on the x and y axis (although you can make whichever you want the major one).
+### Fields:
+* `c::SVector{2,T}` : Center.
+* `a::T` : x semi-axis.
+* `b::T` : y semi-axis.
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating. `true` (default) is associated with being outside the ellipse.
+* `name::String` : Some name given for user convenience. Defaults to "Ellipse".
+"""
+struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
+    c::SVector{2,T}
+    a::T
+    b::T
+    pflag::Bool
+    name::String
+    # major::Int
+end
+
+function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
+                 name::String = "Ellipse") where {T<:Real}
+    S = T <: Integer ? Float64 : T
+    return Ellipse{S}(SVector{2,S}(c),
+    convert(S, abs(a)), convert(S, abs(b)), pflag, name)
+end
+# Disk{T}(args...) where {T} = Disk(args...)
 
 #######################################################################################
 ## Normal vectors
@@ -319,6 +350,8 @@ show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
     normalvec(obst::Obstacle, position)
 Return the vector normal to the obstacle's boundary at the given position (which is
 assumed to be very close to the obstacle's boundary).
+
+The normal **must** point to the direction the particle is expected to come from.
 """
 @inline normalvec(wall::Wall, pos) = wall.normal
 @inline normalvec(w::PeriodicWall, pos) = normalize(w.normal)
@@ -328,6 +361,13 @@ assumed to be very close to the obstacle's boundary).
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
+@inline function normalvec(e::Ellipse{T}, pos) where {T}
+    # from https://www.algebra.com/algebra/homework/Quadratic-relations-and-conic-sections/Tangent-lines-to-an-ellipse.lesson
+    x₀, y₀ = pos
+    h, k = e.c
+    s = e.pflag ? one(T) : -one(T)
+    return s*normalize(SV((x₀-h)/(e.a*e.a), (y₀-k)/(e.b*e.b)))
+end
 
 #######################################################################################
 ## Distances
@@ -419,7 +459,7 @@ end
     cellsize(bd)
 Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard.
 
-Used in `randominside()`, error checking and plotting.
+Makes [`randominside`](@ref) possible.
 """
 function cellsize(d::Circular{T}) where {T}
     xmin = ymin = T(Inf)
