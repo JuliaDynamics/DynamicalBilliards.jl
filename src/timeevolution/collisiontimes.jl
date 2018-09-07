@@ -110,7 +110,11 @@ end
     t ≤ 0.0 ? Inf : t
 end
 
-
+@muladd function collisiontime(p::Particle{T}, e::Ellipse{T}) where {T}
+    # translate particle pos by ellipse center to assume ellipse center at 0
+    # then get the m and c of the line defined by the particle
+    # http://www.ambrsoft.com/TrigoCalc/Circles2/Ellipse/EllipseLine.htm
+end
 
 #######################################################################################
 ## Magnetic particle
