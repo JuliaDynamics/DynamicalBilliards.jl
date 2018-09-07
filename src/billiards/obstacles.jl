@@ -324,7 +324,12 @@ on the x and y axis (although you can make whichever you want the major one).
 * `b::T` : y semi-axis.
 * `pflag::Bool` : Flag that keeps track of where the particle is currently
   propagating. `true` (default) is associated with being outside the ellipse.
-* `name::String` : Some name given for user convenience. Defaults to "Ellipse".
+* `name::String` : Some name given for user convenience. Defaults to `"Ellipse"`.
+
+The ellipse equation is given by
+```math
+\\frac{x - c[1]}{a} + \\frac{y - c[2]}{b} = 1
+```
 """
 struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
     c::SVector{2,T}
