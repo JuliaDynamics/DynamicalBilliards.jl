@@ -13,12 +13,13 @@ end
 #pretty print:
 _get_name(o::Obstacle) = :name ∈ fieldnames(typeof(o)) ? o.name : string(typeof(o))
 function Base.show(io::IO, bd::Billiard{T,D,BT}) where {T, D, BT}
-    s = "Billiard{$T} with $D obstacles:\n"
+    s = "Billiard{$T} with $D obstacles:"
     bd.peridx != nothing && (s = "Periodic "*s)
-    for o in bd
-        s*="  $(_get_name(o))\n"
+    for i in 1:min(10, length(bd))
+        s*="\n  $(_get_name(bd[i]))"
     end
     print(io, s)
+    length(bd) > 10 && print(io, "\n  ...")
 end
 
 
