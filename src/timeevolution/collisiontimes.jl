@@ -1,3 +1,4 @@
+using LinearAlgebra
 export collisiontime, realangle
 #######################################################################################
 ## Particle
@@ -111,9 +112,36 @@ end
 end
 
 @muladd function collisiontime(p::Particle{T}, e::Ellipse{T}) where {T}
-    # translate particle pos by ellipse center to assume ellipse center at 0
-    # then get the m and c of the line defined by the particle
+    # First check if particle is "looking at" eclipse if it is outside
+    if e.pflag
+        dotp = dot(p.vel, normalvec(e, p.pos))
+        dotp >= 0.0 && return T(Inf)
+    end
+
     # http://www.ambrsoft.com/TrigoCalc/Circles2/Ellipse/EllipseLine.htm
+    a = e.a; b = e.b
+    # Translate particle with ellipse center (so that ellipse lies on [0, 0])
+    pc = p.pos - e.c
+    # Find μ, ψ for line equation y = μx + ψ describing particle
+    μ = p.vel[2]/p.vel[1]
+    ψ = pc[2] - μ*pc[1]
+
+    # Determinant and intersection points follow from the link
+    denominator = a*a*μ*μ + b*b
+    Δ² = denominator - ψ*ψ
+    Δ² ≤ 0 && return T(Inf)
+    Δ = sqrt(Δ²); f1 = -a*a*μ*ψ; f2 = b*b*ψ # just factors
+    I1 = SV(f1 + a*b*Δ, f2 + a*b*μ*Δ)/denominator
+    I2 = SV(f1 - a*b*Δ, f2 - a*b*μ*Δ)/denominator
+
+    if e.pflag
+        # There HAS to be a way to KNOW which of the two I1, I2 is the "real closest"
+        # one. Analytically I mean. But I haven't found yet.
+        d1 = norm(pc - I1); d2 = norm(pc - I2)
+        return min(d1, d2)
+    else
+        error("not implemented yet")
+    end
 end
 
 #######################################################################################
