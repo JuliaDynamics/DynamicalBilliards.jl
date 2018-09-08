@@ -32,6 +32,7 @@ include("raysplit.jl")
 include("various.jl")
 include("lyapunov.jl")
 include("psos.jl")
+include("ellipse_tests.jl")
 
 print("DynamicalBilliards tests started at: ")
 print(Dates.format(now(), "HH:MM:s"), "\n")
@@ -42,7 +43,8 @@ fnames = (
     type_stability, lyapunov_spectrum,
     lyapunov_magnetic, escape_times, stadium_bm, cut_psos, coordinates_test,
     boundarymap_portion_test, phasespace_portion_test, meancoltimes,
-    raysplit_straight, raysplit_magnetic, noparticle_interafaces, ispinned_tests)
+    raysplit_straight, raysplit_magnetic, noparticle_interafaces, ispinned_tests,
+    ellipse_tests)
 
 for f in fnames
     println()
