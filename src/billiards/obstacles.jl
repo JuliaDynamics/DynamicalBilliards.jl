@@ -344,8 +344,7 @@ end
     ellipse_arclength(θ, e::Ellipse)
 Return the arclength of the ellipse that
 spans angle `θ` (in normal coordinates, not in the ellipse parameterization).
-
-It must be `θ ∈ [0, π/2]`!
+Expects `θ` to be in `[0, 2π]`.
 
 After properly calculating the
 ```math

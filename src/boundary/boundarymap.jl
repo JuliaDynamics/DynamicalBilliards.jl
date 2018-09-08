@@ -10,6 +10,7 @@ Return the total boundary length of `o`.
 @inline totallength(o::Wall) = norm(o.ep - o.sp)
 @inline totallength(o::Semicircle) = π*o.r
 @inline totallength(o::Circular) = 2π*o.r
+@inline totallength(e::Ellipse) = 4e.arc
 
 @inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
@@ -81,14 +82,17 @@ end
 function _ξ(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
     d = (pos - o.c)/o.r
     if d[2] > 0
-        r = acos(clamp(d[1], -1, 1))
+        θ = acos(clamp(d[1], -1, 1))
     else
-        r = π + acos(-clamp(d[1], -1, 1))
+        θ = π + acos(-clamp(d[1], -1, 1))
     end
-    return r*o.r
+    return θ*o.r
 end
 
-
+function _ξ(pos::SV{T}, o::Ellipse{T}) where {T<:AbstractFloat}
+    θ = atan(pos[2] - o.c[2], pos[1] - o.c[1]) + π
+    return ellipse_arclength(θ, o)
+end
 
 """
     from_bcoords(ξ, sφ, o::Obstacle) -> pos, vel
