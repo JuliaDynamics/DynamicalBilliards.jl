@@ -502,6 +502,16 @@ function cellsize(a::Semicircle{T}) where {T}
     return xmin, ymin, xmax, ymax
 end
 
+function cellsize(e::Ellipse{T}) where {T}
+    if e.pflag
+        xmin = ymin = T(Inf)
+        xmax = ymax = T(-Inf)
+    else
+        xmin = e.c - e.a; ymin = e.c - e.b
+        xmax = e.c + e.a; ymax = e.c + e.b
+    end
+    return xmin, ymin, xmax, ymax
+end
 
 ####################################################
 ## Translations
