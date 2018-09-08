@@ -114,6 +114,7 @@ end
 @muladd function collisiontime(p::Particle{T}, e::Ellipse{T}) where {T}
     # First check if particle is "looking at" eclipse if it is outside
     if e.pflag
+        # These lines may be wrong
         dotp = dot(p.vel, normalvec(e, p.pos))
         dotp >= 0.0 && return T(Inf)
     end
@@ -183,7 +184,7 @@ end
     p1 = o.c
     r1 = o.r
     d = norm(p1-pc)
-    if (d >= rc + r1) || (d <= abs(rc-r1))
+    if (d ≥ rc + r1) || (d ≤ abs(rc-r1))
         return Inf
     end
     # Solve quadratic:

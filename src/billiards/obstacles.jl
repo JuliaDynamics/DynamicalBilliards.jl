@@ -458,7 +458,8 @@ function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
 end
 
 function distance(pos::SV, e::Ellipse)
-    # see https://wet-robots.ghost.io/simple-method-for-distance-to-ellipse/
+    d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
+    e.pflag ? d : -d
 end
 
 ####################################################
