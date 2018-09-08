@@ -529,3 +529,5 @@ translate(d::Antidot, vec) = Antidot(d.c .+ vec, d.r, d.pflag)
 translate(w::Wall, vec) = typeof(w)(w.sp + vec, w.ep +vec, w.normal)
 translate(w::SplitterWall, vec) =
     SplitterWall(w.sp + vec, w.ep +vec, w.normal, w.pflag)
+
+translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b, e.pflag)
