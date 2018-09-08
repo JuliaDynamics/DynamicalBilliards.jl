@@ -328,7 +328,7 @@ on the x and y axis (although you can make whichever you want the major one).
 
 The ellipse equation is given by
 ```math
-\\frac{x - c[1]}{a} + \\frac{y - c[2]}{b} = 1
+\\left(\\frac{x - c[1]}{a} \\right)^2+ \\left(\\frac{y - c[2]}{b}\\right)^2 = 1
 ```
 """
 struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
