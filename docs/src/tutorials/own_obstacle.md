@@ -135,7 +135,7 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 1. [`collisiontime`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
 2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot_billiard`](@ref)) (but requires [`cellsize`](@ref) to be already implemented, because [`plot_billiard`](@ref) also does automatic axis limits configuration)
 1. [`translate`](@ref) : Enables plotting the obstacle with periodic billiards
-3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
+3. [`to_bcoords`](@ref) & [`totallength`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
 The [`cellsize`](@ref) method is kinda trivial:

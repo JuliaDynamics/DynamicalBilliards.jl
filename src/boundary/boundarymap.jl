@@ -1,5 +1,5 @@
 export to_bcoords, from_bcoords, arcintervals
-export boundarymap
+export boundarymap, totallength
 #######################################################################################
 ## Arclengths
 #######################################################################################
