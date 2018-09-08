@@ -5,7 +5,7 @@ In this tutorial we will go through the processes of creating a new obstacle typ
 [`billiard_mushroom`](@ref) functions.
 
 !!! info "Everything uses `SVector{2}`"
-    Fields of `Particle`s and `Obstacle`s contain all their information in 2-dimensional static vectors from module `StaticArrays`. This is important to keep in mind when extending new methods.
+    Fields of `Particle`s and `Obstacle`s contain all their vector-related information in 2-dimensional static vectors from module `StaticArrays`. This is important to keep in mind when extending new methods.
 
 ## Type Definition
 The first thing you have to do is make your new type a sub-type of `Obstacle{T}`
@@ -125,16 +125,16 @@ function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
 end
 ```
 
-And that is all. The obstacle now works perfectly fine for straight propagation.
+And that is all. The obstacle now works perfectly fine for straight propagation of any kind! This includes periodic billiards (both rectangular and hexagonal).
 
 
 
 ## Optional Methods
 
-1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
+1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle
 1. [`collisiontime`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
-2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot_billiard`](@ref)) (but requires [`cellsize`](@ref) to be already implemented, because [`plot_billiard`](@ref) also does automatic axis limits configuration)
-1. [`translate`](@ref) : Enables plotting the obstacle with periodic billiards
+2. [`plot_obstacle`](@ref) : enables plotting (requires [`cellsize`](@ref) to be already implemented, because [`plot_billiard`](@ref) also does automatic axis limits configuration)
+1. [`translate`](@ref) : Enables plotting the obstacle with periodic billiards (you can still use the obstacle with periodic billiards even without `translate`)
 3. [`to_bcoords`](@ref) & [`totallength`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
