@@ -92,9 +92,9 @@ This is the ray-splitting implementation. The three functions given are drawn fr
 the ray-splitting dictionary that is passed directly to `evolve!()`. For a calculated
 incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 """
-@inline resolvecollision!(p::Particle, o::Obstacle) = specular!(p, o)
-@inline resolvecollision!(p::AbstractParticle, o::PeriodicWall) = periodicity!(p, o)
-@inline resolvecollision!(p::MagneticParticle, o::Obstacle) = specular!(p, o)
+@inline resolvecollision!(p::AbstractParticle, o::Obstacle) = specular!(p, o)
+@inline resolvecollision!(p::Particle, o::PeriodicWall) = periodicity!(p, o)
+@inline resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
 
 
 """

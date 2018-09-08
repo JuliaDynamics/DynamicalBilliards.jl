@@ -346,7 +346,7 @@ function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
     return Ellipse{S}(SVector{2,S}(c),
     convert(S, abs(a)), convert(S, abs(b)), pflag, name)
 end
-# Disk{T}(args...) where {T} = Disk(args...)
+Ellipse{T}(args...) where {T} = Ellipse(args...)
 
 #######################################################################################
 ## Normal vectors
@@ -523,10 +523,9 @@ translated by `vector`.
 """
 function translate end
 
-for T in subtypes(Circular)
-  @eval translate(d::$T, vec) = ($T)(d.c .+ vec, d.r)
-end
+translate(d::Circular, vec) = typeof(d)(d.c .+ vec, d.r)
+translate(d::Antidot, vec) = Antidot(d.c .+ vec, d.r, d.pflag)
 
-for T in subtypes(Wall)
-  @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
-end
+translate(w::Wall, vec) = typeof(w)(w.sp + vec, w.ep +vec, w.normal)
+translate(w::SplitterWall, vec) =
+    SplitterWall(w.sp + vec, w.ep +vec, w.normal, w.pflag)
