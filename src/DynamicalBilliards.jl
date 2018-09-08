@@ -19,6 +19,9 @@ using MuladdMacro
 # to a call to `muladd`
 # This can increase performance in some cases.
 
+import Elliptic
+# Elliptic module allows computing elliptic integrals
+
 const SV = SVector{2}
 export SVector
 

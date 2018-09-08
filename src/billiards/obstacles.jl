@@ -337,13 +337,43 @@ mutable struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
     b::T
     pflag::Bool
     name::String
+    arc::T # arclength of one quadrant of the ellipse
 end
+
+"""
+    ellipse_arclength(θ, e::Ellipse)
+Return the arclength of the ellipse that
+spans angle `θ` (in normal coordinates, not in the ellipse parameterization).
+
+It must be `θ ∈ [0, π/2]`!
+
+After properly calculating the
+```math
+d=b\\,E\\bigl(\\tan^{-1}(a/b\\,\\tan(\\theta))\\,\\big|\\,1-(a/b)^2\\bigr)
+```
+"""
+function ellipse_arclength(θ, e::Ellipse)
+    n, θ = divrem(θ, π/2)
+    a = e.a; b = e.b
+    if a/b > 1.0
+        θ = π/2 - θ
+        return (n + 1.0)*e.arc - proper_ellipse_arclength(θ, b, a)
+    else
+        return n*e.arc + proper_ellipse_arclength(θ, a, b)
+    end
+end
+
+proper_ellipse_arclength(θ, a, b)  = b*Elliptic.E(atan(a*tan(θ)/b), 1.0 - (a/b)^2)
+
+export ellipse_arclength
 
 function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
                  name::String = "Ellipse") where {T<:Real}
     S = T <: Integer ? Float64 : T
     return Ellipse{S}(SVector{2,S}(c),
-    convert(S, abs(a)), convert(S, abs(b)), pflag, name)
+            convert(S, abs(a)), convert(S, abs(b)), pflag, name,
+            proper_ellipse_arclength(π/2, min(a, b), max(a, b))
+        )
 end
 Ellipse{T}(args...) where {T} = Ellipse(args...)
 
@@ -366,7 +396,8 @@ The normal **must** point to the direction the particle is expected to come from
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
 @inline function normalvec(e::Ellipse{T}, pos) where {T}
-    # from https://www.algebra.com/algebra/homework/Quadratic-relations-and-conic-sections/Tangent-lines-to-an-ellipse.lesson
+    # from https://www.algebra.com/algebra/homework/
+    # Quadratic-relations-and-conic-sections/Tangent-lines-to-an-ellipse.lesson
     x₀, y₀ = pos
     h, k = e.c
     s = e.pflag ? one(T) : -one(T)
