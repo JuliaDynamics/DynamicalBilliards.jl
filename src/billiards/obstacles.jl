@@ -331,13 +331,12 @@ The ellipse equation is given by
 \\left(\\frac{x - c[1]}{a} \\right)^2+ \\left(\\frac{y - c[2]}{b}\\right)^2 = 1
 ```
 """
-struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
+mutable struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
     c::SVector{2,T}
     a::T
     b::T
     pflag::Bool
     name::String
-    # major::Int
 end
 
 function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
@@ -457,7 +456,7 @@ function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
     dot(v1, n)
 end
 
-function distance(pos::SV, e::Ellipse)
+function distance(pos::SV, e::Ellipse{T})::T where {T}
     d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
     e.pflag ? d : -d
 end
@@ -507,8 +506,8 @@ function cellsize(e::Ellipse{T}) where {T}
         xmin = ymin = T(Inf)
         xmax = ymax = T(-Inf)
     else
-        xmin = e.c - e.a; ymin = e.c - e.b
-        xmax = e.c + e.a; ymax = e.c + e.b
+        xmin = e.c[1] - e.a; ymin = e.c[2] - e.b
+        xmax = e.c[1] + e.a; ymax = e.c[2] + e.b
     end
     return xmin, ymin, xmax, ymax
 end
