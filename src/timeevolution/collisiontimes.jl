@@ -114,7 +114,7 @@ end
     t ≤ 0.0 ? Inf : t
 end
 
-@muladd function collisiontime(p::Particle{T}, e::Ellipse{T}) where {T}
+@muladd function collisiontime(p::Particle{T}, e::Ellipse{T})::T where {T}
     # First check if particle is "looking at" eclipse if it is outside
     if e.pflag
         # These lines may be "not accurate enough" but so far all is good
@@ -138,14 +138,18 @@ end
     I1 = SV(f1 + a*b*Δ, f2 + a*b*μ*Δ)/denominator
     I2 = SV(f1 - a*b*Δ, f2 - a*b*μ*Δ)/denominator
 
+    d1 = norm(pc - I1); d2 = norm(pc - I2)
     if e.pflag
         # There HAS to be a way to KNOW which of the two I1, I2 is the "real closest"
         # one. Analytically I mean. But I haven't found yet.
-        d1 = norm(pc - I1); d2 = norm(pc - I2)
         return min(d1, d2)
     else # If inside the ellipse, only one collision valid
-        dotp = dot(p.vel, (I1 - pc))
-        return dotp ≥ 0.0 ? norm(pc - I1) : norm(pc - I2)
+        if min(d1, d2) < distancecheck(T)
+            return max(d1,d2)
+        else
+            dotp = dot(p.vel, (I1 - pc))
+            return dotp ≥ 0.0 ? d1 : d2
+        end
     end
 end
 

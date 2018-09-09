@@ -21,7 +21,7 @@ const sixsqrt = 6sqrt(2)
 @inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
 @inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
 
-# Used in check of skip intersection, in `realangle` and collision with Semicircle:
+# Used in check of skip intersection, in `realangle`, Semicircle, Ellipse
 @inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
 @inline distancecheck(::Type{BigFloat}) = BigFloat(1e-8)
 
