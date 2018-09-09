@@ -131,7 +131,7 @@ timeprec_rayspl(::MagneticParticle{T}) where {T} = timeprec_forward(T)
 
 angleclamp(::Particle, φ::T) where {T} = φ # clamp(φ, -π/2, π/2)
 
-const MAGNETIC_CLAMP = 1e-8
+const MAGNETIC_CLAMP = 1e-4
 angleclamp(::MagneticParticle, φ::T) where {T} =
 clamp(φ, -π/2 + T(MAGNETIC_CLAMP), π/2 - T(MAGNETIC_CLAMP))
 
