@@ -4,6 +4,8 @@ In this tutorial we will go through the processes of creating a new obstacle typ
 `Semicircle`. This type is already used in the [`billiard_bunimovich`](@ref) and
 [`billiard_mushroom`](@ref) functions.
 
+In addition to this tutorial, you can follow [PR#144](https://github.com/JuliaDynamics/DynamicalBilliards.jl/pull/144), which followed the same process for the [`Ellipse`](@ref) obstacle.
+
 !!! info "Everything uses `SVector{2}`"
     Fields of `Particle`s and `Obstacle`s contain all their vector-related information in 2-dimensional static vectors from module `StaticArrays`. This is important to keep in mind when extending new methods.
 

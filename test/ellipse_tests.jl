@@ -22,9 +22,6 @@ tim = time()
         @test ellipse_arclength(phis[i], o1) > ellipse_arclength(phis[i-1], o1)
     end
 
-
-
-
 end#testset
 if printinfo
     println("Results:")

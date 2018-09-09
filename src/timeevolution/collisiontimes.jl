@@ -12,6 +12,9 @@ collision happens backwards in time.
 In the case of magnetic propagation, there are always two possible collisions.
 The function [`realangle`](@ref) decides which of the two will occur first,
 based on the sign of the angular velocity of the magnetic particle.
+
+**Warning** - It is the duty of the `collisiontime` function to *not* lead to
+double collisions (e.g. avoid collisions when the particle is already on the obstacle)!
 """
 function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)

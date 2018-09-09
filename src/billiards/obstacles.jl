@@ -417,10 +417,16 @@ end
 
 """
     distance(p::AbstractParticle, o::Obstacle)
-Return the **signed** distance between particle `p` and obstacle `o`, based on
-`p.pos`. Positive distance corresponds to the particle being on the *allowed* region
-of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
+Return a **signed measure** for the "distance" between particle `p` and obstacle `o`,
+based on `p.pos`. Positive measure corresponds to the particle being on the *allowed* region
+of the `Obstacle`. E.g. for a `Disk`, this measure is positive when the particle is
 outside of the disk, negative otherwise.
+
+Notice that what we define here is a continuous function that is positive on the one side
+of the obstacle, 0 on top of the obstacle and negative on the other side. It does *not*
+have to be the true exact distance between point and obstacle. For example, in
+the case of an [`Ellipse`](@ref), this distance measure simply
+`d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0`.
 
     distance(p::AbstractParticle, bd::Billiard)
 Return minimum `distance(p, obst)` for all `obst` in `bd`.

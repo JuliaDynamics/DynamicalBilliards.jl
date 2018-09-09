@@ -50,7 +50,7 @@ The arc-coordinate `ξ` is measured as:
 * the distance from start point to end point in `Wall`s
 * the arc length measured counterclockwise from the open face in `Semicircle`s
 * the arc length measured counterclockwise from the rightmost point
-  in `Circular`s
+  in `Circular`/`Ellipse`
 
 Notice that this function returns the *local* arclength. To get the global
 arclength parameterizing an entire billiard, simply do
