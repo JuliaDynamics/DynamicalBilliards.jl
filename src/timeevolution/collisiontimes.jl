@@ -1,4 +1,5 @@
 using LinearAlgebra
+
 export collisiontime, realangle
 #######################################################################################
 ## Particle
@@ -62,7 +63,7 @@ end
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
-        dotp >=0 && return T(Inf)
+        dotp ≥ 0 && return T(Inf)
     end
 
     dc = p.pos - d.c
@@ -207,6 +208,13 @@ end
         pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
         pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d
     )
+    if typeof(o) <: Antidot && o.pflag == false
+        d1 = norm(p.pos - I1); d2 = norm(p.pos - I2)
+        j = d1 < d2 ? 2 : 1
+        if min(d1, d2) ≤ distancecheck(T)
+            return realangle(p, o, (I1, I2)[j])
+        end
+    end
     # Calculate real time until intersection:
     θ1 = realangle(p, o, I1)
     θ2 = realangle(p, o, I2)

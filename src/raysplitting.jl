@@ -129,12 +129,6 @@ end
 timeprec_rayspl(::Particle{T}) where {T} = timeprec(T)
 timeprec_rayspl(::MagneticParticle{T}) where {T} = timeprec_forward(T)
 
-angleclamp(::Particle, φ::T) where {T} = φ # clamp(φ, -π/2, π/2)
-
-const MAGNETIC_CLAMP = 1e-4
-angleclamp(::MagneticParticle, φ::T) where {T} =
-clamp(φ, -π/2 + T(MAGNETIC_CLAMP), π/2 - T(MAGNETIC_CLAMP))
-
 function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
     # Raysplit Algorithm step 1: Determine incidence angle (0 < φ < π/4)
     n = normalvec(a, p.pos)
@@ -186,7 +180,7 @@ function resolvecollision!(p::AbstractParticle{T}, bd::Billiard{T}, colidx::Int,
 
     if trans #perform raysplitting
         # Raysplit Algorithm step 6: find transmission angle in relative angles
-        theta = angleclamp(p, rayspl.refraction(φ, a.pflag, ω))
+        theta = rayspl.refraction(φ, a.pflag, ω)
         # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
         # for all obstacles dictated by the RaySplitter
         for oi ∈ rayspl.affect(colidx)
