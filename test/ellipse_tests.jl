@@ -22,14 +22,51 @@ tim = time()
         @test ellipse_arclength(phis[i], o1) > ellipse_arclength(phis[i-1], o1)
     end
 
+    # Arclength should be same as circle!
+    o3 = Ellipse([0,0], 1.0, 1.0)
+    d = Disk([0,0], 1.0)
+
+    # @test totallength(o3) ≈ totallength(d)
+
 end#testset
+
+@testset "Iris Standard" begin
+    bd = billiard_iris()
+    for i in 1:partnum
+        p = randominside(bd)
+        xt, yt = construct(evolve(p, bd, 1000)...)
+
+        @test minimum(distance(SVector(x, y), o) for (x,y) in zip(xt, yt)) ≥ 0
+        @test maximum(xt) <= 1
+        @test minimum(xt) >= 0
+        @test maximum(yt) <= 1
+        @test minimum(yt) >= 0
+    end
+end
+
+@testset "Iris Std. Ray" begin
+    bd = billiard_iris()
+    o = bd[1]
+    refraction(φ, pflag, ω) = pflag ? 0.5φ : 2.0φ
+    transmission(φ, pflag, ω) = pflag ? 1.0 : abs(φ) < π/4 ? 1.0 : 0.0
+    raya = RaySplitter([1], transmission, refraction)
+    for i in 1:partnum
+        p = randominside(bd)
+        xt, yt = construct(evolve(p, bd, 1000, raya)...)
+        @test maximum(xt) <= 1
+        @test minimum(xt) >= 0
+        @test maximum(yt) <= 1
+        @test minimum(yt) >= 0
+    end
+end
+
 if printinfo
     println("Results:")
     println("+ Ellipse obstacle has proper arclengths.")
-    # println("+ randominside() works with Ellipse.")
-    # println("+ relocate(), collisiontime(), resolvecollision() work for")
-    # println("  standard particle and Ellipse.")
-    # println("+ Ray-splitting works with Ellipse.")
+    println("+ randominside() works with Ellipse.")
+    println("+ relocate(), collisiontime(), resolvecollision() work for")
+    println("  standard particle and Ellipse.")
+    println("+ Ray-splitting works with Ellipse.")
     println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return

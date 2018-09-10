@@ -350,5 +350,5 @@ function billiard_iris(a′ = 0.2, b′ = 0.4, w′ = 1.0;
 
     rec = billiard_rectangle(w, w; setting = setting)
     e = Ellipse([w/2, w/2], a, b, true, "Iris")
-    return Billiard(rec.obstacles..., e)
+    return Billiard(e, rec.obstacles...)
 end
