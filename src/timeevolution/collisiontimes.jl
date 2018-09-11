@@ -210,9 +210,8 @@ end
     )
     if typeof(o) <: Antidot && o.pflag == false
         d1 = norm(p.pos - I1); d2 = norm(p.pos - I2)
-        j = d1 < d2 ? 2 : 1
         if min(d1, d2) ≤ distancecheck(T)
-            return realangle(p, o, (I1, I2)[j])
+            return realangle(p, o, d1 < d2 ? I2 : I1)*rc
         end
     end
     # Calculate real time until intersection:
