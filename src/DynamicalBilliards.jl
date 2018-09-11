@@ -80,19 +80,20 @@ end
 ###################
 # Update messages #
 ###################
-if !isfile(joinpath(@__DIR__, "update_v2.0.0"))
+updatetag = "update_v2.4.0"
+if !isfile(joinpath(@__DIR__, updatetag))
 printstyled(stdout,
 """
-\nUpdate message: DynamicalBilliards v2.0
+\nUpdate message: DynamicalBilliards v2.4.0
 
-The new version v2.0 of DynamicalBilliards brings massive performance
-increase, a ton of new features, a more intuitive and simpler low-level interface,
-automated animation production and much more stuff!
-
-There are also a small amount of minor breaking changes! Please see the
-updated documentation page as well as the changelog.\n
+- new obstacle: Ellipse
+- Improved ray-splitting algorithm: No clamping of refraction angle anymore!
+- New function `ispinned`: returns `Bool` if particle is pinned or not
+- Standard billiards can also be created with keyword arguments as well
+- Many documentation improvements and bugfixes!
+\n
 """; color = :light_magenta)
-touch(joinpath(@__DIR__, "update_v2.0.0"))
+touch(joinpath(@__DIR__, updatetag))
 end
 
 

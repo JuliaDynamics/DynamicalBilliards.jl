@@ -15,15 +15,13 @@ Here its basic use is illustrated
 ```@example lyaps
 using DynamicalBilliards
 
-radius = 1.0
-l = 2.0
+radius = 1.0; l = 2.0
 
-bd = Billiard(billiard_polygon(6, l; setting = "periodic")..., Disk([0., 0.], radius))
+b = Billiard(billiard_polygon(6, l; setting = "periodic")...,
+             Disk([0., 0.], radius))
 
-par = randominside(bd)
-t = 1000.0
-
-exps = lyapunovspectrum(par, bd, t)
+par = randominside(b)
+exps = lyapunovspectrum(par, b, t = 1000.0)
 ```
 
 In the following example we compute the change of $\lambda_1\$ versus the
