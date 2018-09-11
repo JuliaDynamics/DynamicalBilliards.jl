@@ -61,14 +61,15 @@ end
     end
 end
 
-@testset "Equiv to Sinai" begin 
+@testset "Equiv to Sinai" begin
     bd2 = billiard_sinai(0.25)
-    bd = billiard_iris(0.25, 0.25)
+    bd1 = billiard_iris(0.25, 0.25)
 
     for i in 1:partnum
-        p = randominside(bd)
-        m1 = meancollisiontime(p, bd,  1000000)
-        m2 = meancollisiontime(p, bd2, 1000000)
+        N = 100000
+        p = randominside(bd1)
+        m1 = meancollisiontime(p, bd1, N)
+        m2 = meancollisiontime(p, bd2, N)
         @test m1 ≈ m2 rtol=1e-1
     end
 
