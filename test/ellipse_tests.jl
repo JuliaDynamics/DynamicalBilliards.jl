@@ -65,8 +65,8 @@ end
     bd2 = billiard_sinai(0.25)
     bd1 = billiard_iris(0.25, 0.25)
 
-    for i in 1:partnum
-        N = 200000
+    for i in 1:10
+        N = 2000000
         p = randominside(bd1)
         m1 = meancollisiontime(p, bd1, N)
         m2 = meancollisiontime(p, bd2, N)
