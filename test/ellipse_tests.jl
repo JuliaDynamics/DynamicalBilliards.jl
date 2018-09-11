@@ -32,6 +32,7 @@ end#testset
 
 @testset "Iris Standard" begin
     bd = billiard_iris()
+    o = bd[1]
     for i in 1:partnum
         p = randominside(bd)
         xt, yt = construct(evolve(p, bd, 1000)...)
@@ -60,6 +61,19 @@ end
     end
 end
 
+@testset "Equiv to Sinai" begin 
+    bd2 = billiard_sinai(0.25)
+    bd = billiard_iris(0.25, 0.25)
+
+    for i in 1:partnum
+        p = randominside(bd)
+        m1 = meancollisiontime(p, bd,  1000000)
+        m2 = meancollisiontime(p, bd2, 1000000)
+        @test m1 ≈ m2 rtol=1e-1
+    end
+
+end
+
 if printinfo
     println("Results:")
     println("+ Ellipse obstacle has proper arclengths.")
@@ -67,6 +81,7 @@ if printinfo
     println("+ relocate(), collisiontime(), resolvecollision() work for")
     println("  standard particle and Ellipse.")
     println("+ Ray-splitting works with Ellipse.")
+    println("+ Ellipse with equal axis is equivalent with Sinai.")
     println("+ Required time: $(round(time()-tim, digits=3)) sec.")
 end
 return
