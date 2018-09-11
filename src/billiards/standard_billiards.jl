@@ -9,7 +9,7 @@ billiard_stadium, billiard_mushroom, billiard_logo
 ####################################################
 """
     billiard_rectangle(x=1.0, y=1.0; setting = "standard")
-Return a vector of obstacles that defines a rectangle billiard of size (`x`, `y`).
+Return a rectangle billiard of size (`x`, `y`).
 
 ### Settings
 * "standard" : Specular reflection occurs during collision.
@@ -68,7 +68,7 @@ end
 
 """
     billiard_sinai(r=0.25, x=1.0, y=1.0; setting = "standard")
-Return a vector of obstacles that defines a Sinai billiard of size (`x`, `y`) with
+Return a Sinai billiard of size (`x`, `y`) with
 a disk in its center, of radius `r`.
 
 In the periodic case, the system is also known as "Lorentz Gas".
@@ -111,7 +111,7 @@ billiard_lorentz(r=0.25, x=1.0, y=1.0) = billiard_sinai(r,x,y; setting = "period
 
 """
     billiard_polygon(n::Int, R, center = [0,0]; setting = "standard")
-Return a vector of obstacles that defines a regular-polygonal billiard
+Return a regular-polygonal billiard
 with `n` sides, radius `r` and given `center`.
 
 Note: `R` denotes the so-called outer radius, not the inner one.
@@ -336,4 +336,19 @@ function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25)
     newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
     raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
     return bd, raya
+end
+
+export billiard_iris
+
+"""
+    billiard_iris(a=0.2, b=0.4, w=1.0; setting = "standard")
+Return a billiard that is a square of side `w` enclosing at its center an ellipse
+with semi axes `a`, `b`.
+"""
+function billiard_iris(a′ = 0.2, b′ = 0.4, w′ = 1.0;
+    setting = "standard", a = a′, b = b′, w = w′)
+
+    rec = billiard_rectangle(w, w; setting = setting)
+    e = Ellipse([w/2, w/2], a, b, true, "Ellipse")
+    return Billiard(e, rec.obstacles...)
 end

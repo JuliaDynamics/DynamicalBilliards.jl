@@ -2,12 +2,12 @@ export plot_obstacle
 
 obcolor(::Obstacle) = (0,0.6,0)
 obcolor(::Union{RandomWall, RandomDisk}) = (149/255, 88/255, 178/255)
-obcolor(::Union{SplitterWall, Antidot}) = (0.8,0.0,0)
+obcolor(::Union{SplitterWall, Antidot, Ellipse}) = (0.8,0.0,0)
 obcolor(::PeriodicWall) = (0.8,0.8,0)
 obalpha(::Obstacle) = 0.5
-obalpha(::Antidot) = 0.1
+obalpha(::Union{Antidot, Ellipse}) = 0.1
 obls(::Obstacle) = "solid"
-obls(::Union{SplitterWall, Antidot}) = "dashed"
+obls(::Union{SplitterWall, Antidot, Ellipse}) = "dashed"
 obls(::PeriodicWall) = "dotted"
 
 """
@@ -50,4 +50,13 @@ function plot_obstacle(w::Wall; kwargs...)
         color=obcolor(w),
         linestyle = obls(w), lw = 2.0, kwargs...)
     end
+end
+
+function plot_obstacle(e::Ellipse; kwargs...)
+    edgecolor = obcolor(e)
+    facecolor = (edgecolor..., obalpha(e))
+    ellipse = PyPlot.matplotlib[:patches][:Ellipse](e.c, 2e.a, 2e.b;
+        edgecolor = edgecolor, facecolor = facecolor,
+        linestyle = obls(e), lw = 2.0, kwargs...)
+    PyPlot.gca()[:add_artist](ellipse)
 end

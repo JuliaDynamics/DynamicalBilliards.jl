@@ -53,6 +53,7 @@ RandomWall
 PeriodicWall
 SplitterWall
 FiniteWall
+Ellipse
 ```
 ---
 ### Obstacle-related functions

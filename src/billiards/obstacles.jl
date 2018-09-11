@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Semicircle
+normalvec, distance, cellsize, Semicircle, Ellipse
 export translate
 
 using InteractiveUtils
@@ -311,6 +311,70 @@ SplitterWall(sp, ep, n, true, name)
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
+#######################################################################################
+## Unique / Special
+#######################################################################################
+"""
+    Ellipse{T<:AbstractFloat}  <: Obstacle{T}
+Ellipse obstacle that also allows ray-splitting. The ellipse is always oriented
+on the x and y axis (although you can make whichever you want the major one).
+### Fields:
+* `c::SVector{2,T}` : Center.
+* `a::T` : x semi-axis.
+* `b::T` : y semi-axis.
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating. `true` (default) is associated with being outside the ellipse.
+* `name::String` : Some name given for user convenience. Defaults to `"Ellipse"`.
+
+The ellipse equation is given by
+```math
+\\left(\\frac{x - c[1]}{a} \\right)^2+ \\left(\\frac{y - c[2]}{b}\\right)^2 = 1
+```
+"""
+mutable struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
+    c::SVector{2,T}
+    a::T
+    b::T
+    pflag::Bool
+    name::String
+    arc::T # arclength of one quadrant of the ellipse
+end
+
+"""
+    ellipse_arclength(θ, e::Ellipse)
+Return the arclength of the ellipse that
+spans angle `θ` (in normal coordinates, not in the ellipse parameterization).
+Expects `θ` to be in `[0, 2π]`.
+
+After properly calculating the
+```math
+d=b\\,E\\bigl(\\tan^{-1}(a/b\\,\\tan(\\theta))\\,\\big|\\,1-(a/b)^2\\bigr)
+```
+"""
+function ellipse_arclength(θ, e::Ellipse)
+    n, θ = divrem(θ, π/2)
+    a = e.a; b = e.b
+    if a/b > 1.0
+        θ = π/2 - θ
+        return (n + 1.0)*e.arc - proper_ellipse_arclength(θ, b, a)
+    else
+        return n*e.arc + proper_ellipse_arclength(θ, a, b)
+    end
+end
+
+proper_ellipse_arclength(θ, a, b)  = b*Elliptic.E(atan(a*tan(θ)/b), 1.0 - (a/b)^2)
+
+export ellipse_arclength
+
+function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
+                 name::String = "Ellipse") where {T<:Real}
+    S = T <: Integer ? Float64 : T
+    return Ellipse{S}(SVector{2,S}(c),
+            convert(S, abs(a)), convert(S, abs(b)), pflag, name,
+            proper_ellipse_arclength(π/2, min(a, b), max(a, b))
+        )
+end
+Ellipse{T}(args...) where {T} = Ellipse(args...)
 
 #######################################################################################
 ## Normal vectors
@@ -319,6 +383,8 @@ show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
     normalvec(obst::Obstacle, position)
 Return the vector normal to the obstacle's boundary at the given position (which is
 assumed to be very close to the obstacle's boundary).
+
+The normal **must** point to the direction the particle is expected to come from.
 """
 @inline normalvec(wall::Wall, pos) = wall.normal
 @inline normalvec(w::PeriodicWall, pos) = normalize(w.normal)
@@ -328,6 +394,14 @@ assumed to be very close to the obstacle's boundary).
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
+@inline function normalvec(e::Ellipse{T}, pos) where {T}
+    # from https://www.algebra.com/algebra/homework/
+    # Quadratic-relations-and-conic-sections/Tangent-lines-to-an-ellipse.lesson
+    x₀, y₀ = pos
+    h, k = e.c
+    s = e.pflag ? one(T) : -one(T)
+    return s*normalize(SV((x₀-h)/(e.a*e.a), (y₀-k)/(e.b*e.b)))
+end
 
 #######################################################################################
 ## Distances
@@ -343,10 +417,16 @@ end
 
 """
     distance(p::AbstractParticle, o::Obstacle)
-Return the **signed** distance between particle `p` and obstacle `o`, based on
-`p.pos`. Positive distance corresponds to the particle being on the *allowed* region
-of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
+Return a **signed measure** for the "distance" between particle `p` and obstacle `o`,
+based on `p.pos`. Positive measure corresponds to the particle being on the *allowed* region
+of the `Obstacle`. E.g. for a `Disk`, this measure is positive when the particle is
 outside of the disk, negative otherwise.
+
+Notice that what we define here is a continuous function that is positive on the one side
+of the obstacle, 0 on top of the obstacle and negative on the other side. It does *not*
+have to be the true exact distance between point and obstacle. For example, in
+the case of an [`Ellipse`](@ref), this distance measure simply
+`d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0`.
 
     distance(p::AbstractParticle, bd::Billiard)
 Return minimum `distance(p, obst)` for all `obst` in `bd`.
@@ -412,6 +492,11 @@ function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
     dot(v1, n)
 end
 
+function distance(pos::SV, e::Ellipse{T})::T where {T}
+    d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
+    e.pflag ? d : -d
+end
+
 ####################################################
 ## Initial Conditions
 ####################################################
@@ -419,7 +504,7 @@ end
     cellsize(bd)
 Return the delimiters `xmin, ymin, xmax, ymax` of the given obstacle/billiard.
 
-Used in `randominside()`, error checking and plotting.
+Makes [`randominside`](@ref) possible.
 """
 function cellsize(d::Circular{T}) where {T}
     xmin = ymin = T(Inf)
@@ -452,6 +537,16 @@ function cellsize(a::Semicircle{T}) where {T}
     return xmin, ymin, xmax, ymax
 end
 
+function cellsize(e::Ellipse{T}) where {T}
+    if e.pflag
+        xmin = ymin = T(Inf)
+        xmax = ymax = T(-Inf)
+    else
+        xmin = e.c[1] - e.a; ymin = e.c[2] - e.b
+        xmax = e.c[1] + e.a; ymax = e.c[2] + e.b
+    end
+    return xmin, ymin, xmax, ymax
+end
 
 ####################################################
 ## Translations
@@ -463,10 +558,19 @@ translated by `vector`.
 """
 function translate end
 
-for T in subtypes(Circular)
+translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b, e.pflag)
+
+for T in [Disk, RandomDisk]
   @eval translate(d::$T, vec) = ($T)(d.c .+ vec, d.r)
 end
 
 for T in subtypes(Wall)
-  @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
+    if T != SplitterWall
+        @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
+    end
 end
+
+translate(d::Antidot, vec) = Antidot(d.c .+ vec, d.r, d.pflag)
+
+translate(w::SplitterWall, vec) =
+    SplitterWall(w.sp + vec, w.ep +vec, w.normal, w.pflag)

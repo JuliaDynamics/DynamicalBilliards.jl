@@ -11,6 +11,7 @@ systems, using:
 to_bcoords
 from_bcoords
 arcintervals
+totallength
 ```
 
 ## Boundary Maps

@@ -118,7 +118,7 @@ bd = Billiard(leftw, rightw, topw2, botw2, d, d2)
 p = randominside(bd)
 p.pos = [0.311901, 0.740439]
 p.vel = [0.548772, 0.835972]
-xt, yt, vxt, vyt, t = construct(evolve(p, bd, 25)...)
+xt, yt, = construct(evolve(p, bd, 25)...)
 plot_billiard(bd, xt, yt)
 scatter(xt[1], yt[1])
 scatter(xt[end], yt[end], color = "black")

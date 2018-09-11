@@ -13,6 +13,9 @@ collision happens backwards in time.
 In the case of magnetic propagation, there are always two possible collisions.
 The function [`realangle`](@ref) decides which of the two will occur first,
 based on the sign of the angular velocity of the magnetic particle.
+
+**Warning** - It is the duty of the `collisiontime` function to *not* lead to
+double collisions (e.g. avoid collisions when the particle is already on the obstacle)!
 """
 function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)
@@ -112,7 +115,44 @@ end
     t ≤ 0.0 ? Inf : t
 end
 
+@muladd function collisiontime(p::Particle{T}, e::Ellipse{T})::T where {T}
+    # First check if particle is "looking at" eclipse if it is outside
+    if e.pflag
+        # These lines may be "not accurate enough" but so far all is good
+        dotp = dot(p.vel, normalvec(e, p.pos))
+        dotp >= 0.0 && return T(Inf)
+    end
 
+    # http://www.ambrsoft.com/TrigoCalc/Circles2/Ellipse/EllipseLine.htm
+    a = e.a; b = e.b
+    # Translate particle with ellipse center (so that ellipse lies on [0, 0])
+    pc = p.pos - e.c
+    # Find μ, ψ for line equation y = μx + ψ describing particle
+    μ = p.vel[2]/p.vel[1]
+    ψ = pc[2] - μ*pc[1]
+
+    # Determinant and intersection points follow from the link
+    denominator = a*a*μ*μ + b*b
+    Δ² = denominator - ψ*ψ
+    Δ² ≤ 0 && return T(Inf)
+    Δ = sqrt(Δ²); f1 = -a*a*μ*ψ; f2 = b*b*ψ # just factors
+    I1 = SV(f1 + a*b*Δ, f2 + a*b*μ*Δ)/denominator
+    I2 = SV(f1 - a*b*Δ, f2 - a*b*μ*Δ)/denominator
+
+    d1 = norm(pc - I1); d2 = norm(pc - I2)
+    if e.pflag
+        # There HAS to be a way to KNOW which of the two I1, I2 is the "real closest"
+        # one. Analytically I mean. But I haven't found yet.
+        return min(d1, d2)
+    else # If inside the ellipse, only one collision valid
+        if min(d1, d2) < distancecheck(T)
+            return max(d1,d2)
+        else
+            dotp = dot(p.vel, (I1 - pc))
+            return dotp ≥ 0.0 ? d1 : d2
+        end
+    end
+end
 
 #######################################################################################
 ## Magnetic particle
@@ -153,7 +193,7 @@ end
     p1 = o.c
     r1 = o.r
     d = norm(p1-pc)
-    if (d >= rc + r1) || (d <= abs(rc-r1))
+    if (d ≥ rc + r1) || (d ≤ abs(rc-r1))
         return Inf
     end
     # Solve quadratic:
@@ -170,9 +210,8 @@ end
     )
     if typeof(o) <: Antidot && o.pflag == false
         d1 = norm(p.pos - I1); d2 = norm(p.pos - I2)
-        j = d1 < d2 ? 2 : 1
         if min(d1, d2) ≤ distancecheck(T)
-            return realangle(p, o, (I1, I2)[j])
+            return realangle(p, o, d1 < d2 ? I2 : I1)*rc
         end
     end
     # Calculate real time until intersection:

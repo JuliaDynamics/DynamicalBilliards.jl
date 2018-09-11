@@ -29,9 +29,7 @@ savefig("rand_obstacles.svg"); nothing # hide
 
 ```@example 8
 using DynamicalBilliards
-b = billiard_polygon(6, 1)
-a = Antidot([0.0,0.0], 0.5)
-bd = Billiard(b.obstacles..., a)
+bd = billiard_iris()
 ```
 
 If you want to quickly plot the entire billiard with default parameters, simply use the function `plot_billiard(bd)`:
@@ -43,7 +41,7 @@ savefig("billiard_example.svg"); nothing # hide
 ```
 ![](billiard_example.svg)
 
-`plot_billiard()` also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.
+[`plot_billiard`](@ref) also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.
 
 
 
@@ -69,10 +67,8 @@ The default plotting settings have been chosen for maximum clarity and consisten
 * Reflecting obstacles (e.g. `Disk`, `FiniteWall` etc.) are green.
 * Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are purple.
 * Ray-splitting obstacles are red with dashed linestyle.
-* Periodicity enforcing obstacles are yellow with dotted linestyle
-  (if and when plotted).
-* Doors (`InfiniteWall` with `isdoor=true`) are plotted with alternating black and
-  cyan dashed lines.
+* Periodicity enforcing obstacles are yellow with dotted linestyle (if and when plotted).
+* Doors (`InfiniteWall` with `isdoor=true`) are plotted with alternating black and cyan dashed lines.
 
 Particle orbits use matplotlib's color cycle (first one is blue).
 
