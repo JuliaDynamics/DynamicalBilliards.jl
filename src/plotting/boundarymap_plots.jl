@@ -73,8 +73,7 @@ function plot_boundarymap(ξs, sφs, intervals;
 
         return (ax, ax2)
     end
-    PyPlot.gcf()[:tight_layout]()
-    PyPlot.gcf()[:tight_layout]()
+    tight_layout()
     return ax
 end
 

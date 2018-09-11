@@ -26,8 +26,6 @@ savefig("raybil.svg"); nothing # hide
 ```
 ![](raybil.svg)
 
-<!-- ![Ray-splitting billiard](https://i.imgur.com/UKsyURY.png) -->
-
 ## 2. The `RaySplitter` structure
 In the second step, you have to define 2+1 functions: transmission probability,
 refraction angle and optionally new angular velocity after transmission. These functions, as well as which obstacles participate in ray-splitting, are bundled into a special structure:
