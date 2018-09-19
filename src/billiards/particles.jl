@@ -45,7 +45,7 @@ Particle(x::Real, y::Real, φ::Real) = Particle(collect(promote(x,y,φ)))
 Particle() = Particle(rand(), rand(), rand()*2π)
 function Particle(pos::SV{T}, vel::SV{T}) where {T}
     S = T<:Integer ? Float64 : T
-    return MagneticParticle(pos, vel, SVector{2,S}(0,0))
+    return Particle(pos, vel, SVector{2,S}(0.0, 0.0))
 end
 show(io::IO, p::Particle{T}) where {T} =
 print(io, "Particle{$T}\n",
