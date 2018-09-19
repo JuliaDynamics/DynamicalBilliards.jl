@@ -230,22 +230,27 @@ or all their valid collisions are with periodic walls, which again means that
 they go in cirles for ever.
 """
 ispinned(p::Particle, bd) = false
-function ispinned(par::MagneticParticle, bd::Billiard)
-    p = copy(par)
+function _reset_ispinned(p, pos, vel, cc)
+    p.pos = pos; p.vel = vel
+    p.current_cell = cc; p.center = find_cyclotron(p)
+end
+function ispinned(p::MagneticParticle, bd::Billiard)
+    pos, vel, cc = p.pos, p.vel, p.current_cell
     i, t = bounce!(p, bd)
-    t == Inf && return true
-    !isperiodic(bd) && return false
+    if t == Inf; _reset_ispinned(p, pos, vel, cc); return true; end
+    if !isperiodic(bd); _reset_ispinned(p, pos, vel, cc); return false; end
+
     peridx = bd.peridx
-    i ∉ peridx && return false
+    if i ∉ peridx; _reset_ispinned(p, pos, vel, cc); return false; end
 
     # propagate until 2π/ω
     counter = t; limit = 2π/abs(p.omega)
     while counter ≤ limit
         i, t = bounce!(p, bd)
-        i ∉ peridx && return false
+        if i ∉ peridx; _reset_ispinned(p, pos, vel, cc); return false; end
         counter += t
     end
-    return true
+    _reset_ispinned(p, pos, vel, cc); return true
 end
 
 """
