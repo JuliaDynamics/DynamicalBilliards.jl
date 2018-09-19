@@ -149,9 +149,17 @@ end
 
 function ispinned_tests(partnum=500; printinfo=true)
     bd = billiard_sinai(;setting = "periodic")
-    p = randominside(bd, 2.0)
-    while !ispinned(p, bd)
-        p = randominside(bd, 2.0)
-    end
+    # case of pinned that crosses plane but not walls
+    p = MagneticParticle(0.2, 0.5, -π/2, 1/0.3)
     @test ispinned(p, bd)
+    # case of pinned that doesn't cross anything
+    p = MagneticParticle(0.1, 0.5, -π/2, 1/0.05)
+    @test ispinned(p, bd)
+    # case of pinned but does cross periodic walls *and* section
+    p = MagneticParticle(0.0, 1.0, -π/2, 0.44*2)
+    @test ispinned(p, bd)
+    # Sanity check for 2 nonpinned particles
+    @test !ispinned(randominside(bd), bd)
+    p = MagneticParticle(0.2, 0.8, -π/2, 1/0.3)
+    @test !ispinned(p, bd)
 end
