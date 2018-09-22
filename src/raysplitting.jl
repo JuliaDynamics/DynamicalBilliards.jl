@@ -232,7 +232,7 @@ function bounce!(p::AbstractParticle{T}, bd::Billiard{T},
         resolvecollision!(p, bd, i, trans,  raysplitters[raysidx[i]])
         tmin += newt
     else
-        tmin = relocate!(p, bd[i], tmin)
+        tmin, = relocate!(p, bd[i], tmin)
         resolvecollision!(p, bd[i])
     end
     typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))

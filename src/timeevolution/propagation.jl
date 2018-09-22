@@ -107,19 +107,20 @@ and re-evalute until correct. When correct, propagate the particle itself
 to the correct position and return the final adjusted time.
 
 Notice that the adjustment is increased geometrically; if one adjustment is not
-enough, the adjusted time is multiplied by a factor of 10. This happens as many
+enough, the adjusted time is multiplied by a factor of 2. This happens as many
 times as necessary.
 """
 @muladd function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
-    i = 1
+    k = 1
+    t0 = tmin
     while timeprec_sign(o, distance(newpos, o)) > 0
-        tmin = tmin + timeprec_sign(o, i)*timeprec(p, o)
+        tmin = t0 + timeprec_sign(o, k)*timeprec(p, o)
         newpos = propagate_pos(p.pos, p, tmin)
-        i *= 10
+        k *= 2
     end
     propagate!(p, newpos, tmin)
-    return tmin
+    return tmin, k
 end
 
 @inline timeprec_sign(::Obstacle, i) = -i
@@ -202,7 +203,7 @@ Ray-splitting version of `bounce!`.
 @inline function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
     tmin::T, i::Int = next_collision(p, bd)
     o = bd[i]
-    tmin = relocate!(p, o, tmin)
+    tmin, k = relocate!(p, o, tmin)
     resolvecollision!(p, o)
     return i, tmin, p.pos, p.vel
 end
@@ -211,7 +212,7 @@ end
     tmin::T, i::Int = next_collision(p, bd)
     if tmin != Inf
         o = bd[i]
-        tmin = relocate!(p, o, tmin)
+        tmin, k = relocate!(p, o, tmin)
         resolvecollision!(p, o)
     end
     p.center = find_cyclotron(p)
