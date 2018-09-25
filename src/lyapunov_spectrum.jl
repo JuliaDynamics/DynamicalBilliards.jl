@@ -211,7 +211,7 @@ of the `offset` matrix.
 function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin,
                    offset::Vector{SVector{4, T}}) where {T <: AbstractFloat}
 
-    tmin = relocate!(p, o, tmin)
+    tmin, k = relocate!(p, o, tmin)
     propagate_offset!(offset, tmin, p)
     return tmin
 end

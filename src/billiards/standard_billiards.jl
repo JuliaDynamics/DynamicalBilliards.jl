@@ -337,3 +337,59 @@ function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25)
     raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
     return bd, raya
 end
+
+
+function omnibilliard()
+    pref = 3 # how big is the frame with respect to the Disks
+    h = pref*1.0; α = pref*0.8; r = 0.3; off = pref*0.25
+
+    cos6 = cos(π/6)
+    β = (h - cos6*α)/cos6
+    t = α + 2β
+    center_of_mass = [0.0, √3*t/6]
+    startloc = [-α/2, 0.0]
+
+    # create directions of the hexagonal 6:
+    hexvert = [(cos(2π*i/6), sin(2π*i/6)) for i in 1:6]
+    dirs = [SVector{2}(hexvert[i] .- hexvert[mod1(i+1, 6)]) for i in 1:6]
+
+    frame = Obstacle{Float64}[]
+
+    sp = startloc
+    ep = startloc + α*dirs[1]
+    normal = (w = ep .- sp; [-w[2], w[1]])
+    push!(frame, Semicircle((sp+ep)/2, α/2, normal))
+
+
+    for i in 2:6
+        s = iseven(i) ? β : α
+        x = mod(i, 4)
+        T = if x == 1
+            RandomWall
+        elseif x == 2
+            FiniteWall
+        elseif x == 3
+            SplitterWall
+        elseif x == 0
+            InfiniteWall
+        end
+        sp = i != 2 ? frame[i-1].ep : startloc + α*dirs[1]
+        ep = sp + s*dirs[i]
+        normal = (w = ep .- sp; [-w[2], w[1]])
+        push!(frame, T(sp, ep, normal))
+    end
+
+
+    # Radii of circles that compose the Julia logo
+    offset = [0.0, off]
+
+    R = [cos(2π/3) -sin(2π/3);
+         sin(2π/3)  cos(2π/3)]
+
+
+    green = Disk(center_of_mass .+ offset, r, "green")
+    red = Antidot(center_of_mass .+ R*offset, r, "red")
+    purple = RandomDisk(center_of_mass .+ R*R*offset, r, "purple")
+
+    bd = Billiard(green, red, purple, frame...)
+end
