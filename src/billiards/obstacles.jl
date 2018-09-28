@@ -383,9 +383,10 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     if nn ≤ 0 # I am "inside" semicircle
         return s.r - norm(pos - s.c)
     else # I am on the "other side"
-        end1 = SV(s.c[1] + s.r*s.facedir[2], s.c[2] - s.r*s.facedir[1])
-        end2 = SV(s.c[1] - s.r*s.facedir[2], s.c[2] + s.r*s.facedir[1])
-        return min(norm(pos - end1), norm(pos - end2))
+        # end1 = SV(s.c[1] + s.r*s.facedir[2], s.c[2] - s.r*s.facedir[1])
+        # end2 = SV(s.c[1] - s.r*s.facedir[2], s.c[2] + s.r*s.facedir[1])
+        # return min(norm(pos - end1), norm(pos - end2))
+        return one(T)
     end
 end
 
