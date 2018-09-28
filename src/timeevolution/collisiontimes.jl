@@ -257,7 +257,7 @@ corresponds to.
 function next_collision end
 
 @generated function next_collision(p, bd::Billiard{T, L, BT}) where {T, L, BT}
-    out = :(i = 0; ind = 0; tmin = T(Inf))
+    out = :(ind = 0; tmin = T(Inf))
     for j=1:L
         push!(out.args, quote
                             let x = bd[$j]

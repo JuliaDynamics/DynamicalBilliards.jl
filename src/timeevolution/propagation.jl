@@ -112,12 +112,12 @@ times as necessary.
 """
 @muladd function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
     newpos = propagate_pos(p.pos, p, tmin)
-    k = 1
-    t0 = tmin
+    k = 1.0
     while timeprec_sign(o, distance(newpos, o)) > 0
-        tmin = t0 + timeprec_sign(o, k)*timeprec(p, o)
+        tmin += timeprec_sign(o, k)*timeprec(p, o)
         newpos = propagate_pos(p.pos, p, tmin)
-        k *= 2
+        k *= 2.0
+        # println("k=$k")
     end
     propagate!(p, newpos, tmin)
     return tmin, k
