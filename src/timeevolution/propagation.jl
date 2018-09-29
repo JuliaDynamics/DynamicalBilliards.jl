@@ -1,18 +1,5 @@
 export resolvecollision!, construct, next_collision, bounce!, evolve, ispinned
 
-#####################################################################################
-# Mathetical/Convenience Functions
-#####################################################################################
-const sixsqrt = 6sqrt(2)
-
-"""
-    acos1mx(x)
-Approximate arccos(1 - x) for x very close to 0.
-"""
-@inline (acos1mx(x::T)::T) where {T} = sqrt(2x) + sqrt(x)^3/sixsqrt
-
-@inline cross2D(a, b) = a[1]*b[2] - a[2]*b[1]
-
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
 
@@ -99,7 +86,7 @@ end
     φ0 = atan(p.vel[2], p.vel[1])
     sinωtφ, cosωtφ = sincos(ω*t + φ0)
     p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
-    p.vel = SVector{2, T}(cosωtφ, sinωtφ)
+    p.vel = SV{T}(cosωtφ, sinωtφ)
     return
 end
 @inline @muladd function propagate!(

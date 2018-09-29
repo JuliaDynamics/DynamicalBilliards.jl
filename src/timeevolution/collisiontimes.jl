@@ -1,4 +1,15 @@
-export collisiontime, realangle
+export collisiontime
+
+#####################################################################################
+# Accuracy & Convenience Functions
+#####################################################################################
+"""
+Approximate arccos(1 - x) for x very close to 0.
+"""
+@inline (acos1mx(x::T)::T) where {T} = sqrt(2x) + sqrt(x)^3/sixsqrt
+const sixsqrt = 6sqrt(2)
+
+@inline cross2D(a, b) = a[1]*b[2] - a[2]*b[1]
 
 @inline accuracy(::Type{T}) where {T} = eps(T)^(3/4)
 @inline accuracy(::Type{BigFloat}) = BigFloat(1e-32)
@@ -12,10 +23,10 @@ export collisiontime, realangle
 Calculate the collision time between given
 particle and obstacle. Return the time and the estimated collision point `cp`.
 
-Returns `Inf` if the collision is not possible *or* if the
+Returns `Inf, SV(Inf, Inf)` if the collision is not possible *or* if the
 collision happens backwards in time.
 
-**It is the duty of `collisiontime` to avoid collisions when the particle is
+**It is the duty of `collisiontime` to avoid incorrect collisions when the particle is
 on top of the obstacle (or extremely close).**
 """
 @muladd function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
@@ -126,7 +137,7 @@ end
 #######################################################################################
 ## Magnetic particle
 #######################################################################################
-@muladd function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
+@muladd function collisiontime(p::MagneticParticle{T}, w::Wall{T}) where {T}
     ω = p.omega
     pc, pr = cyclotron(p)
     P0 = p.pos
@@ -138,32 +149,36 @@ end
     c = dot(P1P3, P1P3) - pr*pr
     Δ = b^2 -4*a*c
     # Check if line is completely outside (or tangent) of the circle:
-    Δ ≤ 0.0 && return Inf
+    Δ ≤ 0.0 && return nocollision(T)
     # Intersection coefficients:
     u1 = (-b - sqrt(Δ))/2a
     u2 = (-b + sqrt(Δ))/2a
     cond1 = 0.0 ≤ u1 ≤ 1.0
     cond2 = 0.0 ≤ u2 ≤ 1.0
-    # Check if the line is completely inside the circle:
+    # Check if the line (wall) is completely inside the circle:
+    θ, I = nocollision(T)
     if cond1 || cond2
-        # Calculate real angle until intersection:
-        θ1 = cond1 ? (I1 = w.sp + u1*(w.ep-w.sp); realangle(p, w, I1)) : T(Inf)
-        θ2 = cond2 ? (I2 = w.sp + u2*(w.ep-w.sp); realangle(p, w, I2)) : T(Inf)
-        # Collision time, equiv. to arc-length until collision point:
-        return min(θ1, θ2)*pr
-    else
-        return Inf
+        dw = w.ep - w.sp
+        for (u, cond) in ((u1, cond1), (u2, cond2))
+            Y =  w.sp + u*dw
+            if cond
+                φ = realangle(p, w, Y)
+                φ < θ && (θ = φ; I = Y)
+            end
+        end
     end
+    # Collision time = arc-length until collision point
+    return θ*pr, I
 end
 
-@muladd function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
+@muladd function collisiontime(p::MagneticParticle{T}, o::Circular{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
     r1 = o.r
     d = norm(p1-pc)
     if (d >= rc + r1) || (d <= abs(rc-r1))
-        return Inf
+        return nocollision(T)
     end
     # Solve quadratic:
     a = (rc^2 - r1^2 + d^2)/2d
@@ -181,7 +196,8 @@ end
     θ1 = realangle(p, o, I1)
     θ2 = realangle(p, o, I2)
     # Collision time, equiv. to arc-length until collision point:
-    return min(θ1, θ2)*rc
+    j = θ1 < θ2 ? 1 : 2
+    return (θ1, θ2)[j]*rc, (I1, I2)[j]
 end
 
 function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
@@ -248,7 +264,7 @@ function realangle(p::MagneticParticle{T}, o::Obstacle{T}, i::SV{T})::T where {T
 
     # Get "side" of i:
     PI = i - P0
-    side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
+    side = cross2D(PI, PC)*ω
     # Get angle until i (positive number between 0 and 2π)
     side < 0 && (θprime = T(2π-θprime))
     return θprime

@@ -9,10 +9,10 @@
     5. Specular reflection / periodicity is done.
 
 * Renamed `distancecheck` to `accuracy`
-* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!`
+* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`.
 
 ## Enhancements / new features
-* Test suite reworked almost from scratch: More tests, more specific tests, more robust tests!
+* Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
 
 ## TODO
 eval: `_multiplier`, `nocollision`, `distancecheck`
