@@ -1,4 +1,26 @@
-# master
+# 3.0-dev
+
+## BREAKING
+* Change of the internal propagation algorithm:
+    1. the function `collisiontime` returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
+    2. The `timeprec` and all those nonsense are removed. An *internal* (not exposed) function `distancecheck` is implemented instead. It is the duty of `collisiontime` to return `Inf` if the particle is within this `accuracy` and the collision point.
+    2. The particle is then "teleported" to this point by setting its `pos`. For the case of magnetic propagation the velocity is propagated by the collision time. This brings very high accuracy, as the velocity vector is not multiplied with time and then added to the position vector.
+    3. The `distance` is checked. If it has wrong sign, a `relocation` simply relocates the particle in the direction of the `normalvec`, for amount `(1+eps())*distance`.
+    5. Specular reflection / periodicity is done.
+
+* Renamed `distancecheck` to `accuracy`
+* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!`
+
+## Enhancements / new features
+* Test suite reworked almost from scratch: More tests, more specific tests, more robust tests!
+
+## TODO
+eval: `_multiplier`, `nocollision`, `distancecheck`
+* Overload plot
+
+* Renamed `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
+
+
 # v2.3
 * Now you can write `p.ω` as well as `p.omega` for magnetic particles.
 * New `ispinned` function that returns Bool of whether a particle is pinned or not. Also works with periodic billiards.

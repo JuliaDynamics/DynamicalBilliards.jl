@@ -1,29 +1,9 @@
-export resolvecollision!, propagate!, evolve!, construct, specular!,
-periodicity!, propagate_pos, next_collision, relocate!,
-bounce!, evolve, ispinned
+export resolvecollision!, construct, next_collision, bounce!, evolve, ispinned
 
 #####################################################################################
 # Mathetical/Convenience Functions
 #####################################################################################
 const sixsqrt = 6sqrt(2)
-
-# Used in relocate:
-@inline timeprec(::AbstractParticle{T}, ::Obstacle{T}) where {T} = eps(T)^(4/5)
-# This timeprec cannot be used for PeriodWall and RaySplitting obstacles with
-# MagneticParticle because when mangetic and relocating forward you get
-# extremely shallow angles
-# and you need huge changes in time for even tiny changes in position
-@inline timeprec(p::MagneticParticle, o::PeriodicWall) = timeprec_forward(p, o)
-@inline timeprec_forward(::MagneticParticle{T}, ::Obstacle{T}) where {T} = eps(T)^(3/4)
-@inline timeprec_forward(::MagneticParticle{BigFloat}, ::Obstacle) = BigFloat(1e-12)
-
-@inline timeprec(::Type{T}) where {T} = eps(T)^(4/5)
-@inline timeprec_forward(::Type{T}) where {T} = eps(T)^(3/4)
-@inline timeprec_forward(::Type{BigFloat}) = BigFloat(1e-12)
-
-# Used in check of skip intersection, in `realangle` and collision with Semicircle:
-@inline distancecheck(::Type{T}) where {T} = sqrt(eps(T))
-@inline distancecheck(::Type{BigFloat}) = BigFloat(1e-8)
 
 """
     acos1mx(x)
@@ -31,10 +11,105 @@ Approximate arccos(1 - x) for x very close to 0.
 """
 @inline (acos1mx(x::T)::T) where {T} = sqrt(2x) + sqrt(x)^3/sixsqrt
 
-@inline cross2D(a, b) = a[1]*b[2]-a[2]*b[1]
+@inline cross2D(a, b) = a[1]*b[2] - a[2]*b[1]
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
+
+#####################################################################################
+# Bounce
+#####################################################################################
+"""
+    bounce!(p::AbstractParticle, bd::Billiard) → i, t, pos, vel
+"Bounce" the particle (advance for one collision) in the billiard.
+Takes care of finite-precision issues.
+
+Return:
+* index of the obstacle that the particle just collided with
+* the time from the previous collision until the current collision `t`
+* position and velocity of the particle at the current collision (*after* the
+  collision has been resolved!). The position is given in the unit cell of
+  periodic billiards. Do `pos += p.current_cell` for the position in real space.
+
+    bounce!(p, bd, raysplit) → i, t, pos, vel
+Ray-splitting version of `bounce!`.
+"""
+@inline function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
+    i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
+    if tmin != T(Inf)
+        o = bd[i]
+        relocate!(p, o, tmin, cp)
+        resolvecollision!(p, o)
+    end
+    typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))
+    return i, tmin, p.pos, p.vel
+end
+
+#####################################################################################
+# Relocate
+#####################################################################################
+"""
+    relocate!(p::AbstractParticle, o::Obstacle, t, cp)
+Propagate the particle's position for time `t`, and check if it is on
+the correct side of the obstacle. If not, adjust the time `t` by `timeprec`
+and re-evalute until correct. When correct, propagate the particle itself
+to the correct position and return the final adjusted time.
+
+Notice that the adjustment is increased geometrically; if one adjustment is not
+enough, the adjusted time is multiplied by a factor of 2. This happens as many
+times as necessary.
+
+rewriteeeeeeeeee
+"""
+@muladd function relocate!(p::AbstractParticle{T},
+    o::Obstacle{T}, tmin::T, cp::SV{T}) where {T}
+
+    propagate!(p, cp, tmin) # propagate to collision point
+    d = distance(p.pos, o)
+    bool = isnt_valid(d, o)
+    if bool
+        n = normalvec(o, p.pos)
+        p.pos += _multiplier(o, T) * d * n
+        @assert distance(p.pos, o) ≥ 0
+    end
+    return bool
+end
+
+isnt_valid(d, o::Obstacle) = d ≥ 0.0
+isnt_valid(d, o::PeriodicWall) = d ≤ 0.0
+_multiplier(::Obstacle, ::Type{T}) where {T} = one(T) #+ accuracy(T)
+_multiplier(::PeriodicWall, ::Type{T}) where {T} = -one(T) #+ accuracy(T)
+
+"""
+    propagate!(p::AbstractParticle, t)
+Propagate the particle `p` for given time `t`, changing appropriately the the
+`p.pos` and `p.vel` fields.
+
+    propagate!(p, position, t)
+Do the same, but take advantage of the already calculated `position` that the
+particle should end up at.
+"""
+@inline function propagate!(p::Particle{T}, t::Real) where {T}
+    p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t)
+end
+@inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
+
+@inline @muladd function propagate!(p::MagneticParticle{T}, t::Real) where {T}
+    ω = p.omega; r = 1/ω
+    φ0 = atan(p.vel[2], p.vel[1])
+    sinωtφ, cosωtφ = sincos(ω*t + φ0)
+    p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
+    p.vel = SVector{2, T}(cosωtφ, sinωtφ)
+    return
+end
+@inline @muladd function propagate!(
+        p::MagneticParticle{T}, newpos::SV{T}, t) where {T}
+    ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
+    p.pos = newpos
+    p.vel = SV{T}(cossin(ω*t + φ0))
+    return
+end
+
 
 #####################################################################################
 # Resolve Collisions
@@ -97,128 +172,6 @@ incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 @inline resolvecollision!(p::MagneticParticle, o::Obstacle) = specular!(p, o)
 
 resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
-
-
-"""
-    relocate!(p::AbstractParticle, o::Obstacle, t) -> newt
-Propagate the particle's position for time `t`, and check if it is on
-the correct side of the obstacle. If not, adjust the time `t` by `timeprec`
-and re-evalute until correct. When correct, propagate the particle itself
-to the correct position and return the final adjusted time.
-
-Notice that the adjustment is increased geometrically; if one adjustment is not
-enough, the adjusted time is multiplied by a factor of 2. This happens as many
-times as necessary.
-"""
-@muladd function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T) where {T}
-    newpos = propagate_pos(p.pos, p, tmin)
-    k = 1.0
-    while timeprec_sign(o, distance(newpos, o)) > 0
-        tmin += timeprec_sign(o, k)*timeprec(p, o)
-        newpos = propagate_pos(p.pos, p, tmin)
-        k *= 2.0
-        # println("k=$k")
-    end
-    propagate!(p, newpos, tmin)
-    return tmin, k
-end
-
-@inline timeprec_sign(::Obstacle, i) = -i
-@inline timeprec_sign(::PeriodicWall, i) = i
-
-
-
-#####################################################################################
-# Propagate & Bounce
-#####################################################################################
-"""
-    propagate!(p::AbstractParticle, t)
-Propagate the particle `p` for given time `t`, changing appropriately the the
-`p.pos` and `p.vel` fields.
-
-For a `Particle` the propagation is a straight line
-(i.e. velocity vector is constant). For a `MagneticParticle` the propagation
-is circular motion with cyclic frequency `p.omega` and radius `1/p.omega`.
-
-    propagate!(p, position, t)
-Do the same, but take advantage of the already calculated `position` that the
-particle should end up at.
-"""
-@inline propagate!(p::Particle{T}, t::Real) where {T} = (p.pos += SV{T}(p.vel[1]*t, p.vel[2]*t))
-@inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
-
-@inline @muladd function propagate!(p::MagneticParticle{T}, t::Real) where {T}
-    ω = p.omega; r = 1/ω
-    φ0 = atan(p.vel[2], p.vel[1])
-    sinωtφ, cosωtφ = sincos(ω*t + φ0)
-    p.pos += SV{T}((sinωtφ - sin(φ0))*r, (-cosωtφ + cos(φ0))*r)
-    p.vel = SVector{2, T}(cosωtφ, sinωtφ)
-    return
-end
-@inline @muladd function propagate!(p::MagneticParticle{T}, newpos::SVector{2,T}, t) where {T}
-    ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
-    p.pos = newpos
-    p.vel = SVector{2, T}(cossin(ω*t + φ0))
-    return
-end
-
-"""
-    propagate_pos(pos, p::AbstractParticle, t::Real) -> newpos
-Perform a "fake" propagation, i.e. propagate a position as if it was the particle's
-position.
-"""
-@inline propagate_pos(pos, p::Particle{T}, t::Real) where {T} =
-    SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t)
-
-@inline @muladd function propagate_pos(pos, p::MagneticParticle{T}, t) where {T}
-    # "Initial" conditions
-    ω = p.omega; r = 1/ω
-    φ0 = atan(p.vel[2], p.vel[1])
-    # Propagate:
-    sφ0, cφ0 = sincos(φ0)
-    sωφ0, cωφ0 = sincos(ω*t + φ0)
-    ppos = SV{T}((sωφ0 - sφ0)*r, (-cωφ0 + cφ0)*r)
-    return pos + ppos
-end
-
-"""
-    bounce!(p::AbstractParticle, bd::Billiard) -> i, t, pos, vel
-"Bounce" the particle (advance for one collision) in the billiard.
-
-Specifically, find the [`next_collision`](@ref) of `p` with `bd`,
-[`relocate!`](@ref) the particle correctly,
-[`resolvecollision!`](@ref) with the colliding obstacle and finally return:
-
-* index of the obstacle that the particle just collided with
-* the time from the previous collision until the current collision `t`
-* position and velocity of the particle at the current collision (*after* the
-  collision has been resolved!). The position is given in the unit cell of
-  periodic billiards. Do `pos += p.current_cell` for the position in real space.
-
-```julia
-bounce!(p, bd, raysplit) -> i, t, pos, vel
-```
-Ray-splitting version of `bounce!`.
-"""
-@inline function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
-    tmin::T, i::Int = next_collision(p, bd)
-    o = bd[i]
-    tmin, k = relocate!(p, o, tmin)
-    resolvecollision!(p, o)
-    return i, tmin, p.pos, p.vel
-end
-
-@inline function bounce!(p::MagneticParticle{T}, bd::Billiard{T}) where {T}
-    tmin::T, i::Int = next_collision(p, bd)
-    if tmin != Inf
-        o = bd[i]
-        tmin, k = relocate!(p, o, tmin)
-        resolvecollision!(p, o)
-    end
-    p.center = find_cyclotron(p)
-    return i, tmin, p.pos, p.vel
-end
-
 
 #####################################################################################
 # ispinned, Evolve & Construct
