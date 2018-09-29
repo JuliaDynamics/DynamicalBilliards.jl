@@ -44,17 +44,17 @@ function collisiontime(p::Particle{T}, w::FiniteWall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     # case of velocity pointing away of wall:
-    denom ≥ 0.0 && return Inf
+    denom ≥ 0.0 && return nocollision(T)
     posdot = dot(w.sp-p.pos, n)
     # Case of particle starting behind finite wall:
-    posdot ≥ 0.0 && return Inf
+    posdot ≥ 0.0 && return nocollision(T)
     colt = posdot/denom
-    intersection = p.pos + colt * p.vel
-    dfc = norm(intersection - w.center)
+    i = p.pos + colt * p.vel
+    dfc = norm(i - w.center)
     if dfc > w.width/2
-        return T(Inf)
+        return nocollision(T)
     else
-        return colt
+        return colt, i
     end
 end
 
@@ -76,11 +76,11 @@ end
     return t, p.pos + t * p.vel
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
+@muladd function collisiontime(p::Particle{T}, d::Antidot{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
-        dotp >=0 && return T(Inf)
+        dotp ≥ 0 && return nocollision(T)
     end
 
     dc = p.pos - d.c
@@ -88,7 +88,7 @@ end
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return T(Inf)
+    Δ ≤ 0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
     # Closest point (may be in negative time):
@@ -99,17 +99,17 @@ end
     end
 
     # If collision time is negative, return Inf:
-    t <= 0.0 ? T(Inf) : t
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t * p.vel)
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
+@muladd function collisiontime(p::Particle{T}, d::Semicircle{T}) where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return Inf
+    Δ ≤ 0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
     nn = dot(dc, d.facedir)
@@ -117,8 +117,8 @@ end
         # Return most positive time
         t = -B + sqrtD
     else # I am inside semicircle:
-        # these lines make sure that the code works for ANY starting position:
         t = -B - sqrtD
+        # these lines make sure that the code works for ANY starting position:
         if t ≤ 0 || distance(p, d) ≤ accuracy(T)
             t = -B + sqrtD
         end
@@ -126,10 +126,10 @@ end
     # This check is necessary to not collide with the non-existing side
     newpos = p.pos + p.vel * t
     if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
-        return Inf
+        return nocollision(T)
     end
     # If collision time is negative, return Inf:
-    t ≤ 0.0 ? Inf : t
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t*p.vel)
 end
 
 

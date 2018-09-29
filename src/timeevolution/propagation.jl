@@ -53,19 +53,19 @@ rewriteeeeeeeeee
 
     propagate!(p, cp, tmin) # propagate to collision point
     d = distance(p.pos, o)
-    bool = isnt_valid(d, o)
-    if bool
+    okay = _okay(d, o)
+    if !okay
         n = normalvec(o, p.pos)
-        p.pos += _multiplier(o, T) * d * n
-        @assert distance(p.pos, o) ≥ 0
+        p.pos -= d * n
+        # due to finite precision this does not always give positive distance
+        # but collisiontime takes care of it, as it does not care about collisions
+        # very close to the point.
     end
-    return bool
+    return okay
 end
 
-isnt_valid(d, o::Obstacle) = d ≥ 0.0
-isnt_valid(d, o::PeriodicWall) = d ≤ 0.0
-_multiplier(::Obstacle, ::Type{T}) where {T} = one(T) #+ accuracy(T)
-_multiplier(::PeriodicWall, ::Type{T}) where {T} = -one(T) #+ accuracy(T)
+_okay(d, o::Obstacle) = d ≥ 0.0
+_okay(d, o::PeriodicWall) = d ≤ 0.0
 
 """
     propagate!(p::AbstractParticle, t)
