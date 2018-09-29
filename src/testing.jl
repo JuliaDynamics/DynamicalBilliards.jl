@@ -25,8 +25,9 @@ tag(t::Union{<: RaySplitter, <: Tuple}) = "[RAYSPLIT]"
 tag(args...) = join([tag(a) for a in args])
 
 acclevel(::Particle{T}) where {T} = eps(T)^(3/4)
+acclevel(::MagneticParticle{T}) where {T} = eps(T)^(3/4)
 acclevel(bd::Billiard{T}) where {T} = isperiodic(bd) ? eps(T)^(3/5) : eps(T)^(3/4)
-acclevel(p, bd) = max(acclevel(p), acclevel(bd))
+acclevel(args...) = maximum(acclevel(a) for a in args)
 
 function omnibilliard()
     pref = 3 # how big is the frame with respect to the Disks
@@ -83,19 +84,11 @@ function omnibilliard()
     bd = Billiard(green, red, purple, frame...)
 end
 
-function finitehorizon(r = 0.3)
-    @assert r ≥ 0.25
-    bd = billiard_sinai(r; setting = "periodic")
-    corners = Obstacle[]
-    for x in (0.0, 1.0), y in (0.0, 1.0)
-        push!(corners, Disk([x, y], r, "corner ($x, $y)"))
-    end
-    bd = Billiard(corners..., bd...)
-end
+finitehorizon(r = 0.5) = billiard_hexagonal_sinai(0.5; setting = "periodic")
 
 function testparticles()
-    p = Particle(0.11, 0.51, 2π*rand())
-    mp = MagneticParticle(0.11, 0.51, 2π*rand(), 0.5)
+    p = Particle(0.31, 0.51, 2π*rand())
+    mp = MagneticParticle(0.31, 0.51, 2π*rand(), 0.5)
     return p, mp
 end
 

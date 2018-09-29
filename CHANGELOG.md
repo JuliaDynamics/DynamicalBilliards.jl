@@ -17,6 +17,7 @@
 ## TODO
 eval: `_multiplier`, `nocollision`, `distancecheck`
 * Overload plot
+* unroll distance(bd)
 
 * Renamed `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
 

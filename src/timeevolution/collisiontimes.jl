@@ -11,7 +11,7 @@ const sixsqrt = 6sqrt(2)
 
 @inline cross2D(a, b) = a[1]*b[2] - a[2]*b[1]
 
-@inline accuracy(::Type{T}) where {T} = eps(T)^(3/4)
+@inline accuracy(::Type{T}) where {T} = sqrt(eps(T))
 @inline accuracy(::Type{BigFloat}) = BigFloat(1e-32)
 @inline nocollision(::Type{T}) where {T} = (T(Inf), SV{T}(0.0, 0.0))
 
@@ -196,18 +196,17 @@ end
     θ1 = realangle(p, o, I1)
     θ2 = realangle(p, o, I2)
     # Collision time, equiv. to arc-length until collision point:
-    j = θ1 < θ2 ? 1 : 2
-    return (θ1, θ2)[j]*rc, (I1, I2)[j]
+    return θ1 < θ2 ? (θ1*rc, I1) : (θ2*rc, I2)
 end
 
-function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+function collisiontime(p::MagneticParticle{T}, o::Semicircle{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
     r1 = o.r
     d = norm(p1-pc)
     if (d >= rc + r1) || (d <= abs(rc-r1))
-        return Inf
+        return nocollision(T)
     end
     # Solve quadratic:
     a = (rc^2 - r1^2 + d^2)/2d
@@ -224,15 +223,18 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     # Only consider intersections on the "correct" side of Semicircle:
     cond1 = dot(I1-o.c, o.facedir) < 0
     cond2 = dot(I2-o.c, o.facedir) < 0
+    # Collision time, equiv. to arc-length until collision point:
+    θ, I = nocollision(T)
     if cond1 || cond2
-        # Calculate real angle until intersection:
-        θ1 = cond1 ? realangle(p, o, I1) : T(Inf)
-        θ2 = cond2 ? realangle(p, o, I2) : T(Inf)
-        # Collision time, equiv. to arc-length until collision point:
-        return min(θ1, θ2)*rc
-    else
-        return Inf
+        for (Y, cond) in ((I1, cond1), (I2, cond2))
+            if cond
+                φ = realangle(p, o, Y)
+                φ < θ && (θ = φ; I = Y)
+            end
+        end
     end
+    # Collision time = arc-length until collision point
+    return θ*rc, I
 end
 
 """
@@ -251,7 +253,7 @@ function realangle(p::MagneticParticle{T}, o::Obstacle{T}, i::SV{T})::T where {T
     PC = pc - P0
     d2 = dot(i-P0,i-P0) #distance of particle from intersection point
     # Check dot product for close points:
-    if d2 ≤ accuracy(T)
+    if d2 ≤ accuracy(T)*accuracy(T)
         dotp = dot(p.vel, normalvec(o,  p.pos))
         # Case where velocity points away from obstacle:
         dotp ≥ 0 && return T(Inf)

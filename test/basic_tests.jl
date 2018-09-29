@@ -74,8 +74,8 @@ function test_maximum_distance(p, bd, thres = 1e-12, N = 1e6)
 end
 
 
-# billiards_testset("Finite Collision time", test_finite_collisions)
-# billiards_testset("min/max distance", test_maximum_distance, 1e-12)
+billiards_testset("Finite Collision time", test_finite_collisions)
+billiards_testset("min/max distance", test_maximum_distance, 1e-12)
 
 
 # STEP 1 : Add maximum distance AFTER JUST CALLING next_collision and
