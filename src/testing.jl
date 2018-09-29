@@ -3,6 +3,7 @@ using DynamicalBilliards, Test
 using DynamicalBilliards: isperiodic
 
 export tag, omnibilliard, finitehorizon, testparticles, isperiodic
+export acclevel
 
 CONCAVE = Union{Semicircle}
 
@@ -22,6 +23,10 @@ end
 tag(t::Union{<: RaySplitter, <: Tuple}) = "[RAYSPLIT]"
 
 tag(args...) = join([tag(a) for a in args])
+
+acclevel(::Particle{T}) where {T} = eps(T)^(3/4)
+acclevel(bd::Billiard{T}) where {T} = isperiodic(bd) ? eps(T)^(3/5) : eps(T)^(3/4)
+acclevel(p, bd) = max(acclevel(p), acclevel(bd))
 
 function omnibilliard()
     pref = 3 # how big is the frame with respect to the Disks
@@ -113,12 +118,6 @@ function basic_tests(f, args...)
     f(mp, bd, args...)
 end
 
-function separator()
-    println("\n")
-    println("- "^40)
-    println("\n")
-end
-
 """
     billiards_testset(description, f, args...; caller = basic_tests)
 Wrap a testset around `caller(f, args...)` which times the result
@@ -133,6 +132,12 @@ function billiards_testset(d, f, args...; caller = basic_tests)
     println("Required time: $(round(time()-t, digits=3)) sec.")
     separator()
 end
+function separator()
+    println("\n")
+    println("- "^40)
+    println("\n")
+end
+
 
 export basic_tests, billiards_testset
 

@@ -47,8 +47,7 @@ export MushroomTools
 
 include("raysplitting.jl")
 
-# tagging: (for tests)
-include("tags.jl")
+include("testing.jl")
 
 ##########################################
 # Test Options                           #
