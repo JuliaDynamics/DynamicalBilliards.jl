@@ -1,18 +1,21 @@
 # 3.0-dev
 
-## BREAKING
-* Change of the internal propagation algorithm:
-    1. the function `collisiontime` returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
-    2. The `timeprec` and all those nonsense are removed. An *internal* (not exposed) function `distancecheck` is implemented instead. It is the duty of `collisiontime` to return `Inf` if the particle is within this `accuracy` and the collision point.
-    2. The particle is then "teleported" to this point by setting its `pos`. For the case of magnetic propagation the velocity is propagated by the collision time. This brings very high accuracy, as the velocity vector is not multiplied with time and then added to the position vector.
-    3. The `distance` is checked. If it has wrong sign, a `relocation` simply relocates the particle in the direction of the `normalvec`, for amount `(1+eps())*distance`.
-    5. Specular reflection / periodicity is done.
-
-* Renamed `distancecheck` to `accuracy`
-* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`.
 
 ## Enhancements / new features
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
+
+## Low-Level changes:
+These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
+
+* Change of the internal propagation algorithm:
+  1. the function `collisiontime` returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
+  2. The `timeprec` and all those nonsense are removed. It is the duty of `collisiontime` to return `Inf` if the particle is very close to the collision point (`realangle` uses `accuracy`, while for straight propagation the direction of travel is enough).
+  3. The particle is then "teleported" to this point by setting its `pos`. For the case of magnetic propagation the velocity is propagated by the collision time. This brings very high accuracy, as the velocity vector is not multiplied with time and then added to the position vector.
+  4. The `distance` is checked. If it has wrong sign, a `relocation` simply relocates the particle in the direction of the `normalvec`, for amount `(1+eps())*distance`.
+  5. Specular reflection / periodicity is done.
+
+* Renamed `distancecheck` to `accuracy`
+* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`.
 
 ## TODO
 eval: `_multiplier`, `nocollision`, `distancecheck`

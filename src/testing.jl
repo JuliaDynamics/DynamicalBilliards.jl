@@ -94,17 +94,17 @@ end
 
 
 
-"""
-    basic_tests(f, args...)
-Run function `f` with `f(p, bd, args...)`
-for `p, bd` being all combinations of basic particles/billiards.
-"""
-function basic_tests(f, args...)
+function all_tests(f, args...)
+    omni_tests(f, args...)
+    periodic_tests(f, args...)
+end
+function omni_tests(f, args...)
     bd = omnibilliard()
     p, mp = testparticles()
     f(p, bd, args...)
     f(mp, bd, args...)
-
+end
+function periodic_tests(f, args...)
     bd = finitehorizon()
     p, mp = testparticles()
     f(p, bd, args...)
@@ -112,26 +112,21 @@ function basic_tests(f, args...)
 end
 
 """
-    billiards_testset(description, f, args...; caller = basic_tests)
+    billiards_testset(description, f, args...; caller = all_tests)
 Wrap a testset around `caller(f, args...)` which times the result
 and separates the test from others (`println`).
 """
-function billiards_testset(d, f, args...; caller = basic_tests)
-    println("TEST: $(d)")
+function billiards_testset(d, f, args...; caller = all_tests)
+    println(">> TEST: $(d)")
     t = time()
     @testset "$(d)" begin
-        basic_tests(f, args...)
+        caller(f, args...)
     end
     println("Required time: $(round(time()-t, digits=3)) sec.")
     separator()
 end
-function separator()
-    println("\n")
-    println("- "^40)
-    println("\n")
-end
+separator() = println("\n", "- "^40, "\n")
 
-
-export basic_tests, billiards_testset
+export all_tests, omni_tests, periodic_tests, billiards_testset
 
 end

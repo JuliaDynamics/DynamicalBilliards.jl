@@ -1,4 +1,4 @@
-export resolvecollision!, construct, next_collision, bounce!, evolve, ispinned
+export resolvecollision!, construct, next_collision, bounce!, evolve, ispinned, evolve!
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
