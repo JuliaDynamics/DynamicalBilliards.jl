@@ -19,11 +19,11 @@ const sixsqrt = 6sqrt(2)
 ## Particle
 #######################################################################################
 """
-    collisiontime(p::AbstractParticle, o::Obstacle) -> t, cp
+    collisiontime(p::AbstractParticle, o::Obstacle) → t, cp
 Calculate the collision time between given
 particle and obstacle. Return the time and the estimated collision point `cp`.
 
-Returns `Inf, SV(Inf, Inf)` if the collision is not possible *or* if the
+Returns `Inf, SV(0, 0)` if the collision is not possible *or* if the
 collision happens backwards in time.
 
 **It is the duty of `collisiontime` to avoid incorrect collisions when the particle is
