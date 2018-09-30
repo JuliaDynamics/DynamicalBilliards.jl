@@ -7,8 +7,10 @@ struct Billiard{T, D, O<:Tuple, Y}
     peridx::Y
 end
 
-@inline isperiodic(::Billiard{T,D,O,Nothing}) where {T,D,O} = false
-@inline isperiodic(::Billiard{T,D,O,Y}) where {T,D,O,Y} = true
+@inline isperiodic(::Billiard{T,D,<:Tuple,Vector{Int}}) where {T,D} = true
+@inline isperiodic(::Billiard{T,D,<:Tuple,Nothing}) where {T,D} = false
+@inline isperiodic(i::Int, ::Billiard{T,D,O,Nothing}) where {T,D,O} = false
+@inline isperiodic(i::Int, bd::Billiard{T,D,<:Tuple,Vector{Int}}) where {T,D} = i ∈ bd.peridx
 
 #pretty print:
 _get_name(o::Obstacle) = :name ∈ fieldnames(typeof(o)) ? o.name : string(typeof(o))
