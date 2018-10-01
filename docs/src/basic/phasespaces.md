@@ -34,7 +34,6 @@ using PyPlot # enables plot_boundarymap function
 
 colors = ["C$(rand(1:9))" for i in 1:n] # random colors
 
-figure(figsize = (10,8))
 plot_boundarymap(ξς, φς, ις, color = colors)
 savefig("boundarymap.svg"); nothing # hide
 ```
@@ -45,7 +44,6 @@ savefig("boundarymap.svg"); nothing # hide
 And of course similarly for magnetic fields
 ```@example coords
 ξς, φς, ις = boundarymap(bd, t, n, 1.0) # angular velocity last argument
-figure(figsize = (10,8))
 plot_boundarymap(ξς, φς, ις, color = colors)
 savefig("boundarymapmag.svg"); nothing # hide
 ```

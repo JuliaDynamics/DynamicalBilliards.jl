@@ -1,8 +1,15 @@
-# 3.0-dev
+# master
 
+## TODO
+eval: `_multiplier`, `nocollision`, `distancecheck`
+* Overload plot
+* unroll distance(bd)
+
+* Renamed `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
 
 ## Enhancements / new features
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
+* `totallength` is exported
 
 ## Low-Level changes:
 These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
@@ -16,14 +23,6 @@ These changes are not actually breaking, unless someone used the low-level inter
 
 * Renamed `distancecheck` to `accuracy`
 * Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`.
-
-## TODO
-eval: `_multiplier`, `nocollision`, `distancecheck`
-* Overload plot
-* unroll distance(bd)
-
-* Renamed `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
-
 
 # v2.3
 * Now you can write `p.ω` as well as `p.omega` for magnetic particles.

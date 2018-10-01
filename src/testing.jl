@@ -110,6 +110,14 @@ function periodic_tests(f, args...)
     f(p, bd, args...)
     f(mp, bd, args...)
 end
+function ergodic_tests(f, args...)
+    for bd in (billiard_sinai(), billiard_stadium())
+        p = Particle(0.1, 0.1, 2π*rand())
+        mp = MagneticParticle(p, 1.0)
+        f(p, bd, args...)
+        f(mp, bd, args...)
+    end
+end
 
 """
     billiards_testset(description, f, args...; caller = all_tests)
@@ -128,5 +136,6 @@ end
 separator() = println("\n", "- "^40, "\n")
 
 export all_tests, omni_tests, periodic_tests, billiards_testset
+export ergodic_tests
 
 end

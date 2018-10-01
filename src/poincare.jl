@@ -51,12 +51,12 @@ function psos(
 
     while count < t
         # compute collision times
-        tmin::T, i::Int = next_collision(p, bd)
+        i::Int, tmin::T = next_collision(p, bd)
 
-        tplane = collisiontime(p, plane)
+        tplane, = collisiontime(p, plane)
 
         # if tplane is smaller, I intersect the section
-        if tplane ≥ 0 && tplane < tmin && tplane != Inf
+        if tplane != Inf && tplane < tmin
             psos_pos, psos_vel = propagate_posvel(p.pos, p, tplane)
             if dot(psos_vel, plane.normal) < 0 # only write crossings with 1 direction
                 push!(rpos, psos_pos); push!(rvel, psos_vel)
@@ -66,7 +66,7 @@ function psos(
         tmin == Inf && break
 
         if check_for_pinned
-            if isperiodic(bd) && i ∈ bd.peridx
+            if isperiodic(i, bd)
                 t_to_write += tmin
             else
                 t_to_write = zero(T)
@@ -74,7 +74,7 @@ function psos(
         end
 
         # Now "bounce" the particle normally:
-        tmin, = relocate!(p, bd[i], tmin)
+        relocate!(p, bd[i], tmin)
         resolvecollision!(p, bd[i])
         typeof(par) <: MagneticParticle && (p.center = find_cyclotron(p))
 
