@@ -5,6 +5,7 @@
 * Overload plot
 * unroll distance(bd)
 * update Lyapunov exponents to new interface
+* Re-work ray-splitting
 * Rename `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
 
 ## Enhancements / new features

@@ -33,7 +33,6 @@ function meancoltest(args...)
     @testset "Stadium" begin
         l = 1.0; w = 1.0
         bd = billiard_stadium(l, w)
-        vol = w*l + π*w^2
         a = π*(w*l + π*(w/2)^2)/(2l + π*w)
         m = meancollisiontime(p, bd, Int(1e6))
         @test a ≈ m rtol = 0.1
@@ -42,6 +41,7 @@ function meancoltest(args...)
         l = 1.0; w = 1.0
         bd = billiard_stadium(l, w)
         p = MagneticParticle(0.1, 0.1, 0.1, 1.0)
+        a = π*(w*l + π*(w/2)^2)/(2l + π*w)
         m = meancollisiontime(p, bd, Int(1e6))
         @test a ≈ m rtol = 0.1
     end
