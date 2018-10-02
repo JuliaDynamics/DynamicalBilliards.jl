@@ -70,138 +70,73 @@ billiards_testset("PSOS", identity; caller = cut_psos)
 
 
 
-# function fills_boundarymap(p, bd)
-#     @testset "$(tag(p, bd)) Fills boundary map" begin
-#         ξs, sφs = boundarymap(bd, 10000, p)
-#
-#         partition = (10,10) # partition size
-#         A = falses(partition)
-#         l = totallength(bd)
-#         ε = (l/partition[1], 2/partition[2]) # box size
-#         c = 0
-#         for point ∈ zip(ξs, sφs)
-#             id = clamp.(ceil.(Int, (point .- (0, -1))./ε), (1,1), partition)
-#             if !A[id...]
-#                 A[id...] = true
-#                 c += 1
-#                 if c == p[1]*p[2]
-#                     break
-#                 end
-#             end
-#         end
-#         for a in A
-#             @test a
-#         end
-#     end
-# end
-#
-# billiards_testset("Fills boundary map", fills_boundarymap; caller = ergodic_tests)
-#
-#
-#
-#
+function fills_boundarymap(p, bd)
+    @testset "$(tag(p, bd)) Fills boundary map" begin
+        ξs, sφs = boundarymap(bd, 10000, p)
 
-#
-# function boundarymap_portion_test(partnum = 10; printinfo = true)
-#     tim = time()
-#     @testset "Bunimovich" begin
-#         t = 100000.0
-#         bt = billiard_bunimovich()
-#         @testset "ω = $ω" for ω in [0.0, 0.1]
-#             for i in 1:min(partnum, 20)
-#                 p = ω == 0 ? randominside(bt) : randominside(bt, ω)
-#                 φ = π/4 * rand() # so that we never find bouncing walls
-#                 p.vel = (cos(φ), sin(φ))
-#                 ratio, dic = boundarymap_portion(bt,t, randominside(bt), 0.1)
-#                 @test ratio == 1.0
-#             end
-#         end
-#     end
-#     @testset "Mushroom" begin
-#         t = 100000.0
-#         l = 1.0; r = 1.0
-#         @testset "w = $w" for w ∈ [0.2, 0.4]
-#
-#             bt = billiard_mushroom(l, w, r)
-#             @testset "regular" begin
-#                 for i in 1:min(partnum, 10)
-#                     p = MushroomTools.randomregular(l, w, r)
-#                     ratio, dic = boundarymap_portion(bt,t, p, 0.1)
-#                     trueratio =  MushroomTools.g_r_2D(l,w,r)
-#                     # Only one regular particle covers very small amount of space:
-#                     @test ratio < trueratio
-#                 end
-#             end
-#             @testset "chaotic" begin
-#                 for i in 1:min(partnum, 10)
-#                     p = MushroomTools.randomchaotic(l, w, r)
-#                     ratio, dic = boundarymap_portion(bt, t, p, 0.1)
-#                     trueratio =  MushroomTools.g_c_2D(l,w,r)
-#                     @test trueratio - 0.1 ≤ ratio ≤ trueratio + 0.1
-#                 end
-#             end
-#
-#         end
-#     end
-#     if printinfo
-#         println("""
-# Results:
-# + `boundarymap_portion` works
-# + Mushroom boundary map ratios are replicated correctly
-# + Bunimovich stadium always gives ratio of 1.0
-# + Required time: $(round(time()-tim, digits=3)) sec
-# """)
-#     end
-# end
-#
-#
-# function phasespace_portion_test(partnum = 10; printinfo = true)
-#     tim = time()
-#     @testset "Bunimovich" begin
-#         t = 100000.0
-#         bt = billiard_bunimovich()
-#         @testset "ω = $ω" for ω in [0.0, 0.1]
-#             for i in 1:min(partnum, 20)
-#                 p = ω == 0 ? randominside(bt) : randominside(bt, ω)
-#                 φ = π/4 * rand() # so that we never find bouncing walls
-#                 p.vel = (cos(φ), sin(φ))
-#                 ratio = phasespace_portion(bt,t, randominside(bt), 0.1)
-#                 @test ratio == 1.0
-#             end
-#         end
-#     end
-#     @testset "Mushroom" begin
-#         t = 100000.0
-#         l = 1.0; r = 1.0
-#         @testset "w = $w" for w ∈ [0.2, 0.4]
-#             bt = billiard_mushroom(l, w, r)
-#             @testset "regular" begin
-#                 for i in 1:min(partnum, 10)
-#                     p = MushroomTools.randomregular(l, w, r)
-#                     ratio = phasespace_portion(bt,t, p, 0.1)
-#                     trueratio =  MushroomTools.g_r_3D(l,w,r)
-#                     # Only one regular particle covers very small amount of space:
-#                     @test ratio < trueratio
-#                 end
-#             end
-#             @testset "chaotic" begin
-#                 for i in 1:min(partnum, 10)
-#                     p = MushroomTools.randomchaotic(l, w, r)
-#                     ratio = phasespace_portion(bt, t, p, 0.1)
-#                     trueratio =  MushroomTools.g_c_3D(l,w,r)
-#                     @test trueratio - 0.1 ≤ ratio ≤ trueratio + 0.1
-#                 end
-#             end
-#
-#         end
-#     end
-#     if printinfo
-#         println("""
-# Results:
-# + `phasespace_portion` works
-# + Mushroom phase space ratios are replicated correctly
-# + Bunimovich stadium always gives ratio of 1.0
-# + Required time: $(round(time()-tim, digits=3)) sec
-# """)
-#     end
-# end
+        partition = (10,10) # partition size
+        A = falses(partition)
+        l = totallength(bd)
+        ε = (l/partition[1], 2/partition[2]) # box size
+        c = 0
+        for point ∈ zip(ξs, sφs)
+            id = clamp.(ceil.(Int, (point .- (0, -1))./ε), (1,1), partition)
+            if !A[id...]
+                A[id...] = true
+                c += 1
+                if c == partition[1]*partition[2]
+                    break
+                end
+            end
+        end
+        for a in A
+            @test a
+        end
+    end
+end
+
+billiards_testset("Fills boundary map", fills_boundarymap; caller = ergodic_tests)
+
+
+function phasespace_ratio(f, g)
+    @testset "Bunimovich" begin
+        t = 100000.0
+        bt = billiard_bunimovich()
+        for ω in [0.0, 0.1]
+            p = ω == 0 ? randominside(bt) : randominside(bt, ω)
+            @testset "$(tag(p, bt))" begin
+                φ = π/4 * rand() # so that we never find bouncing walls
+                p.vel = (cos(φ), sin(φ))
+                ratio, = f(bt,t, randominside(bt), 0.1)
+                @test ratio == 1.0
+            end
+        end
+    end
+
+    t = 1000000.0
+    l = 1.0; r = 1.0
+    @testset "Mushroom w=$(w)" for w ∈ [0.2, 0.4]
+
+        bt = billiard_mushroom(l, w, r)
+        @testset "regular" begin
+            p = MushroomTools.randomregular(l, w, r)
+            ratio, = f(bt,t, p, 0.1)
+            trueratio =  1 - g(l,w,r)
+            # Only one regular particle covers very small amount of space:
+            @test ratio < trueratio
+        end
+        @testset "chaotic" begin
+            p = MushroomTools.randomchaotic(l, w, r)
+            ratio, = f(bt, t, p, 0.1)
+            trueratio = g(l,w,r)
+            @test trueratio - 0.1 ≤ ratio ≤ trueratio + 0.1
+        end
+    end
+end
+ratio_caller(x, f, g) = phasespace_ratio(f, g)
+
+billiards_testset("2D Phasespace Ratio", identity, boundarymap_portion, MushroomTools.g_c_2D;
+caller = ratio_caller)
+
+# billiards_testset("3D Phasespace Ratio", identity, phasespace_portion, MushroomTools.g_c_3D;
+# caller = ratio_caller)

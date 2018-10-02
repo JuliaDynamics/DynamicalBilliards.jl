@@ -1,11 +1,11 @@
 # master
 
 ## TODO
-eval: `_multiplier`, `nocollision`, `distancecheck`
+* eval: `_multiplier`, `nocollision`, `distancecheck`
 * Overload plot
 * unroll distance(bd)
-
-* Renamed `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
+* update Lyapunov exponents to new interface
+* Rename `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
 
 ## Enhancements / new features
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
