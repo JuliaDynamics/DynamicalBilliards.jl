@@ -1,8 +1,6 @@
 export isphysical, reset_billiard!
 export RaySplitter
 
-#=debug=# false && using Juno
-
 #####################################################################################
 # RaySplitter structures
 #####################################################################################
@@ -145,7 +143,7 @@ function incidence_angle(p::AbstractParticle{T}, a::Obstacle{T})::T where {T}
 end
 
 function istransmitted(p::AbstractParticle{T}, a::Obstacle{T}, Tr::F) where {T, F}
-    ω = typeof(p) <: MagneticParticle ? p.omega : T(0)
+    ω = typeof(p) <: MagneticParticle ? p.omega : zero(T)
     φ = incidence_angle(p, a)
     # Raysplit Algorithm step 3: check transmission probability
     trans = Tr(φ, a.pflag, ω) > rand()
@@ -153,21 +151,17 @@ end
 
 # Raysplit Algorithm step 4: relocate the particle _inside_ the obstacle
 # if ray-splitting happens (see `ineq` variable)
-function relocate_rayspl!(
-    p::AbstractParticle{T}, o::Obstacle{T}, trans::Bool = false)::T where {T}
+function relocate_rayspl!(p::AbstractParticle{T}, o::Obstacle{T},
+    trans::Bool = false) where {T}
 
     ineq = 2trans - 1
-    newpos = p.pos; newt = zero(T)
-    i = 1
-
-    while ineq*distance(newpos, o) > 0
-        newt += ineq*timeprec_rayspl(p)
-        newpos = propagate_pos(p.pos, p, newt)
-        i *= 10
-        #=debug=# false && i > 10000 && println("care, iteration $(log10(i))")
+    d = distance(p.pos, o)
+    notokay = ineq*d > 0.0
+    if notokay
+        n = normalvec(o, p.pos)
+        p.pos -= d * n
     end
-    propagate!(p, newpos, newt)
-    return newt
+    return notokay
 end
 
 
@@ -184,17 +178,21 @@ function resolvecollision!(p::AbstractParticle{T}, bd::Billiard{T}, colidx::Int,
     if trans #perform raysplitting
         # Raysplit Algorithm step 6: find transmission angle in relative angles
         theta = angleclamp(rayspl.refraction(φ, a.pflag, ω))
+
         # Raysplit Algorithm step 7: reverse the Obstacle propagation flag
         # for all obstacles dictated by the RaySplitter
+        # (this also reverses `normalvec` !)
         for oi ∈ rayspl.affect(colidx)
             bd[oi].pflag = ! bd[oi].pflag
         end
+
         # Raysplit Algorithm step 8: find transmission angle in real-space angles
         n = normalvec(a, p.pos) #notice that this is reversed! It's the new normalvec!
         Θ = theta + atan(n[2], n[1])
 
         # Raysplit Algorithm step 9: Perform refraction
         p.vel = SVector{2,T}(cos(Θ), sin(Θ))
+
         # Raysplit Algorithm step 10: Set new angular velocity
         if ismagnetic
             ω = rayspl.newω(p.omega, !a.pflag)  # notice the exclamation mark
@@ -215,24 +213,21 @@ end
 function bounce!(p::AbstractParticle{T}, bd::Billiard{T},
     raysidx::Vector{Int}, raysplitters::Tuple) where {T}
 
-    tmin::T, i::Int = next_collision(p, bd)
-    #=debug=# false && println("Colt. with Left antidot = $(collisiontime(p, bd[1]))")
-    #=debug=# false && println("Min. col. t with $(bd[i].name) = $tmin")
-    #=debug=# false && tmin == 0 || tmin == Inf && error("Ridiculous, tmin=$(tmin)!")
+    i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
+
     if tmin == Inf
         return i, tmin, p.pos, p.vel
+
     elseif raysidx[i] != 0
-        propagate!(p, tmin)
-        trans = istransmitted(p, bd[i], raysplitters[raysidx[i]].transmission)
-        #=debug=# false && println("Angle of incidence: $(φ), transmitted? $trans")
-        #=debug=# false && println("Currently, pflag is $(bd[i].pflag)")
-        #=debug=# false && trans && println("(pflag will be reversed!)")
-        #=debug=# false && println()
-        newt = relocate_rayspl!(p, bd[i], trans)
-        resolvecollision!(p, bd, i, trans,  raysplitters[raysidx[i]])
-        tmin += newt
+
+        propagate!(p, cp, tmin)
+
+        trans::Bool = istransmitted(p, bd[i], raysplitters[raysidx[i]].transmission)
+
+        relocate_rayspl!(p, bd[i], trans)
+        resolvecollision!(p, bd, i, trans, raysplitters[raysidx[i]])
     else
-        tmin, = relocate!(p, bd[i], tmin)
+        relocate!(p, bd[i], tmin, cp)
         resolvecollision!(p, bd[i])
     end
     typeof(p) <: MagneticParticle && (p.center = find_cyclotron(p))
@@ -268,15 +263,6 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple
     #=debug=# false && (dc = 0)
 
     while count < t
-        #=debug=# false && println("count=$count")
-        if #=debug=# false
-            if dc > 10
-                Juno.clearconsole()
-                dc = 0
-            else
-                dc += 1
-            end
-        end
 
         i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
         t_to_write += tmin
