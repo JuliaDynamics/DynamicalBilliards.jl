@@ -1,19 +1,5 @@
 export psos
 
-propagate_posvel(pos, p::Particle{T}, t) where {T} =
-    (SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t), p.vel)
-
-@muladd function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
-    ω = p.omega
-    φ0 = atan(p.vel[2], p.vel[1])
-    s0, c0 = sincos(φ0)
-    sωφ0, cωφ0 = sincos(ω*t + φ0)
-    ppos = SV{T}(sωφ0/ω - s0/ω, -cωφ0/ω + c0/ω)
-    psos_vel = SV{T}(cωφ0, sωφ0)
-    return pos + ppos, psos_vel
-end
-
-
 """
     psos(bd::Billiard, plane::InfiniteWall, t, particles)
 Compute the Poincaré section of the `particles` with the given `plane`, by evolving
@@ -33,7 +19,7 @@ the `plane`. If given more than one particle, the result is a vector of vectors
 of vectors.
 
 *Notice* - This function can handle pinned particles.
-If a pinned particle can intersect with the `plane`, then the intersection is returned.
+If a pinned particle can intersect with the `plane`, then an intersection is returned.
 If however it can't then empty vectors are returned.
 """
 function psos(
@@ -51,37 +37,42 @@ function psos(
 
     while count < t
         # compute collision times
-        tmin::T, i::Int = next_collision(p, bd)
+        i::Int, tmin::T, cp = next_collision(p, bd)
 
-        tplane = collisiontime(p, plane)
+        tplane, = collisiontime(p, plane)
 
         # if tplane is smaller, I intersect the section
-        if tplane ≥ 0 && tplane < tmin && tplane != Inf
+        if tplane ≥ 0.0 && tplane < tmin && tplane != Inf
             psos_pos, psos_vel = propagate_posvel(p.pos, p, tplane)
             if dot(psos_vel, plane.normal) < 0 # only write crossings with 1 direction
                 push!(rpos, psos_pos); push!(rvel, psos_vel)
             end
         end
 
-        tmin == Inf && break
 
         if check_for_pinned
-            if isperiodic(bd) && i ∈ bd.peridx
+            if isperiodic(i, bd)
                 t_to_write += tmin
             else
                 t_to_write = zero(T)
             end
         end
 
+        tmin == Inf && break
+
         # Now "bounce" the particle normally:
-        tmin, = relocate!(p, bd[i], tmin)
+        relocate!(p, bd[i], tmin, cp)
         resolvecollision!(p, bd[i])
         typeof(par) <: MagneticParticle && (p.center = find_cyclotron(p))
 
         if check_for_pinned && t_to_write ≥ cyclotron_time
-            tplane = collisiontime(p, plane)
+            tplane, = collisiontime(p, plane)
             if tplane == Inf
-                return SV{T}[], SV{T}[]
+                if length(rpos) > 0
+                    return [rpos[1]], [rvel[1]]
+                else
+                    return rpos, rvel
+                end
             else
                 psos_pos, psos_vel = propagate_posvel(p.pos, p, tplane)
                 return [psos_pos], [psos_vel]
@@ -109,3 +100,17 @@ end
 psos(bd, plane, t, n::Integer) = psos(bd, plane, t, [randominside(bd) for i=1:n])
 psos(bd, plane, t, n::Integer, ω::Real) =
 psos(bd, plane, t, [randominside(bd, ω) for i=1:n])
+
+
+propagate_posvel(pos, p::Particle{T}, t) where {T} =
+    (SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t), p.vel)
+
+@muladd function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
+    ω = p.omega
+    φ0 = atan(p.vel[2], p.vel[1])
+    s0, c0 = sincos(φ0)
+    sωφ0, cωφ0 = sincos(ω*t + φ0)
+    ppos = SV{T}(sωφ0/ω - s0/ω, -cωφ0/ω + c0/ω)
+    psos_vel = SV{T}(cωφ0, sωφ0)
+    return pos + ppos, psos_vel
+end

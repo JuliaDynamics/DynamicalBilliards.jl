@@ -3,6 +3,7 @@ using DynamicalBilliards, Test
 using DynamicalBilliards: isperiodic
 
 export tag, omnibilliard, finitehorizon, testparticles, isperiodic
+export acclevel
 
 CONCAVE = Union{Semicircle}
 
@@ -22,6 +23,11 @@ end
 tag(t::Union{<: RaySplitter, <: Tuple}) = "[RAYSPLIT]"
 
 tag(args...) = join([tag(a) for a in args])
+
+acclevel(::Particle{T}) where {T} = eps(T)^(3/4)
+acclevel(::MagneticParticle{T}) where {T} = eps(T)^(3/4)
+acclevel(bd::Billiard{T}) where {T} = isperiodic(bd) ? eps(T)^(3/5) : eps(T)^(3/4)
+acclevel(args...) = maximum(acclevel(a) for a in args)
 
 function omnibilliard()
     pref = 3 # how big is the frame with respect to the Disks
@@ -78,62 +84,58 @@ function omnibilliard()
     bd = Billiard(green, red, purple, frame...)
 end
 
-function finitehorizon(r = 0.3)
-    @assert r ≥ 0.25
-    bd = billiard_sinai(r; setting = "periodic")
-    corners = Obstacle[]
-    for x in (0.0, 1.0), y in (0.0, 1.0)
-        push!(corners, Disk([x, y], r, "corner ($x, $y)"))
-    end
-    bd = Billiard(corners..., bd...)
-end
+finitehorizon(r = 0.5) = billiard_hexagonal_sinai(0.5; setting = "periodic")
 
 function testparticles()
-    p = Particle(0.11, 0.51, 2π*rand())
-    mp = MagneticParticle(0.11, 0.51, 2π*rand(), 0.5)
+    p = Particle(0.31, 0.51, 2π*rand())
+    mp = MagneticParticle(0.31, 0.51, 2π*rand(), 0.5)
     return p, mp
 end
 
 
 
-"""
-    basic_tests(f, args...)
-Run function `f` with `f(p, bd, args...)`
-for `p, bd` being all combinations of basic particles/billiards.
-"""
-function basic_tests(f, args...)
+function all_tests(f, args...)
+    omni_tests(f, args...)
+    periodic_tests(f, args...)
+end
+function omni_tests(f, args...)
     bd = omnibilliard()
     p, mp = testparticles()
     f(p, bd, args...)
     f(mp, bd, args...)
-
+end
+function periodic_tests(f, args...)
     bd = finitehorizon()
     p, mp = testparticles()
     f(p, bd, args...)
     f(mp, bd, args...)
 end
-
-function separator()
-    println("\n")
-    println("- "^40)
-    println("\n")
+function ergodic_tests(f, args...)
+    for bd in (billiard_sinai(), billiard_stadium())
+        p = Particle(0.1, 0.1, 2π*rand())
+        mp = MagneticParticle(p, 1.0)
+        f(p, bd, args...)
+        f(mp, bd, args...)
+    end
 end
 
 """
-    billiards_testset(description, f, args...; caller = basic_tests)
+    billiards_testset(description, f, args...; caller = all_tests)
 Wrap a testset around `caller(f, args...)` which times the result
 and separates the test from others (`println`).
 """
-function billiards_testset(d, f, args...; caller = basic_tests)
-    println("TEST: $(d)")
+function billiards_testset(d, f, args...; caller = all_tests)
+    println(">> TEST: $(d)")
     t = time()
     @testset "$(d)" begin
-        basic_tests(f, args...)
+        caller(f, args...)
     end
     println("Required time: $(round(time()-t, digits=3)) sec.")
     separator()
 end
+separator() = println("\n", "- "^40, "\n")
 
-export basic_tests, billiards_testset
+export all_tests, omni_tests, periodic_tests, billiards_testset
+export ergodic_tests
 
 end

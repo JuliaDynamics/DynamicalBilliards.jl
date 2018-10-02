@@ -1,4 +1,4 @@
-export to_bcoords, from_bcoords, arcintervals
+export to_bcoords, from_bcoords, arcintervals, totallength
 export boundarymap
 #######################################################################################
 ## Arclengths
@@ -173,7 +173,7 @@ If `particles` is not a single particle then both `ξs` and `sφs` are vectors
 of `Vector`. The `i` inner vector corresponds to the results of the
 `i` initial condition/particle.
 
-The returned values of this function are can be used in conjuction with the
+The returned values of this function can be used in conjuction with the
 function [`plot_boundarymap`](@ref) (requires `using PyPlot`) to plot the boundary map
 in an intuitive way.
 

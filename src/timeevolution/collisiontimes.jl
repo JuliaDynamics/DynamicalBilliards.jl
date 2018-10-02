@@ -1,64 +1,86 @@
-export collisiontime, realangle
+export collisiontime
+
+#####################################################################################
+# Accuracy & Convenience Functions
+#####################################################################################
+"""
+Approximate arccos(1 - x) for x very close to 0.
+"""
+@inline (acos1mx(x::T)::T) where {T} = sqrt(2x) + sqrt(x)^3/sixsqrt
+const sixsqrt = 6sqrt(2)
+
+@inline cross2D(a, b) = a[1]*b[2] - a[2]*b[1]
+
+@inline accuracy(::Type{T}) where {T} = sqrt(eps(T))
+@inline accuracy(::Type{BigFloat}) = BigFloat(1e-32)
+@inline nocollision(::Type{T}) where {T} = (T(Inf), SV{T}(0.0, 0.0))
+
 #######################################################################################
 ## Particle
 #######################################################################################
 """
-    collisiontime(p::AbstractParticle, o::Obstacle)
+    collisiontime(p::AbstractParticle, o::Obstacle) → t, cp
 Calculate the collision time between given
-particle and obstacle. Returns `Inf` if the collision is not possible *or* if the
+particle and obstacle. Return the time and the estimated collision point `cp`.
+
+Returns `Inf, SV(0, 0)` if the collision is not possible *or* if the
 collision happens backwards in time.
 
-In the case of magnetic propagation, there are always two possible collisions.
-The function [`realangle`](@ref) decides which of the two will occur first,
-based on the sign of the angular velocity of the magnetic particle.
+**It is the duty of `collisiontime` to avoid incorrect collisions when the particle is
+on top of the obstacle (or extremely close).**
 """
-function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
+@muladd function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
-    denom >= 0.0 ? T(Inf) : dot(w.sp-p.pos, n)/denom
+    if denom ≥ 0.0
+        return nocollision(T)
+    else
+        t = dot(w.sp - p.pos, n)/denom
+        return t, p.pos + t * p.vel
+    end
 end
 
 function collisiontime(p::Particle{T}, w::FiniteWall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     # case of velocity pointing away of wall:
-    denom ≥ 0.0 && return Inf
+    denom ≥ 0.0 && return nocollision(T)
     posdot = dot(w.sp-p.pos, n)
     # Case of particle starting behind finite wall:
-    posdot ≥ 0.0 && return Inf
+    posdot ≥ 0.0 && return nocollision(T)
     colt = posdot/denom
-    intersection = p.pos + colt * p.vel
-    dfc = norm(intersection - w.center)
+    i = p.pos + colt * p.vel
+    dfc = norm(i - w.center)
     if dfc > w.width/2
-        return T(Inf)
+        return nocollision(T)
     else
-        return colt
+        return colt, i
     end
 end
 
 @muladd function collisiontime(p::Particle{T}, d::Circular{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
-    dotp >= 0.0 && return T(Inf)
+    dotp ≥ 0.0 && return nocollision(T)
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)           #pointing towards circle center: B < 0
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B*B - C
 
-    Δ <= 0.0 && return T(Inf)
+    Δ ≤ 0.0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
     # Closest point:
     t = -B - sqrtD
-    t <= 0.0 ? T(Inf) : t
+    return t, p.pos + t * p.vel
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Antidot{T})::T where {T}
+@muladd function collisiontime(p::Particle{T}, d::Antidot{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
-        dotp >=0 && return T(Inf)
+        dotp ≥ 0 && return nocollision(T)
     end
 
     dc = p.pos - d.c
@@ -66,7 +88,7 @@ end
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return T(Inf)
+    Δ ≤ 0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
     # Closest point (may be in negative time):
@@ -77,17 +99,17 @@ end
     end
 
     # If collision time is negative, return Inf:
-    t <= 0.0 ? T(Inf) : t
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t * p.vel)
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
+@muladd function collisiontime(p::Particle{T}, d::Semicircle{T}) where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return Inf
+    Δ ≤ 0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
     nn = dot(dc, d.facedir)
@@ -95,19 +117,19 @@ end
         # Return most positive time
         t = -B + sqrtD
     else # I am inside semicircle:
-        # these lines make sure that the code works for ANY starting position:
         t = -B - sqrtD
-        if t ≤ 0 || distance(p, d) ≤ distancecheck(T)
+        # these lines make sure that the code works for ANY starting position:
+        if t ≤ 0 || distance(p, d) ≤ accuracy(T)
             t = -B + sqrtD
         end
     end
     # This check is necessary to not collide with the non-existing side
     newpos = p.pos + p.vel * t
     if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
-        return Inf
+        return nocollision(T)
     end
     # If collision time is negative, return Inf:
-    t ≤ 0.0 ? Inf : t
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t*p.vel)
 end
 
 
@@ -115,7 +137,7 @@ end
 #######################################################################################
 ## Magnetic particle
 #######################################################################################
-@muladd function collisiontime(p::MagneticParticle{T}, w::Wall{T})::T where {T}
+@muladd function collisiontime(p::MagneticParticle{T}, w::Wall{T}) where {T}
     ω = p.omega
     pc, pr = cyclotron(p)
     P0 = p.pos
@@ -127,32 +149,36 @@ end
     c = dot(P1P3, P1P3) - pr*pr
     Δ = b^2 -4*a*c
     # Check if line is completely outside (or tangent) of the circle:
-    Δ ≤ 0.0 && return Inf
+    Δ ≤ 0.0 && return nocollision(T)
     # Intersection coefficients:
     u1 = (-b - sqrt(Δ))/2a
     u2 = (-b + sqrt(Δ))/2a
     cond1 = 0.0 ≤ u1 ≤ 1.0
     cond2 = 0.0 ≤ u2 ≤ 1.0
-    # Check if the line is completely inside the circle:
+    # Check if the line (wall) is completely inside the circle:
+    θ, I = nocollision(T)
     if cond1 || cond2
-        # Calculate real angle until intersection:
-        θ1 = cond1 ? (I1 = w.sp + u1*(w.ep-w.sp); realangle(p, w, I1)) : T(Inf)
-        θ2 = cond2 ? (I2 = w.sp + u2*(w.ep-w.sp); realangle(p, w, I2)) : T(Inf)
-        # Collision time, equiv. to arc-length until collision point:
-        return min(θ1, θ2)*pr
-    else
-        return Inf
+        dw = w.ep - w.sp
+        for (u, cond) in ((u1, cond1), (u2, cond2))
+            Y =  w.sp + u*dw
+            if cond
+                φ = realangle(p, w, Y)
+                φ < θ && (θ = φ; I = Y)
+            end
+        end
     end
+    # Collision time = arc-length until collision point
+    return θ*pr, I
 end
 
-@muladd function collisiontime(p::MagneticParticle{T}, o::Circular{T})::T where {T}
+@muladd function collisiontime(p::MagneticParticle{T}, o::Circular{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
     r1 = o.r
     d = norm(p1-pc)
     if (d >= rc + r1) || (d <= abs(rc-r1))
-        return Inf
+        return nocollision(T)
     end
     # Solve quadratic:
     a = (rc^2 - r1^2 + d^2)/2d
@@ -170,17 +196,17 @@ end
     θ1 = realangle(p, o, I1)
     θ2 = realangle(p, o, I2)
     # Collision time, equiv. to arc-length until collision point:
-    return min(θ1, θ2)*rc
+    return θ1 < θ2 ? (θ1*rc, I1) : (θ2*rc, I2)
 end
 
-function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+function collisiontime(p::MagneticParticle{T}, o::Semicircle{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
     r1 = o.r
     d = norm(p1-pc)
     if (d >= rc + r1) || (d <= abs(rc-r1))
-        return Inf
+        return nocollision(T)
     end
     # Solve quadratic:
     a = (rc^2 - r1^2 + d^2)/2d
@@ -197,15 +223,18 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     # Only consider intersections on the "correct" side of Semicircle:
     cond1 = dot(I1-o.c, o.facedir) < 0
     cond2 = dot(I2-o.c, o.facedir) < 0
+    # Collision time, equiv. to arc-length until collision point:
+    θ, I = nocollision(T)
     if cond1 || cond2
-        # Calculate real angle until intersection:
-        θ1 = cond1 ? realangle(p, o, I1) : T(Inf)
-        θ2 = cond2 ? realangle(p, o, I2) : T(Inf)
-        # Collision time, equiv. to arc-length until collision point:
-        return min(θ1, θ2)*rc
-    else
-        return Inf
+        for (Y, cond) in ((I1, cond1), (I2, cond2))
+            if cond
+                φ = realangle(p, o, Y)
+                φ < θ && (θ = φ; I = Y)
+            end
+        end
     end
+    # Collision time = arc-length until collision point
+    return θ*rc, I
 end
 
 """
@@ -224,7 +253,7 @@ function realangle(p::MagneticParticle{T}, o::Obstacle{T}, i::SV{T})::T where {T
     PC = pc - P0
     d2 = dot(i-P0,i-P0) #distance of particle from intersection point
     # Check dot product for close points:
-    if d2 ≤ distancecheck(T)
+    if d2 ≤ accuracy(T)*accuracy(T)
         dotp = dot(p.vel, normalvec(o,  p.pos))
         # Case where velocity points away from obstacle:
         dotp ≥ 0 && return T(Inf)
@@ -237,7 +266,7 @@ function realangle(p::MagneticParticle{T}, o::Obstacle{T}, i::SV{T})::T where {T
 
     # Get "side" of i:
     PI = i - P0
-    side = (PI[1]*PC[2] - PI[2]*PC[1])*ω
+    side = cross2D(PI, PC)*ω
     # Get angle until i (positive number between 0 and 2π)
     side < 0 && (θprime = T(2π-θprime))
     return θprime
@@ -249,28 +278,28 @@ end
 ## next_collision
 #######################################################################################
 """
-    next_collision(p::AbstractParticle, bd::Billiard) -> tmin, i
-Compute the [`collisiontime`](@ref) across all obstacles in `bd`, find the minimum
-one and return this time as well as the index of the obstacle that the time
-corresponds to.
+    next_collision(p::AbstractParticle, bd::Billiard) -> i, tmin, cp
+Compute the [`collisiontime`](@ref) across all obstacles in `bd` and find the minimum
+one. Return the index of colliding obstacle, the time and the collision point.
 """
 function next_collision end
 
 @generated function next_collision(p, bd::Billiard{T, L, BT}) where {T, L, BT}
-    out = :(ind = 0; tmin = T(Inf))
+    out = :(ind = 0; tmin = T(Inf); cp = SV{T}(0.0, 0.0))
     for j=1:L
         push!(out.args, quote
                             let x = bd[$j]
-                                tcol = collisiontime(p, x)
+                                tcol, pcol = collisiontime(p, x)
                                 # Set minimum time:
                                 if tcol < tmin
                                   tmin = tcol
                                   ind = $j
+                                  cp = pcol
                                 end
                             end
                         end
                         )
     end
-    push!(out.args, :(return tmin, ind))
+    push!(out.args, :(return ind, tmin, cp))
     return out
 end
