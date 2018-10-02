@@ -38,7 +38,7 @@ function cut_psos(args...)
 
         # case of pinned but does cross periodic walls *and* section
         bd = billiard_sinai(;setting = "periodic")
-        p = MagneticParticle(0.0, 1.0, -π/2, 0.44*2)
+        p = MagneticParticle(0.25, 0.25, -π/2 + π/4, 0.44*2)
         a, b = psos(bd, plane, t, p)
         @test typeof(a) <: Vector{<:SVector}
         @test length(a) == length(b) == 1
@@ -46,13 +46,14 @@ function cut_psos(args...)
 
     for ω ∈ [0.0, 1.0]
         p = ω == 0 ? randominside(bt) : randominside(bt, ω)
-        @testset "$(tag(p, bd)) psos"
-        a, b = psos(bt, plane, t, p)
-        for j in 1:length(a)
-            @test a[j][1] ≈ 0.5
-            @test 0 < a[j][2] < 1
-            @test -1 < b[j][1] < 1
-            @test -1 < b[j][2] < 1
+        @testset "$(tag(p, bt)) psos" begin
+            a, b = psos(bt, plane, t, p)
+            for j in 1:length(a)
+                @test a[j][1] ≈ 0.5
+                @test 0 < a[j][2] < 1
+                @test -1 < b[j][1] < 1
+                @test -1 < b[j][2] < 1
+            end
         end
     end
 
@@ -64,6 +65,7 @@ function cut_psos(args...)
     end
 end
 
+billiards_testset("PSOS", identity; caller = cut_psos)
 
 
 
