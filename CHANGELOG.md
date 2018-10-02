@@ -1,14 +1,14 @@
-# master
+# 3.0-dev
 
 ## TODO
-* eval: `_multiplier`, `nocollision`, `distancecheck`
+* update docs
 * Overload plot
-* unroll distance(bd)
 * update Lyapunov exponents to new interface
 * Re-work ray-splitting
 * Rename `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
 
 ## Enhancements / new features
+* Much more robust propagation algorithm that is less prone to errors and "weird behaviors"!
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
 * `totallength` is exported
 
