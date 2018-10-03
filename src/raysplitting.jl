@@ -1,5 +1,5 @@
 export isphysical, reset_billiard!
-export RaySplitter
+export RaySplitter, raysplit_indices
 
 #####################################################################################
 # RaySplitter structures
@@ -259,8 +259,6 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple
 
     count = zero(t)
     t_to_write = zero(T)
-
-    #=debug=# false && (dc = 0)
 
     while count < t
 
