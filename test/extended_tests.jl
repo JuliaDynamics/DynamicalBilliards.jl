@@ -33,8 +33,11 @@ function test_no_escape(p, bd, N = 1e4)
     end
 end
 
+billiards_testset("No escape", test_no_escape; caller = ergodic_tests)
 
-function test_movin_periodic(p, bd, N = 1e3)
+
+
+function test_movin_periodic(p, bd, N = 1e2)
     xmin, ymin, xmax, ymax = cellsize(bd)
 
     ct, poss, vels = evolve!(p, bd, N)
@@ -54,11 +57,9 @@ function test_movin_periodic(p, bd, N = 1e3)
     dy1 = minimum(yt) - ymin
     dy2 = ymax - maximum(yt)
 
-    @testset "$(tag(p, bd)) no escape" begin
-        for d in (dx1, dx2, dy1, dy2)
-            @test d ≤ 0
-        end
-    end
+    @test maximum(abs.((dx1, dx2))) > xmax - xmin
+    @test maximum(abs.((dy1, dy2))) > ymax - ymin
+
 end
 
 billiards_testset("movin periodic", test_movin_periodic; caller = periodic_tests)
