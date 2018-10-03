@@ -27,6 +27,7 @@ tag(args...) = join([tag(a) for a in args])
 acclevel(::Particle{T}) where {T} = eps(T)^(3/4)
 acclevel(::MagneticParticle{T}) where {T} = eps(T)^(3/4)
 acclevel(bd::Billiard{T}) where {T} = isperiodic(bd) ? eps(T)^(3/5) : eps(T)^(3/4)
+acclevel(t::Union{<: RaySplitter, <: Tuple}) = eps()^(3/4)
 acclevel(args...) = maximum(acclevel(a) for a in args)
 
 function omnibilliard()
@@ -133,9 +134,54 @@ function billiards_testset(d, f, args...; caller = all_tests)
     println("Required time: $(round(time()-t, digits=3)) sec.")
     separator()
 end
-separator() = println("\n", "- "^40, "\n")
+separator() = println("\n", "- "^30, "\n")
 
 export all_tests, omni_tests, periodic_tests, billiards_testset
 export ergodic_tests
+
+function basic_ray()
+    bd = billiard_rectangle()
+    d = Antidot([0.5, 0.5], 0.25)
+    bd = Billiard(bd..., d)
+    sa = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
+    newoantidot = ((x, bool) -> bool ? -0.5x : -2.0x)
+    Tp = (p) -> (φ, pflag, ω) -> begin
+        if pflag
+            p
+        else
+            abs(φ) < π/4 ? (1-p) : 0.0
+        end
+    end
+    raywall = RaySplitter([5], Tp(0.5), sa, newoantidot)
+
+    return bd, (raywall,)
+end
+
+function extreme_ray()
+    x = 2.0; y = 1.0
+    bdr =  billiard_rectangle(2.0, 1.0)
+    sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
+    a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
+    a2 = Antidot([3x/4, y/2], 0.25, "Right Antidot")
+
+
+    sa(φ, pflag, ω) = pflag ? 2.0φ : 0.5φ
+    function Tp(φ, pflag, ω)
+        if pflag
+            abs(φ) < π/4 ? 0.9 : 0.0
+        else
+            0.9
+        end
+    end
+
+    newoantidot = ((x, bool) -> bool ? -0.5x : -2.0x)
+
+    raywall = RaySplitter([3], Tp, sa, newoantidot)
+    raya = RaySplitter([1, 2], Tp, sa, newoantidot)
+
+    return Billiard(a1, a2, sw, bdr...), (raywall, raya)
+end
+
+export basic_ray, extreme_ray
 
 end

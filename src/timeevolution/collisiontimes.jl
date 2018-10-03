@@ -20,14 +20,14 @@ const sixsqrt = 6sqrt(2)
 #######################################################################################
 """
     collisiontime(p::AbstractParticle, o::Obstacle) → t, cp
-Calculate the collision time between given
-particle and obstacle. Return the time and the estimated collision point `cp`.
+Calculate the collision time between given particle and obstacle.
+Return the time and the estimated collision point `cp`.
 
 Returns `Inf, SV(0, 0)` if the collision is not possible *or* if the
 collision happens backwards in time.
 
 **It is the duty of `collisiontime` to avoid incorrect collisions when the particle is
-on top of the obstacle (or extremely close).**
+on top of the obstacle (or very close).**
 """
 @muladd function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)

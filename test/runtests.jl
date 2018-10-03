@@ -1,5 +1,5 @@
 using DynamicalBilliards
-using Dates, LinearAlgebra
+using Dates
 using Test
 using DynamicalBilliards.Testing
 
@@ -12,8 +12,8 @@ include("extended_tests.jl")
 include("various_tests.jl")
 include("type_stability.jl")
 include("phasespaces_tests.jl")
+include("raysplt_tests.jl")
 # include("lyapunov.jl")
-# include("raysplit.jl")
 
 print("\nDynamicalBilliards tests ended (successfully) at: ")
 print(Dates.format(now(), "HH:MM:s"), "\n")
