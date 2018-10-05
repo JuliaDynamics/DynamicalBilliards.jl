@@ -13,6 +13,7 @@ using LinearAlgebra
 using StaticArrays
 import Base: show, eltype, getindex
 
+using Elliptic
 using MuladdMacro
 # The @muladd macro turns all expressions of the type
 # a = b*c ± d

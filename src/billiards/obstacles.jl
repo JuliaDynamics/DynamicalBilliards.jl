@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Semicircle
+normalvec, distance, cellsize, Semicircle, Ellipse
 export translate
 
 using InteractiveUtils
@@ -390,6 +390,14 @@ assumed to be very close to the obstacle's boundary).
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
+@inline function normalvec(e::Ellipse{T}, pos) where {T}
+    # from https://www.algebra.com/algebra/homework/
+    # Quadratic-relations-and-conic-sections/Tangent-lines-to-an-ellipse.lesson
+    x₀, y₀ = pos
+    h, k = e.c
+    s = e.pflag ? one(T) : -one(T)
+    return s*normalize(SV((x₀-h)/(e.a*e.a), (y₀-k)/(e.b*e.b)))
+end
 
 #######################################################################################
 ## Distances
@@ -452,6 +460,11 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     end
 end
 
+
+function distance(pos::SV, e::Ellipse{T})::T where {T}
+    d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
+    e.pflag ? d : -d
+end
 
 # The entire functionality of `distance_init` is necessary only for
 # FiniteWall !!!
