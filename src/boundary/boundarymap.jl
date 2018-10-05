@@ -10,6 +10,7 @@ Return the total boundary length of `o`.
 @inline totallength(o::Wall) = norm(o.ep - o.sp)
 @inline totallength(o::Semicircle) = π*o.r
 @inline totallength(o::Circular) = 2π*o.r
+@inline totallength(e::Ellipse) = 4e.arc
 
 @inline totallength(bd::Billiard) = sum(totallength(x) for x in bd.obstacles)
 
@@ -49,7 +50,7 @@ The arc-coordinate `ξ` is measured as:
 * the distance from start point to end point in `Wall`s
 * the arc length measured counterclockwise from the open face in `Semicircle`s
 * the arc length measured counterclockwise from the rightmost point
-  in `Circular`s
+  in `Circular`/`Ellipse`s
 
 Notice that this function returns the *local* arclength. To get the global
 arclength parameterizing an entire billiard, simply do
@@ -67,6 +68,7 @@ function to_bcoords(pos::SV, vel::SV, o::Obstacle)
     return ξ, sinφ
 end
 
+# Internal function ξ is simply returning the boundary "arc-coordinate"
 _ξ(pos::SV, o::Wall) = norm(pos - o.sp)
 
 function _ξ(pos::SV{T}, o::Semicircle{T}) where {T<:AbstractFloat}
@@ -88,6 +90,10 @@ function _ξ(pos::SV{T}, o::Circular{T}) where {T<:AbstractFloat}
     return r*o.r
 end
 
+function _ξ(pos::SV{T}, o::Ellipse{T}) where {T<:AbstractFloat}
+    θ = atan(pos[2] - o.c[2], pos[1] - o.c[1]) + π
+    return ellipse_arclength(θ, o)
+end
 
 
 """
@@ -123,6 +129,11 @@ end
 
 real_pos(ξ, o::Circular{T}) where T = o.c .+ o.r * SV{T}(cossin(ξ/o.r))
 
+function real_pos(ξ, o::Ellipse{T}) where T
+    error("`from_bcoords` is not implemented for Ellipse. If you know of a way "*
+    "to find a point (2-vector) on an ellipse given an arclength ξ, please let us know!")
+    return nothing
+end
 
 
 """

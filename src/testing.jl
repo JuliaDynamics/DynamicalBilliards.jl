@@ -102,9 +102,19 @@ end
 function omni_tests(f, args...)
     bd = omnibilliard()
     p, mp = testparticles()
+    e = Ellipse([0.68, 1.53], 0.3, 0.2)
+    bd2 = Billiard(bd..., e)
+    f(p, bd2, args...)
+    f(mp, bd, args...)
+end
+function omni_tests_noellipse(f, args...)
+    bd = omnibilliard()
+    p, mp = testparticles()
     f(p, bd, args...)
     f(mp, bd, args...)
 end
+export omni_tests_noellipse
+
 function periodic_tests(f, args...)
     bd = finitehorizon()
     p, mp = testparticles()
@@ -139,10 +149,15 @@ separator() = println("\n", "- "^30, "\n")
 export all_tests, omni_tests, periodic_tests, billiards_testset
 export ergodic_tests
 
-function basic_ray()
+function basic_ray(ellipse)
     bd = billiard_rectangle()
-    d = Antidot([0.5, 0.5], 0.25)
-    bd = Billiard(bd..., d)
+    d = Antidot([0.25, 0.5], 0.15)
+    if ellipse
+        e = Ellipse([0.75, 0.5], 0.15, 0.25)
+        bd = Billiard(bd..., d, e)
+    else
+        bd = Billiard(bd..., d)
+    end
     sa = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
     newoantidot = ((x, bool) -> bool ? -0.5x : -2.0x)
     Tp = (p) -> (φ, pflag, ω) -> begin
@@ -152,17 +167,21 @@ function basic_ray()
             abs(φ) < π/4 ? (1-p) : 0.0
         end
     end
-    raywall = RaySplitter([5], Tp(0.5), sa, newoantidot)
+    ray = RaySplitter(ellipse ? [5, 6] : [5], Tp(0.5), sa, newoantidot)
 
-    return bd, (raywall,)
+    return bd, (ray,)
 end
 
-function extreme_ray()
+function extreme_ray(ellipse)
     x = 2.0; y = 1.0
     bdr =  billiard_rectangle(2.0, 1.0)
     sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
     a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
-    a2 = Antidot([3x/4, y/2], 0.25, "Right Antidot")
+    if ellipse
+        a2 = Ellipse([3x/4, y/2], 0.25, 0.2, true, "Ellipse")
+    else
+        a2 = Antidot([3x/4, y/2], 0.25, "Right Antidot")
+    end
 
 
     sa(φ, pflag, ω) = pflag ? 2.0φ : 0.5φ

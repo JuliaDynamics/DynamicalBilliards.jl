@@ -337,3 +337,18 @@ function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25)
     raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
     return bd, raya
 end
+
+export billiard_iris
+
+"""
+    billiard_iris(a=0.2, b=0.4, w=1.0; setting = "standard")
+Return a billiard that is a square of side `w` enclosing at its center an ellipse
+with semi axes `a`, `b`.
+"""
+function billiard_iris(a′ = 0.2, b′ = 0.4, w′ = 1.0;
+    setting = "standard", a = a′, b = b′, w = w′)
+
+    rec = billiard_rectangle(w, w; setting = setting)
+    e = Ellipse([w/2, w/2], a, b, true, "Ellipse")
+    return Billiard(e, rec.obstacles...)
+end

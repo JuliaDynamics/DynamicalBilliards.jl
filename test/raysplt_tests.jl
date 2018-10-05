@@ -5,12 +5,11 @@ using DynamicalBilliards.Testing
 # %% Basic tests
 
 function simple_raysplit(f, args...)
-    bd, ray = basic_ray()
+    bd, ray = basic_ray(true)
     p = randominside(bd)
     f(p, bd, ray, args...)
 
-    reset_billiard!(bd)
-
+    bd, ray = basic_ray(false)
     mp = randominside(bd, 2.0)
     f(mp, bd, ray, args...)
 end
@@ -82,10 +81,11 @@ billiards_testset("Ray min/max distance", ray_maximum_distance; caller = simple_
 # %% Extreme angles test
 
 function extreme_raysplit(f, args...)
-    bd, ray = extreme_ray()
+    bd, ray = extreme_ray(true)
     p = randominside(bd)
     f(p, bd, ray, args...)
 
+    bd, ray = extreme_ray(false)
     mp = randominside(bd, 2.0)
     f(mp, bd, ray, args...)
 end
@@ -97,14 +97,14 @@ billiards_testset("ERay min/max distance", ray_maximum_distance; caller = extrem
 # %% Totally brutal tests
 
 function inside_antidot(args...)
-    bd, ray = extreme_ray()
+    bd, ray = extreme_ray(true)
     pa = randominside(bd)
     mp = randominside(bd, 1.0)
     isray(i) = (i == 1 || i == 2)
     raysidx = DynamicalBilliards.raysplit_indices(bd, ray)
 
     for p in (pa, mp); @testset "$(tag(p, bd, ray)) BRUTAL" begin
-        reset_billiard!(bd)
+        bd, ray = extreme_ray(typeof(p) <: Particle)
         n = 0
         iprev = 0
         check = false

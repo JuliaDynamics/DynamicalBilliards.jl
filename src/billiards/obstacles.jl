@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-normalvec, distance, cellsize, Semicircle
+normalvec, distance, cellsize, Semicircle, Ellipse
 export translate
 
 using InteractiveUtils
@@ -312,6 +312,68 @@ show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
 
+"""
+    Ellipse{T<:AbstractFloat}  <: Obstacle{T}
+Ellipse obstacle that also allows ray-splitting. The ellipse is always oriented
+on the x and y axis (although you can make whichever you want the major one).
+### Fields:
+* `c::SVector{2,T}` : Center.
+* `a::T` : x semi-axis.
+* `b::T` : y semi-axis.
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating. `true` (default) is associated with being outside the ellipse.
+* `name::String` : Some name given for user convenience. Defaults to `"Ellipse"`.
+
+The ellipse equation is given by
+```math
+\\left(\\frac{x - c[1]}{a} \\right)^2+ \\left(\\frac{y - c[2]}{b}\\right)^2 = 1
+```
+"""
+mutable struct Ellipse{T<:AbstractFloat} <: Obstacle{T}
+    c::SVector{2,T}
+    a::T
+    b::T
+    pflag::Bool
+    name::String
+    arc::T # arclength of one quadrant of the ellipse
+end
+
+"""
+    ellipse_arclength(θ, e::Ellipse)
+Return the arclength of the ellipse that
+spans angle `θ` (in normal coordinates, not in the ellipse parameterization).
+Expects `θ` to be in `[0, 2π]`.
+
+After properly calculating the
+```math
+d=b\\,E\\bigl(\\tan^{-1}(a/b\\,\\tan(\\theta))\\,\\big|\\,1-(a/b)^2\\bigr)
+```
+"""
+function ellipse_arclength(θ, e::Ellipse)
+    n, θ = divrem(θ, π/2)
+    a = e.a; b = e.b
+    if a/b > 1.0
+        θ = π/2 - θ
+        return (n + 1.0)*e.arc - proper_ellipse_arclength(θ, b, a)
+    else
+        return n*e.arc + proper_ellipse_arclength(θ, a, b)
+    end
+end
+
+proper_ellipse_arclength(θ, a, b)  = b*Elliptic.E(atan(a*tan(θ)/b), 1.0 - (a/b)^2)
+
+export ellipse_arclength
+
+function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
+                 name::String = "Ellipse") where {T<:Real}
+    S = T <: Integer ? Float64 : T
+    return Ellipse{S}(SVector{2,S}(c),
+            convert(S, abs(a)), convert(S, abs(b)), pflag, name,
+            proper_ellipse_arclength(π/2, min(a, b), max(a, b))
+        )
+end
+Ellipse{T}(args...) where {T} = Ellipse(args...)
+
 #######################################################################################
 ## Normal vectors
 #######################################################################################
@@ -328,6 +390,14 @@ assumed to be very close to the obstacle's boundary).
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
 @inline normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 
+@inline function normalvec(e::Ellipse{T}, pos) where {T}
+    # from https://www.algebra.com/algebra/homework/
+    # Quadratic-relations-and-conic-sections/Tangent-lines-to-an-ellipse.lesson
+    x₀, y₀ = pos
+    h, k = e.c
+    s = e.pflag ? one(T) : -one(T)
+    return s*normalize(SV((x₀-h)/(e.a*e.a), (y₀-k)/(e.b*e.b)))
+end
 
 #######################################################################################
 ## Distances
@@ -391,6 +461,11 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
 end
 
 
+function distance(pos::SV, e::Ellipse{T})::T where {T}
+    d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
+    e.pflag ? d : -d
+end
+
 # The entire functionality of `distance_init` is necessary only for
 # FiniteWall !!!
 distance_init(p::AbstractParticle, a::Obstacle) = distance_init(p.pos, a)
@@ -447,6 +522,17 @@ function cellsize(a::Antidot{T}) where {T}
     return xmin, ymin, xmax, ymax
 end
 
+function cellsize(e::Ellipse{T}) where {T}
+    if e.pflag
+        xmin = ymin = T(Inf)
+        xmax = ymax = T(-Inf)
+    else
+        xmin = e.c[1] - e.a; ymin = e.c[2] - e.b
+        xmax = e.c[1] + e.a; ymax = e.c[2] + e.b
+    end
+    return xmin, ymin, xmax, ymax
+end
+
 function cellsize(a::Semicircle{T}) where {T}
     xmin, ymin = a.c - a.r
     xmax, ymax = a.c + a.r
@@ -471,3 +557,5 @@ end
 for T in subtypes(Wall)
   @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
 end
+
+translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b)

@@ -11,7 +11,7 @@ Return a `RaySplitter` instance, used to perform raysplitting.
 that this `RaySplitter` corresponds to.
 
 `transmission`, `refraction` and `newangular` are **functions**. Let
-`φ` be the angle of incidence and `ω` be the angular velocit
+`φ` be the angle of incidence and `ω` be the angular velocity
 and `pflag` the propagation flag (before transmission).
 The functions have the following signatures:
 
