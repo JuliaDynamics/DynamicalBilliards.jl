@@ -133,6 +133,44 @@ end
 end
 
 
+@muladd function collisiontime(p::Particle{T}, e::Ellipse{T}) where {T}
+    # First check if particle is "looking at" eclipse if it is outside
+    if e.pflag
+        # These lines may be "not accurate enough" but so far all is good
+        dotp = dot(p.vel, normalvec(e, p.pos))
+        dotp ≥ 0.0 && return nocollision(T)
+    end
+
+    # http://www.ambrsoft.com/TrigoCalc/Circles2/Ellipse/EllipseLine.htm
+    a = e.a; b = e.b
+    # Translate particle with ellipse center (so that ellipse lies on [0, 0])
+    pc = p.pos - e.c
+    # Find μ, ψ for line equation y = μx + ψ describing particle
+    μ = p.vel[2]/p.vel[1]
+    ψ = pc[2] - μ*pc[1]
+
+    # Determinant and intersection points follow from the link
+    denomin = a*a*μ*μ + b*b
+    Δ² = denomin - ψ*ψ
+    Δ² ≤ 0 && return nocollision(T)
+    Δ = sqrt(Δ²); f1 = -a*a*μ*ψ; f2 = b*b*ψ # just factors
+    I1 = SV(f1 + a*b*Δ, f2 + a*b*μ*Δ)/denomin
+    I2 = SV(f1 - a*b*Δ, f2 - a*b*μ*Δ)/denomin
+
+    d1 = norm(pc - I1); d2 = norm(pc - I2)
+    if e.pflag
+        return d1 < d2 ? (d1, I1 + e.c) : (d2, I2 + e.c)
+    else # inside the ellipse: one collision is _always_ valid
+        (i, j) = d1 < d2 ? (2, 1) : (1, 2)
+        if (d1, d2)[j] < accuracy(T) # special case for being very close to ellipse
+            dotp = dot(p.vel, normalvec(e, (I1, I2)[j]))
+            dotp ≥ 0 && return ((d1, d2)[i], (I1, I2)[i])
+        else # check which of the two points is ahead or behind the obstacle
+            z1 = dot(pc - I1, p.vel)
+            return z1 > 0 ? (d2, I2) : (d1, I1)
+        end
+    end
+end
 
 #######################################################################################
 ## Magnetic particle
