@@ -161,14 +161,21 @@ end
     if e.pflag
         return d1 < d2 ? (d1, I1 + e.c) : (d2, I2 + e.c)
     else # inside the ellipse: one collision is _always_ valid
-        (i, j) = d1 < d2 ? (2, 1) : (1, 2)
-        if (d1, d2)[j] < accuracy(T) # special case for being very close to ellipse
-            dotp = dot(p.vel, normalvec(e, (I1, I2)[j]))
-            dotp ≥ 0 && return ((d1, d2)[i], (I1, I2)[i])
-        else # check which of the two points is ahead or behind the obstacle
-            z1 = dot(pc - I1, p.vel)
-            return z1 > 0 ? (d2, I2) : (d1, I1)
+        if d1 < d2
+            dmin, Imin = d1, I1
+            dmax, Imax = d2, I2
+        else
+            dmin, Imin = d2, I2
+            dmax, Imax = d1, I1
         end
+
+        if dmin < accuracy(T) # special case for being very close to ellipse
+            dotp = dot(p.vel, normalvec(e, Imin))
+            dotp ≥ 0 && return (dmax, Imax + e.c)
+        end
+         # check which of the two points is ahead or behind the obstacle
+        z1 = dot(pc - Imax, p.vel)
+        return z1 < 0 ? (dmax, Imax + e.c) : (dmin, Imin + e.c)
     end
 end
 
