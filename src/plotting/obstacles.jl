@@ -51,3 +51,12 @@ function plot_obstacle(w::Wall; kwargs...)
         linestyle = obls(w), lw = 2.0, kwargs...)
     end
 end
+
+function plot_obstacle(e::Ellipse; kwargs...)
+    edgecolor = obcolor(e)
+    facecolor = (edgecolor..., obalpha(e))
+    ellipse = PyPlot.matplotlib[:patches][:Ellipse](e.c, 2e.a, 2e.b;
+        edgecolor = edgecolor, facecolor = facecolor,
+        linestyle = obls(e), lw = 2.0, kwargs...)
+    PyPlot.gca()[:add_artist](ellipse)
+end
