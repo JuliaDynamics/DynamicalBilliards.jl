@@ -97,7 +97,7 @@ function phasespace_portion(bd::Billiard{T}, t,
 
         dummy.pos = pos
         dummy.vel = vel
-        τ, = next_collision(dummy,bd)
+        _, τ = next_collision(dummy,bd)
         total += τ
         (haskey(dict, SV{Int64}(ξcell, φcell))) && (visited += τ)
     end

@@ -138,5 +138,5 @@ ratio_caller(x, f, g) = phasespace_ratio(f, g)
 billiards_testset("2D Phasespace Ratio", identity, boundarymap_portion, MushroomTools.g_c_2D;
 caller = ratio_caller)
 
-# billiards_testset("3D Phasespace Ratio", identity, phasespace_portion, MushroomTools.g_c_3D;
-# caller = ratio_caller)
+billiards_testset("3D Phasespace Ratio", identity, phasespace_portion, MushroomTools.g_c_3D;
+caller = ratio_caller)
