@@ -14,7 +14,7 @@ function coordinate_invariance(p, bd, args...)
     end
 end
 
-billiards_testset("Coordinate change invariance", coordinate_invariance; caller = omni_tests)
+billiards_testset("Coordinate change invariance", coordinate_invariance; caller = omni_tests_noellipse)
 
 
 

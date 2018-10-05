@@ -102,9 +102,19 @@ end
 function omni_tests(f, args...)
     bd = omnibilliard()
     p, mp = testparticles()
+    e = Ellipse([0.68, 1.53], 0.3, 0.2)
+    bd2 = Billiard(bd..., e)
+    f(p, bd2, args...)
+    f(mp, bd, args...)
+end
+function omni_tests_noellipse(f, args...)
+    bd = omnibilliard()
+    p, mp = testparticles()
     f(p, bd, args...)
     f(mp, bd, args...)
 end
+export omni_tests_noellipse
+
 function periodic_tests(f, args...)
     bd = finitehorizon()
     p, mp = testparticles()
