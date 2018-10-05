@@ -522,6 +522,17 @@ function cellsize(a::Antidot{T}) where {T}
     return xmin, ymin, xmax, ymax
 end
 
+function cellsize(e::Ellipse{T}) where {T}
+    if e.pflag
+        xmin = ymin = T(Inf)
+        xmax = ymax = T(-Inf)
+    else
+        xmin = e.c[1] - e.a; ymin = e.c[2] - e.b
+        xmax = e.c[1] + e.a; ymax = e.c[2] + e.b
+    end
+    return xmin, ymin, xmax, ymax
+end
+
 function cellsize(a::Semicircle{T}) where {T}
     xmin, ymin = a.c - a.r
     xmax, ymax = a.c + a.r
