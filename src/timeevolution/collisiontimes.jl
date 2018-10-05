@@ -275,6 +275,11 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T}) where {T}
     return θ*rc, I
 end
 
+collisiontime(p::MagneticParticle, e::Ellipse) = error(
+"Magnetic propagation for Ellipse is not supported :( Consider contributing a "*
+"method to `collisiontime(p::MagneticParticle, e::Ellipse)`!")
+
+
 """
     realangle(p::MagneticParticle, o::Obstacle, I) -> θ
 Given the intersection point `I` of the trajectory of a magnetic particle `p` with
