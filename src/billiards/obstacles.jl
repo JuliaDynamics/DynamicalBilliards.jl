@@ -557,3 +557,5 @@ end
 for T in subtypes(Wall)
   @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
 end
+
+translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b)
