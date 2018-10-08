@@ -1,4 +1,4 @@
-export resolvecollision!, construct, next_collision, bounce!, evolve, ispinned, evolve!
+export construct, bounce!, evolve, ispinned, evolve!
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
@@ -58,7 +58,7 @@ rewriteeeeeeeeee
         n = normalvec(o, p.pos)
         p.pos -= d * n
         # due to finite precision this does not always give positive distance
-        # but collisiontime takes care of it, as it does not care about collisions
+        # but collision takes care of it, as it does not care about collisions
         # very close to the point.
     end
     return okay

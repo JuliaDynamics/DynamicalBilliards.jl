@@ -6,7 +6,7 @@ together, let's talk about how this package works.
 
 Firstly one defines a [`Billiard`](@ref) and optionally some [`RaySplitter`](@ref) instances. Then one creates a particle inside the defined billiard. The algorithm for the propagation of a particle is the following:
 
-1. Calculate the [`collisiontime`](@ref) of the particle with **all** obstacles in the billiard.
+1. Calculate the [`collision`](@ref) of the particle with **all** obstacles in the billiard.
 2. Find the smallest time, and the obstacle corresponding to that.
 3. [`relocate!`](@ref) the particle, so that it is on the correct side of the obstacle to-be-collided with.
 4. (Optionally) check if there is transmission for ray-splitting: `T(φ) > rand()`
@@ -64,7 +64,7 @@ translate
 
 ## Collision Times
 ```@docs
-collisiontime
+collision
 next_collision
 realangle
 ```

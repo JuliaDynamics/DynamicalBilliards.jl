@@ -5,7 +5,7 @@ With 3 simple steps, the user can get the output of the propagation of a particl
 
 In general, the workflow of `DynamicalBilliards` follows these simple steps:
 1. Create a billiard.
-2. Create a particle inside that billiard.
+2. Create particles inside that billiard.
 3. Get the output you want by using one of the high level functions.
 
 Adding more complexity in your billiard does not add complexity in your code. For example, to implement a ray-splitting billiard
@@ -34,8 +34,8 @@ A "particle" is that thingy that moves around in the billiard. It always moves w
 
 Currently there are two types of particles:
 
-* `Particle`, which propagates as a straight line.
-* `MagneticParticle`, which propagates as a circle instead of a line (similar to electrons in a perpendicular magnetic field).
+* [`Particle`](@ref), which propagates as a straight line.
+* [`MagneticParticle`](@ref), which propagates as a circle instead of a line (similar to electrons in a perpendicular magnetic field).
 
 There are two ways to create a particle. The first one is to provide the
 constructor with some initial conditions:
@@ -57,7 +57,7 @@ mp = MagneticParticle(x0, y0, φ0, ω)
     When creating a billiard or a particle, the object is printed with `{Float64}` at the end. This shows what type of numbers are used for *all* numerical operations. If you are curious you can learn more about it in the [numerical precision page](/physics/#numerical-precision).
 
 !!! danger "Particles must be inside the Billiard!"
-    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [low-level API page](LINKME).
+    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [low-level API page](low_level).
 
 ## Random initial conditions
 
@@ -172,9 +172,9 @@ for i in 1:length(posvector)
     end
 end
 xlabel("\$y\$"); ylabel("\$v_y\$")
-savefig("psos.svg"); nothing # hide
+savefig("psos.png"); nothing # hide
 ```
-![](psos.svg)
+![](psos.png)
 
 !!! note "`psos` operates on the unit cell"
     The `psos` function always calculates the crossings *within* the unit cell of

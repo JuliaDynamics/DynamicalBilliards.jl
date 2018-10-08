@@ -44,7 +44,7 @@ The following functions must obtain methods for `Semicircle` (or any other custo
 
 1. [`normalvec`](@ref)
 2. [`distance`](@ref) (with arguments `(position, obstacle)`)
-3. [`collisiontime`](@ref) with `Particle`
+3. [`collision`](@ref) with `Particle`
 
 Assuming that upon collision a specular reflection happens, then you don't need
 to define a method for [`resolvecollision!`](@ref). You can however define
@@ -57,7 +57,7 @@ for [`RandomDisk`](@ref).
 
 The first method is very simple, just do:
 ```julia
-import DynamicalBilliards: normalvec, distance, collisiontime
+import DynamicalBilliards: normalvec, distance, collision
 normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 ```
 Since the function is only used during [`distance`](@ref) and
@@ -91,10 +91,10 @@ end
 Notice that this definition always returns positive distance when the particle is on
 the "other side".
 
-Finally, the method for [`collisiontime`](@ref) is by far the most *trickiest*. But,
+Finally, the method for [`collision`](@ref) is by far the most *trickiest*. But,
 with pen, paper and a significant amount of patience, one can find a way:
 ```julia
-function collisiontime(p::Particle{T}, d::Semicircle{T})::T where {T}
+function collision(p::Particle{T}, d::Semicircle{T})::T where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
@@ -132,7 +132,7 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 ## Optional Methods
 
 1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
-1. [`collisiontime`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
+1. [`collision`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
 2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
 3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
@@ -149,10 +149,10 @@ end
 ```
 
 
-The [`collisiontime`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also
+The [`collision`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also
 tricky, however it is almost identical with the method for the general [`Circular`](@ref) obstacle:
 ```julia
-function collisiontime(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c

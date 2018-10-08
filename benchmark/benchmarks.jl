@@ -13,7 +13,7 @@ particles = [Particle(0.05, 0.05, -0.1), MagneticParticle(0.05,0.05,-0.1,1.0)]
 obstacles = [bt[1], bt[6], bt2[1], bt2[5]] #distinct obstacles for resolvecollision! tests
 proptime = 4.2
 ptypes = ["straight", "magnetic"]
-colf = (collisiontime,
+colf = (collision,
         next_collision,
         bounce!,
         resolvecollision!,
@@ -31,8 +31,8 @@ end
 
 for (f, p) in zip(["straight", "magnetic"], particles)
     for o in chain(bt, bt2)
-        SUITE["collisiontime"][f][o.name] =
-            @benchmarkable collisiontime($p, $o)
+        SUITE["collision"][f][o.name] =
+            @benchmarkable collision($p, $o)
     end
 end
 
