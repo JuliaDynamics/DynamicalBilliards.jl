@@ -1,5 +1,3 @@
-export plot
-
 obcolor(::Obstacle) = (0,0.6,0)
 obcolor(::Union{RandomWall, RandomDisk}) = (149/255, 88/255, 178/255)
 obcolor(::Union{SplitterWall, Antidot, Ellipse}) = (0.8,0.0,0)

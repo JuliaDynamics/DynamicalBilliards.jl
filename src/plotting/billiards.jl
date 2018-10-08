@@ -1,5 +1,4 @@
 using InteractiveUtils
-export plot
 
 function nonperiodic(bd::Billiard)
     toplot = Obstacle{eltype(bd)}[]

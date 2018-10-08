@@ -1,4 +1,4 @@
-export plot_cyclotron, plot
+export plot_cyclotron
 
 """
     plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
