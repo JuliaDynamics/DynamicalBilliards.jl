@@ -73,7 +73,7 @@ newfig = false, savename="logo", deletefigs = false, col_to_plot = 7);
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/DynamicalBilliards_billiard_animation.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/DynamicalBilliards_billiard_animation.mp4?raw=true" type="video/mp4">
 </video>
 
 ## Mean Free Path of the Lorentz Gas

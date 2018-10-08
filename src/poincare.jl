@@ -39,7 +39,7 @@ function psos(
         # compute collision times
         i::Int, tmin::T, cp = next_collision(p, bd)
 
-        tplane, = collisiontime(p, plane)
+        tplane, = collision(p, plane)
 
         # if tplane is smaller, I intersect the section
         if tplane ≥ 0.0 && tplane < tmin && tplane != Inf
@@ -66,7 +66,7 @@ function psos(
         typeof(par) <: MagneticParticle && (p.center = find_cyclotron(p))
 
         if check_for_pinned && t_to_write ≥ cyclotron_time
-            tplane, = collisiontime(p, plane)
+            tplane, = collision(p, plane)
             if tplane == Inf
                 if length(rpos) > 0
                     return [rpos[1]], [rvel[1]]

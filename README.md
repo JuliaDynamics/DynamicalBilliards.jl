@@ -1,4 +1,4 @@
-![DynamicalBilliards v2.0 Logo: The Julia billiard](https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/DynamicalBilliards_logo_animated.gif?raw=true)
+![DynamicalBilliards v2.0 Logo: The Julia billiard](https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/DynamicalBilliards_logo_animated.gif?raw=true)
 
 A Julia package for dynamical billiard systems in two dimensions.
 The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction.

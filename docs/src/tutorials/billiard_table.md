@@ -4,7 +4,7 @@ Billiard
 ```
 ---
 
-A `Billiard` is a wrapper of a `Tuple` of `Obstacles`.
+A `Billiard` is a wrapper of a `Tuple` of `Obstacle`s.
 The abstract Type `Obstacle{T}` is the supertype of all objects that a particle may collide with, with global billiard precision of type `T`.
 
 There are many premade functions that construct well-known billiards, like the periodic Sinai billiard.
@@ -96,3 +96,25 @@ If you wish to create a billiard table that you know will be convex, you should
 then use `InfiniteWall`s for faster evolution.
 Notice that using [`escapetime`](@ref) requires
 at least one `FiniteWall` with field `isdoor=true`.
+
+## Obstacle Library
+This is the list of `Obstacle`s you can use when creating your own billiard.
+
+```@docs
+Obstacle
+Disk
+RandomDisk
+Antidot
+Semicircle
+InfiniteWall
+RandomWall
+PeriodicWall
+SplitterWall
+FiniteWall
+Ellipse
+```
+---
+In addition, `translate` is a helpful function:
+```@docs
+translate
+```

@@ -1,4 +1,4 @@
-export resolvecollision!, construct, next_collision, bounce!, evolve, ispinned, evolve!
+export construct, bounce!, evolve, ispinned, evolve!, propagate!
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
@@ -37,16 +37,10 @@ end
 #####################################################################################
 """
     relocate!(p::AbstractParticle, o::Obstacle, t, cp)
-Propagate the particle's position for time `t`, and check if it is on
-the correct side of the obstacle. If not, adjust the time `t` by `timeprec`
-and re-evalute until correct. When correct, propagate the particle itself
-to the correct position and return the final adjusted time.
-
-Notice that the adjustment is increased geometrically; if one adjustment is not
-enough, the adjusted time is multiplied by a factor of 2. This happens as many
-times as necessary.
-
-rewriteeeeeeeeee
+Propagate the particle to `cp` and propagate velocities for time `t`.
+Check if it is on the correct side of the obstacle. If not,
+change the particle position by [`distance`](@ref) along the [`normalvec`](@ref)
+of the obstacle.
 """
 @muladd function relocate!(p::AbstractParticle{T},
     o::Obstacle{T}, tmin::T, cp::SV{T}) where {T}
@@ -58,7 +52,7 @@ rewriteeeeeeeeee
         n = normalvec(o, p.pos)
         p.pos -= d * n
         # due to finite precision this does not always give positive distance
-        # but collisiontime takes care of it, as it does not care about collisions
+        # but collision takes care of it, as it does not care about collisions
         # very close to the point.
     end
     return okay

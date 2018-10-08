@@ -1,4 +1,4 @@
-export collisiontime
+export collision, next_collision
 
 #####################################################################################
 # Accuracy & Convenience Functions
@@ -19,17 +19,17 @@ const sixsqrt = 6sqrt(2)
 ## Particle
 #######################################################################################
 """
-    collisiontime(p::AbstractParticle, o::Obstacle) → t, cp
-Calculate the collision time between given particle and obstacle.
-Return the time and the estimated collision point `cp`.
+    collision(p::AbstractParticle, o::Obstacle) → t, cp
+Find the collision (if any) between given particle and obstacle.
+Return the time until collision and the estimated collision point `cp`.
 
 Returns `Inf, SV(0, 0)` if the collision is not possible *or* if the
 collision happens backwards in time.
 
-**It is the duty of `collisiontime` to avoid incorrect collisions when the particle is
+**It is the duty of `collision` to avoid incorrect collisions when the particle is
 on top of the obstacle (or very close).**
 """
-@muladd function collisiontime(p::Particle{T}, w::Wall{T}) where {T}
+@muladd function collision(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     if denom ≥ 0.0
@@ -40,7 +40,7 @@ on top of the obstacle (or very close).**
     end
 end
 
-function collisiontime(p::Particle{T}, w::FiniteWall{T}) where {T}
+function collision(p::Particle{T}, w::FiniteWall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     # case of velocity pointing away of wall:
@@ -58,7 +58,7 @@ function collisiontime(p::Particle{T}, w::FiniteWall{T}) where {T}
     end
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Circular{T}) where {T}
+@muladd function collision(p::Particle{T}, d::Circular{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     dotp ≥ 0.0 && return nocollision(T)
@@ -76,7 +76,7 @@ end
     return t, p.pos + t * p.vel
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Antidot{T}) where {T}
+@muladd function collision(p::Particle{T}, d::Antidot{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
@@ -102,7 +102,7 @@ end
     t ≤ 0.0 ? nocollision(T) : (t, p.pos + t * p.vel)
 end
 
-@muladd function collisiontime(p::Particle{T}, d::Semicircle{T}) where {T}
+@muladd function collision(p::Particle{T}, d::Semicircle{T}) where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
@@ -133,7 +133,7 @@ end
 end
 
 
-@muladd function collisiontime(p::Particle{T}, e::Ellipse{T}) where {T}
+@muladd function collision(p::Particle{T}, e::Ellipse{T}) where {T}
     # First check if particle is "looking at" eclipse if it is outside
     if e.pflag
         # These lines may be "not accurate enough" but so far all is good
@@ -182,7 +182,7 @@ end
 #######################################################################################
 ## Magnetic particle
 #######################################################################################
-@muladd function collisiontime(p::MagneticParticle{T}, w::Wall{T}) where {T}
+@muladd function collision(p::MagneticParticle{T}, w::Wall{T}) where {T}
     ω = p.omega
     pc, pr = cyclotron(p)
     P0 = p.pos
@@ -216,7 +216,7 @@ end
     return θ*pr, I
 end
 
-@muladd function collisiontime(p::MagneticParticle{T}, o::Circular{T}) where {T}
+@muladd function collision(p::MagneticParticle{T}, o::Circular{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
@@ -244,7 +244,7 @@ end
     return θ1 < θ2 ? (θ1*rc, I1) : (θ2*rc, I2)
 end
 
-function collisiontime(p::MagneticParticle{T}, o::Semicircle{T}) where {T}
+function collision(p::MagneticParticle{T}, o::Semicircle{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
@@ -282,9 +282,9 @@ function collisiontime(p::MagneticParticle{T}, o::Semicircle{T}) where {T}
     return θ*rc, I
 end
 
-collisiontime(p::MagneticParticle, e::Ellipse) = error(
+collision(p::MagneticParticle, e::Ellipse) = error(
 "Magnetic propagation for Ellipse is not supported :( Consider contributing a "*
-"method to `collisiontime(p::MagneticParticle, e::Ellipse)`!")
+"method to `collision(p::MagneticParticle, e::Ellipse)`!")
 
 
 """
@@ -329,7 +329,7 @@ end
 #######################################################################################
 """
     next_collision(p::AbstractParticle, bd::Billiard) -> i, tmin, cp
-Compute the [`collisiontime`](@ref) across all obstacles in `bd` and find the minimum
+Compute the [`collision`](@ref) across all obstacles in `bd` and find the minimum
 one. Return the index of colliding obstacle, the time and the collision point.
 """
 function next_collision end
@@ -339,7 +339,7 @@ function next_collision end
     for j=1:L
         push!(out.args, quote
                             let x = bd[$j]
-                                tcol, pcol = collisiontime(p, x)
+                                tcol, pcol = collision(p, x)
                                 # Set minimum time:
                                 if tcol < tmin
                                   tmin = tcol

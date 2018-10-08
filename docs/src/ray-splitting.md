@@ -15,7 +15,7 @@ x, y = 2.0, 1.0
 bdr =  billiard_rectangle(x, y)
 sw = SplitterWall([x/2, 0.0], [x/2,y], [-1,0], true)
 a1 = Antidot([x/4, y/2], 0.25, "Left Antidot")
-a2 = Antidot([3x/4, y/2], 0.15, "Right Antidot")
+a2 = Ellipse([3x/4, y/2], 0.15, 0.25, true, "Ellipse")
 bd = Billiard(a1, a2, sw, bdr...)
 ```
 
@@ -100,7 +100,7 @@ red obstacles, which allow for ray splitting. It is even cooler to animate
 this motion using [`animate_evolution`](@ref)!
 
 <video width="100%" height="auto" controls>
-<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/ray.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/ray.mp4?raw=true" type="video/mp4">
 </video>
 
 
@@ -183,5 +183,5 @@ animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/inverse.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/inverse.mp4?raw=true" type="video/mp4">
 </video>

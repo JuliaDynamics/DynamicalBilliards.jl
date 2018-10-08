@@ -24,7 +24,7 @@ function type_stability(p, bd)
     @testset "$(tag(p))" begin
         T = eltype(bd)
         for o in bd
-            t, cp = collisiontime(p, o)
+            t, cp = collision(p, o)
             @test typeof(t) == T
             @test eltype(cp) == T
         end

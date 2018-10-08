@@ -4,8 +4,7 @@
 * update docs
 * Overload plot
 * update Lyapunov exponents to new interface
-* Re-work ray-splitting
-* Rename `collisiontime` to just `collision`, since now it retuns both the time and the estimated collision point.
+
 
 ## Enhancements / new features
 * Much more robust propagation algorithm that is less prone to errors and "weird behaviors"!
@@ -15,15 +14,18 @@
 ## Low-Level changes:
 These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
 
+* Renamed `collisiontime` to just `collision`, since now it returns both the time and the estimated collision point.
+
+* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `normvalvec, distance, cellsize, ``propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`. For the low level interface only `propagate!`, `bounce!`, `collision` and `next_collision` are exposed. Only `bounce!` is exposed as public API. The low level interface is _still_ documented though. 
+
 * Change of the internal propagation algorithm:
-  1. the function `collisiontime` returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
-  2. The `timeprec` and all those nonsense are removed. It is the duty of `collisiontime` to return `Inf` if the particle is very close to the collision point (`realangle` uses `accuracy`, while for straight propagation the direction of travel is enough).
+  1. the function `collision` (previously `collisiontime`) returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
+  2. The `timeprec` and all those nonsense are removed. It is the duty of `collision` to return `Inf` if the particle is very close to the collision point (`realangle` uses `accuracy`, while for straight propagation the direction of travel is enough).
   3. The particle is then "teleported" to this point by setting its `pos`. For the case of magnetic propagation the velocity is propagated by the collision time. This brings very high accuracy, as the velocity vector is not multiplied with time and then added to the position vector.
   4. The `distance` is checked. If it has wrong sign, a `relocation` simply relocates the particle in the direction of the `normalvec`, for amount `(1+eps())*distance`.
   5. Specular reflection / periodicity is done.
 
 * Renamed `distancecheck` to `accuracy`
-* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`.
 
 # v2.3
 * Now you can write `p.ω` as well as `p.omega` for magnetic particles.

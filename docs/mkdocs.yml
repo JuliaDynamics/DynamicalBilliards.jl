@@ -41,7 +41,7 @@ pages:
 - Lyapunov Exponents: lyapunovs.md
 - MushroomTools: mushroomtools.md
 - Physics: physics.md
-- Low Level API: basic/low_level.md
+- Internals: basic/low_level.md
 - Tutorials:
   - Defining a Billiard: tutorials/billiard_table.md
   - Creating your own Obstacle: tutorials/own_obstacle.md

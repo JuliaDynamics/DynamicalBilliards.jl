@@ -33,7 +33,7 @@ include("billiards/obstacles.jl")
 include("billiards/billiardtable.jl")
 include("billiards/standard_billiards.jl")
 
-include("timeevolution/collisiontimes.jl")
+include("timeevolution/collisions.jl")
 include("timeevolution/propagation.jl")
 include("timeevolution/highleveltimes.jl")
 

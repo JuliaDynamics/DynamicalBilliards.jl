@@ -91,7 +91,7 @@ animate_evolution(p, bd, 50; savename = "penta")
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/penta.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/penta.mp4?raw=true" type="video/mp4">
 </video>
 
 ## Periodic Billiards
@@ -112,11 +112,11 @@ For example, the following code
 using DynamicalBilliards, PyPlot
 r = 0.25
 bd = billiard_rectangle(2, 1; setting = "periodic")
-d = RandomDisk([0.5, 0.5], r)
-d2 = Disk([1.5, 0.5], r/2)
+d = Disk([0.5, 0.5], r)
+d2 = Ellipse([1.5, 0.5], r, 2r/3)
 bd = Billiard(bd.obstacles..., d, d2)
-p = randominside(bd)
-xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 20)...)
+p = Particle(1.0, 0.5, 0.2)
+xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 10)...)
 plot_billiard(bd, xt, yt)
 plot_particle(p)
 savefig("rectperiodic.svg"); nothing # hide
@@ -128,15 +128,13 @@ the keyword argument `hexagonal = true` to [`plot_billiard`](@ref). As an exampl
 
 ```@example 8
 bd = billiard_hexagonal_sinai(0.3, 1.50; setting = "periodic")
-d = RandomDisk([0.62, 0], 0.2)
-d2 = Antidot([0.62/2, 0.5], 0.25)
+d = Disk([0.7, 0], 0.2)
+d2 = Antidot([0.7/2, 0.65], 0.35)
 bd = Billiard(bd..., d, d2)
 
-p = randominside(bd, 0.2)
-xt, yt = construct(evolve(p, bd, 10)...)
+p = MagneticParticle(-0.5, 0.5, π/5, 1.0)
 
-xmin = minimum(xt); xmax = maximum(xt)
-ymin = minimum(yt); ymax = maximum(yt)
+xt, yt = construct(evolve(p, bd, 10)...)
 
 plot_billiard(bd, xt, yt; hexagonal = true)
 savefig("hexperiodic.svg"); nothing # hide
