@@ -1,11 +1,15 @@
 # Creating your own `Obstacle` Type
 
-In this tutorial we will go through the processes of creating a new obstacle type, a
-`Semicircle`. This type is already used in the [`billiard_bunimovich`](@ref) and
-[`billiard_mushroom`](@ref) functions.
+In this tutorial we will go through the processes of creating a new obstacle type, a `Semicircle`. This type is already used in the [`billiard_bunimovich`](@ref) and [`billiard_mushroom`](@ref) functions.
 
 !!! info "Everything uses `SVector{2}`"
     Fields of `Particle`s and `Obstacle`s contain all their information in 2-dimensional static vectors from module `StaticArrays`. This is important to keep in mind when extending new methods.
+
+!!! info "Extends internal APIs"
+    Notice that implementing your own obstacle requires you to extend methods that _do not_ belong to the public API.
+
+!!! note "See also the `Ellipse` PR"
+    Pull Request [#159](https://github.com/JuliaDynamics/DynamicalBilliards.jl/pull/159) implements the [`Ellipse`](@ref) obstacle, step by step, by following the tutorial of this page. All commits are commented and it can be a second helpful guide on how to implement an obstacle.
 
 ## Type Definition
 The first thing you have to do is make your new type a sub-type of `Obstacle{T}`
@@ -127,7 +131,8 @@ end
 
 And that is all. The obstacle now works perfectly fine for straight propagation.
 
-
+!!! note "Ray-Splitting support"
+    Supporting ray-splitting for your custom obstacle is very easy. The first step is to give it a field called `pflag`, which is a `Bool`. The second step is to ensure that `collisiontime` works properly for particles coming from both directions of the obstacle! Both inside or outside! This is implemented for `Ellipse` in Pull Request [#159](https://github.com/JuliaDynamics/DynamicalBilliards.jl/pull/159).
 
 ## Optional Methods
 
