@@ -38,7 +38,7 @@ plot the orbit defined by `(xt, yt)` and only use the limits.
 function plot(bd::Billiard{T};
     ax = (PyPlot.figure(); PyPlot.gca())) where {T}
     PyPlot.sca(ax)
-    for obst in bd; plot_obstacle(obst); end
+    for obst in bd; plot(obst); end
     xmin, ymin, xmax, ymax = cellsize(bd)
     dx = xmax - xmin; dy = ymax - ymin
     ax[:set_aspect]("equal")
@@ -127,7 +127,7 @@ function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
         for y in dy
             disp = SVector(x,y)
             for obst in toplot
-                plot_obstacle(translate(obst, disp))
+                plot(translate(obst, disp))
             end
         end
     end
@@ -160,8 +160,8 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     for d in obstacles
         for j ∈ jmin:jmax
             for i ∈ imin:imax
-                plot_obstacle(translate(d, j*basis_a + i*basis_c))
-                plot_obstacle(translate(d, j*basis_a + i*basis_c + basis_b))
+                plot(translate(d, j*basis_a + i*basis_c))
+                plot(translate(d, j*basis_a + i*basis_c + basis_b))
             end
         end
     end

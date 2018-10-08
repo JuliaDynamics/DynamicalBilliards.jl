@@ -3,7 +3,6 @@ All plotting functionality of `DynamicalBilliards` lies within a few well-define
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```@docs
 DynamicalBilliards.plot
-plot_obstacle
 plot_particle
 plot_cyclotron
 animate_evolution
@@ -18,9 +17,9 @@ using DynamicalBilliards, PyPlot
 bd = billiard_sinai()
 
 figure()
-plot_obstacle(bd[2]);
-plot_obstacle(bd[4], color = "blue", linestyle = "dotted", lw = 5.0);
-plot_obstacle(bd[1], facecolor = "yellow", edgecolor = "black");
+plot(bd[2]);
+plot(bd[4], color = "blue", linestyle = "dotted", lw = 5.0);
+plot(bd[1], facecolor = "yellow", edgecolor = "black");
 savefig("rand_obstacles.svg"); nothing # hide
 ```
 ![](rand_obstacles.svg)

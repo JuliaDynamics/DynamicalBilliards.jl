@@ -1,4 +1,4 @@
-export plot_obstacle
+export plot
 
 obcolor(::Obstacle) = (0,0.6,0)
 obcolor(::Union{RandomWall, RandomDisk}) = (149/255, 88/255, 178/255)
@@ -11,7 +11,7 @@ obls(::Union{SplitterWall, Antidot, Ellipse}) = "dashed"
 obls(::PeriodicWall) = "dotted"
 
 """
-    plot_obstacle(obst::Obstacle; kwargs...)
+    plot(obst::Obstacle; kwargs...)
 Plot given obstacle on the current `PyPlot` axes.
 
 The default arguments for each type of obstacle have been chosen for maximum
@@ -21,7 +21,7 @@ The `kwargs...` given by the user are keywords passed directly into PyPlot's
 constructors. For `Wall` obstacles, kwargs are passed into `PyPlot.plot()`. For
 `Circular` obstacles, kwargs are passed into `matplotlib.patches.Circle` or `Arc`.
 """
-function plot_obstacle(d::Circular; kwargs...)
+function plot(d::Circular; kwargs...)
     edgecolor = obcolor(d)
     facecolor = (edgecolor..., obalpha(d))
     circle1 = PyPlot.plt[:Circle](d.c, d.r;
@@ -30,7 +30,7 @@ function plot_obstacle(d::Circular; kwargs...)
     PyPlot.gca()[:add_artist](circle1)
 end
 
-function plot_obstacle(d::Semicircle; kwargs...)
+function plot(d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = obcolor(d)
@@ -39,7 +39,7 @@ function plot_obstacle(d::Semicircle; kwargs...)
     PyPlot.gca()[:add_artist](s1)
 end
 
-function plot_obstacle(w::Wall; kwargs...)
+function plot(w::Wall; kwargs...)
     if typeof(w) <: FiniteWall &&  w.isdoor
        PyPlot.plot([w.sp[1],w.ep[1]],[w.sp[2],w.ep[2]];
        color="black", linestyle = "-", lw = 2.0, kwargs...)
@@ -52,7 +52,7 @@ function plot_obstacle(w::Wall; kwargs...)
     end
 end
 
-function plot_obstacle(e::Ellipse; kwargs...)
+function plot(e::Ellipse; kwargs...)
     edgecolor = obcolor(e)
     facecolor = (edgecolor..., obalpha(e))
     ellipse = PyPlot.matplotlib[:patches][:Ellipse](e.c, 2e.a, 2e.b;
