@@ -5,6 +5,9 @@ using DynamicalBilliards: isperiodic
 export tag, omnibilliard, finitehorizon, testparticles, isperiodic
 export acclevel
 
+using DynamicalBilliards: distance, cellsize
+export distance, cellsize
+
 CONCAVE = Union{Semicircle}
 
 tag(p::Particle) = "[STRAIGHT]"
