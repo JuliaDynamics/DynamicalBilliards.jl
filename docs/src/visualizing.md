@@ -2,10 +2,10 @@ All plotting functionality of `DynamicalBilliards` lies within a few well-define
 
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```@docs
+DynamicalBilliards.plot
 plot_obstacle
 plot_particle
 plot_cyclotron
-plot_billiard
 animate_evolution
 ```
 
@@ -34,16 +34,16 @@ a = Antidot([0.0,0.0], 0.5)
 bd = Billiard(b.obstacles..., a)
 ```
 
-If you want to quickly plot the entire billiard with default parameters, simply use the function `plot_billiard(bd)`:
+If you want to quickly plot the entire billiard with default parameters, simply use the function `plot(bd)`:
 
 ```@example 8
 using PyPlot
-plot_billiard(bd)
+plot(bd)
 savefig("billiard_example.svg"); nothing # hide
 ```
 ![](billiard_example.svg)
 
-`plot_billiard()` also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.
+`plot()` also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.
 
 
 
@@ -96,12 +96,12 @@ animate_evolution(p, bd, 50; savename = "penta")
 
 ## Periodic Billiards
 In order to plot periodic billiards, you have need to call a different method of
-[`plot_billiard`](@ref), since now you
+[`plot`](@ref), since now you
 also have to specify the limits of plotting. The
 methods provided are:
 ```julia
-plot_billiard(bd, xmin, ymin, xmax, ymax)
-plot_billiard(bd, xt::Vector{T}, yt::Vector{T})
+plot(bd, xmin, ymin, xmax, ymax)
+plot(bd, xt::Vector{T}, yt::Vector{T})
 ```
 The last one conveniently plots the combo of particle-trajectory and
 periodic-billiard taking care of all the details internally. Give the keyword
@@ -117,14 +117,14 @@ d2 = Ellipse([1.5, 0.5], r, 2r/3)
 bd = Billiard(bd.obstacles..., d, d2)
 p = Particle(1.0, 0.5, 0.2)
 xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 10)...)
-plot_billiard(bd, xt, yt)
+plot(bd, xt, yt)
 plot_particle(p)
 savefig("rectperiodic.svg"); nothing # hide
 ```
 ![](rectperiodic.svg)
 
 And, you can also periodically plot billiards with hexagonal periodicity. Only give
-the keyword argument `hexagonal = true` to [`plot_billiard`](@ref). As an example:
+the keyword argument `hexagonal = true` to [`plot`](@ref). As an example:
 
 ```@example 8
 bd = billiard_hexagonal_sinai(0.3, 1.50; setting = "periodic")
@@ -136,7 +136,7 @@ p = MagneticParticle(-0.5, 0.5, π/5, 1.0)
 
 xt, yt = construct(evolve(p, bd, 10)...)
 
-plot_billiard(bd, xt, yt; hexagonal = true)
+plot(bd, xt, yt; hexagonal = true)
 savefig("hexperiodic.svg"); nothing # hide
 ```
 ![](hexperiodic.svg)

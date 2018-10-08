@@ -138,7 +138,7 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 
 1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collision`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
-2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
+2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot`](@ref))
 3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 

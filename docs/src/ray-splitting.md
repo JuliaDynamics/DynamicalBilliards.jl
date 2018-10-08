@@ -21,7 +21,7 @@ bd = Billiard(a1, a2, sw, bdr...)
 
 ```@example ray
 using PyPlot
-plot_billiard(bd)
+plot(bd)
 savefig("raybil.svg"); nothing # hide
 ```
 ![](raybil.svg)
@@ -88,7 +88,7 @@ For example,
 p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
 xt, yt, vxt, vyt, tt = construct(evolve(p, bd, 100, raysplitters)...)
-plot_billiard(bd)
+plot(bd)
 plot(xt, yt)
 scatter(xt[1], yt[1], color = "black")
 savefig("rayorbit.svg"); nothing # hide
@@ -177,7 +177,7 @@ p = randominside(bd, 0.4);
 
 and we animate its evolution, by first zooming out of the billiard
 ```julia
-plot_billiard(bd)
+plot(bd)
 xlim(-1, 2); ylim(-1, 2);
 animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
 ```

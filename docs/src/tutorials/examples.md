@@ -66,7 +66,7 @@ mkpath("dynamicalbilliards")
 cd("dynamicalbilliards")
 
 figure(figsize = (14,14))
-plot_billiard(bd; ax = gca())
+plot(bd; ax = gca())
 axis("off")
 animate_evolution(p, bd, 500, raya;
 newfig = false, savename="logo", deletefigs = false, col_to_plot = 7);
@@ -119,7 +119,7 @@ p = randominside(bd)
 p.pos = [0.311901, 0.740439]
 p.vel = [0.548772, 0.835972]
 xt, yt, vxt, vyt, t = construct(evolve(p, bd, 25)...)
-plot_billiard(bd, xt, yt)
+plot(bd, xt, yt)
 scatter(xt[1], yt[1])
 scatter(xt[end], yt[end], color = "black")
 ylim(0,y)

@@ -38,7 +38,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
     p = copy(par)
     if newfig == true
         fig = PyPlot.figure(figsize = figsize)
-        plot_billiard(bd; ax = PyPlot.gca())
+        plot(bd; ax = PyPlot.gca())
     end
 
     disable_axis && PyPlot.axis("off")
