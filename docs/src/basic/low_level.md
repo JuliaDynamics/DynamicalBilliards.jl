@@ -9,14 +9,14 @@ Firstly one defines a [`Billiard`](@ref) and optionally some [`RaySplitter`](@re
 
 1. Calculate the [`collision`](@ref) of the particle with **all** obstacles in the billiard.
 2. Find the collision that happens first (in time), and the obstacle corresponding to that.
-3. [`relocate!`](@ref) the particle, and ensure that it is **inside** the billiard. This means that [`distance`](@ref) between particle and obstacle is either positive or close to machine precision.
+3. [`DynamicalBilliards.relocate!`](@ref) the particle, and ensure that it is **inside** the billiard. This means that [`DynamicalBilliards.distance`](@ref) between particle and obstacle is either positive or close to machine precision.
 4. (Optionally) check if there is transmission for ray-splitting: `T(φ) > rand()`
   * If yes, perform the ray-splitting algorithm (see the [ray-splitting](ray-splitting) page).
-  * If not, then [`resolvecollision!`](@ref) of the particle with the obstacle (specular or periodic conditions).
+  * If not, then [`DynamicalBilliards.resolvecollision!`](@ref) of the particle with the obstacle (specular or periodic conditions).
 
 5. Continue this loop for a given amount of time.
 
-Notice that the [`relocate!`](@ref) step is *very* important because it takes care that all particles remain inside the billiard.
+Notice that the [`DynamicalBilliards.relocate!`](@ref) step is *very* important because it takes care that all particles remain inside the billiard.
 
 The exposed [`bounce!`](@ref) function bundles steps 1-4 together.
 

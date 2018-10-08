@@ -101,6 +101,7 @@ at least one `FiniteWall` with field `isdoor=true`.
 This is the list of `Obstacle`s you can use when creating your own billiard.
 
 ```@docs
+Obstacle
 Disk
 RandomDisk
 Antidot
@@ -110,6 +111,7 @@ RandomWall
 PeriodicWall
 SplitterWall
 FiniteWall
+Ellipse
 ```
 ---
 In addition, `translate` is a helpful function:

@@ -91,7 +91,7 @@ animate_evolution(p, bd, 50; savename = "penta")
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://github.com/JuliaDynamics/Tutorials-and-Resources/blob/master/billiard_animations/penta.mp4?raw=true" type="video/mp4">
+<source src="https://github.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/tree/master/animations/billiards/penta.mp4?raw=true" type="video/mp4">
 </video>
 
 ## Periodic Billiards

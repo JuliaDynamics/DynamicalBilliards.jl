@@ -46,13 +46,13 @@ so that constructing a `Semicircle` is possible from arbitrary vectors.
 The following functions must obtain methods for `Semicircle` (or any other custom
 `Obstacle`) in order for it to work with `DynamicalBilliards`:
 
-1. [`normalvec`](@ref)
-2. [`distance`](@ref) (with arguments `(position, obstacle)`)
-3. [`collision`](@ref) with `Particle`
+1. [`DynamicalBilliards.normalvec`](@ref)
+2. [`DynamicalBilliards.distance`](@ref) (with arguments `(position, obstacle)`)
+3. [`DynamicalBilliards.collision`](@ref) with `Particle`
 
 Assuming that upon collision a specular reflection happens, then you don't need
-to define a method for [`resolvecollision!`](@ref). You can however define
-custom methods for [`resolvecollision!`](@ref), which is what we have done e.g.
+to define a method for [`DynamicalBilliards.resolvecollision!`](@ref). You can however define
+custom methods for [`DynamicalBilliards.resolvecollision!`](@ref), which is what we have done e.g.
 for [`RandomDisk`](@ref).
 
 !!! note "Use `import`!"
@@ -64,12 +64,12 @@ The first method is very simple, just do:
 import DynamicalBilliards: normalvec, distance, collision
 normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 ```
-Since the function is only used during [`distance`](@ref) and
-[`resolvecollision!`](@ref) and since we will be writing explicit methods for the first,
+Since the function is only used during `distance` and
+[`DynamicalBilliards.resolvecollision!`](@ref) and since we will be writing explicit methods for the first,
 we don't have to care about
 what happens when the particle is far away from the boundary.
 
-The [`distance`](@ref) method is a bit tricky. Since the type already subtypes `Circular`,
+The `distance` method is a bit tricky. Since the type already subtypes `Circular`,
 the following definition from `DynamicalBilliards` applies:
 ```julia
 distance(pos::AbstractVector, d::Circular) = norm(pos - d.c) - d.r
@@ -136,13 +136,13 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 
 ## Optional Methods
 
-1. [`cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
+1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collision`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
 2. [`plot_obstacle`](@ref) : enables plotting (used in [`plot_billiard`](@ref))
 3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
-The [`cellsize`](@ref) method is kinda trivial:
+The [`DynamicalBilliards.cellsize`](@ref) method is kinda trivial:
 ```julia
 import DynamicalBilliards: cellsize, plot_obstacle, to_bcoords, from_bcoords
 
@@ -154,8 +154,7 @@ end
 ```
 
 
-The [`collision`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also
-tricky, however it is almost identical with the method for the general [`Circular`](@ref) obstacle:
+The [`collision`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also tricky, however it is almost identical with the method for the general `Circular` obstacle:
 ```julia
 function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     ω = p.omega

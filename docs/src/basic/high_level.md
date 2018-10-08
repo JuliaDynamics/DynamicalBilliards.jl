@@ -257,3 +257,9 @@ billiard_raysplitting_showcase
 billiard_logo
 billiard_iris
 ```
+
+## Particle types
+```@docs
+Particle
+MagneticParticle
+```
