@@ -3,7 +3,6 @@ All plotting functionality of `DynamicalBilliards` lies within a few well-define
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```@docs
 DynamicalBilliards.plot
-plot_particle
 plot_cyclotron
 animate_evolution
 ```
@@ -48,14 +47,14 @@ savefig("billiard_example.svg"); nothing # hide
 
 ### Plotting particles
 
-Following the above example, we create and plot a particle using the function `plot_particle`:
+Following the above example, we create and plot a particle using the function `plot`:
 ```@example 8
 p = randominside(bd)
-plot_particle(p)
+plot(p)
 # Plot one more particle with purple color,
 # pentagon shape and bigger size (default is s=30):
 p2 = randominside(bd)
-plot_particle(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
+plot(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
 savefig("particles_example.svg"); nothing # hide
 ```
 ![](particles_example.svg)
@@ -117,7 +116,7 @@ bd = Billiard(bd.obstacles..., d, d2)
 p = Particle(1.0, 0.5, 0.2)
 xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 10)...)
 plot(bd, xt, yt)
-plot_particle(p)
+plot(p)
 savefig("rectperiodic.svg"); nothing # hide
 ```
 ![](rectperiodic.svg)
