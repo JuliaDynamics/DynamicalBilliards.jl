@@ -1,22 +1,22 @@
 # 3.0-dev
 
 ## TODO
-* update docs
-* Overload plot
 * update Lyapunov exponents to new interface
-
 
 ## Enhancements / new features
 * Much more robust propagation algorithm that is less prone to errors and "weird behaviors"!
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
 * `totallength` is exported
 
-## Low-Level changes:
+## Breaking changes
+* Plotting functions now overload `plot` instead. There is no more `plot_obstacle`, `plot_billiard` and `plot_particle`. `plot_boundarymap` and `animate_evolution` remain the same though.
+
+## Low-Level changes
 These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
 
 * Renamed `collisiontime` to just `collision`, since now it returns both the time and the estimated collision point.
 
-* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `normvalvec, distance, cellsize, ``propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`. For the low level interface only `propagate!`, `bounce!`, `collision` and `next_collision` are exposed. Only `bounce!` is exposed as public API. The low level interface is _still_ documented though. 
+* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `normvalvec, distance, cellsize, ``propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`. For the low level interface only `propagate!`, `bounce!`, `collision` and `next_collision` are exposed. Only `bounce!` is exposed as public API. The low level interface is _still_ documented though.
 
 * Change of the internal propagation algorithm:
   1. the function `collision` (previously `collisiontime`) returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
