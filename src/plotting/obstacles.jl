@@ -19,6 +19,8 @@ The `kwargs...` given by the user are keywords passed directly into PyPlot's
 constructors. For `Wall` obstacles, kwargs are passed into `PyPlot.plot()`. For
 `Circular` obstacles, kwargs are passed into `matplotlib.patches.Circle` or `Arc`.
 """
+function plot(d::Obstacle) end
+
 function plot(d::Circular; kwargs...)
     edgecolor = obcolor(d)
     facecolor = (edgecolor..., obalpha(d))

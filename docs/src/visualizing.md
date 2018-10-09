@@ -2,7 +2,9 @@ All plotting functionality of `DynamicalBilliards` lies within a few well-define
 
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
 ```@docs
-DynamicalBilliards.plot
+DynamicalBilliards.plot(::Obstacle)
+DynamicalBilliards.plot(::Billiard)
+DynamicalBilliards.plot(::AbstractParticle)
 plot_cyclotron
 animate_evolution
 ```

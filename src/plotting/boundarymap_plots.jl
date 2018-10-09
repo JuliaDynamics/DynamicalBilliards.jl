@@ -22,12 +22,19 @@ function plot_boundarymap(ξs, sφs, intervals;
     ax = (PyPlot.figure(); PyPlot.gca()),
     color = "C0", bordercolor = "C3", ms = 1.0, obstacleindices = true, kwargs...)
 
-    # Plot PSOS
-    for (i, (xis, sphis)) in enumerate(zip(ξs, sφs))
-        c = typeof(color) <: AbstractVector ? color[i] : color
+    # Plot the points
+    if typeof(ξs) <: Vector{<:Real}
+        c = typeof(color) <: AbstractVector ? color[1] : color
 
-        ax[:plot](xis, sphis; marker="o", color = c,
+        ax[:plot](ξs, sφs; marker="o", color = c,
         linestyle="None", ms = ms, kwargs...)
+    else            
+        for (i, (xis, sphis)) in enumerate(zip(ξs, sφs))
+            c = typeof(color) <: AbstractVector ? color[i] : color
+
+            ax[:plot](xis, sphis; marker="o", color = c,
+            linestyle="None", ms = ms, kwargs...)
+        end
     end
 
     # Plot obstacle limits

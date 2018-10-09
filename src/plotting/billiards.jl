@@ -20,20 +20,23 @@ Plot all obstacles in `bd` using the default arguments, set
 `xlim` and `ylim` to be 20% larger than `cellsize` and
 set the axis aspect ratio to equal.
 
-    plot(bd, xmin, ymin, xmax, ymax; hexagonal = false, ax = (figure(); gca()))
+    plot(bd::Billiard, xmin, ymin, xmax, ymax;
+         hexagonal = false, ax = (figure(); gca()))
 Plot the given **periodic** billiard `bd`, repeatedly
 plotting from `(xmin, ymin)` to `(xmax, ymax)`.
 Works for either rectangular periodic billiards, or hexagonal ones. Use
 keyword `hexagonal` to denote which one you want.
 
-    plot(bd, xt::Vector, yt::Vector; hexagonal = false,
-    ax = (figure(); gca()), plot_orbit = true, orbit_color = "C0")
+    plot(bd::Billiard, xt::Vector, yt::Vector; hexagonal = false,
+         ax = (figure(); gca()), plot_orbit = true, orbit_color = "C0")
 Plot the given **periodic** billiard `bd` using the limits defined
 by `xt` and `yt`.
 
 Set the keyword argument `plot_orbit = false` to not
 plot the orbit defined by `(xt, yt)` and only use the limits.
 """
+function plot(bd::Billiard) end
+
 function plot(bd::Billiard{T};
     ax = (PyPlot.figure(); PyPlot.gca())) where {T}
     PyPlot.sca(ax)
