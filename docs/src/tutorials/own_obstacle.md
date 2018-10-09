@@ -139,8 +139,9 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collision`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
 2. [`plot`](@ref) : enables plotting (used in [`plot`](@ref))
-3. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
-4. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
+3. [`specular!`](@ref) with `offset` : Allows [`lyapunovspectrum!`](@ref) to be computed.
+4. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
+5. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
 The [`DynamicalBilliards.cellsize`](@ref) method is kinda trivial:
 ```julia
@@ -210,5 +211,55 @@ function plot(d::Semicircle; kwargs...)
 end
 ```
 
+To enable computation of Lyapunov exponents in billiards with your obstacle,
+you have to write another method for `specular!` that also handles the evolution
+of perturbation vectors in tangent space. For this, the method has to 
+accept an argument of type `Vector{SVector{4, T}}`, which contains the four 
+perturbation vectors corresponding to the four Lyapunov exponents.
+
+Finding a formula for the evolution of the perturbations requires some tricky 
+calculations. Fortunately for us, the results for general circular obstacles 
+were already determined by Dellago, Posch and Hoover [1] – we just have to 
+implement them.
+
+```julia
+function specular!(p::Particle{T}, o::Circular{T},
+	offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
+	
+    n = normalvec(o, p.pos)
+    ti = SV{T}(-p.vel[2],p.vel[1])
+
+    cosa = -dot(n, p.vel)
+    p.vel = p.vel + 2*cosa*n
+
+    tf = SV{T}(-p.vel[2], p.vel[1])
+
+    for k in 1:4
+        δqprev = offset[k][δqind]
+        δpprev = offset[k][δpind]
+        # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
+        # with norm(p) = 1
+        δq  = δqprev - 2*dot(δqprev,n)*n
+        δp  = δpprev - 2*dot(δpprev,n)*n - curvature(o)*2/o.r*dot(δqprev,ti)/cosa*tf
+        ###
+        offset[k] = vcat(δq, δp)
+    end
+end
+
+@inline curvature(::Semicircle) = -1
+@inline curvature(::Disk) = +1
+
+```
+
+Note that calculating Lyapunov exponents for magnetic particles requires a 
+separate method, as the formulas are different for magnetic propagation. 
+
 Finally, we also add a methods for [`to_bcoords`](@ref) and [`from_bcoords`](@ref).
 For them, see the [relevant source file](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/src/boundary/boundarymap.jl).
+
+
+
+
+References
+
+[1] Ch. Dellago et al., Phys. Rev. E 53, 1485 (1996).
