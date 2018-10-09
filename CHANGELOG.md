@@ -12,11 +12,11 @@
 * `totallength` is exported
 
 ## Low-Level changes:
-These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
+These changes are not actually breaking, unless someone used the low-level interface. The amount of low level interface is exposed was reduced tremendously.
 
 * Renamed `collisiontime` to just `collision`, since now it returns both the time and the estimated collision point.
 
-* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `normvalvec, distance, cellsize, ``propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`. For the low level interface only `propagate!`, `bounce!`, `collision` and `next_collision` are exposed. Only `bounce!` is exposed as public API. The low level interface is _still_ documented though. 
+* Many low-level functions are not exported any more, for safety and because it didn't make much sense: `normvalvec, distance, cellsize, ``propagate!`, `relocate!`, `resolvecollision!`, `periodicity!`, `specular!` `realangle`. For the low level interface only `propagate!`, `bounce!`, `collision` and `next_collision` are exposed. Only `bounce!` is exposed as public API. The low level interface is _still_ documented though.
 
 * Change of the internal propagation algorithm:
   1. the function `collision` (previously `collisiontime`) returns both the time until collision *as well as* the collision point (most methods computed it already anyways).
