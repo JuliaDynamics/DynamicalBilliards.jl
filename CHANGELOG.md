@@ -1,18 +1,18 @@
 # 3.0-dev
 
 ## TODO
-* update docs
-* Overload plot
 * update Lyapunov exponents to new interface
-
 
 ## Enhancements / new features
 * Much more robust propagation algorithm that is less prone to errors and "weird behaviors"!
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
 * `totallength` is exported
 
-## Low-Level changes:
-These changes are not actually breaking, unless someone used the low-level interface. The amount of low level interface is exposed was reduced tremendously.
+## Breaking changes
+* Plotting functions now overload `plot` instead. There is no more `plot_obstacle`, `plot_billiard` and `plot_particle`. `plot_boundarymap` and `animate_evolution` remain the same though.
+
+## Low-Level changes
+These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
 
 * Renamed `collisiontime` to just `collision`, since now it returns both the time and the estimated collision point.
 

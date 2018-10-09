@@ -12,7 +12,7 @@ Animate the evolution of particle `p` in billiard `bd`, for a total of
   * `framerate = 5` : Rate of drawing new collisions (per second).
     Both during showing animation and during saving it.
   * `col_to_plot = 5` : How many previous collisions are shown during the animation.
-  * `particle_kwargs` : A `NamedTuple` of keywords passed to [`plot_particle`](@ref).
+  * `particle_kwargs` : A `NamedTuple` of keywords passed to [`plot`](@ref).
   * `orbit_kwargs` : A `NamedTuple` of keywrods passed to `PyPlot.plot`
     which plots the orbit of the particle (`line` object).
   * `savename = nothing` : If `nothing`, nothing is saved.
@@ -38,7 +38,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
     p = copy(par)
     if newfig == true
         fig = PyPlot.figure(figsize = figsize)
-        plot_billiard(bd; ax = PyPlot.gca())
+        plot(bd; ax = PyPlot.gca())
     end
 
     disable_axis && PyPlot.axis("off")
@@ -78,7 +78,7 @@ function animate_evolution(par::AbstractParticle, bd, colnumber, raysplit = noth
         line[:set_xdata](xpd)
         line[:set_ydata](ypd)
 
-        point, quiv = plot_particle(p; particle_kwargs...)
+        point, quiv = plot(p; particle_kwargs...)
 
         if savename != nothing
             s = savename*"_$(i+1).png"

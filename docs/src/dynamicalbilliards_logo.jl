@@ -69,7 +69,7 @@ mkpath("dynamicalbilliards")
 cd("dynamicalbilliards")
 
 figure(figsize = (14,14))
-plot_billiard(bd; ax = gca())
+plot(bd; ax = gca())
 axis("off")
 animate_evolution(p, bd, 500, raya;
 newfig = false, savename="logo", deletefigs = false, col_to_plot = 7);
