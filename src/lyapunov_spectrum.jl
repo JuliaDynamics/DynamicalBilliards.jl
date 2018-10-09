@@ -190,30 +190,32 @@ end
 ################################################################################
 
 #="""
-    propagate!(p::AbstractParticle{T}, t::T, offset::MArray{Tuple{4,4},T})
+    propagate!(p::AbstractParticle{T}, newpos::SV{T}, t::T, 
+    offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
 `p.pos` and `p.vel` fields together with the components of the offset vectors
 stored in the `offset` matrix.
 """=#
-function propagate!(p::AbstractParticle{T}, t::T,
+function propagate!(p::AbstractParticle{T}, newpos::SV{T}, t::T, 
                     offset::Vector{SVector{4, T}}) where {T<: AbstractFloat}
 
-    propagate!(p, t)
+    propagate!(p, newpos, t)
     propagate_offset!(offset, t, p)
+    return
 end
 
 
 #="""
-    relocate(p::AbstractParticle, o::Obstacle, t, offset::MArray) -> newt
+    relocate(p::AbstractParticle, o::Obstacle, t, cp::SV{T}, offset::MArray)
 Propagate the particle's position for time `t` (corrected) and update the components
 of the `offset` matrix.
 """=#
-function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin,
+function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin, cp::SV{T},
                    offset::Vector{SVector{4, T}}) where {T <: AbstractFloat}
 
-    tmin, k = relocate!(p, o, tmin)
+    okay = relocate!(p, o, tmin, cp)
     propagate_offset!(offset, tmin, p)
-    return tmin
+    return okay
 end
 
 
@@ -221,7 +223,7 @@ end
 ## HIGH-LEVEL FUNCTION
 ################################################################################
 function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::AbstractFloat;
-    warning::Bool = false) where {T<:AbstractFloat}
+                           warning::Bool = false) where {T<:AbstractFloat}
 
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
               SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
@@ -240,7 +242,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
 
     while count < t
         #bounce!-step
-        tmin::T, i::Int = next_collision(p, bd)
+        i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
 
         #check for pinning
         if ismagnetic && tmin == Inf
@@ -248,7 +250,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
             return zeros(T, 4)
         end
 
-        tmin = relocate!(p, bd[i], tmin, offset)
+        tmin = relocate!(p, bd[i], tmin, cp, offset)
         resolvecollision!(p, bd[i], offset)
         ismagnetic && (p.center = find_cyclotron(p))
         count += increment_counter(t, tmin)
