@@ -102,6 +102,12 @@ function all_tests(f, args...)
     omni_tests(f, args...)
     periodic_tests(f, args...)
 end
+
+function simple_tests(f, args...)
+    ergodic_tests(f, args...)
+    periodic_tests(f, args...)
+end
+
 function omni_tests(f, args...)
     bd = omnibilliard()
     p, mp = testparticles()
@@ -110,6 +116,7 @@ function omni_tests(f, args...)
     f(p, bd2, args...)
     f(mp, bd, args...)
 end
+
 function omni_tests_noellipse(f, args...)
     bd = omnibilliard()
     p, mp = testparticles()
@@ -124,6 +131,7 @@ function periodic_tests(f, args...)
     f(p, bd, args...)
     f(mp, bd, args...)
 end
+
 function ergodic_tests(f, args...)
     for bd in (billiard_sinai(), billiard_stadium())
         p = Particle(0.1, 0.1, 2π*rand())
@@ -149,7 +157,7 @@ function billiards_testset(d, f, args...; caller = all_tests)
 end
 separator() = println("\n", "- "^30, "\n")
 
-export all_tests, omni_tests, periodic_tests, billiards_testset
+export all_tests, simple_tests, omni_tests, periodic_tests, billiards_testset
 export ergodic_tests
 
 function basic_ray(ellipse)
