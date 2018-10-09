@@ -5,7 +5,6 @@ All plotting functions are brought into scope when `using PyPlot`. The functions
 DynamicalBilliards.plot(::Obstacle)
 DynamicalBilliards.plot(::Billiard)
 DynamicalBilliards.plot(::AbstractParticle)
-plot_cyclotron
 animate_evolution
 ```
 
@@ -57,6 +56,8 @@ plot(p)
 # pentagon shape and bigger size (default is s=30):
 p2 = randominside(bd)
 plot(p2; color=(0.5, 0, 0.8), marker="p", s=60.0)
+p3 = randominside(bd, 2.0)
+plot(p3, true; color=(0, 0, 0.8), marker="o", s=60.0)
 savefig("particles_example.svg"); nothing # hide
 ```
 ![](particles_example.svg)
@@ -66,6 +67,7 @@ savefig("particles_example.svg"); nothing # hide
 ## Color conventions
 The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:
 * Particles are black.
+* Particle orbits use matplotlib's color cycle (first one is blue).
 * Reflecting obstacles (e.g. `Disk`, `FiniteWall` etc.) are green.
 * Randomly reflecting obstacles (e.g. `RandomDisk` or `RandomWall`) are purple.
 * Ray-splitting obstacles are red with dashed linestyle.
@@ -73,8 +75,6 @@ The default plotting settings have been chosen for maximum clarity and consisten
   (if and when plotted).
 * Doors (`InfiniteWall` with `isdoor=true`) are plotted with alternating black and
   cyan dashed lines.
-
-Particle orbits use matplotlib's color cycle (first one is blue).
 
 ## Animating the motion of a particle
 

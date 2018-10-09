@@ -1,5 +1,3 @@
-export plot_cyclotron
-
 """
     plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
 Plot the circle traced by the free particle motion. Optionally use `p.current_cell` for
@@ -15,11 +13,10 @@ function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
   edgecolor = (0.0,0.0,0.8, 0.5), linewidth = 2.0, facecolor = (0., 0.0, 0.8, 0.05),
   kwargs...)
   PyPlot.gca()[:add_artist](circle1)
-  PyPlot.show()
 end
 
 """
-    plot(p::AbstractParticle; use_cell=true, kwargs...)
+    plot(p::AbstractParticle [, cyclotron=false]; use_cell=true, kwargs...)
 Plot given particle on the current `PyPlot` axes. Optionally use `p.current_cell` for
 the particle's position. Given `kwargs...` are passed onto `PyPlot.scatter`.
 
@@ -27,10 +24,16 @@ The particle is represented as a small ball (`PyPlot.scatter`) and a small arrow
 (`PyPlot.quiver`).
 All `kwargs...` are given to `scatter` but if a keyword argument `color` is given,
 it is also passed to `quiver`.
+
+Optionally you can plot the cyclotron traced by a `MagneticParticle` by giving
+`true` as second argument.
 """
 function plot(p::AbstractParticle) end
 
-function plot(p::AbstractParticle{T}; use_cell=true, kwargs...) where {T}
+function plot(p::AbstractParticle{T}, cycl::Bool = false; use_cell=true, kwargs...) where {T}
+  if typeof(p) <: MagneticParticle && cycl
+    plot_cyclotron(p; use_cell = use_cell)
+  end
   pos = use_cell ? p.pos + p.current_cell : p.pos
   kwargs = Dict(kwargs)
   # Set same color for arrow and point:
