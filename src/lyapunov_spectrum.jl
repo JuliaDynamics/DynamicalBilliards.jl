@@ -249,7 +249,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
     while count < t
         # bouncing
         i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
-        tmin = relocate!(p, bd[i], tmin, cp, offset)
+        relocate!(p, bd[i], tmin, cp, offset)
         resolvecollision!(p, bd[i], offset)
         count += increment_counter(t, tmin)
 
