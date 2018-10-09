@@ -1,5 +1,4 @@
 using InteractiveUtils
-export plot_billiard
 
 function nonperiodic(bd::Billiard)
     toplot = Obstacle{eltype(bd)}[]
@@ -16,29 +15,32 @@ periodicerror() = throw(ArgumentError(
 
 
 """
-    plot_billiard(bd::Billiard; ax = (figure(); gca()))
+    plot(bd::Billiard; ax = (figure(); gca()))
 Plot all obstacles in `bd` using the default arguments, set
 `xlim` and `ylim` to be 20% larger than `cellsize` and
 set the axis aspect ratio to equal.
 
-    plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = false, ax = (figure(); gca()))
+    plot(bd::Billiard, xmin, ymin, xmax, ymax;
+         hexagonal = false, ax = (figure(); gca()))
 Plot the given **periodic** billiard `bd`, repeatedly
 plotting from `(xmin, ymin)` to `(xmax, ymax)`.
 Works for either rectangular periodic billiards, or hexagonal ones. Use
 keyword `hexagonal` to denote which one you want.
 
-    plot_billiard(bd, xt::Vector, yt::Vector; hexagonal = false,
-    ax = (figure(); gca()), plot_orbit = true, orbit_color = "C0")
+    plot(bd::Billiard, xt::Vector, yt::Vector; hexagonal = false,
+         ax = (figure(); gca()), plot_orbit = true, orbit_color = "C0")
 Plot the given **periodic** billiard `bd` using the limits defined
 by `xt` and `yt`.
 
 Set the keyword argument `plot_orbit = false` to not
 plot the orbit defined by `(xt, yt)` and only use the limits.
 """
-function plot_billiard(bd::Billiard{T};
+function plot(bd::Billiard) end
+
+function plot(bd::Billiard{T};
     ax = (PyPlot.figure(); PyPlot.gca())) where {T}
     PyPlot.sca(ax)
-    for obst in bd; plot_obstacle(obst); end
+    for obst in bd; plot(obst); end
     xmin, ymin, xmax, ymax = cellsize(bd)
     dx = xmax - xmin; dy = ymax - ymin
     ax[:set_aspect]("equal")
@@ -51,7 +53,7 @@ function plot_billiard(bd::Billiard{T};
     return nothing
 end
 
-function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
+function plot(bd::Billiard, xmin, ymin, xmax, ymax;
     hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()))
 
     isperiodic(bd) || periodicerror()
@@ -74,14 +76,14 @@ function plot_billiard(bd::Billiard, xmin, ymin, xmax, ymax;
     return nothing
 end
 
-function plot_billiard(bd, xt::AbstractVector, yt::AbstractVector;
+function plot(bd, xt::AbstractVector, yt::AbstractVector;
     hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()),
     plot_orbit = true, orbit_color = "C0")
 
     xmin = minimum(xt); xmax = maximum(xt)
     ymin = minimum(yt); ymax = maximum(yt)
 
-    plot_billiard(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
+    plot(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
 
     if plot_orbit
         PyPlot.sca(ax)
@@ -127,7 +129,7 @@ function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
         for y in dy
             disp = SVector(x,y)
             for obst in toplot
-                plot_obstacle(translate(obst, disp))
+                plot(translate(obst, disp))
             end
         end
     end
@@ -160,8 +162,8 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     for d in obstacles
         for j ∈ jmin:jmax
             for i ∈ imin:imax
-                plot_obstacle(translate(d, j*basis_a + i*basis_c))
-                plot_obstacle(translate(d, j*basis_a + i*basis_c + basis_b))
+                plot(translate(d, j*basis_a + i*basis_c))
+                plot(translate(d, j*basis_a + i*basis_c + basis_b))
             end
         end
     end

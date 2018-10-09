@@ -52,15 +52,15 @@ push!(bd, d)
 # Make the structure required:
 billiard = Billiard(bd)
 ```
-To make sure the billiard looks as you would expect, use the function `plot_billiard(bd)`. Create a particle inside that billiard and evolve it:
+To make sure the billiard looks as you would expect, use the function `plot(bd)`. Create a particle inside that billiard and evolve it:
 ```@example tut1
 using PyPlot
-plot_billiard(billiard)
+plot(billiard)
 ω = 0.5
 p = randominside(billiard, ω)
 xt, yt, vxt, vyt, t = construct(evolve!(p, billiard, 100)...)
 plot(xt, yt)
-plot_particle(p)
+plot(p)
 savefig("tut1.svg"); nothing # hide
 ```
 ![](tut1.svg)
