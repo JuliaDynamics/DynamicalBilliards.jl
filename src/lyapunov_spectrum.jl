@@ -225,52 +225,41 @@ end
 function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::AbstractFloat;
                            warning::Bool = false) where {T<:AbstractFloat}
 
-    offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
-              SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
-
-    t = T(tt)
-    ismagnetic = typeof(p) <: MagneticParticle
-    if t <= 0.0
-        error("`evolve!()` cannot evolve backwards in time.")
+    if tt <= 0.0
+        throw(ArgumentError(
+            "`lyapunovspectrum()` cannot evolve backwards in time."))
     end
 
-    count = zero(T)
-    t_pincheck = zero(T)
-    ismagnetic && (absω = abs(p.omega))
-
+    # intial offset vectors
+    offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
+              SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
     λ = zeros(T, 4)
 
+    t = T(tt)
+    count = zero(T)
+
+    # check for pinning before evolution
+    if ispinned(p, bd)
+        warning && @warn "Pinned particle!"
+        return λ
+    end
+
+    ismagnetic = typeof(p) <: MagneticParticle
+
     while count < t
-        #bounce!-step
+        # bouncing
         i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
-
-        #check for pinning
-        if ismagnetic && tmin == Inf
-            warning && warn("Pinned particle! (Inf. col. t)")
-            return zeros(T, 4)
-        end
-
         tmin = relocate!(p, bd[i], tmin, cp, offset)
         resolvecollision!(p, bd[i], offset)
-        ismagnetic && (p.center = find_cyclotron(p))
         count += increment_counter(t, tmin)
 
-        t_pincheck += tmin
+        # update cyclotron data
+        ismagnetic && (p.center = find_cyclotron(p))
 
-        #check for pinning
-        if isperiodic(bd) && i ∈ bd.peridx
-            # Pinned particle:
-            if ismagnetic && t_pincheck ≥ 2π/absω
-                warning && warn("Pinned particle! (completed circle)")
-                return zeros(T, 4)
-            end
-        else
-            t_pincheck = zero(T)
-        end
-
-        #QR decomposition to get lyapunov exponents
+        # QR decomposition to get Lyapunov spectrum
         Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
         offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
+        
         for i ∈ 1:4
             λ[i] += log(abs(R[i,i]))
         end
