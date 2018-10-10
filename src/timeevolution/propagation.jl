@@ -278,6 +278,64 @@ evolve(bd::Billiard, args...; kwargs...) =
     evolve!(randominside(bd), bd, args...; kwargs...)
 
 """
+one day, this will be a beautiful docstring
+"""
+function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
+                     dt::T) where {T <: AbstractFloat}
+    poss = SV{T}[]
+    vels = SV{T}[]
+
+    φ0 = atan(prevvel[2], prevvel[1])
+    s0, c0 = sincos(φ0)
+    sc0 = SV(s0, -c0)
+
+    tvec = collect(0:dt:ct)
+    
+    for t ∈ tvec
+        s,c = sincos(p.ω*t + φ0)
+        pos = SV(s,-c)/p.ω + prevpos - sc0/p.ω
+        vel = SV(s,c)
+        push!(poss, pos); push!(vels, vel)
+        
+    end
+
+    # finish with ct
+    if tvec[end] != ct
+        push!(tvec, ct)
+        push!(poss, p.pos + p.current_cell)
+        push!(vels, p.vel)
+    end
+    
+    return poss, vels, tvec
+end
+
+function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
+                     dt::T) where {T <: AbstractFloat}
+
+    poss = SV{T}[]
+    vels = SV{T}[]
+    tvec = collect(0:dt:ct)
+
+    for t ∈ tvec
+        pos = prevpos + t*prevvel
+        vel = prevvel
+        push!(poss, pos); push!(vels, vel)
+    end
+    
+    # finish with ct
+    if tvec[end] != ct
+        push!(tvec, ct)
+        push!(poss, p.pos + p.current_cell)
+        push!(vels, p.vel)
+    end
+    
+    return poss, vels, tvec
+end
+
+
+"""
+
+TODO: Update this
     construct(ct, poss, vels [, ω [, dt=0.01]]) -> xt, yt, vxt, vyt, t
 Given the output of [`evolve!`](@ref), construct the
 timeseries of the position and velocity, as well as the time vector.
@@ -295,53 +353,72 @@ Return:
 * y velocity time-series
 * time vector
 """
-function construct(t::Vector{T},
-    poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}) where {T}
+function construct(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
+                      warning::Bool = true) where {T}
 
-    xt = [pos[1] for pos in poss]
-    yt = [pos[2] for pos in poss]
-    vxt = [vel[1] for vel in vels]
-    vyt = [vel[2] for vel in vels]
-    ct = cumsum(t)
-    return xt, yt, vxt, vyt, ct
-end
+    ts = [zero(T)]
+    poss = [p.pos]
+    vels = [p.vel]
 
-function construct(t::Vector{T},  poss::Vector{SVector{2,T}},
-vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
+    count = zero(t)
+    t_total = zero(T)
+    t_to_write = zero(T)
 
-    dt = T(dt)
-    ω == 0 && return construct(t, poss, vels)
+    prevpos = p.pos + p.current_cell
+    prevvel = p.vel
 
-    xt = [poss[1][1]]
-    yt = [poss[1][2]]
-    vxt= [vels[1][1]]
-    vyt= [vels[1][2]]
-    ts = [t[1]]
-    ct = cumsum(t)
+    if ispinned(p, bd)
+        warn && @warn "Pinned particle – returning one cycle"
+        nposs, nvels, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt)
+        append!(ts, nts[2:end] .+ t_total)
+        append!(poss, nposs[2:end])
+        append!(vels, nvels[2:end])
+        return ts, poss, vels
+    end
+    
+    while count < t
 
-    for i in 2:length(t)
-        φ0 = atan(vels[i-1][2], vels[i-1][1])
-        x0 = poss[i-1][1]; y0 = poss[i-1][2]
-        colt=t[i]
+        i, ct = bounce!(p, bd)
+        t_to_write += ct
 
-        t0 = ct[i-1]
-        # Construct proper time-vector
-        if colt >= dt
-            timevec = collect(0:dt:colt)[2:end]
-            timevec[end] == colt || push!(timevec, colt)
+        
+        if isperiodic(bd) && i ∈ bd.peridx
+            # do nothing at periodic obstacles
+            continue
         else
-            timevec = colt
-        end
+            if t_to_write <= dt
+                # push collision point only
+                push!(ts, t_to_write)
+                push!(poss, p.pos + p.current_cell)
+                push!(vels, p.vel)
+            else
+                # extrapolate & append
+                nposs, nvels, nts = extrapolate(p, prevpos, prevvel, t_to_write, dt)
 
-        for td in timevec
-            s, c = sincos(ω*td + φ0)
-            s0, c0 = sincos(φ0)
-            push!(vxt, c)
-            push!(vyt, s)
-            push!(xt, s/ω + x0 - s0/ω)  #vy0 is sin(φ0)
-            push!(yt, -c/ω + y0 + c0/ω) #vx0 is cos(φ0)
-            push!(ts, t0 + td)
-        end#collision time
-    end#total time
-    return xt, yt, vxt, vyt, ts
+                append!(ts, nts[2:end] .+ t_total)
+                append!(poss, nposs[2:end])
+                append!(vels, nvels[2:end]) 
+            end
+
+            prevpos = p.pos + p.current_cell
+            prevvel = p.vel
+            
+            t_total += t_to_write
+            count += increment_counter(t, t_to_write)
+            
+            t_to_write = zero(T)
+            
+        end
+        
+    end
+    
+    return ts, poss, vels
 end
+
+#reasonable defaults for dt
+@inline construct(p::MagneticParticle{T}, bd::Billiard{T}, t; kwargs...) where {T} =
+    construct(p, bd, t, T(0.01); kwargs...)
+
+@inline construct(p::Particle{T}, bd::Billiard{T}, t; kwargs...) where {T} =
+    construct(p, bd, t, T(Inf); kwargs...)
+
