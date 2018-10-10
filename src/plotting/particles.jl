@@ -28,8 +28,6 @@ it is also passed to `quiver`.
 Optionally you can plot the cyclotron traced by a `MagneticParticle` by giving
 `true` as second argument.
 """
-function plot(p::AbstractParticle) end
-
 function plot(p::AbstractParticle{T}, cycl::Bool = false; use_cell=true, kwargs...) where {T}
   if typeof(p) <: MagneticParticle && cycl
     plot_cyclotron(p; use_cell = use_cell)

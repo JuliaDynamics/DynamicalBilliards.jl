@@ -4,7 +4,7 @@ All plotting functions are brought into scope when `using PyPlot`. The functions
 ```@docs
 DynamicalBilliards.plot(::Obstacle)
 DynamicalBilliards.plot(::Billiard)
-DynamicalBilliards.plot(::AbstractParticle)
+DynamicalBilliards.plot(::AbstractParticle, ::Bool)
 animate_evolution
 ```
 
