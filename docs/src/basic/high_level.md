@@ -56,7 +56,7 @@ mp = MagneticParticle(x0, y0, φ0, ω)
     When creating a billiard or a particle, the object is printed with `{Float64}` at the end. This shows what type of numbers are used for *all* numerical operations. If you are curious you can learn more about it in the [numerical precision page](/low_level/#numerical-precision).
 
 !!! danger "Particles must be inside the Billiard!"
-    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [low-level API page](low_level).
+    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [Internals page](low_level).
 
 ## Random initial conditions
 
