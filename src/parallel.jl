@@ -14,15 +14,19 @@ function parallelize(f, bd::Billiard, t, particles::Vector{<:AbstractParticle};
 end
 
 function threads_pl(f, bd, t, particles)
-    ret = zeros(length(particles)) # change this
+    ret = _retinit(f, particles)
     Threads.@threads for i in 1:length(particles)
-        @inbounds ret[i] = f(particles[i], bd, t)
+        @inbounds ret[i] = _getval(f, particles[i], bd, t)
     end
     return ret
 end
 
 function pmap_pl(f, bd, t, particles)
-    g(p) = f(p, bd, t)
+    g(p) = _getval(f, p, bd, t)
     ret = pmap(g, particles)
     return ret
 end
+
+_retinit(f, p::Vector{<:AbstractParticle{T}}) where {T} = zeros(T, length(p))
+_getval(f, p, bd, t) = f(p, bd, t)
+_getval(f::typeof(lyapunovspectrum), p, bd, t) = f(p, bd, t)[1]

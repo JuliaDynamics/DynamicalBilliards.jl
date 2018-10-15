@@ -232,7 +232,7 @@ meancollisiontime(randominside(bd), bd, 10000.0)
 ```
 
 ## It's all about bounce!
-The main propagation algorithm used by `DynamicalBilliards` bundled in the following well-behaving function:
+The main propagation algorithm used by `DynamicalBilliards` is bundled in the following well-behaving function:
 ```@docs
 bounce!
 ```
