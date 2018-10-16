@@ -78,3 +78,19 @@ function ispinned_tests(args...)
 end
 
 billiards_testset("ispinned", identity; caller = ispinned_tests)
+
+# Quick an sloppy parallelization test
+function test_parallelized(args...)
+    bd = billiard_mushroom()
+    N = 100
+    particles = [randominside(bd) for i in 1:N]
+    for f in (meancollisiontime!, escapetime!, lyapunovspectrum!)
+        res = parallelize(f, bd, N, particles)
+        @test length(res) == N
+    end
+
+    res, ai = parallelize(boundarymap, bd, N, particles)
+    @test length(res) == N
+end
+
+billiards_testset("parallelize", identity; caller = test_parallelized)

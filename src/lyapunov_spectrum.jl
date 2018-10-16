@@ -222,10 +222,10 @@ end
 ################################################################################
 ## HIGH-LEVEL FUNCTION
 ################################################################################
-function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::AbstractFloat;
+function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt;
                            warning::Bool = false) where {T<:AbstractFloat}
 
-    if tt <= 0.0
+    if tt ≤ 0.0
         throw(ArgumentError(
             "`lyapunovspectrum()` cannot evolve backwards in time."))
     end

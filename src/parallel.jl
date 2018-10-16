@@ -52,6 +52,7 @@ _retinit(::typeof(boundarymap), p::Vector{<:AbstractParticle{T}}) where {T} =
 
 _getval(f, p, bd, t) = f(p, bd, t)
 _getval(f::typeof(lyapunovspectrum), p, bd, t) = @inbounds f(p, bd, t)[1]
+_getval(f::typeof(lyapunovspectrum!), p, bd, t) = @inbounds f(p, bd, t)[1]
 
 # Methods for boundary map are trickier because of the weird call signature
 # and return signature
