@@ -48,6 +48,8 @@ export MushroomTools
 
 include("raysplitting.jl")
 
+include("parallel.jl")
+
 include("testing.jl")
 
 ##########################################

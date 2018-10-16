@@ -72,8 +72,8 @@ billiards_testset("PSOS", identity; caller = cut_psos)
 
 function fills_boundarymap(p, bd)
     @testset "$(tag(p, bd)) Fills boundary map" begin
-        ξs, sφs = boundarymap(bd, 10000, p)
-
+        bmap, = boundarymap(p, bd, 10000)
+        ξs = [b[1] for b in bmap]; sφs = [b[2] for b in bmap]
         partition = (10,10) # partition size
         A = falses(partition)
         l = totallength(bd)

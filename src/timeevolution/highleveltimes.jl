@@ -18,6 +18,7 @@ A warning can be thrown if the result is `Inf`. Enable this using the keyword
 `warning = true`.
 
 If a particle is not given, a random one is picked through [`randominside`](@ref).
+See [`parallelize`](@ref) for a parallelized version.
 """
 escapetime(p, bd, t; warning = false) =
     escapetime!(copy(p), bd, t; warning = warning)
@@ -107,6 +108,7 @@ Collision times are counted only between obstacles that are *not*
 [`PeriodicWall`](@ref).
 
 If a particle is not given, a random one is picked through [`randominside`](@ref).
+See [`parallelize`](@ref) for a parallelized version.
 """
 meancollisiontime(p, bd, t) = meancollisiontime!(copy(p), bd, t)
 meancollisiontime(bd::Billiard, t) = meancollisiontime(randominside(bd), bd, t)

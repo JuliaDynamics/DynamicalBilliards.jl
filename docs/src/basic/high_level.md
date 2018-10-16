@@ -56,7 +56,7 @@ mp = MagneticParticle(x0, y0, φ0, ω)
     When creating a billiard or a particle, the object is printed with `{Float64}` at the end. This shows what type of numbers are used for *all* numerical operations. If you are curious you can learn more about it in the [numerical precision page](/low_level/#numerical-precision).
 
 !!! danger "Particles must be inside the Billiard!"
-    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [low-level API page](low_level).
+    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [Internals page](low_level).
 
 ## Random initial conditions
 
@@ -231,8 +231,25 @@ bd = billiard_sinai()
 meancollisiontime(randominside(bd), bd, 10000.0)
 ```
 
+## Parallelization
+```@docs
+parallelize
+```
+---
+Here are some examples
+```@example 2
+bd = billiard_stadium()
+particles = [randominside(bd) for i in 1:1000]
+parallelize(meancollisiontime, bd, 1000, particles)
+```
+
+```@example 2
+parallelize(lyapunovspectrum, bd, 1000, particles)
+```
+
+
 ## It's all about bounce!
-The main propagation algorithm used by `DynamicalBilliards` bundled in the following well-behaving function:
+The main propagation algorithm used by `DynamicalBilliards` is bundled in the following well-behaving function:
 ```@docs
 bounce!
 ```
