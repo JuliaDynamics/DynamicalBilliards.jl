@@ -9,7 +9,7 @@ parallelize(f, bd, t, n::Int, ω) = parallelize(f, bd, t, [randominside(bd, ω) 
 """
     parallelize(f, bd::Billiard, t, particles; partype = :threads)
 Parallelize function `f` across the available particles. The parallelization type can
-be `:threads` or `:pmap` (which uses threads or a worker pool initialized with `addprocs`)
+be `:threads` or `:pmap, which use threads or a worker pool initialized with `addprocs`
 _before_ `using DynamicalBilliards`.
 
 `particles` can be:
@@ -21,8 +21,7 @@ The functions usable here are:
 * `meancollisiontime`
 * `escapetime`
 * `lyapunovspectrum` (returns only the maximal exponent)
-* `boundarymap` (_does not_ return `arcintervals`)
-
+* `boundarymap` (returns vector of vectors of 2-vectors and `arcintervals`)
 """
 function parallelize(f, bd::Billiard, t, particles::Vector{<:AbstractParticle};
     partype = :threads)
@@ -48,6 +47,9 @@ function pmap_pl(f, bd, t, particles)
 end
 
 _retinit(f, p::Vector{<:AbstractParticle{T}}) where {T} = zeros(T, length(p))
+_retinit(::typeof(boundarymap), p::Vector{<:AbstractParticle{T}}) where {T} =
+    Vector{Vector{SV{T}}}(undef, length(p))
+
 _getval(f, p, bd, t) = f(p, bd, t)
 _getval(f::typeof(lyapunovspectrum), p, bd, t) = @inbounds f(p, bd, t)[1]
 
@@ -57,7 +59,13 @@ function threads_pl(f::typeof(boundarymap), bd, t, particles)
     intervals = arcintervals(bd)
     ret = _retinit(f, particles)
     Threads.@threads for i in 1:length(particles)
-        @inbounds ret[i] = _getval(f, particles[i], bd, t)
+        @inbounds ret[i] = f(particles[i], bd, t, intervals)[1]
     end
+    return ret
+end
+function pmap_pl(f::typeof(boundarymap), bd, t, particles)
+    intervals = arcintervals(bd)
+    g(p) = f(p, bd, t, intervals)
+    ret = pmap(g, particles)
     return ret
 end

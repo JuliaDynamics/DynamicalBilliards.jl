@@ -24,7 +24,7 @@ function plot_boundarymap(bmap, intervals;
     color = "C0", bordercolor = "C3", ms = 1.0, obstacleindices = true, kwargs...)
 
     # Plot the points
-    if typeof(bmap) <: Vector{<:Vector}
+    if typeof(bmap) <: Vector{<:SVector}
         c = typeof(color) <: AbstractVector ? color[1] : color
         ξs = [b[1] for b in bmap]; sφs = [b[2] for b in bmap]
 
