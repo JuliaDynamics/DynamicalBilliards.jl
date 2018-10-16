@@ -190,13 +190,13 @@ end
 ################################################################################
 
 #="""
-    propagate!(p::AbstractParticle{T}, newpos::SV{T}, t::T, 
+    propagate!(p::AbstractParticle{T}, newpos::SV{T}, t::T,
     offset::MArray{Tuple{4,4},T})
 Propagate the particle `p` for given time `t`, changing appropriately the the
 `p.pos` and `p.vel` fields together with the components of the offset vectors
 stored in the `offset` matrix.
 """=#
-function propagate!(p::AbstractParticle{T}, newpos::SV{T}, t::T, 
+function propagate!(p::AbstractParticle{T}, newpos::SV{T}, t::T,
                     offset::Vector{SVector{4, T}}) where {T<: AbstractFloat}
 
     propagate!(p, newpos, t)
@@ -259,7 +259,7 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
         # QR decomposition to get Lyapunov spectrum
         Q, R = qr(hcat(offset[1], offset[2], offset[3], offset[4]))
         offset[1], offset[2], offset[3], offset[4] = Q[:, 1], Q[:, 2], Q[:, 3], Q[:, 4]
-        
+
         for i ∈ 1:4
             λ[i] += log(abs(R[i,i]))
         end
@@ -271,13 +271,14 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt::Abstract
 end
 
 """
-    lyapunovspectrum([p::AbstractParticle,] bd::Billiard, t::Float)
+    lyapunovspectrum([p::AbstractParticle,] bd::Billiard, t)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table.
 
 Returns zeros for pinned particles.
 
 If a particle is not given, a random one is picked through [`randominside`](@ref).
+See [`parallelize`](@ref) for a parallelized version.
 """
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(copy(p), args...)
 lyapunovspectrum(bd::Billiard, args...) =

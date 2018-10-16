@@ -231,6 +231,23 @@ bd = billiard_sinai()
 meancollisiontime(randominside(bd), bd, 10000.0)
 ```
 
+## Parallelization
+```@docs
+parallelize
+```
+---
+Here are some examples
+```@example 2
+bd = billiard_stadium()
+particles = [randominside(bd) for i in 1:1000]
+parallelize(meancollisiontime, bd, 1000, particles)
+```
+
+```@example 2
+parallelize(lyapunovspectrum, bd, 1000, particles)
+```
+
+
 ## It's all about bounce!
 The main propagation algorithm used by `DynamicalBilliards` is bundled in the following well-behaving function:
 ```@docs

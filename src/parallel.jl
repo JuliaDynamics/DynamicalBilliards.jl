@@ -18,10 +18,10 @@ _before_ `using DynamicalBilliards`.
   This uses [`randominside`](@ref).
 
 The functions usable here are:
-* `meancollisiontime`
-* `escapetime`
-* `lyapunovspectrum` (returns only the maximal exponent)
-* `boundarymap` (returns vector of vectors of 2-vectors and `arcintervals`)
+* [`meancollisiontime`](@ref)
+* [`escapetime`](@ref)
+* [`lyapunovspectrum`](@ref) (returns only the maximal exponents)
+* [`boundarymap`](@ref) (returns vector of vectors of 2-vectors _and_ `arcintervals`)
 """
 function parallelize(f, bd::Billiard, t, particles::Vector{<:AbstractParticle};
     partype = :threads)
@@ -61,11 +61,11 @@ function threads_pl(f::typeof(boundarymap), bd, t, particles)
     Threads.@threads for i in 1:length(particles)
         @inbounds ret[i] = f(particles[i], bd, t, intervals)[1]
     end
-    return ret
+    return ret, intervals
 end
 function pmap_pl(f::typeof(boundarymap), bd, t, particles)
     intervals = arcintervals(bd)
     g(p) = f(p, bd, t, intervals)
     ret = pmap(g, particles)
-    return ret
+    return ret, intervals
 end
