@@ -1,16 +1,17 @@
 export plot_boundarymap, plot_boundarymap_portion
 
 """
-    plot_boundarymap(ξs, sφs, intervals; kwargs...)
+    plot_boundarymap(bmap, intervals; kwargs...)
 
 Plots the boundary map.
-The input arguments are the return values of [`boundarymap`](@ref).
+The input arguments are the return values of [`boundarymap`](@ref) (also applies
+for the parallelized version, where `bmap` is a vector of vectors of 2-vectors).
 
 ## Keyword Arguments
 * `ax = (figure(); gca())` : The axis to plot on.
 * `color = "C0"` : The color to use for the plotted points. Can be either a
-  color for `PyPlot.plot` or a vector of colors of length `length(ξs)`, in
-  order to give each initial condition a different color.
+  color for `PyPlot.plot` or a vector of colors of length `length(bmap)`, in
+  order to give each initial condition a different color (for parallelized version).
 * `ms = 1.0` : Marker size of the points.
 * `bordercolor = "C3"` : The color of the vertical lines that denote the obstacle
   borders.
@@ -18,21 +19,24 @@ The input arguments are the return values of [`boundarymap`](@ref).
 * Any other keyword argument is passed to `PyPlot.plot` which plots the points of
   the section.
 """
-function plot_boundarymap(ξs, sφs, intervals;
+function plot_boundarymap(bmap, intervals;
     ax = (PyPlot.figure(); PyPlot.gca()),
     color = "C0", bordercolor = "C3", ms = 1.0, obstacleindices = true, kwargs...)
 
     # Plot the points
-    if typeof(ξs) <: Vector{<:Real}
+    if typeof(bmap) <: Vector{<:Vector}
         c = typeof(color) <: AbstractVector ? color[1] : color
+        ξs = [b[1] for b in bmap]; sφs = [b[2] for b in bmap]
 
         ax[:plot](ξs, sφs; marker="o", color = c,
         linestyle="None", ms = ms, kwargs...)
-    else            
-        for (i, (xis, sphis)) in enumerate(zip(ξs, sφs))
+    else
+        for (i, bmapp) in enumerate(bmap)
+            ξs = [b[1] for b in bmapp]; sφs = [b[2] for b in bmapp]
+
             c = typeof(color) <: AbstractVector ? color[i] : color
 
-            ax[:plot](xis, sphis; marker="o", color = c,
+            ax[:plot](ξs, sφs; marker="o", color = c,
             linestyle="None", ms = ms, kwargs...)
         end
     end

@@ -10,6 +10,7 @@
 
 ## Breaking changes
 * Plotting functions now overload `plot` instead. There is no more `plot_obstacle`, `plot_billiard` and `plot_particle`. `plot_boundarymap` and `animate_evolution` remain the same though.
+* `boundarymap` call signature and return values reworked.
 
 ## Low-Level changes
 These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.
