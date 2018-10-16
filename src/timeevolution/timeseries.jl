@@ -164,20 +164,21 @@ one day, this will be a beautiful docstring
 """
 function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
                      dt::T) where {T <: AbstractFloat}
-    poss = SV{T}[]
-    vels = SV{T}[]
     
     φ0 = atan(prevvel[2], prevvel[1])
     s0, c0 = sincos(φ0)
     sc0 = SV(s0, -c0)
 
     tvec = collect(0:dt:ct)
+
+    poss = Vector{SV{T}}(undef, length(tvec))
+    vels = Vector{SV{T}}(undef, length(tvec))
     
-    for t ∈ tvec
+    for (i,t) ∈ enumerate(tvec)
         s,c = sincos(p.ω*t + φ0)
 
-        push!(poss, SV(s,-c)/p.ω + prevpos - sc0/p.ω)
-        push!(vels, SV(s,c))        
+        poss[i] = SV(s,-c)/p.ω + prevpos - sc0/p.ω
+        vels[i] = SV(s,c)
     end
 
     # finish with ct
@@ -192,15 +193,14 @@ end
 
 function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
                      dt::T) where {T <: AbstractFloat}
-
-    poss = SV{T}[]
-    vels = SV{T}[]
-
     tvec = collect(0:dt:ct)
 
-    for t ∈ tvec
-        push!(poss, prevpos + t*prevvel)
-        push!(vels, prevvel)
+    poss = Vector{SV{T}}(length(tvec), undef)
+    vels = Vector{SV{T}}(length(tvec), undef)
+
+    for (i,t) ∈ enumerate(tvec)
+        poss[i] = prevpos + t*prevvel
+        vels[i] = prevvel
     end
     
     # finish with ct
@@ -253,12 +253,14 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
     prevvel = p.vel
 
     if ispinned(p, bd)
-        warn && @warn "Pinned particle – returning one cycle"
-        (nx, ny), (nvx, nvy), nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt)
+        warning && @warn "Pinned particle – returning one cycle"
+        nposs, nvels, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt)
 
         append!(ts, nts[2:end] .+ t_total)
-        append!(x, nx[2:end]); append!(y, ny[2:end])
-        append!(vx, nvx[2:end]); append!(vy; nvy[2:end])
+        append!(x, map(x->x[1], nposs[2:end]))
+        append!(y, map(x->x[2], nposs[2:end]))
+        append!(vx, map(x->x[1], nvels[2:end]))
+        append!(vy, map(x->x[2], nvels[2:end]))
 
         return x, y, vx, vy, ts
     end
@@ -270,7 +272,7 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
 
         
         if isperiodic(bd) && i ∈ bd.peridx
-            # do nothing at periodic obstacles
+            # do nothing at periodic obstacles, (nvx
             continue
         else
             if t_to_write <= dt
@@ -283,12 +285,13 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
                 push!(vy, p.vel[2])
             else
                 # extrapolate & append
-                (nx, ny), (nvx, nvy), nts = extrapolate(p, prevpos, prevvel,
+                nposs, nvels, nts = extrapolate(p, prevpos, prevvel,
                                                         t_to_write, dt)
 
-                append!(ts, nts[2:end] .+ t_total)
-                append!(x, nx[2:end]); append!(y, ny[2:end])
-                append!(vx, nvx[2:end]); append!(vy; nvy[2:end])                
+                append!(x, map(x->x[1], nposs[2:end]))
+                append!(y, map(x->x[2], nposs[2:end]))
+                append!(vx, map(x->x[1], nvels[2:end]))
+                append!(vy, map(x->x[2], nvels[2:end]))
             end
 
             prevpos = p.pos + p.current_cell
@@ -308,10 +311,10 @@ end
 
 #reasonable defaults for dt
 @inline timeseries!(p::MagneticParticle{T}, bd::Billiard{T}, t; kwargs...) where {T} =
-    construct(p, bd, t, T(0.01); kwargs...)
+    timeseries!(p, bd, t, T(0.01); kwargs...)
 
 @inline timeseries!(p::Particle{T}, bd::Billiard{T}, t; kwargs...) where {T} =
-    construct(p, bd, t, T(Inf); kwargs...)
+    timeseries!(p, bd, t, T(Inf); kwargs...)
 
 
 # non-mutating version
@@ -320,4 +323,4 @@ end
 Non-mutating version of [`timeseries!`](@ref)
 """
 @inline timeseries(p::AbstractParticle, args...; kwargs...) =
-    construct!(copy(p), args...; kwargs...)
+    timeseries!(copy(p), args...; kwargs...)
