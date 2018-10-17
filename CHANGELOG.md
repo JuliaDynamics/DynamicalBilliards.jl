@@ -1,11 +1,9 @@
 # 3.0-dev
 
-## TODO
-* update Lyapunov exponents to new interface
-
 ## Breaking changes
 * Plotting functions now overload `plot` instead. There is no more `plot_obstacle`, `plot_billiard` and `plot_particle`. `plot_boundarymap` and `animate_evolution` remain the same though.
 * `construct` is removed.
+* `boundarymap` call signature and return values reworked.
 
 ## Enhancements / new features
 * New function `timeseries` creates the timeseries of the particle evolution in a billiard. This does prettymuch what `construct(evolve...)` used to do.
@@ -14,7 +12,7 @@
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!
 * `totallength` is exported.
 * `plot(bd, x, y)` (using the timeseries of `timeseries`) now also works for non-periodic billiards as well, for convenience.
-
+* Automatic parallelization is now possible for some functions, given by the `parallelize` function.
 
 ## Low-Level changes
 These changes are not actually breaking, unless someone used the low-level interface. The docs also changed and much less than the low level interface is exposed.

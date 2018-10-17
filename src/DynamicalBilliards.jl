@@ -49,6 +49,8 @@ export MushroomTools
 include("raysplitting.jl")
 include("timeseries.jl")
 
+include("parallel.jl")
+
 include("testing.jl")
 
 ##########################################
