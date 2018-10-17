@@ -90,85 +90,10 @@ evolve(bd::Billiard, args...; kwargs...) =
     evolve!(randominside(bd), bd, args...; kwargs...)
 
 
-"""
-    construct(ct, poss, vels [, ω [, dt=0.01]]) -> xt, yt, vxt, vyt, t
-Given the output of [`evolve!`](@ref), construct the
-timeseries of the position and velocity, as well as the time vector.
-In case of not given `ω` (or `ω == 0`), straight construction takes place.
-In case of `ω != 0` or `ω::Vector` magnetic construction takes place.
-The additional optional argument of `dt` (only valid for magnetic construction)
-is the timestep with which the timeseries are constructed.
-Return:
-* x position time-series
-* y position time-series
-* x velocity time-series
-* y velocity time-series
-* time vector
-"""
 
-
-#=
-    extrapolate(p, prevpos, prevvel, ct, dt)
-=#
-function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T) where {T <: AbstractFloat}
-    
-    φ0 = atan(prevvel[2], prevvel[1])
-    s0, c0 = sincos(φ0)
-
-    tvec = collect(0:dt:ct)
-    
-    x = Vector{T}(undef, length(tvec))
-    y = Vector{T}(undef, length(tvec))
-    vx = Vector{T}(undef, length(tvec))
-    vy = Vector{T}(undef, length(tvec))
-    
-    for (i,t) ∈ enumerate(tvec)
-        s,c = sincos(p.ω*t + φ0)
-
-        x[i] = s/p.ω + prevpos[1] - s0/p.ω
-        y[i] = -c/p.ω + prevpos[2] + c0/p.ω
-        vx[i] = s; vy[i] = c
-    end
-
-    # finish with ct
-    if tvec[end] != ct
-        push!(tvec, ct)
-        push!(x, p.pos[1] + p.current_cell[1])
-        push!(y, p.pos[2] + p.current_cell[2])
-        
-        push!(vx, p.vel[1]); push!(vy, p.vel[2])
-    end
-    
-    return x, y, vx, vy, tvec
-end
-
-function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T) where {T <: AbstractFloat}
-    tvec = collect(0:dt:ct)
-
-    poss = Vector{SV{T}}(length(tvec), undef)
-    vels = Vector{SV{T}}(length(tvec), undef)
-
-    for (i,t) ∈ enumerate(tvec)
-        x[i] = prevpos[1] + t*prevvel[1]
-        y[i] = prevpos[2] + t*prevvel[2]
-        vx[i], vy[i] = prevvel
-    end
-    
-    # finish with ct
-    if tvec[end] != ct
-        push!(tvec, ct)
-        push!(x, p.pos[1] + p.current_cell[1])
-        push!(y, p.pos[2] + p.current_cell[2])
-        
-        push!(vx, p.vel[1]); push!(vy, p.vel[2])
-    end
-    
-    return x, y, vx, vy, tvec
-end
-
-
+#####################################################################################
+# Timeseries
+#####################################################################################
 """
     timeseries!(p::AbstractParticle, bd::Billiard, t, [dt])
 Evolves the given particle `p` inside the billiard `bd`.  If `t` is of type
@@ -176,12 +101,12 @@ Evolves the given particle `p` inside the billiard `bd`.  If `t` is of type
 evolve for as many collisions as `t`.
 Returns the time series for position and velocity as well as the time vector.
 
-The optional argument `dt` is the time step used for interpolating the time 
-series in between collisions. For straight propagation, this defaults
- to `Inf`, i.e. only collision points are returned. 
-For magnetic propagation, it defaults to 0.01.
+The optional argument `dt` is the time step used for interpolating the time
+series in between collisions. `dt` is capped by the collision time, as
+the interpolation _always_ stops at collisions.
+For straight propagation `dt = Inf`, while for magnetic `dt = 0.01`.
 
-For pinned magnetic particles, `timeseries!` issues a warning and returns the 
+For pinned magnetic particles, `timeseries!` issues a warning and returns the
 trajectory for one period.
 
 Return:
@@ -194,11 +119,9 @@ Return:
 function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
                       warning::Bool = true) where {T}
 
-    ts::Vector{T} = [zero(T)]
-    x::Vector{T} = [p.pos[1]]
-    y::Vector{T} = [p.pos[2]]
-    vx::Vector{T} = [p.vel[1]]
-    vy::Vector{T} = [p.vel[2]]
+    ts = [zero(T)]
+    x  = [p.pos[1]]; y  = [p.pos[2]]
+    vx = [p.vel[1]]; vy = [p.vel[2]]
 
     count = zero(t)
     t_total = zero(T)
@@ -219,18 +142,18 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
 
         return x, y, vx, vy, ts
     end
-    
-    while count < t
+
+    @inbounds while count < t
 
         i, ct = bounce!(p, bd)
         t_to_write += ct
 
-        
+
         if isperiodic(bd) && i ∈ bd.peridx
-            # do nothing at periodic obstacles, (nvx
+            # do nothing at periodic obstacles
             continue
         else
-            if t_to_write <= dt
+            if t_to_write ≤ dt
                 # push collision point only
                 push!(ts, t_to_write)
                 push!(x, p.pos[1] + p.current_cell[1])
@@ -240,8 +163,7 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
                 push!(vy, p.vel[2])
             else
                 # extrapolate & append
-                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel,
-                                                        t_to_write, dt)
+                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_to_write, dt)
 
                 append!(ts, nts[2:end] .+ t_total)
                 append!(x, nx[2:end])
@@ -252,17 +174,69 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
 
             prevpos = p.pos + p.current_cell
             prevvel = p.vel
-            
+
             t_total += t_to_write
             count += increment_counter(t, t_to_write)
-            
             t_to_write = zero(T)
-            
+
         end
-        
     end
-    
     return x, y, vx, vy, ts
+end
+
+function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
+                     dt::T) where {T <: AbstractFloat}
+
+    φ0 = atan(prevvel[2], prevvel[1])
+    s0, c0 = sincos(φ0)
+
+    tvec = 0:dt:ct
+    x = Vector{T}(undef, length(tvec))
+    y = Vector{T}(undef, length(tvec))
+    vx = Vector{T}(undef, length(tvec))
+    vy = Vector{T}(undef, length(tvec))
+
+    @inbounds for (i,t) ∈ enumerate(tvec)
+        s,c = sincos(p.ω*t + φ0)
+
+        x[i] = s/p.ω + prevpos[1] - s0/p.ω
+        y[i] = -c/p.ω + prevpos[2] + c0/p.ω
+        vx[i] = s; vy[i] = c
+    end
+
+    # finish with ct
+    @inbounds if tvec[end] != ct
+        push!(tvec, ct)
+        push!(x, p.pos[1] + p.current_cell[1])
+        push!(y, p.pos[2] + p.current_cell[2])
+        push!(vx, p.vel[1]); push!(vy, p.vel[2])
+    end
+
+    return x, y, vx, vy, tvec
+end
+
+function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
+                     dt::T) where {T <: AbstractFloat}
+
+    tvec = 0:dt:ct
+    poss = Vector{SV{T}}(length(tvec), undef)
+    vels = Vector{SV{T}}(length(tvec), undef)
+
+    @inbounds for (i,t) ∈ enumerate(tvec)
+        x[i] = prevpos[1] + t*prevvel[1]
+        y[i] = prevpos[2] + t*prevvel[2]
+        vx[i], vy[i] = prevvel
+    end
+
+    # finish with ct
+    @inbounds if tvec[end] != ct
+        push!(tvec, ct)
+        push!(x, p.pos[1] + p.current_cell[1])
+        push!(y, p.pos[2] + p.current_cell[2])
+        push!(vx, p.vel[1]); push!(vy, p.vel[2])
+    end
+
+    return x, y, vx, vy, tvec
 end
 
 #reasonable defaults for dt
