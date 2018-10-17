@@ -239,7 +239,7 @@ end
 #####################################################################################
 @inline raysplit_indices(bd, ::Nothing) = nothing
 @inline bounce!(p, bd, ::Nothing, ::Nothing) = bounce!(p, bd)
-@inline acceptable_raysplitter(::Nothing, bd) = true
+@inline acceptable_raysplitter(::Nothing, bd::Billiard) = true
 
 evolve!(p, bd, t, ray::RaySplitter; warning = false) =
     evolve!(p, bd, t, (ray, ); warning = warning)
