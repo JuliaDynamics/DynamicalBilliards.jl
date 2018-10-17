@@ -39,11 +39,8 @@ function type_stability(p, bd)
         @test eltype(ct) == T
         @test eltype(poss[1]) == eltype(vels[1]) == T
 
-        if typeof(p) <: MagneticParticle
-            xt, yt, vxt, vyt, tt = construct(ct, poss, vels, p.ω, 0.1)
-        else
-            xt, yt, vxt, vyt, tt = construct(ct, poss, vels)
-        end
+        xt, yt, vxt, vyt, tt = timeseries(p, bd, T(10.0); dt = T(0.1))
+
         for x in (xt, yt, vxt, vyt, tt)
             @test eltype(x) == T
         end
