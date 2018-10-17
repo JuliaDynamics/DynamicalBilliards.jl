@@ -37,50 +37,64 @@ The function [`construct`](@ref) takes that into account.
 
 To implement ray-splitting, the `evolve!` function is supplemented with a
 fourth argument, `raysplitters` which is a tuple of [`RaySplitter`](@ref) instances.
+Notice that `evolve` **always mutates the billiard** if ray-splitting is used!
 For more information and instructions on using ray-splitting
 please visit the official documentation.
 """
-function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t;
+function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = nothing;
     warning = false) where {T<:AbstractFloat}
 
     if t ≤ 0
         throw(ArgumentError("`evolve!()` cannot evolve backwards in time."))
     end
-
-    ismagnetic = typeof(p) <: MagneticParticle
-    rt = T[]; push!(rt, 0)
-    rpos = SVector{2,T}[]; push!(rpos, p.pos)
-    rvel = SVector{2,T}[]; push!(rvel, p.vel)
-    ismagnetic && (omegas = T[]; push!(omegas, p.omega); absω = abs(p.omega))
-
-    count = zero(t)
-    t_to_write = zero(T)
-
     if ispinned(p, bd)
         push!(rpos, p.pos)
         push!(rvel, p.vel)
         push!(rt, Inf)
-        return (rt, rpos, rvel, p.omega)
+        return (rt, rpos, rvel, p.ω)
+    end
+
+    ismagnetic = p isa MagneticParticle
+    isray = !isa(raysplitters, Nothing)
+    isray && acceptable_raysplitter(raysplitters, bd)
+    raysidx = raysplit_indices(bd, raysplitters)
+    ismagnetic && isray && (omegas = [p.ω])
+
+    rt = T[0.0]; rpos = [p.pos]; rvel = [p.vel]
+    count = zero(t)
+    t_to_write = zero(T)
+    if typeof(t) == Int
+        for zzz in (rt, rpos, rvel)
+            sizehint!(zzz, t)
+        end
     end
 
     while count < t
 
-        i, tmin, pos, vel = bounce!(p, bd)
+        i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
         t_to_write += tmin
 
-        if isperiodic(bd) && i ∈ bd.peridx
+        if isperiodic(i, bd)
             continue
         else
             push!(rpos, pos + p.current_cell)
             push!(rvel, vel)
             push!(rt, t_to_write)
+            ismagnetic && isray && push!(omegas, p.ω)
             # set counter
             count += increment_counter(t, t_to_write)
             t_to_write = zero(T)
         end
     end#time, or collision number, loop
 
-    return ismagnetic ? (rt, rpos, rvel, p.omega) : (rt, rpos, rvel)
+    # Return stuff
+    if ismagnetic && isray
+        return (rt, rpos, rvel, omegas)
+    elseif ismagnetic
+        return (rt, rpos, rvel, p.ω)
+    else
+        return (rt, rpos, rvel)
+    end
 end
 
 """

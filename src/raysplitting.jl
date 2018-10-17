@@ -237,9 +237,13 @@ end
 #####################################################################################
 # Evolve raysplitting
 #####################################################################################
+@inline raysplit_indices(bd, ::Nothing) = nothing
+@inline bounce!(p, bd, ::Nothing, ::Nothing) = bounce!(p, bd)
+@inline acceptable_raysplitter(::Nothing, bd) = true
+
 evolve!(p, bd, t, ray::RaySplitter; warning = false) =
     evolve!(p, bd, t, (ray, ); warning = warning)
-function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple;
+function evolve!(p::Matrix{T}, bd::Billiard{T}, t, raysplitters::Tuple;
     warning = false) where {T}
 
     if t <= 0
