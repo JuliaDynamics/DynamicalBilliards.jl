@@ -237,9 +237,13 @@ end
 #####################################################################################
 # Evolve raysplitting
 #####################################################################################
+@inline raysplit_indices(bd, ::Nothing) = nothing
+@inline bounce!(p, bd, ::Nothing, ::Nothing) = bounce!(p, bd)
+@inline acceptable_raysplitter(::Nothing, bd::Billiard) = true
+
 evolve!(p, bd, t, ray::RaySplitter; warning = false) =
     evolve!(p, bd, t, (ray, ); warning = warning)
-function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple;
+function evolve!(p::Matrix{T}, bd::Billiard{T}, t, raysplitters::Tuple;
     warning = false) where {T}
 
     if t <= 0
@@ -298,44 +302,6 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters::Tuple
     end
 end
 
-#####################################################################################
-# Construct
-#####################################################################################
-function construct(t::Vector{T}, poss::Vector{SVector{2,T}},
-vels::Vector{SVector{2,T}}, omegas::Vector{T}, dt=0.01) where T
-
-    xt = [poss[1][1]]
-    yt = [poss[1][2]]
-    vxt= [vels[1][1]]
-    vyt= [vels[1][2]]
-    ts = [t[1]]
-    ct = cumsum(t)
-
-    for i in 2:length(t)
-        ω = omegas[i-1]
-        φ0 = atan(vels[i-1][2], vels[i-1][1])
-        x0 = poss[i-1][1]; y0 = poss[i-1][2]
-        colt=t[i]
-
-        t0 = ct[i-1]
-        # Construct proper time-vector
-        if colt >= dt
-            timevec = collect(0:dt:colt)[2:end]
-            timevec[end] == colt || push!(timevec, colt)
-        else
-            timevec = colt
-        end
-
-        for td in timevec
-            push!(vxt, cos(ω*td + φ0))
-            push!(vyt, sin(ω*td + φ0))
-            push!(xt, sin(ω*td + φ0)/ω + x0 - sin(φ0)/ω)  #vy0 is sin(φ0)
-            push!(yt, -cos(ω*td + φ0)/ω + y0 + cos(φ0)/ω) #vx0 is cos(φ0)
-            push!(ts, t0 + td)
-        end#collision time
-    end#total time
-    return xt, yt, vxt, vyt, ts
-end
 
 ########################
 # is physical, etc.

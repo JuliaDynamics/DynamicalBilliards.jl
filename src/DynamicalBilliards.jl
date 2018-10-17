@@ -47,6 +47,7 @@ include("mushroomtools.jl")
 export MushroomTools
 
 include("raysplitting.jl")
+include("timeseries.jl")
 
 include("parallel.jl")
 

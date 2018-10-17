@@ -212,6 +212,15 @@ function extreme_ray(ellipse)
     return Billiard(a1, a2, sw, bdr...), (raywall, raya)
 end
 
-export basic_ray, extreme_ray
+function ray_tests(f, args...)
+    bd, ray = basic_ray(true)
+    p = randominside(bd)
+    @testset "$(tag(p, bd, ray))" begin; f(p, bd, ray, args...); end
+    bd, ray = basic_ray(false)
+    p = randominside(bd, 1.0)
+    @testset "$(tag(p, bd, ray))" begin; f(p, bd, ray, args...); end
+end
+
+export basic_ray, extreme_ray, ray_tests
 
 end
