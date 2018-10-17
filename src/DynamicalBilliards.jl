@@ -35,7 +35,6 @@ include("billiards/standard_billiards.jl")
 
 include("timeevolution/collisions.jl")
 include("timeevolution/propagation.jl")
-include("timeevolution/timeseries.jl")
 include("timeevolution/highleveltimes.jl")
 
 include("boundary/boundarymap.jl")
@@ -48,6 +47,7 @@ include("mushroomtools.jl")
 export MushroomTools
 
 include("raysplitting.jl")
+include("timeseries.jl")
 
 include("testing.jl")
 

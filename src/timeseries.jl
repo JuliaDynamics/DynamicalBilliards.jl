@@ -1,3 +1,5 @@
+# This file must be loaded _after_ raysplitting
+
 export evolve!, evolve, timeseries!, timeseries
 
 """
@@ -184,23 +186,25 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
     return x, y, vx, vy, ts
 end
 
+extrapolate(p::MagneticParticle, prevpos, prevvel, ct, dt) =
+extrapolate(p, prevpos, prevvel, ct, dt, p.ω)
+
 function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T) where {T <: AbstractFloat}
+                     dt::T, ω::T) where {T <: AbstractFloat}
 
     φ0 = atan(prevvel[2], prevvel[1])
     s0, c0 = sincos(φ0)
 
-    tvec = 0:dt:ct
+    tvec = collect(0:dt:ct)
     x = Vector{T}(undef, length(tvec))
     y = Vector{T}(undef, length(tvec))
     vx = Vector{T}(undef, length(tvec))
     vy = Vector{T}(undef, length(tvec))
 
     @inbounds for (i,t) ∈ enumerate(tvec)
-        s,c = sincos(p.ω*t + φ0)
-
-        x[i] = s/p.ω + prevpos[1] - s0/p.ω
-        y[i] = -c/p.ω + prevpos[2] + c0/p.ω
+        s,c = sincos(ω*t + φ0)
+        x[i] = s/ω + prevpos[1] - s0/ω
+        y[i] = -c/ω + prevpos[2] + c0/ω
         vx[i] = s; vy[i] = c
     end
 
@@ -218,9 +222,11 @@ end
 function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
                      dt::T) where {T <: AbstractFloat}
 
-    tvec = 0:dt:ct
-    poss = Vector{SV{T}}(length(tvec), undef)
-    vels = Vector{SV{T}}(length(tvec), undef)
+    tvec = collect(0:dt:ct)
+    x = Vector{T}(undef, length(tvec))
+    y = Vector{T}(undef, length(tvec))
+    vx = Vector{T}(undef, length(tvec))
+    vy = Vector{T}(undef, length(tvec))
 
     @inbounds for (i,t) ∈ enumerate(tvec)
         x[i] = prevpos[1] + t*prevvel[1]
