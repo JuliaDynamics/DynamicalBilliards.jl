@@ -111,13 +111,16 @@ evolve(bd::Billiard, args...; kwargs...) =
 # Timeseries
 #####################################################################################
 """
-    timeseries!(p::AbstractParticle, bd::Billiard, t, [dt])
+    timeseries!([p::AbstractParticle,] bd::Billiard, t; dt, warning)
 Evolves the given particle `p` inside the billiard `bd`.  If `t` is of type
 `AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
 Returns the time series for position and velocity as well as the time vector.
 
-The optional argument `dt` is the time step used for interpolating the time
+This function mutates the particle, use `timeseries` otherwise. If a particle is
+not given, a random one is picked through [`randominside`](@ref).
+
+The keyword argument `dt` is the time step used for interpolating the time
 series in between collisions. `dt` is capped by the collision time, as
 the interpolation _always_ stops at collisions.
 For straight propagation `dt = Inf`, while for magnetic `dt = 0.01`.
@@ -131,13 +134,29 @@ Return:
 * x velocity time-series
 * y velocity time-series
 * time vector
+
+### Ray-splitting billiards
+    timeseries!(p, bd, t, raysplitters; ...)
+
+To implement ray-splitting, the `timeseries!` function is supplemented with a
+fourth argument, `raysplitters` which is a tuple of [`RaySplitter`](@ref) instances.
+Notice that `timeseries` **always mutates the billiard** if ray-splitting is used!
+For more information and instructions on using ray-splitting
+please visit the official documentation.
 """
-function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
-                      warning::Bool = true) where {T}
+function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = nothing;
+                     dt = typeof(p) <: Particle ? T(Inf) : T(0.01),
+                     warning::Bool = true) where {T}
 
     ts = [zero(T)]
     x  = [p.pos[1]]; y  = [p.pos[2]]
     vx = [p.vel[1]]; vy = [p.vel[2]]
+
+    ismagnetic = p isa MagneticParticle
+    prevω = ismagnetic ? p.ω : T(0)
+    isray = !isa(raysplitters, Nothing)
+    isray && acceptable_raysplitter(raysplitters, bd)
+    raysidx = raysplit_indices(bd, raysplitters)
 
     count = zero(t)
     t_total = zero(T)
@@ -161,11 +180,11 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
 
     @inbounds while count < t
 
-        i, ct = bounce!(p, bd)
+        ismagnetic && isray && (prevω = p.ω)
+        i, ct = bounce!(p, bd, raysidx, raysplitters)
         t_to_write += ct
 
-
-        if isperiodic(bd) && i ∈ bd.peridx
+        if isperiodic(i, bd)
             # do nothing at periodic obstacles
             continue
         else
@@ -179,7 +198,7 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
                 push!(vy, p.vel[2])
             else
                 # extrapolate & append
-                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_to_write, dt)
+                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_to_write, dt, prevω)
 
                 append!(ts, nts[2:end] .+ t_total)
                 append!(x, nx[2:end])
@@ -199,9 +218,6 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
     end
     return x, y, vx, vy, ts
 end
-
-extrapolate(p::MagneticParticle, prevpos, prevvel, ct, dt) =
-extrapolate(p, prevpos, prevvel, ct, dt, p.ω)
 
 function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
                      dt::T, ω::T) where {T <: AbstractFloat}
@@ -234,7 +250,7 @@ function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct:
 end
 
 function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T) where {T <: AbstractFloat}
+                     dt::T, ω::T) where {T <: AbstractFloat}
 
     tvec = collect(0:dt:ct)
     x = Vector{T}(undef, length(tvec))
@@ -258,14 +274,6 @@ function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
 
     return x, y, vx, vy, tvec
 end
-
-#reasonable defaults for dt
-@inline timeseries!(p::MagneticParticle{T}, bd::Billiard{T}, t; kwargs...) where {T} =
-    timeseries!(p, bd, t, T(0.01); kwargs...)
-
-@inline timeseries!(p::Particle{T}, bd::Billiard{T}, t; kwargs...) where {T} =
-    timeseries!(p, bd, t, T(Inf); kwargs...)
-
 
 # non-mutating version
 """
