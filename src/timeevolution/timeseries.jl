@@ -1,4 +1,4 @@
-export evolve!, evolve, construct, extrapolate, timeseries!, timeseries
+export evolve!, evolve, timeseries!, timeseries
 
 """
     evolve!([p::AbstractParticle,] bd::Billiard, t)
@@ -105,90 +105,42 @@ Return:
 * y velocity time-series
 * time vector
 """
-function construct(t::Vector{T},
-    poss::Vector{SVector{2,T}}, vels::Vector{SVector{2,T}}) where {T}
-
-    xt = [pos[1] for pos in poss]
-    yt = [pos[2] for pos in poss]
-    vxt = [vel[1] for vel in vels]
-    vyt = [vel[2] for vel in vels]
-    ct = cumsum(t)
-    return xt, yt, vxt, vyt, ct
-end
-
-function construct(t::Vector{T},  poss::Vector{SVector{2,T}},
-vels::Vector{SVector{2,T}}, ω::T, dt=0.01) where {T}
-
-    dt = T(dt)
-    ω == 0 && return construct(t, poss, vels)
-
-    xt = [poss[1][1]]
-    yt = [poss[1][2]]
-    vxt= [vels[1][1]]
-    vyt= [vels[1][2]]
-    ts = [t[1]]
-    ct = cumsum(t)
-
-    for i in 2:length(t)
-        φ0 = atan(vels[i-1][2], vels[i-1][1])
-        x0 = poss[i-1][1]; y0 = poss[i-1][2]
-        colt=t[i]
-
-        t0 = ct[i-1]
-        # Construct proper time-vector
-        if colt >= dt
-            timevec = collect(0:dt:colt)[2:end]
-            timevec[end] == colt || push!(timevec, colt)
-        else
-            timevec = colt
-        end
-
-        for td in timevec
-            s, c = sincos(ω*td + φ0)
-            s0, c0 = sincos(φ0)
-            push!(vxt, c)
-            push!(vyt, s)
-            push!(xt, s/ω + x0 - s0/ω)  #vy0 is sin(φ0)
-            push!(yt, -c/ω + y0 + c0/ω) #vx0 is cos(φ0)
-            push!(ts, t0 + td)
-        end#collision time
-    end#total time
-    return xt, yt, vxt, vyt, ts
-end
 
 
-
-"""
+#=
     extrapolate(p, prevpos, prevvel, ct, dt)
-one day, this will be a beautiful docstring
-"""
+=#
 function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
                      dt::T) where {T <: AbstractFloat}
     
     φ0 = atan(prevvel[2], prevvel[1])
     s0, c0 = sincos(φ0)
-    sc0 = SV(s0, -c0)
 
     tvec = collect(0:dt:ct)
-
-    poss = Vector{SV{T}}(undef, length(tvec))
-    vels = Vector{SV{T}}(undef, length(tvec))
+    
+    x = Vector{T}(undef, length(tvec))
+    y = Vector{T}(undef, length(tvec))
+    vx = Vector{T}(undef, length(tvec))
+    vy = Vector{T}(undef, length(tvec))
     
     for (i,t) ∈ enumerate(tvec)
         s,c = sincos(p.ω*t + φ0)
 
-        poss[i] = SV(s,-c)/p.ω + prevpos - sc0/p.ω
-        vels[i] = SV(s,c)
+        x[i] = s/p.ω + prevpos[1] - s0/p.ω
+        y[i] = -c/p.ω + prevpos[2] + c0/p.ω
+        vx[i] = s; vy[i] = c
     end
 
     # finish with ct
     if tvec[end] != ct
         push!(tvec, ct)
-        push!(poss, p.pos + p.current_cell)
-        push!(vels, p.vel)
+        push!(x, p.pos[1] + p.current_cell[1])
+        push!(y, p.pos[2] + p.current_cell[2])
+        
+        push!(vx, p.vel[1]); push!(vy, p.vel[2])
     end
     
-    return poss, vels, tvec
+    return x, y, vx, vy, tvec
 end
 
 function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
@@ -199,18 +151,21 @@ function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
     vels = Vector{SV{T}}(length(tvec), undef)
 
     for (i,t) ∈ enumerate(tvec)
-        poss[i] = prevpos + t*prevvel
-        vels[i] = prevvel
+        x[i] = prevpos[1] + t*prevvel[1]
+        y[i] = prevpos[2] + t*prevvel[2]
+        vx[i], vy[i] = prevvel
     end
     
     # finish with ct
     if tvec[end] != ct
         push!(tvec, ct)
-        push!(poss, p.pos + p.current_cell)
-        push!(vels, p.vel)
+        push!(x, p.pos[1] + p.current_cell[1])
+        push!(y, p.pos[2] + p.current_cell[2])
+        
+        push!(vx, p.vel[1]); push!(vy, p.vel[2])
     end
     
-    return poss, vels, tvec
+    return x, y, vx, vy, tvec
 end
 
 
@@ -254,13 +209,13 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
 
     if ispinned(p, bd)
         warning && @warn "Pinned particle – returning one cycle"
-        nposs, nvels, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt)
+        nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt)
 
         append!(ts, nts[2:end] .+ t_total)
-        append!(x, map(x->x[1], nposs[2:end]))
-        append!(y, map(x->x[2], nposs[2:end]))
-        append!(vx, map(x->x[1], nvels[2:end]))
-        append!(vy, map(x->x[2], nvels[2:end]))
+        append!(x, nx[2:end])
+        append!(y, ny[2:end])
+        append!(vx, nvx[2:end])
+        append!(vy, nvy[2:end])
 
         return x, y, vx, vy, ts
     end
@@ -285,13 +240,14 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, dt;
                 push!(vy, p.vel[2])
             else
                 # extrapolate & append
-                nposs, nvels, nts = extrapolate(p, prevpos, prevvel,
+                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel,
                                                         t_to_write, dt)
 
-                append!(x, map(x->x[1], nposs[2:end]))
-                append!(y, map(x->x[2], nposs[2:end]))
-                append!(vx, map(x->x[1], nvels[2:end]))
-                append!(vy, map(x->x[2], nvels[2:end]))
+                append!(ts, nts[2:end] .+ t_total)
+                append!(x, nx[2:end])
+                append!(y, ny[2:end])
+                append!(vx, nvx[2:end])
+                append!(vy, nvy[2:end])
             end
 
             prevpos = p.pos + p.current_cell
