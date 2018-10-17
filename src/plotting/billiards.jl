@@ -29,11 +29,9 @@ keyword `hexagonal` to denote which one you want.
 
     plot(bd::Billiard, xt::Vector, yt::Vector; hexagonal = false,
          ax = (figure(); gca()), plot_orbit = true, orbit_color = "C0")
-Plot the given **periodic** billiard `bd` using the limits defined
-by `xt` and `yt`.
-
-Set the keyword argument `plot_orbit = false` to not
-plot the orbit defined by `(xt, yt)` and only use the limits.
+Plot the given billiard `bd` and an acompanying orbit resulting from
+[`timeseries!`](@ref) using the limits defined by `xt` and `yt`.
+Works for both periodic and normal billiards.
 """
 function plot(bd::Billiard) end
 
@@ -80,10 +78,14 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
     hexagonal = false, ax = (PyPlot.figure(); PyPlot.gca()),
     plot_orbit = true, orbit_color = "C0")
 
-    xmin = minimum(xt); xmax = maximum(xt)
-    ymin = minimum(yt); ymax = maximum(yt)
+    if isperiodic(bd)
+        xmin = minimum(xt); xmax = maximum(xt)
+        ymin = minimum(yt); ymax = maximum(yt)
 
-    plot(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
+        plot(bd, xmin, ymin, xmax, ymax; hexagonal = hexagonal, ax = ax)
+    else
+        plot(bd; ax = ax)
+    end
 
     if plot_orbit
         PyPlot.sca(ax)
@@ -95,19 +97,21 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
     dcx = cellxmax - cellxmin
     dcy = cellymax - cellymin
 
-    if hexagonal
-        PyPlot.xlim(xmin - dcx/2, xmax + dcx/2)
-        PyPlot.ylim(ymin - dcy/2, ymax + dcy/2)
-        PyPlot.gca()[:set_aspect]("equal")
-    else
-        rr = xmin < 0 ? (div(xmin, dcx)-1) : (div(xmin, dcx))
-        ll = ymin < 0 ? (div(ymin, dcy)-1) : (div(ymin, dcy))
+    if isperiodic(bd)
+        if hexagonal
+            PyPlot.xlim(xmin - dcx/2, xmax + dcx/2)
+            PyPlot.ylim(ymin - dcy/2, ymax + dcy/2)
+            PyPlot.gca()[:set_aspect]("equal")
+        else
+            rr = xmin < 0 ? (div(xmin, dcx)-1) : (div(xmin, dcx))
+            ll = ymin < 0 ? (div(ymin, dcy)-1) : (div(ymin, dcy))
 
-        PyPlot.xlim(cellxmin + rr*dcx,
-        cellxmin + (div(xmax, dcx)+1)*dcx)
-        PyPlot.ylim(cellymin + ll*dcy,
-        cellymin + (div(ymax, dcy)+1)*dcy)
-        PyPlot.gca()[:set_aspect]("equal")
+            PyPlot.xlim(cellxmin + rr*dcx,
+            cellxmin + (div(xmax, dcx)+1)*dcx)
+            PyPlot.ylim(cellymin + ll*dcy,
+            cellymin + (div(ymax, dcy)+1)*dcy)
+            PyPlot.gca()[:set_aspect]("equal")
+        end
     end
     return nothing
 end
