@@ -18,11 +18,6 @@ vectors have the initial conditions, repeated once.
 [`evolve!`](@ref) can be given an additional `warning` keyword argument in the case
 of magnetic propagation, e.g. `warning = true` that throws a  message whenever a pinned particle is evolved.
 
-!!! warning "Using [`construct`](@ref)"
-    When using the syntax `construct(evolve!(p, bd, t)...)` be sure that there
-    aren't any pinned particles given to evolve. If there are any,
-    construct will result in an error.
-
 ---
 
 ## Velocity measure
@@ -42,11 +37,11 @@ then one simply has to adjust the values of `ω` given in the code with
 \omega_\text{code} = \frac{\omega_\text{real}}{v_\text{real}}
 ```
 
-After getting the timeseries from `construct()`:
+After getting the timeseries:
 ```julia
 # These are the "code"-data. |v| = 1 always
-ct, poss, vels, omegas = evolve!(p, bd, ttotal, ray_splt)
-xt, yt, vxt, vyt, t = construct(ct, poss, vels, omegas)
+ct, poss, vels, omegas = evolve(p, bd, ttotal)
+xt, yt, vxt, vyt, t = timeseries(p, bd, ttotal)
 ```
 you only need to make some final adjustment on the `vxt, vyt`. The position and time data
 are completely unaffected.

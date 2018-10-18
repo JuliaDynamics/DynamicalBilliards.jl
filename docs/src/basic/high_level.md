@@ -78,9 +78,9 @@ mp = randominside(bd, ω)
 
 `randominside` always creates particles with same number type as the billiard.
 
-## `evolve` & `construct`
+## `evolve` & `timeseries`
 Now that we have created a billiard and a particle inside, we want to evolve it!
-There is a simple function for that, called `evolve!` (or `evolve` if you don't want to mutate the particle):
+There is a simple function for that, called `evolve!` (or `evolve` if you don't want to mutate the particle), which returns the time, position and velocities at the collision points:
 ```@docs
 evolve!
 ```
@@ -103,29 +103,25 @@ for i in 1:10
 end
 ```
 
-The above return types are helpful in some applications. In other applications however
-one prefers to have the time series of the individual variables. For this,
-the `construct` function is used:
+The above return types are helpful in some applications.
+In other applications however one prefers to have the time series of the individual variables.
+For this, the `timeseries` function is used:
 ```@docs
-construct
+timeseries
 ```
 ---
-The function is especially useful when one wants immediately the timeseries instead
-of the output of `evolve!`. Because of the simple syntax
+For example:
 ```@example 2
-xt, yt, vxt, vyt, t = construct(evolve(p, bd, 100)...)
+xt, yt, vxt, vyt, t = timeseries(p, bd, 100)
 
 # print as a matrix:
 hcat(xt, yt, vxt, vyt, t)[1:5, :]
 ```
 
-
-This nicely reveals why in the case of magnetic propagation `evolve!` also returns
-the angular velocity. So that it is possible to do the same process for magnetic
-propagation as well (plus, it is also useful in ray-splitting).
+Same story for magnetic particles:
 ```@example 2
 # evolve the magnetic particle instead:
-xt, yt, vxt, vyt, t = construct(evolve(mp, bd, 100)...)
+xt, yt, vxt, vyt, t = timeseries(mp, bd, 100)
 
 # print as a matrix:
 hcat(xt, yt, vxt, vyt, t)[1:5, :]

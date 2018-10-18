@@ -58,7 +58,7 @@ using PyPlot
 plot(billiard)
 ω = 0.5
 p = randominside(billiard, ω)
-xt, yt, vxt, vyt, t = construct(evolve!(p, billiard, 100)...)
+xt, yt, vxt, vyt, t = timeseries!(p, billiard, 100)
 plot(xt, yt)
 plot(p)
 savefig("tut1.svg"); nothing # hide

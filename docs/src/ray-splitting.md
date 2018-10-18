@@ -87,7 +87,7 @@ For example,
 ```@example ray
 p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
-xt, yt, vxt, vyt, tt = construct(evolve(p, bd, 100, raysplitters)...)
+xt, yt, vxt, vyt, tt = timeseries(p, bd, 100, raysplitters)
 plot(bd)
 plot(xt, yt)
 scatter(xt[1], yt[1], color = "black")
