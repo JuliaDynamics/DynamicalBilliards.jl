@@ -15,6 +15,16 @@ function plot_cyclotron(p::MagneticParticle; use_cell=true, kwargs...)
   PyPlot.gca()[:add_artist](circle1)
 end
 
+function plot_particle(x,y,vx,vy; ax = PyPlot.gca(), c = "k", kwargs...)
+    # Plot position:
+    s1 = ax[:scatter](x, y; color=c, s= 30.0, kwargs...)
+    # Plot velocity:
+    q1 = ax[:quiver](x, y, 0.08vx, 0.08vy; angles = "xy", scale = 1, width = 0.005, color=c)
+
+    return s1, q1
+end
+
+
 """
     plot(p::AbstractParticle [, cyclotron=false]; use_cell=true, kwargs...)
 Plot given particle on the current `PyPlot` axes. Optionally use `p.current_cell` for
@@ -29,20 +39,17 @@ Optionally you can plot the cyclotron traced by a `MagneticParticle` by giving
 `true` as second argument.
 """
 function plot(p::AbstractParticle{T}, cycl::Bool = false; use_cell=true, kwargs...) where {T}
-  if typeof(p) <: MagneticParticle && cycl
-    plot_cyclotron(p; use_cell = use_cell)
-  end
-  pos = use_cell ? p.pos + p.current_cell : p.pos
-  kwargs = Dict(kwargs)
-  # Set same color for arrow and point:
-  if haskey(kwargs, :color)
-    c = kwargs[:color]
-  else
-    c = (0,0,0)
-  end
-  # Plot position:
-  s1 = PyPlot.scatter(pos...; color=c, s= 30.0, kwargs...)
-  # Plot velocity:
-  q1 = PyPlot.quiver(pos..., 0.08p.vel...; angles = "xy", scale = 1, width = 0.005, color=c)
-  return s1, q1
+    if typeof(p) <: MagneticParticle && cycl
+        plot_cyclotron(p; use_cell = use_cell)
+    end
+    pos = use_cell ? p.pos + p.current_cell : p.pos
+    kwargs = Dict(kwargs)
+    # Set same color for arrow and point:
+    if ! haskey(kwargs, :color)
+        c = kwargs[:color]
+    else
+        c = (0,0,0)
+    end
+    
+    return plot_particle(p.pos..., p.vel...; c = c, kwargs...)
 end
