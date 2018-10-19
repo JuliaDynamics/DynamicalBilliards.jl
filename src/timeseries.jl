@@ -167,7 +167,7 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
 
     if ispinned(p, bd)
         warning && @warn "Pinned particle – returning one cycle"
-        nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt)
+        nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt, p.ω)
 
         append!(ts, nts[2:end] .+ t_total)
         append!(x, nx[2:end])
@@ -235,7 +235,7 @@ function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct:
         s,c = sincos(ω*t + φ0)
         x[i] = s/ω + prevpos[1] - s0/ω
         y[i] = -c/ω + prevpos[2] + c0/ω
-        vx[i] = s; vy[i] = c
+        vx[i] = c; vy[i] = s
     end
 
     # finish with ct
