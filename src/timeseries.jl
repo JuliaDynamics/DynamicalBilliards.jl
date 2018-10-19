@@ -125,8 +125,9 @@ series in between collisions. `dt` is capped by the collision time, as
 the interpolation _always_ stops at collisions.
 For straight propagation `dt = Inf`, while for magnetic `dt = 0.01`.
 
-For pinned magnetic particles, `timeseries!` issues a warning and returns the
-trajectory for one period.
+For pinned magnetic particles, `timeseries!` issues a warning and returns the 
+trajectory of the particle. If `t` is integer, the trajectory is evolved for 
+one full circle only
 
 Return:
 * x position time-series
@@ -166,8 +167,11 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
     prevvel = p.vel
 
     if ispinned(p, bd)
-        warning && @warn "Pinned particle – returning one cycle"
-        nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, 2π/p.ω, dt, p.ω)
+        warning && @warn "Pinned particle detected!"
+
+        #return one cycle if t is a collision number
+        t_ret = typeof(t) <: Integer ? 2π/p.ω : T(t)
+        nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_ret, dt, p.ω)
 
         append!(ts, nts[2:end] .+ t_total)
         append!(x, nx[2:end])
