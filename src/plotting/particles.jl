@@ -17,9 +17,9 @@ end
 
 function plot_particle(x,y,vx,vy; ax = PyPlot.gca(), c = "k", kwargs...)
     # Plot position:
-    s1 = ax[:scatter](x, y; color=c, s= 30.0, kwargs...)
+    s1 = ax[:scatter](x, y; color=c, s= 20.0, kwargs...)
     # Plot velocity:
-    q1 = ax[:quiver](x, y, 0.08vx, 0.08vy; angles = "xy", scale = 1, width = 0.005, color=c)
+    q1 = ax[:quiver](x, y, 0.04vx, 0.04vy; angles = "xy", scale = 1, width = 0.004, color=c)
 
     return s1, q1
 end
@@ -50,6 +50,6 @@ function plot(p::AbstractParticle{T}, cycl::Bool = false; use_cell=true, kwargs.
     else
         c = (0,0,0)
     end
-    
+
     return plot_particle(p.pos..., p.vel...; c = c, kwargs...)
 end
