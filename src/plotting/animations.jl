@@ -75,7 +75,7 @@ total time `t` (always considered float). Optionally enable ray-splitting.
     the save directory and are deleted after the animation is done. You can choose
     to keep them.
   * `dpi = 100` : dpi of saved figures.
-  * `framerate = 60` : Animation framerate.
+  * `framerate = 20` : Animation framerate.
 """
 function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            bd::Billiard, t, raysplitters = nothing;
@@ -84,9 +84,9 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            particle_kwargs = NamedTuple(),
                            tail_kwargs = NamedTuple(),
                            figsize = (7.2, 7.2),
-                           ax = (PyPlot.figure(figsize = figsize); ax = gca(); plot(bd; ax = ax); ax),
+                           ax = (PyPlot.figure(figsize = figsize); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
                            savename = nothing, dpi = 100, deletefigs = true,
-                           disable_axis = false, framerate = 60
+                           disable_axis = false, framerate = 20
                            ) where {T}
 
     disable_axis && ax[:axis]("off")
@@ -112,19 +112,22 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
     end
 
     maxframe = minimum(tslengths)
+    j = 1
 
     for i ∈ 2:maxframe
         if (i-1)%frameskip == 0
             [pf() for pf in plotframes]
             sleep(0.01)
+            if savename != nothing
+                s = savename*"_$(j).png"
+                PyPlot.savefig(s, dpi = dpi)
+                push!(colnumbers, j)
+                j += 1
+            end
         else
             [sf() for sf in skipframes]
         end
-        if savename != nothing
-            s = savename*"_$(i).png"
-            PyPlot.savefig(s, dpi = dpi)
-            push!(colnumbers, i)
-        end
+
     end
 
     if savename != nothing
