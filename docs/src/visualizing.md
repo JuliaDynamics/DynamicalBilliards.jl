@@ -85,14 +85,33 @@ Let's animate a particle inside a simple pentagon with magnetic field:
 bd = billiard_polygon(5, 1)
 a = Disk([0.0,0.0], 0.4)
 bd = Billiard(bd.obstacles..., a)
-p = randominside(bd, 1.0)
+p = MagneticParticle(0, -0.5, 0, 1.0)
 
-animate_evolution(p, bd, 50; savename = "penta")
+animate_evolution(p, bd, 10.0; savename = "penta")
 ```
 
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/penta.mp4?raw=true" type="video/mp4">
 </video>
+
+The cool thing about [`animate_evolution`](@ref) is that it can animate multiple
+particles simultaneously! For example, here is a beautiful demonstration of chaos
+in non-dispersive billiards:
+```julia
+bd = billiard_stadium()
+N = 20
+cs = [(i/N, 0, 1 - i/N, 0.5) for i in 1:N]
+ps = [Particle(1, 0.6 + 0.0005*i, 0) for i in 1:N]
+
+animate_evolution(ps, bd, 10.0; colors = cs, tailtime = 1.5, savename = "disperse")
+```
+
+<video width="100%" height="auto" controls>
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/disperse.mp4?raw=true" type="video/mp4">
+</video>
+
+
+
 
 ## Periodic Billiards
 In order to plot periodic billiards, you have need to call a different method of

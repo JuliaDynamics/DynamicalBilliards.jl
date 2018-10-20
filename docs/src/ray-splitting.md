@@ -170,16 +170,16 @@ ray = RaySplitter([1,2,3,4], trans, refra, neww, affect = (i) -> SVector(1,2,3,4
 ```
 
 We initialize a simple rectangular billiard and a particle
-```julia
+```@example ray
 bd = billiard_rectangle(setting = "ray-splitting")
-p = randominside(bd, 0.4);
+p = MagneticParticle(0.4, 0.6, 0.0, 0.4)
 ```
 
 and we animate its evolution, by first zooming out of the billiard
 ```julia
 plot(bd)
 xlim(-1, 2); ylim(-1, 2);
-animate_evolution(p, bd, 100, (ray,); newfig = false, savename = "inverse")
+animate_evolution(p, bd, 10.0, (ray,); ax = gca(), savename = "inverse", tailtime = 3.0)
 ```
 
 <video width="100%" height="auto" controls>
