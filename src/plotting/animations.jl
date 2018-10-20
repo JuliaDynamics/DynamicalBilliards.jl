@@ -14,7 +14,7 @@ function setup_animation(p::AbstractParticle, bd:: Billiard, t::AbstractFloat,
     # initial plot
     point, arrow = plot_particle(x[1], y[1], vx[1], vy[1]; ax = ax, zorder = 20,
                                  particle_kwargs...)
-    tail, = ax[:plot](x[1:2], y[1:2], color = tailcolor; tail_kwargs...)
+    tail, = ax[:plot](x[1:2], y[1:2], zorder = 1, color = tailcolor; tail_kwargs...)
 
     # frame counter
     count = 2
@@ -56,6 +56,8 @@ total time `t` (always considered float). Optionally enable ray-splitting.
     Increasing either `frameskip` and `dt` makes the animation progress faster.
   * `tailtime = 1.0` : The length of the "tail" trailing the particle in time
     units.
+  * `resetting = reset_billiard!` : function called after evolving each individual 
+    particle in the billiard (so that ray-splitting doesn't brake).
 ### Colors & plotting kwargs
   * `colors` : An array of valid Matplotlib colors for the "tails". If `colors`
     is shorter than `ps`, colors are reused. Defaults to the standard
@@ -86,7 +88,8 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            figsize = (7.2, 7.2),
                            ax = (PyPlot.figure(figsize = figsize); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
                            savename = nothing, dpi = 100, deletefigs = true,
-                           disable_axis = false, framerate = 20
+                           disable_axis = false, framerate = 20,
+                           resetting = reset_billiard!
                            ) where {T}
 
     disable_axis && ax[:axis]("off")
@@ -99,6 +102,8 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
     tslengths = Vector{Int}(undef, nps)
 
     for (i, p) ∈ enumerate(ps)
+
+        resetting(bd)
 
         pf, sf, tl = setup_animation(
             p, bd, T(t), ax, raysplitters, dt = dt, taillength = taillength,
@@ -144,3 +149,6 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
         end
     end
 end
+
+animate_evolution(p::AbstractParticle, args...; kwargs...) =
+animate_evolution([p], args...; kwargs...)
