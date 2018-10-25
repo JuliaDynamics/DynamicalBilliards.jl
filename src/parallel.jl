@@ -9,7 +9,7 @@ parallelize(f, bd, t, n::Int, ω) = parallelize(f, bd, t, [randominside(bd, ω) 
 """
     parallelize(f, bd::Billiard, t, particles; partype = :threads)
 Parallelize function `f` across the available particles. The parallelization type can
-be `:threads` or `:pmap, which use threads or a worker pool initialized with `addprocs`
+be `:threads` or `:pmap`, which use threads or a worker pool initialized with `addprocs`
 _before_ `using DynamicalBilliards`.
 
 `particles` can be:
