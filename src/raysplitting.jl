@@ -1,5 +1,6 @@
 export isphysical, reset_billiard!
 export RaySplitter, raysplit_indices
+export law_of_refraction
 
 #####################################################################################
 # RaySplitter structures
