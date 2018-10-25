@@ -392,3 +392,56 @@ function isphysical(rays::Tuple)
   end#obstacle range
   return true
 end
+
+
+################################################################################
+
+"""
+    law_of_refraction(n1, n2 = 1.0) 
+
+Given the indices of refraction `n1` and `n2` inside and outside of a 
+ray-splitting obstacle, this function returns `transmission` and `refraction`
+functions for constructing a [`RaySplitter`](@ref), using Snell's law of
+refraction to compute the angle of refraction. 
+The transmission probability is set to 1.0 except for the case of total 
+internal reflection.
+
+If `n2` is not given, it defaults to 1.0.
+
+Note that the "inside" of the ray-splitting obstacle is defined as the side
+where `pflag` is false. 
+
+"""
+function law_of_refraction(n1, n2 = 1.0)
+    # n1 is "inside" the obstacle, n2 is "outside"
+
+    if n1 < 1.0 || n2 < 1.0
+        error("You have just given a physicist a headache.")
+    end
+
+    # Snell's law 
+    refraction(φ, pflag, ω) =
+        asin(clamp((pflag ? (n2/n1) : (n1/n2) )* sin(φ), -1.0, 1.0))
+    
+    # total internal reflection
+    function transmission(φ, pflag, ω)
+        nratio = pflag ? (n1/n2) : (n2/n1)
+        
+        if abs(nratio) < 1 &&  abs(φ) >= asin(nratio)
+            return 0.0
+        else
+            return 1.0
+        end
+    end
+    
+    return transmission, refraction
+end
+
+            
+            
+            
+    
+
+
+    
+        
