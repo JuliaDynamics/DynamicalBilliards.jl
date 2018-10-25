@@ -7,7 +7,7 @@
 
 ## Enhancements / new features
 * Brand new evolution animation function (replaced the old). It now animates in real-time!!! (you can use `dt = Inf` to obtain the old behavior). In addition it supports animating the evolution of multiple particles in parallel!!!
-* New function `timeseries` creates the timeseries of the particle evolution in a billiard. This does prettymuch what `construct(evolve...)` used to do.
+* New function `timeseries` creates the timeseries of the particle evolution in a billiard. This does pretty much what `construct(evolve...)` used to do.
 * New obstacle: `Ellipse`.
 * Much more robust propagation algorithm that is less prone to errors and "weird behaviors"!
 * Test suite reworked almost from scratch: More tests, more specific tests, more robust tests, easier to debug tests!

@@ -12,21 +12,6 @@ dynamical billiards in two dimensions.
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
     the logo of our package!
 
-This documentation was built with the following stable versions:
-```@setup versions
-using Pkg.API: installed
-ins = installed()
-function f()
-for pkg in ["DynamicalBilliards", "StaticArrays", "PyPlot"]
-  w = string(ins[pkg])
-  w[end] == '+' && (w = w[1:end-1])
-  println(rpad(" * $(pkg) ", 30, "."), " $(w)")
-end
-end
-```
-```@example versions
-f() # hide
-```
 
 ## About Billiards
 
