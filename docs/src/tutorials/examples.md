@@ -90,7 +90,6 @@ in only the x-direction:
 ```@example tut3
 using DynamicalBilliards, PyPlot
 o = 0.0; x = 2.0; y=1.0
-bd = Obstacle{Float64}[]
 
 sp = [o,o]; ep = [o, y]; n = [x,o]
 leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
@@ -105,16 +104,14 @@ botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
 r = 0.25
 d = Disk([0.5, 0.5], r)
 d2 = Disk([1.5, 0.5], r/2)
-push!(bd, d, d2)
 
 bd = Billiard(leftw, rightw, topw2, botw2, d, d2)
 
 p = randominside(bd)
 p.pos = [0.311901, 0.740439]
 p.vel = [0.548772, 0.835972]
-xt, yt, vxt, vyt, t = construct(evolve(p, bd, 25)...)
+xt, yt, t = timeseries(p, bd, 25)
 plot(bd, xt, yt)
-scatter(xt[1], yt[1])
 scatter(xt[end], yt[end], color = "black")
 ylim(0,y)
 xlim(floor(minimum(xt)), ceil(maximum(xt)))
