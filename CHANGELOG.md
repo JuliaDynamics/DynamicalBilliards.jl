@@ -1,9 +1,9 @@
-# 3.0-dev
+# 3.0
 
 ## Breaking changes
 * Plotting functions now overload `plot` instead. There is no more `plot_obstacle`, `plot_billiard` and `plot_particle`. `plot_boundarymap` and `animate_evolution` remain the same though.
 * `construct` is removed.
-* `boundarymap` call signature and return values reworked.
+* `boundarymap` call signature and return values are reworked.
 
 ## Enhancements / new features
 * Brand new evolution animation function (replaced the old). It now animates in real-time!!! (you can use `dt = Inf` to obtain the old behavior). In addition it supports animating the evolution of multiple particles in parallel!!!
