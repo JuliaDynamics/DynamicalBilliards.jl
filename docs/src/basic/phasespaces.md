@@ -21,7 +21,7 @@ boundarymap
 ---
 For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
 ```@example coords
-using DynamicalBilliards
+using DynamicalBilliards, PyPlot
 
 bd = billiard_mushroom()
 

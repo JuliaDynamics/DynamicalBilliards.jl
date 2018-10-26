@@ -135,7 +135,7 @@ d = Disk([0.5, 0.5], r)
 d2 = Ellipse([1.5, 0.5], r, 2r/3)
 bd = Billiard(bd.obstacles..., d, d2)
 p = Particle(1.0, 0.5, 0.2)
-xt, yt, vxt, vyt, t = construct(evolve!(p, bd, 10)...)
+xt, yt, vxt, vyt, t = timeseries!(p, bd, 10)
 plot(bd, xt, yt)
 plot(p)
 savefig("rectperiodic.svg"); nothing # hide
@@ -153,7 +153,7 @@ bd = Billiard(bd..., d, d2)
 
 p = MagneticParticle(-0.5, 0.5, π/5, 1.0)
 
-xt, yt = construct(evolve(p, bd, 10)...)
+xt, yt = timeseries(p, bd, 10)
 
 plot(bd, xt, yt; hexagonal = true)
 savefig("hexperiodic.svg"); nothing # hide
