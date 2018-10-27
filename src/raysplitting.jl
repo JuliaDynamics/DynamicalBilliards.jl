@@ -405,7 +405,7 @@ ray-splitting obstacle, this function returns `transmission` and `refraction`
 functions for constructing a [`RaySplitter`](@ref), using Snell's law of
 refraction to compute the angle of refraction. 
 The transmission probability is set to 1.0 except for the case of total 
-internal reflection.
+internal reflection (i.e. refraction angle > π/2).
 
 If `n2` is not given, it defaults to 1.0.
 
