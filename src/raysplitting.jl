@@ -398,20 +398,14 @@ end
 ################################################################################
 
 """
-    law_of_refraction(n1, n2 = 1.0) 
+    law_of_refraction(n1, n2 = 1.0) -> t, r
 
-Given the indices of refraction `n1` and `n2` inside and outside of a 
-ray-splitting obstacle, this function returns `transmission` and `refraction`
-functions for constructing a [`RaySplitter`](@ref), using Snell's law of
-refraction to compute the angle of refraction. 
-The transmission probability is set to 1.0 except for the case of total 
-internal reflection (i.e. refraction angle > π/2).
+Create a transmission and refraction functions `t, r` that follow Snell's
+refraction law, i.e. the transmission probability is set to 1.0 except
+for the case of total internal reflection. 
 
-If `n2` is not given, it defaults to 1.0.
-
-Note that the "inside" of the ray-splitting obstacle is defined as the side
-where `pflag` is false. 
-
+`n1` is the index of refraction for the `pflag = false` side of an obstacle,
+while `n2` is the index of refraction for `pflag = true`.
 """
 function law_of_refraction(n1, n2 = 1.0)
     # n1 is "inside" the obstacle, n2 is "outside"
@@ -437,12 +431,3 @@ function law_of_refraction(n1, n2 = 1.0)
     
     return transmission, refraction
 end
-
-            
-            
-            
-    
-
-
-    
-        
