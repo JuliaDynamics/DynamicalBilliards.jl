@@ -12,7 +12,7 @@ if !Sys.iswindows()
         deps   = Deps.pip("mkdocs", "mkdocs-material",
         "python-markdown-math", "pygments", "pymdown-extensions"),
         repo   = "github.com/JuliaDynamics/DynamicalBilliards.jl.git",
-        target = "site"
+        target = "site",
         make = () -> run(`mkdocs build`)
     )
 end
