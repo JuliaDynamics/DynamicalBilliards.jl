@@ -1,4 +1,4 @@
-export construct, bounce!, evolve, ispinned, evolve!, propagate!
+export bounce!, evolve, ispinned, evolve!, propagate!
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write

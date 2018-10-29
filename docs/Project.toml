@@ -1,0 +1,9 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterMarkdown = "997ab1e6-3595-5248-9280-8efb232c3433"
+DynamicalBilliards = "4986ee89-4ee5-5cef-b6b8-e49ba721d7a5"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+Documenter = "~0.20"
