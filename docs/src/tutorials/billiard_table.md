@@ -47,6 +47,10 @@ end
 summary(bd)
 ```
 
+!!! note "Keep the size around 1."
+    Because the precision in `DynamicalBilliards` is measured using `eps(T)` with
+    `T` the number type, it is advised to keep the size of the billiard in the order of magnitude of 1. Having overly large billiards with sizes of 100 or more can lead to accuracy loss!
+
 The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the user because it must point towards where the particle is expected to come from. If `w` is the vector (wall) pointing from start- to end-point then the vector `[-w[2], w[1]]` is pointing to the left of `w` and the vector `[w[2], -[w1]]` is pointing to the right. Both are normal to `w`, but you have to know which one to pick. In this case this is very easy, since the normal has to simply point towards the origin.
 
 
