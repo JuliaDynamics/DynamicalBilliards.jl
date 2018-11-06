@@ -1,4 +1,8 @@
-# 3.0-dev
+# 3.1
+* `law_of_refraction` : new function that returns transmission and refraction functions based on Snell's law and refractive indices.
+* Plenty of doc corrections.
+
+# 3.0
 
 ## Breaking changes
 * Plotting functions now overload `plot` instead. There is no more `plot_obstacle`, `plot_billiard` and `plot_particle`. `plot_boundarymap` and `animate_evolution` remain the same though.
