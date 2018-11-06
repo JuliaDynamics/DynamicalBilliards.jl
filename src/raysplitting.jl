@@ -1,5 +1,6 @@
 export isphysical, reset_billiard!
 export RaySplitter, raysplit_indices
+export law_of_refraction
 
 #####################################################################################
 # RaySplitter structures
@@ -391,4 +392,42 @@ function isphysical(rays::Tuple)
     end#pflag range
   end#obstacle range
   return true
+end
+
+
+################################################################################
+
+"""
+    law_of_refraction(n1, n2 = 1.0) -> t, r
+
+Create transmission and refraction functions `t, r` that follow Snell's
+law, i.e. the transmission probability is set to 1.0 except
+for the case of total internal reflection. 
+
+`n1` is the index of refraction for the `pflag = false` side of an obstacle,
+while `n2` is the index of refraction for `pflag = true`.
+"""
+function law_of_refraction(n1, n2 = 1.0)
+    # n1 is "inside" the obstacle, n2 is "outside"
+
+    if n1 < 1.0 || n2 < 1.0
+        error("You have just given a physicist a headache.")
+    end
+
+    # Snell's law 
+    refraction(φ, pflag, ω) =
+        asin(clamp((pflag ? (n2/n1) : (n1/n2) )* sin(φ), -1.0, 1.0))
+    
+    # total internal reflection
+    function transmission(φ, pflag, ω)
+        nratio = pflag ? (n1/n2) : (n2/n1)
+        
+        if abs(nratio) < 1 &&  abs(φ) >= asin(nratio)
+            return 0.0
+        else
+            return 1.0
+        end
+    end
+    
+    return transmission, refraction
 end

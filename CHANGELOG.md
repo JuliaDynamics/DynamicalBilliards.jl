@@ -1,3 +1,7 @@
+# 3.1
+* `law_of_refraction` : new function that returns transmission and refraction functions based on Snell's law and refractive indices.
+* Plenty of doc corrections.
+
 # 3.0
 
 ## Breaking changes

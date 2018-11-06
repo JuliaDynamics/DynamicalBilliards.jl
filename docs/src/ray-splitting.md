@@ -152,6 +152,53 @@ In order to test if the `RaySplitter` you have defined has physical meaning, the
 isphysical
 ```
 
+## Snell's Law
+
+In classical geometric optics, the refraction of a ray of light moving from one 
+medium to another is described by Snell's law. For an angle of incidence of 
+$\phi$, the refraction angle $\theta$ is determined by the equation
+
+```math
+\frac{sin(\phi)}{\sin(\theta)} = \frac{n'}{n}
+```
+
+where $n$ and $n'$ are the respective refractive indices of the media. 
+
+To easily simulate these relations in `DynamicalBilliards`, the function
+`law_of_refraction` can be used to set up ray-splitting according to this law.
+
+```@docs
+law_of_refraction
+```
+
+Using the functions returned by `law_of_refraction`, we can set up a 
+`RaySplitter` for a billiard. 
+```@example lens
+using DynamicalBilliards, PyPlot
+# Create a circular "lens"
+o = Antidot(SVector(1.0, 0.75), 0.5)
+# in a rectangular box
+bd = Billiard(billiard_rectangle(2.5, 1.5)..., o)
+# create a RaySplitter using law of refraction
+trans, refra = law_of_refraction(1.5)
+rs = (RaySplitter([5], trans, refra),)
+```
+We now animate the evolution of an array of particles on parallel trajectories to 
+demonstrate the refractive properties of the spherical lens
+```julia
+# create parallel particles
+ps = [Particle(0.1, y, 0.0) for y in 0.4:0.05:1.1]
+
+# animate 
+animate_evolution(ps, bd, 2.0, rs, colors = ["C0" for i ∈ 1:length(ps)],
+	tailtime=2.5, savename = "lens")
+```
+<video width="100%" height="auto" controls>
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/lens.mp4?raw=true" type="video/mp4">
+</video>
+
+
+
 ## Example of Affecting Multiple Obstacles
 Here we will show an application of *inverse* billiards, where particles go in and out
 of a billiard, while taking advantage of the existence of a magnetic field outside to return.
