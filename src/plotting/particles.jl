@@ -51,5 +51,5 @@ function plot(p::AbstractParticle{T}, cycl::Bool = false; use_cell=true, kwargs.
         c = (0,0,0)
     end
 
-    return plot_particle(p.pos..., p.vel...; c = c, kwargs...)
+    return plot_particle(pos..., p.vel...; c = c, kwargs...)
 end

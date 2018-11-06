@@ -92,7 +92,8 @@ Antidot{T}(args...) where {T} = Antidot(args...)
 
 """
     Semicircle{T<:AbstractFloat} <: Circular{T}
-Obstacle that represents half a circle.
+Obstacle that represents half a circle. Propagation is allowed only inside
+the semicircle.
 ### Fields:
 * `c::SVector{2,T}` : Center.
 * `r::T` : Radius.

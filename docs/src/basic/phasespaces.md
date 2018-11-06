@@ -21,30 +21,31 @@ boundarymap
 ---
 For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
 ```@example coords
-using DynamicalBilliards
+using DynamicalBilliards, PyPlot
 
 bd = billiard_mushroom()
 
 n = 100 # how many particles to create
 t = 200 # how long to evolve each one
 
-ξς, φς, ις = boundarymap(bd, t, n)
+bmap, arcs = parallelize(boundarymap, bd, t, n)
 
 using PyPlot # enables plot_boundarymap function
 
 colors = ["C$(rand(1:9))" for i in 1:n] # random colors
 
-plot_boundarymap(ξς, φς, ις, color = colors)
+plot_boundarymap(bmap, arcs, color = colors)
+tight_layout()
 savefig("boundarymap.svg"); nothing # hide
 ```
 ![](boundarymap.svg)
 
-<!-- ![Boundary map](https://i.imgur.com/RO9UZa9.png) -->
 
 And of course similarly for magnetic fields
 ```@example coords
-ξς, φς, ις = boundarymap(bd, t, n, 1.0) # angular velocity last argument
-plot_boundarymap(ξς, φς, ις, color = colors)
+bmap, arcs = parallelize(boundarymap, bd, t, n, 1.0)
+plot_boundarymap(bmap, arcs, color = colors)
+tight_layout()
 savefig("boundarymapmag.svg"); nothing # hide
 ```
 ![](boundarymapmag.svg)

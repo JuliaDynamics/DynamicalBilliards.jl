@@ -12,16 +12,13 @@ Return the states of the particle between collisions.
 This function mutates the particle, use `evolve` otherwise. If a particle is
 not given, a random one is picked through [`randominside`](@ref).
 
-### Returns
+### Return
 
 * `ct::Vector{T}` : Collision times.
 * `poss::Vector{SVector{2,T}}` : Positions at the collisions.
 * `vels::Vector{SVector{2,T}})` : Velocities exactly after the collisions.
 * `ω`, either `T` or `Vector{T}` : Angular velocity/ies (returned only for magnetic
   particles).
-
-Use the function [`construct`](@ref) to create timeseries of positions and
-velocities out of these outputs.
 
 The time `ct[i+1]` is the time necessary to reach state `poss[i+1], vels[i+1]` starting
 from the state `poss[i], vels[i]`. That is why `ct[1]` is always 0 since
@@ -30,7 +27,6 @@ the particle has while propagating from state `poss[i], vels[i]` to `i+1`.
 
 Notice that at any point, the velocity vector `vels[i]` is the one obdained *after*
 the specular reflection of the `i-1`th collision.
-The function [`construct`](@ref) takes that into account.
 
 ### Ray-splitting billiards
     evolve!(p, bd, t, raysplitters)
@@ -125,8 +121,8 @@ series in between collisions. `dt` is capped by the collision time, as
 the interpolation _always_ stops at collisions.
 For straight propagation `dt = Inf`, while for magnetic `dt = 0.01`.
 
-For pinned magnetic particles, `timeseries!` issues a warning and returns the 
-trajectory of the particle. If `t` is integer, the trajectory is evolved for 
+For pinned magnetic particles, `timeseries!` issues a warning and returns the
+trajectory of the particle. If `t` is integer, the trajectory is evolved for
 one full circle only
 
 Return:

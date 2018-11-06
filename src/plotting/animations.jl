@@ -50,13 +50,13 @@ total time `t` (always considered float). Optionally enable ray-splitting.
 
 ### Evolution kwargs
   * `dt = 0.01` : Time resolution used for production of time series (see
-    [`timeseries`](@ref). It is not recommended to significantly increase this value,
+    [`timeseries!`](@ref). It is not recommended to significantly increase this value,
     to preserve the smoothness of the orbits.
   * `frameskip = 5` : The amount of `dt`-steps performed each frame.
     Increasing either `frameskip` and `dt` makes the animation progress faster.
   * `tailtime = 1.0` : The length of the "tail" trailing the particle in time
     units.
-  * `resetting = reset_billiard!` : function called after evolving each individual 
+  * `resetting = reset_billiard!` : function called after evolving each individual
     particle in the billiard (so that ray-splitting doesn't brake).
 ### Colors & plotting kwargs
   * `colors` : An array of valid Matplotlib colors for the "tails". If `colors`

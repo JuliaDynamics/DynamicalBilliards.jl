@@ -78,7 +78,6 @@ function plot_boundarymap(bmap, intervals;
 
         return (ax, ax2)
     end
-    PyPlot.tight_layout()
     return ax
 end
 
@@ -113,6 +112,5 @@ function plot_boundarymap_portion(d, δξ, δφ = δξ;
     plot = ax[:pcolormesh](ξs, φs, data; kwargs...)
 
     cb && PyPlot.colorbar(plot)
-    PyPlot.tight_layout()
     return ax
 end

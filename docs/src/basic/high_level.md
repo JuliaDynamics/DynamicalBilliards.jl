@@ -107,7 +107,7 @@ The above return types are helpful in some applications.
 In other applications however one prefers to have the time series of the individual variables.
 For this, the `timeseries` function is used:
 ```@docs
-timeseries
+timeseries!
 ```
 ---
 For example:

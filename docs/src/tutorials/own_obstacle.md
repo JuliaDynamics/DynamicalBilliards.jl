@@ -51,8 +51,8 @@ The following functions must obtain methods for `Semicircle` (or any other custo
 3. [`DynamicalBilliards.collision`](@ref) with `Particle`
 
 Assuming that upon collision a specular reflection happens, then you don't need
-to define a method for [`DynamicalBilliards.resolvecollision!`](@ref). You can however define
-custom methods for [`DynamicalBilliards.resolvecollision!`](@ref), which is what we have done e.g.
+to define a method for [`DynamicalBilliards.specular!`](@ref). You can however define
+custom methods for [`DynamicalBilliards.specular!`](@ref), which is what we have done e.g.
 for [`RandomDisk`](@ref).
 
 !!! note "Use `import`!"
@@ -102,10 +102,10 @@ function collision(p::Particle{T}, d::Semicircle{T})::T where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
-    C = dot(dc, dc) - d.r^2    #being outside of circle: C > 0
+    C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ <= 0 && return Inf
+    Δ ≤ 0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
     nn = dot(dc, d.facedir)
@@ -113,19 +113,19 @@ function collision(p::Particle{T}, d::Semicircle{T})::T where {T}
         # Return most positive time
         t = -B + sqrtD
     else # I am inside semicircle:
-        # these lines make sure that the code works for ANY starting position:
         t = -B - sqrtD
-        if t ≤ 0 || distance(p, d) ≤ distancecheck(T)
+        # these lines make sure that the code works for ANY starting position:
+        if t ≤ 0 || distance(p, d) ≤ accuracy(T)
             t = -B + sqrtD
         end
     end
     # This check is necessary to not collide with the non-existing side
-    newpos = p.pos + p.vel .* t
+    newpos = p.pos + p.vel * t
     if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
-        return Inf
+        return nocollision(T)
     end
     # If collision time is negative, return Inf:
-    t ≤ 0.0 ? Inf : t
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t*p.vel)
 end
 ```
 
@@ -138,8 +138,8 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 
 1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collision`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
-2. [`plot`](@ref) : enables plotting (used in [`plot`](@ref))
-3. [`specular!`](@ref) with `offset` : Allows [`lyapunovspectrum!`](@ref) to be computed.
+2. [`plot`](@ref) with `obstacle` : enables plotting
+3. [`DynamicalBilliards.specular!`](@ref) with `offset` : Allows [`lyapunovspectrum`](@ref) to be computed.
 4. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 5. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
@@ -164,7 +164,7 @@ function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     r1 = o.r
     d = norm(p1-pc)
     if (d >= rc + r1) || (d <= abs(rc-r1))
-        return Inf
+        return nocollision(T)
     end
     # Solve quadratic:
     a = (rc^2 - r1^2 + d^2)/2d
@@ -181,15 +181,18 @@ function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     # Only consider intersections on the "correct" side of Semicircle:
     cond1 = dot(I1-o.c, o.facedir) < 0
     cond2 = dot(I2-o.c, o.facedir) < 0
+    # Collision time, equiv. to arc-length until collision point:
+    θ, I = nocollision(T)
     if cond1 || cond2
-        # Calculate real angle until intersection:
-        θ1 = cond1 ? realangle(p, o, I1) : T(Inf)
-        θ2 = cond2 ? realangle(p, o, I2) : T(Inf)
-        # Collision time, equiv. to arc-length until collision point:
-        return min(θ1, θ2)*rc
-    else
-        return Inf
+        for (Y, cond) in ((I1, cond1), (I2, cond2))
+            if cond
+                φ = realangle(p, o, Y)
+                φ < θ && (θ = φ; I = Y)
+            end
+        end
     end
+    # Collision time = arc-length until collision point
+    return θ*rc, I
 end
 
 ```
@@ -213,19 +216,19 @@ end
 
 To enable computation of Lyapunov exponents in billiards with your obstacle,
 you have to write another method for `specular!` that also handles the evolution
-of perturbation vectors in tangent space. For this, the method has to 
-accept an argument of type `Vector{SVector{4, T}}`, which contains the four 
+of perturbation vectors in tangent space. For this, the method has to
+accept an argument of type `Vector{SVector{4, T}}`, which contains the four
 perturbation vectors corresponding to the four Lyapunov exponents.
 
-Finding a formula for the evolution of the perturbations requires some tricky 
-calculations. Fortunately for us, the results for general circular obstacles 
-were already determined by Dellago, Posch and Hoover [1] – we just have to 
+Finding a formula for the evolution of the perturbations requires some tricky
+calculations. Fortunately for us, the results for general circular obstacles
+were already determined by Dellago, Posch and Hoover [1] – we just have to
 implement them.
 
 ```julia
 function specular!(p::Particle{T}, o::Circular{T},
 	offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
-	
+
     n = normalvec(o, p.pos)
     ti = SV{T}(-p.vel[2],p.vel[1])
 
@@ -251,15 +254,13 @@ end
 
 ```
 
-Note that calculating Lyapunov exponents for magnetic particles requires a 
-separate method, as the formulas are different for magnetic propagation. 
+Note that calculating Lyapunov exponents for magnetic particles requires a
+separate method, as the formulas are different for magnetic propagation.
 
 Finally, we also add a methods for [`to_bcoords`](@ref) and [`from_bcoords`](@ref).
-For them, see the [relevant source file](https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/src/boundary/boundarymap.jl).
+For them, see the relevant source file (use `@which`).
 
 
+**References**
 
-
-References
-
-[1] Ch. Dellago et al., Phys. Rev. E 53, 1485 (1996).
+[1] : Ch. Dellago et al., Phys. Rev. E 53, 1485 (1996).

@@ -84,19 +84,21 @@ end
 ###################
 # Update messages #
 ###################
-if !isfile(joinpath(@__DIR__, "update_v2.0.0"))
+if !isfile(joinpath(@__DIR__, "update_v3.0.0"))
 printstyled(stdout,
 """
-\nUpdate message: DynamicalBilliards v2.0
+\nUpdate message: DynamicalBilliards v3.0
 
-The new version v2.0 of DynamicalBilliards brings massive performance
-increase, a ton of new features, a more intuitive and simpler low-level interface,
-automated animation production and much more stuff!
-
-There are also a small amount of minor breaking changes! Please see the
-updated documentation page as well as the changelog.\n
+The new version v3.0 of DynamicalBilliards has
+a reworked (and better!) propagation
+algorithm, a new sexy way to animate billiards
+(multiple particle support!)
+the Ellipse obstacle and many other things!
+Please see the changelog,
+because there have been a small
+amount of breaking changes!\n
 """; color = :light_magenta)
-touch(joinpath(@__DIR__, "update_v2.0.0"))
+touch(joinpath(@__DIR__, "update_v3.0.0"))
 end
 
 

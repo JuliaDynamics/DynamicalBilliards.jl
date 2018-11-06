@@ -3,8 +3,8 @@ export lyapunovspectrum!, lyapunovspectrum
 const δqind = SV{Int}(1,2)
 const δpind = SV{Int}(3,4)
 
-@inline curvature(::Semicircle) = -1
-@inline curvature(::Disk) = +1
+@inline curvature(::Semicircle) = -1.0
+@inline curvature(::Disk) = +1.0
 
 ################################################################################
 ## SPECULAR (LINEAR)
@@ -23,11 +23,11 @@ function specular!(p::Particle{T}, o::Circular{T},
     ti = SV{T}(-p.vel[2],p.vel[1])
 
     cosa = -dot(n, p.vel)
-    p.vel = p.vel + 2*cosa*n
+    p.vel = p.vel + 2.0*cosa*n
 
     tf = SV{T}(-p.vel[2], p.vel[1])
 
-    for k in 1:4
+    @inbounds for k in 1:4
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
@@ -49,8 +49,8 @@ function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 20)
-        δq  = δqprev - 2*dot(δqprev,n)*n
-        δp  = δpprev - 2*dot(δpprev,n)*n
+        δq  = δqprev - 2.0*dot(δqprev,n)*n
+        δp  = δpprev - 2.0*dot(δpprev,n)*n
         ###
         offset[k] = vcat(δq, δp)
     end
@@ -104,7 +104,7 @@ function specular!(p::MagneticParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
 
     # magterm = ω*δτ_c*(BR-RB)*p_i / δqprev_normal
     # i.e. everything that can be calculated without using the previous offset vector
-    magterm = -2*p.omega*((dot(p.vel, Rn)/(-cosa))*n + Rn)
+    magterm = -2.0*p.omega*((dot(p.vel, Rn)/(-cosa))*n + Rn)
 
     #actual specular reflection should not occur before magterm is calculated
     p.vel = p.vel + 2*cosa*n
@@ -116,8 +116,8 @@ function specular!(p::MagneticParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
         δqprev_normal = dot(δqprev, n)
 
         # Formulas derived analogously to Dellago et al., PRE 53, 2, 1996: 1485-1501
-        δq  = δqprev - 2*δqprev_normal*n
-        δp  = δpprev - 2*dot(δpprev,n)*n + magterm*δqprev_normal
+        δq  = δqprev - 2.0*δqprev_normal*n
+        δp  = δpprev - 2.0*dot(δpprev,n)*n + magterm*δqprev_normal
         ###
         offset[k] = vcat(δq, δp)
     end

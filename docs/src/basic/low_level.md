@@ -1,6 +1,6 @@
 # Internals
 
-This section is **not** part of the public API defined by `DynamicalBilliards`. Consider it something like a *developer's guide*.
+This page is **not** part of the public API defined by `DynamicalBilliards`. Consider it something like a *developer's guide*.
 
 ## Implementation
 Before talking about the low level methods that enable everything to work nicely together, let's talk about how this package works.
@@ -66,7 +66,6 @@ next_collision
 ```
 
 ## Non-Exported Internals
-This section is **not** part of the public API. Instead, it serves more like a "developer's guide", for people wanting to learn more about the internals of `DynamicalBilliards`.
 
 ### Obstacle related
 
@@ -77,7 +76,7 @@ DynamicalBilliards.cellsize
 
 ### Propagation
 ```@docs
-propagate!
+DynamicalBilliards.propagate!
 DynamicalBilliards.resolvecollision!
 DynamicalBilliards.relocate!
 DynamicalBilliards.specular!

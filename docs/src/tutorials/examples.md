@@ -5,7 +5,6 @@ comments.
 The "Julia-logo-billiard" animation that is the logo of our package was made with the following code. The function [`billiard_logo`](@ref) also exports the same result.
 ```julia
 using DynamicalBilliards, PyPlot
-using DynamicalBilliards: cross2D
 
 # %%
 h = 1.0; α = 0.8; r = 0.18; off = 0.25
@@ -46,7 +45,7 @@ purple = RandomDisk(center_of_mass .+ R*R*offset, r, "purple")
 
 bd = Billiard(green, red, purple, frame...)
 
-# %% Raysplitting functions for the red circle:
+# Raysplitting functions for the red circle:
 refraction = (φ, pflag, ω) -> pflag ? 0.5φ : 2.0φ
 transmission_p = (p) -> (φ, pflag, ω) -> begin
     if pflag
@@ -56,24 +55,19 @@ transmission_p = (p) -> (φ, pflag, ω) -> begin
     end
 end
 newoantidot = ((x, bool) -> bool ? -2.0x : -0.5x)
-raya = RaySplitter([2], transmission_p(0.8), refraction, newoantidot)
+raya = RaySplitter([2], transmission_p(0.5), refraction, newoantidot)
 
-# %% Create and animate particle:
-p = randominside(bd, 3.5)
+# Create and animate particles
+N = 5
+particles = [MagneticParticle(-0.3, 0.7 + 0.0005*i, 0.0, -2.0) for i in 1:N]
+cs = [(0, 0, i/N, 0.75) for i in 1:N]
 
-cd()
-mkpath("dynamicalbilliards")
-cd("dynamicalbilliards")
-
-figure(figsize = (14,14))
-plot(bd; ax = gca())
-axis("off")
-animate_evolution(p, bd, 500, raya;
-newfig = false, savename="logo", deletefigs = false, col_to_plot = 7);
+animate_evolution(particles, bd, 10.0, (raya,);
+colors = cs, disable_axis = true)
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/DynamicalBilliards_billiard_animation.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/DynamicalBilliards_v3.mp4?raw=true" type="video/mp4">
 </video>
 
 ## Mean Free Path of the Lorentz Gas
@@ -96,7 +90,6 @@ in only the x-direction:
 ```@example tut3
 using DynamicalBilliards, PyPlot
 o = 0.0; x = 2.0; y=1.0
-bd = Obstacle{Float64}[]
 
 sp = [o,o]; ep = [o, y]; n = [x,o]
 leftw = PeriodicWall(sp, ep, n, "Left periodic boundary")
@@ -111,16 +104,14 @@ botw2 = InfiniteWall(sp, ep, n, "Bottom wall")
 r = 0.25
 d = Disk([0.5, 0.5], r)
 d2 = Disk([1.5, 0.5], r/2)
-push!(bd, d, d2)
 
 bd = Billiard(leftw, rightw, topw2, botw2, d, d2)
 
 p = randominside(bd)
 p.pos = [0.311901, 0.740439]
 p.vel = [0.548772, 0.835972]
-xt, yt, vxt, vyt, t = construct(evolve(p, bd, 25)...)
+xt, yt, t = timeseries(p, bd, 25)
 plot(bd, xt, yt)
-scatter(xt[1], yt[1])
 scatter(xt[end], yt[end], color = "black")
 ylim(0,y)
 xlim(floor(minimum(xt)), ceil(maximum(xt)))

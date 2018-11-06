@@ -1,4 +1,7 @@
 # Creating your own Billiard
+
+## The `Billiard` type
+
 ```@docs
 Billiard
 ```
@@ -16,8 +19,9 @@ using DynamicalBilliards
 bd = Obstacle{Float64}[]  # T<: AbstractFloat
 ```
 and then you create your obstacles one by one and add them to it. All obstacles that are already defined in the package
-can be found at the [Obstacles page](/basic/library/#obstacles) of the library. The function [`billiard_polygon`](@ref) creates a polygonal billiard table.
-However, for the example of this page, we will create a hexagonal billiard with a disk in the middle step-by-step.
+can be found at the [Obstacles library](/#Obstacle-Library) below.
+
+For the example of this page, we will create a hexagonal billiard with a disk in the middle step-by-step (the function [`billiard_polygon`](@ref) creates a polygonal billiard table already).
 
 The first step is to define the six walls of the billiard table.
 An [`InfiniteWall`](@ref) object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name.
@@ -43,7 +47,15 @@ end
 summary(bd)
 ```
 
+!!! note "Keep the size around 1."
+    Because the precision in `DynamicalBilliards` is measured using `eps(T)` with
+    `T` the number type, it is advised to keep the size of the billiard in the order of magnitude of 1. Having overly large billiards with sizes of 100 or more can lead to accuracy loss!
+
 The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the user because it must point towards where the particle is expected to come from. If `w` is the vector (wall) pointing from start- to end-point then the vector `[-w[2], w[1]]` is pointing to the left of `w` and the vector `[w[2], -[w1]]` is pointing to the right. Both are normal to `w`, but you have to know which one to pick. In this case this is very easy, since the normal has to simply point towards the origin.
+
+
+!!! note "There is no glue."
+    In `DynamicalBilliards` there is no "glue" that combines particles or "sticks" them together, ensuring that the billiard is closed. You only have to take care that their ends meet geometrically. Even obstacle overlapping is allowed, if you want to be on the safe side!
 
 We add a disk by specifying a center and radius (and optionally a name):
 ```@example tut1

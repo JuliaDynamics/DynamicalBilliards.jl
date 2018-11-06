@@ -1,4 +1,4 @@
-export construct, bounce!, evolve, ispinned, evolve!, propagate!
+export bounce!, evolve, ispinned, evolve!, propagate!
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
@@ -18,7 +18,9 @@ Return:
   collision has been resolved!). The position is given in the unit cell of
   periodic billiards. Do `pos += p.current_cell` for the position in real space.
 
-    bounce!(p, bd, raysplit) → i, t, pos, vel
+```julia
+bounce!(p, bd, raysplit) → i, t, pos, vel
+```
 Ray-splitting version of `bounce!`.
 """
 @inline function bounce!(p::AbstractParticle{T}, bd::Billiard{T}) where {T}
@@ -187,4 +189,3 @@ function ispinned(p::MagneticParticle, bd::Billiard)
     end
     _reset_ispinned(p, pos, vel, cc); return true
 end
-
