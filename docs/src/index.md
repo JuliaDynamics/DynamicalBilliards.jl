@@ -9,7 +9,7 @@ dynamical billiards in two dimensions.
     The *breaking* changes are extremely few and regard only the internal interfaces and plotting functions.
 
 !!! tip "Julia Billiard logo animation"
-    Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
+    Check out the example in the [tutorials](tutorials/examples.md/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
     the logo of our package!
 
 
@@ -23,26 +23,26 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 ## Features
 
-* Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles. Arbitrary billiard shapes can be made and no shape is "hard coded".
+* Modular creation of a [billiard](basic/high_level.md/#billiard) from well defined obstacles. Arbitrary billiard shapes can be made and no shape is "hard coded".
 * Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table.
   * During magnetic propagation the particle orbit is a circle instead of a line!
   * All features exist for both types of propagation!
-  * See the [high level API](basic/high_level) to get started!
+  * See the [high level API](basic/high_level.md) to get started!
 
-* Support for creating [random initial conditions](basic/high_level/#random-initial-conditions) in an arbitrary
+* Support for creating [random initial conditions](basic/high_level.md/#random-initial-conditions) in an arbitrary
   billiard.
-* [Ray-splitting implementation](ray-splitting): a particle may propagate
+* [Ray-splitting implementation](ray-splitting.md): a particle may propagate
   through an obstacle given arbitrary transmission and refraction
   laws. This is also known as a "semiclassical billiard".
-* [Poincaré surfaces of section](high_level/#poincare-sections) (intersections with arbitrary plane).
-* [Boundary maps](basic/phasespaces).
-* [Escape times](basic/high_level/#escape-times) & [mean collision times](basic/high_level/#mean-collision-times).
-* [Lyapunov exponents](lyapunovs).
-* Support for both [coordinate systems](basic/phasespaces/#coordinate-systems): 3D real space and boundary coordinates.
-* Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [phase spaces](basic/phasespaces/#phase-space-portions) section.
-* Easy to use [low-level interface](basic/low_level).
-* Specialized tools for [mushroom billiards](mushroomtools).
-* Full support for [visualizing and animating](visualizing) billiards and motion in billiards.
+* [Poincaré surfaces of section](basic/high_level.md/#poincare-sections) (intersections with arbitrary plane).
+* [Boundary maps](basic/phasespaces.md).
+* [Escape times](basic/high_level.md/#escape-times) & [mean collision times](basic/high_level.md/#mean-collision-times).
+* [Lyapunov exponents](lyapunovs.md).
+* Support for both [coordinate systems](basic/phasespaces.md/#coordinate-systems): 3D real space and boundary coordinates.
+* Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [phase spaces](basic/phasespaces.md/#phase-space-portions) section.
+* Easy to use [low-level interface](basic/low_level.md).
+* Specialized tools for [mushroom billiards](mushroomtools.md).
+* Full support for [visualizing and animating](visualizing.md) billiards and motion in billiards.
 * Brutal tests that confirm the package works and overcomes numerical precision issues.
 
 This package does not support finite-sized particles and, as a result, there is also no support for collision between particles.
