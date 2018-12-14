@@ -312,8 +312,8 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
     ismagnetic = typeof(p) <: MagneticParticle
 
     # perturbation vectors
-    Δ_before = Vector{SVector{4, T}}()
-    Δ_after  = Vector{SVector{4, T}}()
+    Δ = Vector{SVector{4, T}}()
+    Δ  = Vector{SVector{4, T}}()
 
     # sample times
     tim = T[]
@@ -326,17 +326,18 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
         i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
         relocate!(p, bd[i], tmin, cp, offset)
 
+        # push perturbations before collision
         push!(tim, tmin + count)
         push!(obst, i)
-        
-        # push perturbations before collision
         # arbitrary choice to push only the first perturbation vector
-        push!(Δ_before, offset[1])
-
+        push!(Δ, offset[1])
+        
         resolvecollision!(p, bd[i], offset)
-    
+
         # push perturbations after collision
-        push!(Δ_after, offset[1])
+        push!(tim, tmin + count)
+        push!(obst, i)
+        push!(Δ, offset[1])
         
         # recalculate cyclotron centre
         ismagnetic && (p.center = find_cyclotron(p))
@@ -345,7 +346,7 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
         
     end#time loop
 
-    return tim, Δ_before, Δ_after, obst
+    return tim, Δ, obst
 end
 
 """
