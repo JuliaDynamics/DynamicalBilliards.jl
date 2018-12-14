@@ -304,21 +304,21 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
     count = zero(T)
     t = T(tt)
 
-     # check for pinning before evolution
-    if ispinned(p, bd)
-        warning && @warn "Pinned particle!"
-        return λ
-    end
-    ismagnetic = typeof(p) <: MagneticParticle
-
     # perturbation vectors
     Δ = Vector{SVector{4, T}}()
-    
+   
     # sample times
     tim = T[]
 
     # obstacle indices
     obst = Int[]
+
+     # check for pinning before evolution
+    if ispinned(p, bd)
+        warning && @warn "Pinned particle!"
+        return tim, Δ, obst
+    end
+    ismagnetic = typeof(p) <: MagneticParticle
 
     while count < t
         # bounce
