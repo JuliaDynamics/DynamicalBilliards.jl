@@ -313,8 +313,7 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
 
     # perturbation vectors
     Δ = Vector{SVector{4, T}}()
-    Δ  = Vector{SVector{4, T}}()
-
+    
     # sample times
     tim = T[]
 
