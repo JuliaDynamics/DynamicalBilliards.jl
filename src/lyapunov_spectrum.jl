@@ -350,8 +350,17 @@ end
 
 """
     perturbationgrowth(p, bd, t)
+Calculates the evolution of the perturbation vector Δ along the trajectory of `p`. 
+Δ is initialised with `[1,0,0,0]`.
+Immediately before and after every collison, this function computes
+* the current time. 
+* the current  value of Δ
+* the obstacle index of the current obstacle 
+and returns these in three vectors.
 
-A fancy docstring
+Returns empty lists for pinned particles.
+
+If a particle is not given, a random one is picked through [`randominside`](@ref).
 """
 perturbationgrowth(p::AbstractParticle, args...) = perturbationgrowth!(copy(p), args...)
 perturbationgrowth(bd::Billiard, args...) =
