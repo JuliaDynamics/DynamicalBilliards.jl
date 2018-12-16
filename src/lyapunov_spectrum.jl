@@ -1,4 +1,5 @@
-export lyapunovspectrum!, lyapunovspectrum
+export lyapunovspectrum!, lyapunovspectrum,
+    perturbationgrowth!, perturbationgrowth
 
 const δqind = SV{Int}(1,2)
 const δpind = SV{Int}(3,4)
@@ -283,3 +284,83 @@ See [`parallelize`](@ref) for a parallelized version.
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(copy(p), args...)
 lyapunovspectrum(bd::Billiard, args...) =
     lyapunovspectrum!(randominside(bd), bd, args...)
+
+
+################################################################################
+## Raw perturbation growth
+################################################################################
+
+# get perturbation vectors before and after collision
+function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
+                             tt::AbstractFloat) where {T<:AbstractFloat}
+
+    # unfortunately, we have to use four perturbation vectors for all the
+    # perturbation growth functions.
+    # However, as this function does not orthonormalize anything, we get the
+    # same perturbation growth curve four times.
+    offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
+              SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
+
+    count = zero(T)
+    t = T(tt)
+
+    # perturbation vectors
+    Δ = Vector{SVector{4, T}}()
+
+    # sample times
+    tim = T[]
+
+    # obstacle indices
+    obst = Int[]
+
+     # check for pinning before evolution
+    if ispinned(p, bd)
+        return tim, Δ, obst
+    end
+    ismagnetic = typeof(p) <: MagneticParticle
+
+    while count < t
+        # bounce
+        i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
+        relocate!(p, bd[i], tmin, cp, offset)
+
+        # push perturbations before collision
+        push!(tim, tmin + count)
+        push!(obst, i)
+        # arbitrary choice to push only the first perturbation vector
+        push!(Δ, offset[1])
+
+        resolvecollision!(p, bd[i], offset)
+
+        # push perturbations after collision
+        push!(tim, tmin + count)
+        push!(obst, i)
+        push!(Δ, offset[1])
+
+        # recalculate cyclotron centre
+        ismagnetic && (p.center = find_cyclotron(p))
+        # increment counter
+        count += increment_counter(t, tmin)
+
+    end#time loop
+
+    return tim, Δ, obst
+end
+
+"""
+    perturbationgrowth(p, bd, t)
+Calculates the evolution of the perturbation vector Δ along the trajectory of `p`.
+Δ is initialised with `[1,0,0,0]`.
+Immediately before and after every collison, this function computes
+* the current time.
+* the current  value of Δ
+* the obstacle index of the current obstacle
+and returns these in three vectors.
+
+Returns empty lists for pinned particles.
+
+If a particle is not given, a random one is picked through [`randominside`](@ref).
+"""
+perturbationgrowth(p::AbstractParticle, args...) = perturbationgrowth!(copy(p), args...)
+perturbationgrowth(bd::Billiard, args...) =
+    perturbationgrowth!(randominside(bd), bd, args...)

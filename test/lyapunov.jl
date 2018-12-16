@@ -64,3 +64,26 @@ end
 billiards_testset("Lyapunov numerical values",
                   identity, caller=test_lyapunov_values)
 
+
+using LinearAlgebra
+function test_perturbationgrowth(p, bd, n)
+    tmax = 100.0
+
+    # there should only be floating point precision errors as we're computing
+    # exactly the same thing twice
+    error_level = 1e-10
+
+    for i ∈ 1:n
+        t, Δ, o = perturbationgrowth(p, bd, tmax)
+        λ = lyapunovspectrum(p, bd, tmax)
+
+        λ_estimate = log(norm(Δ[end]))/t[end]
+        @test abs(λ[1] - λ_estimate) < error_level
+
+        # automatically generate new intial conditions! whoopee!
+        evolve!(p, bd, tmax)
+    end
+end
+
+billiards_testset("Compare Lyapunovs and perturbation growth",
+                  test_perturbationgrowth, 10; caller=ergodic_tests)

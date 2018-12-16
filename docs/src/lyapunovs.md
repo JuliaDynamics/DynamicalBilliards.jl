@@ -57,3 +57,24 @@ The plot of the maximum exponent can be compared with the results reported by
 [Gaspard et. al](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.51.5332)
 (see figure 7), showing that using just `t = 5000.0` is already enough of a
 statistical averaging.
+
+## Perturbation Growth
+To be able to inspect the dynamics of perturbation growth in more detail, we also provide the following function:
+```@docs
+perturbationgrowth
+```
+---
+For example, lets plot the evolution of the perturbation growth using different colors for collisions with walls and disks in the Sinai billiard:
+```@example lyaps
+using DynamicalBilliards, PyPlot, LinearAlgebra
+bd = billiard_sinai()
+
+t, Δ, i = perturbationgrowth(randominside(bd), bd, 10.0)
+
+figure()
+plot(t, log.(norm.(Δ)), "k-", lw = 0.5)
+scatter(t, log.(norm.(Δ)), c = [j == 1 ? "C0" : "C1" for j in i])
+xlabel("\$t\$"); ylabel("\$\\log(||\\Delta ||)\$")
+savefig("pertg.svg"); nothing # hide
+```
+![](pertg.svg)
