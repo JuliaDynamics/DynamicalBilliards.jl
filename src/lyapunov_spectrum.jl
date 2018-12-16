@@ -287,7 +287,7 @@ lyapunovspectrum(bd::Billiard, args...) =
 
 
 ################################################################################
-## Raw perturbation growth 
+## Raw perturbation growth
 ################################################################################
 
 # get perturbation vectors before and after collision
@@ -297,16 +297,16 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
     # unfortunately, we have to use four perturbation vectors for all the
     # perturbation growth functions.
     # However, as this function does not orthonormalize anything, we get the
-    # same perturbation growth curve four times. 
+    # same perturbation growth curve four times.
     offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
               SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
-    
+
     count = zero(T)
     t = T(tt)
 
     # perturbation vectors
     Δ = Vector{SVector{4, T}}()
-   
+
     # sample times
     tim = T[]
 
@@ -315,7 +315,6 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
 
      # check for pinning before evolution
     if ispinned(p, bd)
-        warning && @warn "Pinned particle!"
         return tim, Δ, obst
     end
     ismagnetic = typeof(p) <: MagneticParticle
@@ -330,19 +329,19 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
         push!(obst, i)
         # arbitrary choice to push only the first perturbation vector
         push!(Δ, offset[1])
-        
+
         resolvecollision!(p, bd[i], offset)
 
         # push perturbations after collision
         push!(tim, tmin + count)
         push!(obst, i)
         push!(Δ, offset[1])
-        
+
         # recalculate cyclotron centre
         ismagnetic && (p.center = find_cyclotron(p))
         # increment counter
         count += increment_counter(t, tmin)
-        
+
     end#time loop
 
     return tim, Δ, obst
@@ -350,12 +349,12 @@ end
 
 """
     perturbationgrowth(p, bd, t)
-Calculates the evolution of the perturbation vector Δ along the trajectory of `p`. 
+Calculates the evolution of the perturbation vector Δ along the trajectory of `p`.
 Δ is initialised with `[1,0,0,0]`.
 Immediately before and after every collison, this function computes
-* the current time. 
+* the current time.
 * the current  value of Δ
-* the obstacle index of the current obstacle 
+* the obstacle index of the current obstacle
 and returns these in three vectors.
 
 Returns empty lists for pinned particles.
