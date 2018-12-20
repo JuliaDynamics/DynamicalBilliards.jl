@@ -4,8 +4,8 @@ export lyapunovspectrum!, lyapunovspectrum,
 const δqind = SV{Int}(1,2)
 const δpind = SV{Int}(3,4)
 
-@inline curvature(::Semicircle) = -1.0
-@inline curvature(::Disk) = +1.0
+@inline curvature(::Semicircle{T}) where {T} = -one(T)
+@inline curvature(::Disk{T}) where {T} = one(T)
 
 ################################################################################
 ## SPECULAR (LINEAR)
