@@ -1,5 +1,5 @@
-export lyapunovspectrum!, lyapunovspectrum,
-    perturbationgrowth!, perturbationgrowth
+export lyapunovspectrum!, lyapunovspectrum
+export perturbationgrowth!, perturbationgrowth, pertubationevolution
 
 const δqind = SV{Int}(1,2)
 const δpind = SV{Int}(3,4)
@@ -274,12 +274,14 @@ end
 """
     lyapunovspectrum([p::AbstractParticle,] bd::Billiard, t)
 Returns the finite time lyapunov exponents (averaged over time `t`)
-for a given particle in a billiard table.
+for a given particle in a billiard table using the method outlined in [1].
 
 Returns zeros for pinned particles.
 
 If a particle is not given, a random one is picked through [`randominside`](@ref).
 See [`parallelize`](@ref) for a parallelized version.
+
+[1] : Ch. Dellago *et al*, [Phys. Rev. E **53** (1996)](http://link.aps.org/doi/10.1103/PhysRevE.53.1485)
 """
 lyapunovspectrum(p::AbstractParticle, args...) = lyapunovspectrum!(copy(p), args...)
 lyapunovspectrum(bd::Billiard, args...) =
@@ -298,7 +300,7 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
     # perturbation growth functions.
     # However, as this function does not orthonormalize anything, we get the
     # same perturbation growth curve four times.
-    offset = [SVector{4, T}(1,0,0,0)]
+    offset = [SVector{4, T}(1,1,1,1)]
 
     count = zero(T)
     t = T(tt)
@@ -319,6 +321,7 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
     ismagnetic = typeof(p) <: MagneticParticle
 
     while count < t
+        off = offset[1]
         # bounce
         i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
         relocate!(p, bd[i], tmin, cp, offset)
@@ -326,19 +329,21 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
         # push perturbations before collision
         push!(tim, tmin + count)
         push!(obst, i)
-        # arbitrary choice to push only the first perturbation vector
-        push!(Δ, offset[1])
+        # push after propagation evolution
+        push!(Δ, offset[1] ./ off)
+        off = offset[1]
 
         resolvecollision!(p, bd[i], offset)
-
         # push perturbations after collision
         push!(tim, tmin + count)
         push!(obst, i)
-        push!(Δ, offset[1])
+        push!(Δ, offset[1] ./ off)
 
-        # recalculate cyclotron centre
         ismagnetic && (p.center = find_cyclotron(p))
-        # increment counter
+
+        # normalize pertubation vector
+        offset[1] = offset[1] ./ norm(offset[1])
+
         count += increment_counter(t, tmin)
 
     end#time loop
@@ -347,19 +352,46 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
 end
 
 """
-    perturbationgrowth(p, bd, t)
-Calculates the evolution of the perturbation vector Δ along the trajectory of `p`.
-Δ is initialised with `[1,0,0,0]`.
-Immediately before and after every collison, this function computes
-* the current time.
-* the current  value of Δ
-* the obstacle index of the current obstacle
-and returns these in three vectors.
-
-Returns empty lists for pinned particles.
+    perturbationgrowth([p,] bd, t) -> ts, Rs, is
+Calculate the evolution of the perturbation vector `Δ` along the trajectory of `p` in
+`bd` for total time `t`. `Δ` is initialised as `[1,1,1,1]`.
 
 If a particle is not given, a random one is picked through [`randominside`](@ref).
+Returns empty lists for pinned particles.
+
+## Description
+This function *safely* computes the time evolution of a pertubation vector using the
+linearized dynamics of the system, as outlined by [1]. Because the dynamics are linear,
+we can safely re-normalize the pertubation vector after every collision (otherwise the
+pertubations grow to infinity).
+
+Immediately before *and after* every collison, this function computes
+* the current time.
+* the element-wise ratio of Δ with its previous value
+* the obstacle index of the current obstacle
+and returns these in three vectors `ts, Rs, is`.
+
+To obtain the *actual* evolution of the pertubation vector you can use the function
+`pertubationevolution(Rs)` which simply does
+```julia
+Δ = Vector{SVector{4,Float64}}(undef, length(R))
+Δ[1] = R[1]
+for i in 2:length(R)
+    Δ[i] = R[i] .* Δ[i-1]
+end
+```
+
+[1] : Ch. Dellago *et al*, [Phys. Rev. E **53** (1996)](http://link.aps.org/doi/10.1103/PhysRevE.53.1485)
 """
 perturbationgrowth(p::AbstractParticle, args...) = perturbationgrowth!(copy(p), args...)
 perturbationgrowth(bd::Billiard, args...) =
     perturbationgrowth!(randominside(bd), bd, args...)
+
+function pertubationevolution(Rs::Vector{SVector{4, T}}) where T
+    Δ = Vector{SVector{4,T}}(undef, length(R))
+    Δ[1] = R[1]
+    @inbounds for i in 2:length(R)
+        Δ[i] = R[i] .* Δ[i-1]
+    end
+    return Δ
+end
