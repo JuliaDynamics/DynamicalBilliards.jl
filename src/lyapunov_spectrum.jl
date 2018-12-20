@@ -28,7 +28,7 @@ function specular!(p::Particle{T}, o::Circular{T},
 
     tf = SV{T}(-p.vel[2], p.vel[1])
 
-    @inbounds for k in 1:4
+    @inbounds for k in eachindex(offset)
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
@@ -46,7 +46,7 @@ function specular!(p::Particle{T}, o::Union{InfiniteWall{T},FiniteWall{T}},
     n = normalvec(o, p.pos)
     specular!(p, o)
 
-    for k in 1:4
+    for k in eachindex(offset)
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
         # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 20)
@@ -80,7 +80,7 @@ function specular!(p::MagneticParticle{T}, o::Circular{T},
     tf = SV{T}(-p.vel[2], p.vel[1])
 
 
-    for k in 1:4
+    for k in eachindex(offset)
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
 
@@ -110,7 +110,7 @@ function specular!(p::MagneticParticle{T}, o::Union{InfiniteWall{T},FiniteWall{T
     #actual specular reflection should not occur before magterm is calculated
     p.vel = p.vel + 2*cosa*n
 
-    for k in 1:4
+    for k in eachindex(offset)
         δqprev = offset[k][δqind]
         δpprev = offset[k][δpind]
 
@@ -165,7 +165,7 @@ time interval `t`
 """
 function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,     #linear case
                            p::Particle{T}) where T
-    for k in 1:4
+    for k in eachindex(offset)
         δΓ = offset[k]
         offset[k] = SVector{4,T}(δΓ[1] + t*δΓ[3], δΓ[2] + t*δΓ[4], δΓ[3], δΓ[4])
     end
@@ -177,7 +177,7 @@ function propagate_offset!(offset::Vector{SVector{4, T}}, t::T,
     ω = p.omega
     sω, cω = sincos(ω*t)
 
-    for k in 1:4
+    for k in eachindex(offset)
         δΓ = offset[k]
         offset[k] = SVector{4,T}(δΓ[1] + sω/ω*δΓ[3] + (cω - 1)/ω*δΓ[4],
                                  δΓ[2] + (1 - cω)/ω*δΓ[3] + sω/ω*δΓ[4],
@@ -298,8 +298,7 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
     # perturbation growth functions.
     # However, as this function does not orthonormalize anything, we get the
     # same perturbation growth curve four times.
-    offset = [SVector{4, T}(1,0,0,0), SVector{4, T}(0,1,0,0),
-              SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
+    offset = [SVector{4, T}(1,0,0,0)]
 
     count = zero(T)
     t = T(tt)
