@@ -69,11 +69,12 @@ For example, lets plot the evolution of the perturbation growth using different 
 using DynamicalBilliards, PyPlot, LinearAlgebra
 bd = billiard_sinai()
 
-t, Δ, i = perturbationgrowth(randominside(bd), bd, 10.0)
+ts, Rs, is = perturbationgrowth(Particle(0.1, 0.1, 0.1), bd, 10.0)
+Δ = pertubationevolution(Rs)
 
 figure()
-plot(t, log.(norm.(Δ)), "k-", lw = 0.5)
-scatter(t, log.(norm.(Δ)), c = [j == 1 ? "C0" : "C1" for j in i])
+plot(ts, log.(norm.(Δ)), "k-", lw = 0.5)
+scatter(ts, log.(norm.(Δ)), c = [j == 1 ? "C0" : "C1" for j in is])
 xlabel("\$t\$"); ylabel("\$\\log(||\\Delta ||)\$")
 savefig("pertg.svg"); nothing # hide
 ```

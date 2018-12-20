@@ -16,7 +16,7 @@ function test_lyapunov_spectrum(p, bd, t = 1e6, error_level = 1e-3)
     @testset "λ₂ ≈ 0, λ₃ ≈ 0" begin
         @test abs(exps[2]) < error_level
         @test abs(exps[3]) < error_level
-    end    
+    end
 end
 
 billiards_testset("Properties of Lyapunov spectrum",
@@ -27,16 +27,16 @@ function test_lyapunov_magnetic_limit(args...)
 
     t = 1e5
     error_level = 5e-2
-    
+
     for j ∈ 1:10
         pmag = randominside(bd, 1e-3)
         plin = Particle(pmag.pos, pmag.vel, SVector{2,Float64}(0,0))
-        
+
         exp_mag = lyapunovspectrum!(pmag, bd, t)
         exp_lin = lyapunovspectrum!(plin, bd, t)
-        
+
         @test exp_mag[1] - exp_lin[1] < error_level
-    end 
+    end
 end
 
 billiards_testset("Lyapunov spectrum for small B",
@@ -50,7 +50,7 @@ function test_lyapunov_values(args...)
     # based on Gaspard et al (see docs) & DynamicalBilliards v2.5
     expected_values = [3.6, 1.4, 0.8, 0.6, 0.5]
     error_level = 0.1
-   
+
     for (i, space) in enumerate(spaces)
         bd = billiard_polygon(6, space/(sqrt(3)); setting = "periodic")
         disc = Disk([0., 0.], radius)
@@ -66,24 +66,25 @@ billiards_testset("Lyapunov numerical values",
 
 
 using LinearAlgebra
-function test_perturbationgrowth(p, bd, n)
+function test_perturbationgrowth(p, bd)
+
     tmax = 100.0
+    error_level = 1e-1
 
-    # there should only be floating point precision errors as we're computing
-    # exactly the same thing twice
-    error_level = 1e-10
+    t, R, o = perturbationgrowth(p, bd, tmax)
+    λ = lyapunovspectrum(p, bd, tmax)
+    Δ = pertubationevolution(R)
 
-    for i ∈ 1:n
-        t, Δ, o = perturbationgrowth(p, bd, tmax)
-        λ = lyapunovspectrum(p, bd, tmax)
-
-        λ_estimate = log(norm(Δ[end]))/t[end]
-        @test abs(λ[1] - λ_estimate) < error_level
-
-        # automatically generate new intial conditions! whoopee!
-        evolve!(p, bd, tmax)
+    norms = log.(norm.(Δ))
+    actual = norms[end]; i = length(norms) - 1
+    while isinf(actual)
+        actual = norms[i]
+        i -= 1
     end
+
+    λ_estimate = actual/t[i]
+    @test abs(λ[1] - λ_estimate) < error_level
 end
 
 billiards_testset("Compare Lyapunovs and perturbation growth",
-                  test_perturbationgrowth, 10; caller=ergodic_tests)
+                  test_perturbationgrowth; caller=ergodic_tests)
