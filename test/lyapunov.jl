@@ -69,7 +69,7 @@ using LinearAlgebra
 function test_perturbationgrowth(p, bd)
 
     tmax = 100.0
-    error_level = 1e-3
+    error_level = 1e-1
 
     t, R, o = perturbationgrowth(p, bd, tmax)
     λ = lyapunovspectrum(p, bd, tmax)
