@@ -67,7 +67,7 @@ billiards_testset("Lyapunov numerical values",
 
 using LinearAlgebra
 function test_perturbationgrowth(p, bd, n)
-    tmax = 100.0
+    tmax = 10000.0
 
     # there should only be floating point precision errors as we're computing
     # exactly the same thing twice
@@ -77,8 +77,15 @@ function test_perturbationgrowth(p, bd, n)
         t, R, o = perturbationgrowth(p, bd, tmax)
         λ = lyapunovspectrum(p, bd, tmax)
         Δ = pertubationevolution(R)
+        
+        norms = log.(norm.(Δ))
+        actual = norms[end]; i = length(norms) - 1
+        while isinf(actual)
+            actual = norms[i]
+            i -= 1
+        end
 
-        λ_estimate = log(norm(Δ[end]))/t[end]
+        λ_estimate = actual/t[i]
         @test abs(λ[1] - λ_estimate) < error_level
 
         # automatically generate new intial conditions! whoopee!

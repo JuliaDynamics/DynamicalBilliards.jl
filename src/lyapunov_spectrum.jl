@@ -296,10 +296,6 @@ lyapunovspectrum(bd::Billiard, args...) =
 function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
                              tt::AbstractFloat) where {T<:AbstractFloat}
 
-    # unfortunately, we have to use four perturbation vectors for all the
-    # perturbation growth functions.
-    # However, as this function does not orthonormalize anything, we get the
-    # same perturbation growth curve four times.
     offset = [SVector{4, T}(1,1,1,1)]
 
     count = zero(T)
