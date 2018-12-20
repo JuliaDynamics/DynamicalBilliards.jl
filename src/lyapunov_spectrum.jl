@@ -387,7 +387,7 @@ perturbationgrowth(p::AbstractParticle, args...) = perturbationgrowth!(copy(p), 
 perturbationgrowth(bd::Billiard, args...) =
     perturbationgrowth!(randominside(bd), bd, args...)
 
-function pertubationevolution(Rs::Vector{SVector{4, T}}) where T
+function pertubationevolution(R::Vector{SVector{4, T}}) where T
     Δ = Vector{SVector{4,T}}(undef, length(R))
     Δ[1] = R[1]
     @inbounds for i in 2:length(R)
