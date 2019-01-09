@@ -115,8 +115,10 @@ this motion using [`animate_evolution`](@ref)!
 
 
 !!! important "Angle of refraction is clamped"
-    Internally we clamp the output of the angle of refraction function to
+    Internally we clamp the output of the angle of refraction function. Let `c = DynamicalBilliards.CLAMPING_ANGLE` (currently `c = 0.1`). We clamp `θ` to
     `-π/2 + 0.1 ≤ θ ≤ π/2 - 0.1`. This is so that the relocating algorithm does not fall into an infinite loop.
+
+		You can change the value of `c` but very small values can lead to infinite loops in extreme cases.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
@@ -154,15 +156,15 @@ isphysical
 
 ## Snell's Law
 
-In classical geometric optics, the refraction of a ray of light moving from one 
-medium to another is described by Snell's law. For an angle of incidence of 
+In classical geometric optics, the refraction of a ray of light moving from one
+medium to another is described by Snell's law. For an angle of incidence of
 $\phi$, the refraction angle $\theta$ is determined by the equation
 
 ```math
 \frac{sin(\phi)}{\sin(\theta)} = \frac{n'}{n}
 ```
 
-where $n$ and $n'$ are the respective refractive indices of the media. 
+where $n$ and $n'$ are the respective refractive indices of the media.
 
 To easily simulate these relations in `DynamicalBilliards`, the function
 `law_of_refraction` can be used to set up ray-splitting according to this law.
@@ -171,8 +173,8 @@ To easily simulate these relations in `DynamicalBilliards`, the function
 law_of_refraction
 ```
 
-Using the functions returned by `law_of_refraction`, we can set up a 
-`RaySplitter` for a billiard. 
+Using the functions returned by `law_of_refraction`, we can set up a
+`RaySplitter` for a billiard.
 ```@example lens
 using DynamicalBilliards, PyPlot
 # Create a circular "lens"
@@ -183,13 +185,13 @@ bd = Billiard(billiard_rectangle(2.5, 1.5)..., o)
 trans, refra = law_of_refraction(1.5)
 rs = (RaySplitter([5], trans, refra),)
 ```
-We now animate the evolution of an array of particles on parallel trajectories to 
+We now animate the evolution of an array of particles on parallel trajectories to
 demonstrate the refractive properties of the spherical lens
 ```julia
 # create parallel particles
 ps = [Particle(0.1, y, 0.0) for y in 0.4:0.05:1.1]
 
-# animate 
+# animate
 animate_evolution(ps, bd, 2.0, rs, colors = ["C0" for i ∈ 1:length(ps)],
 	tailtime=2.5, savename = "lens")
 ```
