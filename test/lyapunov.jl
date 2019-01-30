@@ -73,7 +73,7 @@ function test_perturbationgrowth(p, bd)
 
     t, R, o = perturbationgrowth(p, bd, tmax)
     λ = lyapunovspectrum(p, bd, tmax)
-    Δ = pertubationevolution(R)
+    Δ = perturbationevolution(R)
 
     norms = log.(norm.(Δ))
     actual = norms[end]; i = length(norms) - 1

@@ -1,3 +1,6 @@
+# 3.2
+* Replaced all instances of `pertubation` with `perturbation`. A deprecation is thrown.
+
 # 3.1
 * `law_of_refraction` : new function that returns transmission and refraction functions based on Snell's law and refractive indices.
 * Plenty of doc corrections.

@@ -1,5 +1,5 @@
 export lyapunovspectrum!, lyapunovspectrum
-export perturbationgrowth!, perturbationgrowth, pertubationevolution
+export perturbationgrowth!, perturbationgrowth, perturbationevolution
 
 const δqind = SV{Int}(1,2)
 const δpind = SV{Int}(3,4)
@@ -337,7 +337,7 @@ function perturbationgrowth!(p::AbstractParticle{T}, bd::Billiard{T},
 
         ismagnetic && (p.center = find_cyclotron(p))
 
-        # normalize pertubation vector
+        # normalize perturbation vector
         offset[1] = offset[1] ./ norm(offset[1])
 
         count += increment_counter(t, tmin)
@@ -356,10 +356,10 @@ If a particle is not given, a random one is picked through [`randominside`](@ref
 Returns empty lists for pinned particles.
 
 ## Description
-This function *safely* computes the time evolution of a pertubation vector using the
+This function *safely* computes the time evolution of a perturbation vector using the
 linearized dynamics of the system, as outlined by [1]. Because the dynamics are linear,
-we can safely re-normalize the pertubation vector after every collision (otherwise the
-pertubations grow to infinity).
+we can safely re-normalize the perturbation vector after every collision (otherwise the
+perturbations grow to infinity).
 
 Immediately before *and after* every collison, this function computes
 * the current time.
@@ -367,8 +367,8 @@ Immediately before *and after* every collison, this function computes
 * the obstacle index of the current obstacle
 and returns these in three vectors `ts, Rs, is`.
 
-To obtain the *actual* evolution of the pertubation vector you can use the function
-`pertubationevolution(Rs)` which simply does
+To obtain the *actual* evolution of the perturbation vector you can use the function
+`perturbationevolution(Rs)` which simply does
 ```julia
 Δ = Vector{SVector{4,Float64}}(undef, length(R))
 Δ[1] = R[1]
@@ -383,7 +383,7 @@ perturbationgrowth(p::AbstractParticle, args...) = perturbationgrowth!(copy(p), 
 perturbationgrowth(bd::Billiard, args...) =
     perturbationgrowth!(randominside(bd), bd, args...)
 
-function pertubationevolution(R::Vector{SVector{4, T}}) where T
+function perturbationevolution(R::Vector{SVector{4, T}}) where T
     Δ = Vector{SVector{4,T}}(undef, length(R))
     Δ[1] = R[1]
     @inbounds for i in 2:length(R)
@@ -391,3 +391,5 @@ function pertubationevolution(R::Vector{SVector{4, T}}) where T
     end
     return Δ
 end
+
+@deprecate pertubationevolution perturbationevolution

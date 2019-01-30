@@ -70,7 +70,7 @@ using DynamicalBilliards, PyPlot, LinearAlgebra
 bd = billiard_sinai()
 
 ts, Rs, is = perturbationgrowth(Particle(0.1, 0.1, 0.1), bd, 10.0)
-Δ = pertubationevolution(Rs)
+Δ = perturbationevolution(Rs)
 
 figure()
 plot(ts, log.(norm.(Δ)), "k-", lw = 0.5)
