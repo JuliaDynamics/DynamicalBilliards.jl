@@ -43,13 +43,13 @@ billiards_testset("Lyapunov spectrum for small B",
                   identity; caller=test_lyapunov_magnetic_limit)
 
 function test_lyapunov_values(args...)
-    t = 5000.0
+    t = 20000.0
     radius = 1.0
 
     spaces = [2.0, 2.5, 3.0, 3.5, 4.0 ]
     # based on Gaspard et al (see docs) & DynamicalBilliards v2.5
     expected_values = [3.6, 1.4, 0.8, 0.6, 0.5]
-    error_level = 0.1
+    error_level = 0.2
 
     for (i, space) in enumerate(spaces)
         bd = billiard_polygon(6, space/(sqrt(3)); setting = "periodic")
