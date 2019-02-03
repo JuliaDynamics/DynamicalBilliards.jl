@@ -3,7 +3,7 @@ using DynamicalBilliards
 using Documenter, PyPlot, DocumenterMarkdown
 
 ioff()
-makedocs(modules=[DynamicalBilliards], doctest=false, root = @__DIR__, format = Markdown())
+makedocs(modules=[DynamicalBilliards], doctest=false, root = @__DIR__, format = DocumenterMarkdown.Markdown())
 close("all")
 
 if !Sys.iswindows()
