@@ -67,7 +67,7 @@ colors = cs, disable_axis = true)
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/DynamicalBilliards_v3.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/DynamicalBilliards_v3.mp4?raw=true" type="video/mp4">
 </video>
 
 ## Mean Free Path of the Lorentz Gas
@@ -83,7 +83,7 @@ The result is very close to the analytic result:
 which you can find for example [here](http://www.cmls.polytechnique.fr/perso/golse/Surveys/FGIcmp03.pdf).
 
 ## Semi-Periodic Billiard
-`DynamicalBilliards.jl` allows for your system to be periodic in only some specific
+`DynamicalBilliards` allows for your system to be periodic in only some specific
 directions. For example, the following code produces a billiard that is periodic
 in only the x-direction:
 

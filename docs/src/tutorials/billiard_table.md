@@ -26,7 +26,7 @@ For the example of this page, we will create a hexagonal billiard with a disk in
 The first step is to define the six walls of the billiard table.
 An [`InfiniteWall`](@ref) object needs to be supplemented with a start point, an end point, a normal vector and, optionally, a name.
 
-The vertex points of a regular hexagon of radius `r` are given by the formula:
+The vertex points of a regular hexagon of radius ``r`` are given by the formula:
 ```math
 (x,y) = \left( r\cos\left(\frac{2\pi i}{6}\right), r\cos\left(\frac{2\pi i}{6}\right) \right)\,, \quad \text{for i $\in$ \{1,...,6\}}
 ```
@@ -55,7 +55,7 @@ The `normal` vector of a `Wall` obstacle is necessary to be supplemented by the 
 
 
 !!! note "There is no glue."
-    In `DynamicalBilliards` there is no "glue" that combines particles or "sticks" them together, ensuring that the billiard is closed. You only have to take care that their ends meet geometrically. Even obstacle overlapping is allowed, if you want to be on the safe side!
+    In `DynamicalBilliards` there is no "glue" that combines obstacles or "sticks" them together, ensuring that the billiard is closed. You only have to take care that their ends meet geometrically. Even obstacle overlapping is allowed, if you want to be on the safe side!
 
 We add a disk by specifying a center and radius (and optionally a name):
 ```@example tut1

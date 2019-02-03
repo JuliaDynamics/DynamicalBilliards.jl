@@ -100,7 +100,7 @@ red obstacles, which allow for ray splitting. It is even cooler to animate
 this motion using [`animate_evolution`](@ref)!
 
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/ray.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/ray.mp4?raw=true" type="video/mp4">
 </video>
 
 
@@ -196,7 +196,7 @@ animate_evolution(ps, bd, 2.0, rs, colors = ["C0" for i ∈ 1:length(ps)],
 	tailtime=2.5, savename = "lens")
 ```
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/lens.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/lens.mp4?raw=true" type="video/mp4">
 </video>
 
 
@@ -232,5 +232,5 @@ animate_evolution(p, bd, 10.0, (ray,); ax = gca(), savename = "inverse", tailtim
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/inverse.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/inverse.mp4?raw=true" type="video/mp4">
 </video>

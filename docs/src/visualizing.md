@@ -91,7 +91,7 @@ animate_evolution(p, bd, 10.0; savename = "penta")
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/penta.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/penta.mp4?raw=true" type="video/mp4">
 </video>
 
 The cool thing about [`animate_evolution`](@ref) is that it can animate multiple
@@ -107,7 +107,7 @@ animate_evolution(ps, bd, 10.0; colors = cs, tailtime = 1.5, savename = "dispers
 ```
 
 <video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/disperse.mp4?raw=true" type="video/mp4">
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/disperse.mp4?raw=true" type="video/mp4">
 </video>
 
 
