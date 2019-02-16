@@ -53,19 +53,6 @@ include("parallel.jl")
 
 include("testing.jl")
 
-##########################################
-# Test Options                           #
-##########################################
-"""
-    test_options(;print_info = false, long_tests = false)
-Set if you want the long version of the tests and if you want information to be
-printed during testing.
-"""
-function test_options(;print_info::Bool = true, long_tests::Bool = true)
-    ENV["DYNAMICALBILLIARDS_PRINTTEST"] = print_info
-    ENV["DYNAMICALBILLIARDS_LONGTEST"] = long_tests
-end
-
 ####################################################
 # Plotting Routines (loaded when `Using PyPlot`)   #
 ####################################################
