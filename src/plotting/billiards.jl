@@ -10,7 +10,7 @@ function nonperiodic(bd::Billiard)
 end
 
 periodicerror() = throw(ArgumentError(
-"The billiard must be periodic, i.e. has at least two `PeriodicWall` obstacles"
+"The billiard must be periodic, i.e. has at least two `PeriodicWall` obstacles."
 ))
 
 
@@ -64,7 +64,8 @@ function plot(bd::Billiard, xmin, ymin, xmax, ymax;
         "function `billiard_polygon(6, r, R, setting = \"periodic\")`."))
         plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
     else
-        n ∉ (2, 4) && throw(ArgumentError("Rectangular periodic billiards must have "*
+        n ∉ (2, 4) && throw(ArgumentError(
+        "Rectangular periodic billiards must have "*
         "exactly 2 or 4 periodic walls."))
         plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
     end
@@ -89,8 +90,8 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
 
     if plot_orbit
         PyPlot.sca(ax)
-        ax.scatter(xt[1], yt[1], color = "black", zorder = 99)
-        ax.plot(xt, yt, color = orbit_color, zorder = 1)
+        ax[:scatter](xt[1], yt[1], color = "black", zorder = 99)
+        ax[:plot](xt, yt, color = orbit_color, zorder = 1)
     end
 
     cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
