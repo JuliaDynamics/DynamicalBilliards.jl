@@ -17,7 +17,7 @@ end
 
 function plot_particle(x,y,vx,vy; ax = PyPlot.gca(), c = "k", kwargs...)
     # Plot position:
-    s1 = ax[:scatter](x, y; color=c, s= 20.0, kwargs..., zorder = 99)
+    s1 = ax[:scatter](x, y; color=c, s = 20.0, kwargs..., zorder = 99)
     # Plot velocity:
     q1 = ax[:quiver](x, y, 0.04vx, 0.04vy; angles = "xy", scale = 1, width = 0.004, color=c, zorder = 99)
 

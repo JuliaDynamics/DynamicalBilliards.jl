@@ -90,7 +90,7 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
 
     if plot_orbit
         PyPlot.sca(ax)
-        ax[:scatter](xt[1], yt[1], color = "black", zorder = 99)
+        ax[:scatter](xt[1], yt[1], color = "gray", s = 20.0, zorder = 99)
         ax[:plot](xt, yt, color = orbit_color, zorder = 1)
     end
 
