@@ -9,6 +9,9 @@ dynamical billiards in two dimensions.
 !!! tip "Julia Billiard logo animation"
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
     the logo of our package!
+!!! tip "Julia Billiard logo animation"
+    Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
+    the logo of our package!
 
 
 ## About Billiards
@@ -49,8 +52,7 @@ This package does not support finite-sized particles and, as a result, there is 
 
 We have created a [Jupyter notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) that showcases how easy it is to simulate a dynamical billiard using Julia. This [notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) is an educative example of both using Multiple Dispatch and of how the internal code of `DynamicalBilliards` works. It also highlights the extendibility of the core code.
 
-If you are interested in learning idiomatic Julia code and understanding the source code of our package, we highly recommend taking a look at this [notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb).
-
+Besides a Jupyter notebook, this tutorial is also available as an interactive article in the new platform NextJournal [here](https://nextjournal.com/julia/billiard).
 
 
 ## Citing
