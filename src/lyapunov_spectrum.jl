@@ -223,10 +223,10 @@ end
 ################################################################################
 ## HIGH-LEVEL FUNCTION
 ################################################################################
-function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt;
+function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, t;
                            warning::Bool = false) where {T<:AbstractFloat}
 
-    if tt ≤ 0.0
+    if t ≤ 0.0
         throw(ArgumentError(
             "`lyapunovspectrum()` cannot evolve backwards in time."))
     end
@@ -236,8 +236,8 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt;
               SVector{4, T}(0,0,1,0), SVector{4, T}(0,0,0,1)]
     λ = zeros(T, 4)
 
-    t = T(tt)
-    count = zero(T)
+    timecount = zero(T)
+    count = zero(t)
 
     # check for pinning before evolution
     if ispinned(p, bd)
@@ -252,6 +252,8 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt;
         i::Int, tmin::T, cp::SV{T} = next_collision(p, bd)
         relocate!(p, bd[i], tmin, cp, offset)
         resolvecollision!(p, bd[i], offset)
+
+        timecount += tmin
         count += increment_counter(t, tmin)
 
         # update cyclotron data
@@ -265,16 +267,17 @@ function lyapunovspectrum!(p::AbstractParticle{T}, bd::Billiard{T}, tt;
             λ[i] += log(abs(R[i,i]))
         end
 
-
     end#time loop
 
-    return λ./count
+    return λ./timecount
 end
 
 """
     lyapunovspectrum([p::AbstractParticle,] bd::Billiard, t)
 Returns the finite time lyapunov exponents (averaged over time `t`)
 for a given particle in a billiard table using the method outlined in [1].
+`t` can be either `Float` or `Int`, meaning total time or total amount
+of collisions.
 
 Returns zeros for pinned particles.
 
