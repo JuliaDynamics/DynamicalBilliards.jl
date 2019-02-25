@@ -1,3 +1,6 @@
+# 3.4
+* Lyapunov computation and perturbation growth can now accept integer time (which means amount of collisions).
+
 # 3.3
 * Replaced all instances of `pertubation` with `perturbation`. A deprecation is thrown.
 
