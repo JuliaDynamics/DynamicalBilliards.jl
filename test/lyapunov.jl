@@ -97,6 +97,25 @@ function test_perturbationgrowth(p, bd)
 
     λ_estimate = actual/t[i]
     @test abs(λ[1] - λ_estimate) < error_level
+
+    nmax = 200
+    error_level = 1e-1
+
+    t, R, o = perturbationgrowth(p, bd, nmax)
+    λ = lyapunovspectrum(p, bd, nmax)
+    Δ = perturbationevolution(R)
+
+    @test length(t) == 2*nmax
+
+    norms = log.(norm.(Δ))
+    actual = norms[end]; i = length(norms) - 1
+    while isinf(actual)
+        actual = norms[i]
+        i -= 1
+    end
+
+    λ_estimate = actual/t[i]
+    @test abs(λ[1] - λ_estimate) < error_level
 end
 
 billiards_testset("Compare Lyapunovs and perturbation growth",
