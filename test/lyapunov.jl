@@ -18,7 +18,7 @@ function test_lyapunov_spectrum(p, bd, t = 1e6, error_level = 1e-3)
         @test abs(exps[3]) < error_level
     end
 
-    exps = lyapunovspectrum!(p, bd, 5000)
+    exps = lyapunovspectrum!(p, bd, 10000)
     sumpair = exps[1] + exps[4]
 
     # these properties should be true for all billiards
@@ -98,7 +98,7 @@ function test_perturbationgrowth(p, bd)
     λ_estimate = actual/t[i]
     @test abs(λ[1] - λ_estimate) < error_level
 
-    nmax = 200
+    nmax = 500
     error_level = 1e-1
 
     t, R, o = perturbationgrowth(p, bd, nmax)
