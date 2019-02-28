@@ -9,9 +9,6 @@ dynamical billiards in two dimensions.
 !!! tip "Julia Billiard logo animation"
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
     the logo of our package!
-!!! tip "Julia Billiard logo animation"
-    Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
-    the logo of our package!
 
 
 ## About Billiards
