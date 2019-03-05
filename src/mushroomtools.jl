@@ -50,6 +50,7 @@ parameterized by `(l,w,r)`.
 """
 V_3D_tot(l,w,r) = 2π*(l*w + (1/2)*π*r^2)
 V_3D_reg(l,w,r) = 2π*r^2*(acos(w/(2r)) - w/(2r)*sqrt(1 - (w^2)/(4r^2)))
+V_3D_cha(l,w,r) = V_3D_tot(l,w,r) - V_3D_reg(l,w,r)
 
 """
     g_r_3D(l, w, r)
