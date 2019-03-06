@@ -28,6 +28,19 @@ end
 
 billiards_testset("No escape", test_no_escape; caller = ergodic_tests)
 
+function test_visited_obstacles(p, bd, N = 50)
+
+    ts, obst = visited_obstacles(p, bd, N)
+    cts, = evolve(p, bd, N)
+
+    @test length(ts) == length(cts)
+    cc = cumsum(cts)
+    for i in eachindex(cc)
+        @test cc[i] ≈ ts[i]  atol = 1e-12
+    end
+end
+billiards_testset("Visited obstacles", test_visited_obstacles; caller = ergodic_tests)
+
 
 
 function test_movin_periodic(p, bd, N = 1e3)
