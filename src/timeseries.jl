@@ -121,8 +121,9 @@ Evolve the given particle `p` inside the billiard `bd` exactly like
 * `obst::Vector{Int}` : Vector of obstacle indices in `bd` that the particle
   collided with at the time points in `ts`.
 
-The function starts counting time _after_ the first collision.
-The function records collisions with periodic walls.
+The first entries are `0.0` and `0`.
+Similarly with [`evolve!`](@ref) the function does not
+record collisions with periodic walls.
 
 Currently does not support raysplitting. Returns empty arrays
 for pinned particles.
@@ -137,9 +138,7 @@ function visited_obstacles!(
         return T[], Int[]
     end
 
-    i, tmin, = bounce!(p, bd)
-
-    ts = T[0.0]; obst = Int[i]
+    ts = T[0.0]; obst = Int[0]
 
     count = zero(t); t_to_write = zero(T)
     if typeof(t) == Int
@@ -151,9 +150,13 @@ function visited_obstacles!(
     while count < t
         i, tmin, pos, vel = bounce!(p, bd)
         t_to_write += tmin
-
-        count += increment_counter(t, tmin)
-        push!(ts, t_to_write); push!(obst, i)
+        if isperiodic(i, bd)
+            continue
+        else
+            count += increment_counter(t, tmin)
+            push!(ts, t_to_write + ts[end]); push!(obst, i)
+            t_to_write = zero(T)
+        end
     end#time, or collision number, loop
     return ts, obst
 end
