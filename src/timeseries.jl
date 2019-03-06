@@ -1,6 +1,7 @@
 # This file must be loaded _after_ raysplitting
 
 export evolve!, evolve, timeseries!, timeseries
+export visited_obstacles, visited_obstacles!
 
 """
     evolve!([p::AbstractParticle,] bd::Billiard, t)
@@ -101,7 +102,61 @@ evolve(p::AbstractParticle, args...) = evolve!(copy(p), args...)
 evolve(bd::Billiard, args...; kwargs...) =
     evolve!(randominside(bd), bd, args...; kwargs...)
 
+"""
+    visited_obstacles(p, args...)
+Same as [`visited_obstacles!`](@ref) but copies the particle instead.
+"""
+visited_obstacles(p::AbstractParticle, args...) =
+    visited_obstacles!(copy(p), args...)
+visited_obstacles(bd::Billiard, args...; kwargs...) =
+    visited_obstacles!(randominside(bd), bd, args...; kwargs...)
 
+
+"""
+    visited_obstacles!([p::AbstractParticle,] bd::Billiard, t)
+Evolve the given particle `p` inside the billiard `bd` exactly like
+[`evolve!`](@ref). However return only:
+
+* `ts::Vector{T}` : Vector of time points of when each collision occured.
+* `obst::Vector{Int}` : Vector of obstacle indices in `bd` that the particle
+  collided with at the time points in `ts`.
+
+The function starts counting time _after_ the first collision.
+The function records collisions with periodic walls.
+
+Currently does not support raysplitting. Returns empty arrays
+for pinned particles.
+"""
+function visited_obstacles!(
+    p::AbstractParticle{T}, bd::Billiard{T}, t) where {T<:AbstractFloat}
+
+    if t ≤ 0
+        throw(ArgumentError("cannot evolve backwards in time."))
+    end
+    if ispinned(p, bd)
+        return T[], Int[]
+    end
+
+    i, tmin, = bounce!(p, bd)
+
+    ts = T[0.0]; obst = Int[i]
+
+    count = zero(t); t_to_write = zero(T)
+    if typeof(t) == Int
+        for zzz in (ts, obst)
+            sizehint!(zzz, t)
+        end
+    end
+
+    while count < t
+        i, tmin, pos, vel = bounce!(p, bd)
+        t_to_write += tmin
+
+        count += increment_counter(t, tmin)
+        push!(ts, t_to_write); push!(obst, i)
+    end#time, or collision number, loop
+    return ts, obst
+end
 
 #####################################################################################
 # Timeseries

@@ -75,6 +75,7 @@ parameterized by `(l,w,r)`.
 """
 V_2D_tot(l, w, r) = 2(π*r + 2r + 2l)
 V_2D_reg(l, w, r) = 2π*r*(1 - w/2r) + 2sqrt(4r*r - w*w) -2w*acos(w/2r)
+V_2D_cha(l,w,r) = V_2D_tot(l,w,r) - V_2D_reg(l,w,r)
 
 """
     g_r_2D(l, w, r)

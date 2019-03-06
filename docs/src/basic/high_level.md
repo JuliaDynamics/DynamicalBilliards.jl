@@ -127,10 +127,13 @@ xt, yt, vxt, vyt, t = timeseries(mp, bd, 100)
 hcat(xt, yt, vxt, vyt, t)[1:5, :]
 ```
 
+Sometimes we may need information about which obstacles a particle visited, in which sequence, and when. For this we have the following function:
+```@docs
+visited_obstacles!
+```
 
 !!! note "Type of `t`"
-    Remember that the behavior of `evolve!` depends on the type of the third argument,
-    which represents "total amount". If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total number of collisions.
+    Remember that the behavior of time evolution depends on the type of the `t` argument, which represents "total amount". If it is `AbstractFloat`, it represents total amount of time, but if it is `Int` it represents total number of collisions.
 
 
 

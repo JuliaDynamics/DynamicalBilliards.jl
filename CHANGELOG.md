@@ -1,3 +1,7 @@
+# 3.5
+* New function `visited_obstacles!`.
+* 2D and 3D chaotic phase space volumes now in `MushroomTools`.
+
 # 3.4
 * Lyapunov computation and perturbation growth can now accept integer time (which means amount of collisions).
 
