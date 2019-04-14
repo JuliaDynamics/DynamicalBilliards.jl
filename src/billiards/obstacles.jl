@@ -424,7 +424,7 @@ function normalvec(l::PolarCurve{T}, pos) where {T}
     e_ρ = SV(co, si); e_φ = SV(-si, co)
     w = l.w(φ)
     t = ρ*e_φ + w*e_ρ # tangential vector
-    return SV(-t[2], t[1]) # rotate 90ᵒ
+    return SV(-t[2], t[1]) # rotate 90ᵒ. Looks towards inside of curve
 end
 #######################################################################################
 ## Distances
@@ -499,6 +499,12 @@ function distance(pos::SV, e::Ellipse{T})::T where {T}
     e.pflag ? d : -d
 end
 
+function distance(pos::SV, l::PolarCurve)
+    z = pos - l.c
+    φ = atan(z[2], z[1])
+    return norm(z) - l.ρ(φ)
+end
+
 # The entire functionality of `distance_init` is necessary only for
 # FiniteWall !!!
 distance_init(p::AbstractParticle, a::Obstacle) = distance_init(p.pos, a)
@@ -566,9 +572,25 @@ function cellsize(e::Ellipse{T}) where {T}
     return xmin, ymin, xmax, ymax
 end
 
-function cellsize(a::Semicircle{T}) where {T}
+function cellsize(a::Semicircle)
     xmin, ymin = a.c - a.r
     xmax, ymax = a.c + a.r
+    return xmin, ymin, xmax, ymax
+end
+
+function cellsize(l::PolarCurve{T}) where {T}
+    xmin = ymin = T(Inf)
+    xmax = ymax = T(-Inf)
+    φs = 0:0.01:2π
+    for φ in φs
+        r = l.ρ(φ); si, co = sincos(φ)
+        xmin > r*co && (xmin = r*co)
+        xmax < r*co && (xmax = r*co)
+        ymin > r*si && (ymin = r*si)
+        ymax < r*si && (ymax = r*si)
+    end
+    xmin += l.c[1]; xmax += l.c[1]
+    ymin += l.c[2]; ymax += l.c[2]
     return xmin, ymin, xmax, ymax
 end
 
@@ -592,3 +614,4 @@ for T in subtypes(Wall)
 end
 
 translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b)
+translate(l::PolarCurve, vec) = PolarCurve(l.c + vec, l.ρ, l.w)

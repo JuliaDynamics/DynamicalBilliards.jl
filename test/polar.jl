@@ -1,5 +1,5 @@
 using DynamicalBilliards, PyPlot
-using DynamicalBilliards: normalvec, cossin
+using DynamicalBilliards: normalvec, cossin, cellsize
 
 # superellipse curve
 function superellipse(a, b, n)
