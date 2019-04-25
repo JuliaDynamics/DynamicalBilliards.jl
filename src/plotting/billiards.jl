@@ -41,7 +41,7 @@ function plot(bd::Billiard{T};
     for obst in bd; plot(obst); end
     xmin, ymin, xmax, ymax = cellsize(bd)
     dx = xmax - xmin; dy = ymax - ymin
-    ax[:set_aspect]("equal")
+    ax.set_aspect("equal")
     if !isinf(xmin) && !isinf(xmax)
         PyPlot.xlim(xmin - 0.1dx, xmax + 0.1dx)
     end
@@ -90,8 +90,8 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
 
     if plot_orbit
         PyPlot.sca(ax)
-        ax[:scatter](xt[1], yt[1], color = "gray", s = 20.0, zorder = 99)
-        ax[:plot](xt, yt, color = orbit_color, zorder = 1)
+        ax.scatter(xt[1], yt[1], color = "gray", s = 20.0, zorder = 99)
+        ax.plot(xt, yt, color = orbit_color, zorder = 1)
     end
 
     cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)
@@ -102,7 +102,7 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
         if hexagonal
             PyPlot.xlim(xmin - dcx/2, xmax + dcx/2)
             PyPlot.ylim(ymin - dcy/2, ymax + dcy/2)
-            PyPlot.gca()[:set_aspect]("equal")
+            PyPlot.gca().set_aspect("equal")
         else
             rr = xmin < 0 ? (div(xmin, dcx)-1) : (div(xmin, dcx))
             ll = ymin < 0 ? (div(ymin, dcy)-1) : (div(ymin, dcy))
@@ -111,7 +111,7 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
             cellxmin + (div(xmax, dcx)+1)*dcx)
             PyPlot.ylim(cellymin + ll*dcy,
             cellymin + (div(ymax, dcy)+1)*dcy)
-            PyPlot.gca()[:set_aspect]("equal")
+            PyPlot.gca()set_aspect("equal")
         end
     end
     return nothing
@@ -152,7 +152,7 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
     PyPlot.xlim(xmin - space/2, xmax + space/2)
     PyPlot.ylim(ymin, ymax)
-    PyPlot.gca()[:set_aspect]("equal")
+    PyPlot.gca()set_aspect("equal")
 
     # Cell limits:
     cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)

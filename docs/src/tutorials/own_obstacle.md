@@ -206,10 +206,10 @@ function plot(d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = DynamicalBilliards.obcolor(d)
-    s1 = PyPlot.matplotlib[:patches][:Arc](
+    s1 = PyPlot.matplotlib.patches.Arc(
         d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
         lw = 2.0, kwargs...)
-    PyPlot.gca()[:add_artist](s1)
+    PyPlot.gca().add_artist(s1)
     PyPlot.show()
 end
 ```

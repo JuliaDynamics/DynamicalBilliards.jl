@@ -28,7 +28,7 @@ function plot_boundarymap(bmap, intervals;
         c = typeof(color) <: AbstractVector ? color[1] : color
         ξs = [b[1] for b in bmap]; sφs = [b[2] for b in bmap]
 
-        ax[:plot](ξs, sφs; marker="o", color = c,
+        ax.plot(ξs, sφs; marker="o", color = c,
         linestyle="None", ms = ms, kwargs...)
     else
         for (i, bmapp) in enumerate(bmap)
@@ -36,7 +36,7 @@ function plot_boundarymap(bmap, intervals;
 
             c = typeof(color) <: AbstractVector ? color[i] : color
 
-            ax[:plot](ξs, sφs; marker="o", color = c,
+            ax.plot(ξs, sφs; marker="o", color = c,
             linestyle="None", ms = ms, kwargs...)
         end
     end
@@ -45,36 +45,36 @@ function plot_boundarymap(bmap, intervals;
     xmax = 0.0
     for intv ∈ intervals
         for xval ∈ intv
-            ax[:plot]([xval,xval], [-1, 1], linewidth = 1.5, color = bordercolor,
+            ax.plot]([xval,xval], [-1, 1, linewidth = 1.5, color = bordercolor,
             alpha = 0.5)
             xmax = (xval > xmax) ? xval : xmax
         end
     end
-    ax[:set_xlim](0,xmax)
-    ax[:set_ylim](-1,1)
-    ax[:set_xlabel]("\$\\xi\$")
-    ax[:set_ylabel]("\$\\sin(\\phi_n)\$")
+    ax.set_xlim(0,xmax)
+    ax.set_ylim(-1,1)
+    ax.set_xlabel("\$\\xi\$")
+    ax.set_ylabel("\$\\sin(\\phi_n)\$")
 
     #number obstacles by index
     if obstacleindices
         #introduce twin axis
-        ax2 = ax[:twiny]()
+        ax2 = ax.twiny()
 
         #non-labelled major tics at every obstacle border
-        ax2[:xaxis][:set_major_formatter](PyPlot.matplotlib[:ticker][:NullFormatter]())
-        ax2[:set_xticks](intervals)
+        ax2.xaxis.set_major_formatter(PyPlot.matplotlib.ticker.NullFormatter())
+        ax2.set_xticks(intervals)
 
         #zero-length minor tics in between borders, labelled with the obstacle index
-        ax2[:xaxis][:set_minor_locator](PyPlot.matplotlib[:ticker][:FixedLocator](
+        ax2.xaxis.set_minor_locator(PyPlot.matplotlib.ticker.FixedLocator(
             [(intervals[i] + intervals[i+1])/2 for i in 1:length(intervals)-1]
         ))
 
-        ax2[:xaxis][:set_minor_formatter](
-            PyPlot.matplotlib[:ticker][:FixedFormatter](map(x->string(x),1:length(intervals)))
+        ax2.xaxis.set_minor_formatter(
+            PyPlot.matplotlib.ticker.FixedFormatter(map(x->string(x),1:length(intervals)))
         )
 
-        ax2[:tick_params](axis="x", which="minor", length=0)
-        ax2[:set_xlabel]("obstacle index")
+        ax2.tick_params(axis="x", which="minor", length=0)
+        ax2.set_xlabel("obstacle index")
 
         return (ax, ax2)
     end
@@ -109,7 +109,7 @@ function plot_boundarymap_portion(d, δξ, δφ = δξ;
     ξs = repmat(δξ.*(0:ξmax-1), 1, φmax)
     φs = repmat((δφ.*(0:1:φmax-1) .- 1)',ξmax, 1)
 
-    plot = ax[:pcolormesh](ξs, φs, data; kwargs...)
+    plot = ax.pcolormesh(ξs, φs, data; kwargs...)
 
     cb && PyPlot.colorbar(plot)
     return ax

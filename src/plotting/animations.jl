@@ -14,22 +14,22 @@ function setup_animation(p::AbstractParticle, bd:: Billiard, t::AbstractFloat,
     # initial plot
     point, arrow = plot_particle(x[1], y[1], vx[1], vy[1]; ax = ax, zorder = 20,
                                  particle_kwargs...)
-    tail, = ax[:plot](x[1:2], y[1:2], zorder = 1, color = tailcolor; tail_kwargs...)
+    tail, = ax.plot(x[1:2], y[1:2], zorder = 1, color = tailcolor; tail_kwargs...)
 
     # frame counter
     count = 2
 
     function plot_frame()
         # replot point
-        point[:remove]()
+        point.remove()
         # replot arrow
-        arrow[:remove]()
+        arrow.remove()
 
         point, arrow = plot_particle(x[count], y[count], vx[count], vy[count];
                                      ax = ax, zorder = 20, particle_kwargs...)
         # set tail data
-        @views tail[:set_xdata](x[clamp(count-taillength, 1, count):count])
-        @views tail[:set_ydata](y[clamp(count-taillength, 1, count):count])
+        @views tail.set_xdata(x[clamp(count-taillength, 1, count):count])
+        @views tail.set_ydata(y[clamp(count-taillength, 1, count):count])
 
         # increment frame counter
         count += 1
@@ -92,7 +92,7 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            resetting = reset_billiard!
                            ) where {T}
 
-    disable_axis && ax[:axis]("off")
+    disable_axis && ax.axis("off")
     nps = length(ps)
     taillength = round(Int, tailtime/dt)
     savename != nothing && (colnumbers = Int[])

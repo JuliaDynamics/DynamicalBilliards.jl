@@ -24,19 +24,19 @@ function plot(d::Obstacle) end
 function plot(d::Circular; kwargs...)
     edgecolor = obcolor(d)
     facecolor = (edgecolor..., obalpha(d))
-    circle1 = PyPlot.plt[:Circle](d.c, d.r;
+    circle1 = PyPlot.plt.Circle(d.c, d.r;
         edgecolor = edgecolor, facecolor = facecolor,
         linestyle = obls(d), lw = 2.0, kwargs...)
-    PyPlot.gca()[:add_artist](circle1)
+    PyPlot.gca().add_artist(circle1)
 end
 
 function plot(d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = obcolor(d)
-    s1 = PyPlot.matplotlib[:patches][:Arc](d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
+    s1 = PyPlot.matplotlib.patches.Arc(d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
     lw = 2.0, kwargs...)
-    PyPlot.gca()[:add_artist](s1)
+    PyPlot.gca().add_artist(s1)
 end
 
 function plot(w::Wall; kwargs...)
@@ -55,8 +55,8 @@ end
 function plot(e::Ellipse; kwargs...)
     edgecolor = obcolor(e)
     facecolor = (edgecolor..., obalpha(e))
-    ellipse = PyPlot.matplotlib[:patches][:Ellipse](e.c, 2e.a, 2e.b;
+    ellipse = PyPlot.matplotlib.patches][:Ellipse(e.c, 2e.a, 2e.b;
         edgecolor = edgecolor, facecolor = facecolor,
         linestyle = obls(e), lw = 2.0, kwargs...)
-    PyPlot.gca()[:add_artist](ellipse)
+    PyPlot.gca().add_artist(ellipse)
 end
