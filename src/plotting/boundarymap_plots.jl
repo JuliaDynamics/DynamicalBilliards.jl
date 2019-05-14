@@ -45,7 +45,7 @@ function plot_boundarymap(bmap, intervals;
     xmax = 0.0
     for intv ∈ intervals
         for xval ∈ intv
-            ax.plot]([xval,xval], [-1, 1, linewidth = 1.5, color = bordercolor,
+            ax.plot([xval,xval], [-1, 1], linewidth = 1.5, color = bordercolor,
             alpha = 0.5)
             xmax = (xval > xmax) ? xval : xmax
         end

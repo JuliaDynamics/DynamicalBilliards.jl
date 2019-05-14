@@ -55,7 +55,7 @@ end
 function plot(e::Ellipse; kwargs...)
     edgecolor = obcolor(e)
     facecolor = (edgecolor..., obalpha(e))
-    ellipse = PyPlot.matplotlib.patches][:Ellipse(e.c, 2e.a, 2e.b;
+    ellipse = PyPlot.matplotlib.patches.Ellipse(e.c, 2e.a, 2e.b;
         edgecolor = edgecolor, facecolor = facecolor,
         linestyle = obls(e), lw = 2.0, kwargs...)
     PyPlot.gca().add_artist(ellipse)
