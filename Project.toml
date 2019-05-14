@@ -4,10 +4,13 @@ repo = "https://github.com/JuliaDynamics/DynamicalBilliards.jl.git"
 version = "3.5.4"
 
 [deps]
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Elliptic = "b305315f-e792-5b7a-8f41-49f472929428"
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Elliptic = "≥ 0.5.0"
