@@ -11,14 +11,8 @@ module DynamicalBilliards
 
 using LinearAlgebra
 using StaticArrays
-import Base: show, eltype, getindex
-
 using Elliptic
-using MuladdMacro
-# The @muladd macro turns all expressions of the type
-# a = b*c ± d
-# to a call to `muladd`
-# This can increase performance in some cases.
+import Base: show, eltype, getindex
 
 const SV = SVector{2}
 export SVector

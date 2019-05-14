@@ -29,7 +29,7 @@ collision happens backwards in time.
 **It is the duty of `collision` to avoid incorrect collisions when the particle is
 on top of the obstacle (or very close).**
 """
-@muladd function collision(p::Particle{T}, w::Wall{T}) where {T}
+function collision(p::Particle{T}, w::Wall{T}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     if denom ≥ 0.0
@@ -58,7 +58,7 @@ function collision(p::Particle{T}, w::FiniteWall{T}) where {T}
     end
 end
 
-@muladd function collision(p::Particle{T}, d::Circular{T}) where {T}
+function collision(p::Particle{T}, d::Circular{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     dotp ≥ 0.0 && return nocollision(T)
@@ -76,7 +76,7 @@ end
     return t, p.pos + t * p.vel
 end
 
-@muladd function collision(p::Particle{T}, d::Antidot{T}) where {T}
+function collision(p::Particle{T}, d::Antidot{T}) where {T}
 
     dotp = dot(p.vel, normalvec(d, p.pos))
     if d.pflag == true
@@ -102,7 +102,7 @@ end
     t ≤ 0.0 ? nocollision(T) : (t, p.pos + t * p.vel)
 end
 
-@muladd function collision(p::Particle{T}, d::Semicircle{T}) where {T}
+function collision(p::Particle{T}, d::Semicircle{T}) where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
@@ -133,7 +133,7 @@ end
 end
 
 
-@muladd function collision(p::Particle{T}, e::Ellipse{T}) where {T}
+function collision(p::Particle{T}, e::Ellipse{T}) where {T}
     # First check if particle is "looking at" eclipse if it is outside
     if e.pflag
         # These lines may be "not accurate enough" but so far all is good
@@ -182,7 +182,7 @@ end
 #######################################################################################
 ## Magnetic particle
 #######################################################################################
-@muladd function collision(p::MagneticParticle{T}, w::Wall{T}) where {T}
+function collision(p::MagneticParticle{T}, w::Wall{T}) where {T}
     ω = p.omega
     pc, pr = cyclotron(p)
     P0 = p.pos
@@ -216,7 +216,7 @@ end
     return θ*pr, I
 end
 
-@muladd function collision(p::MagneticParticle{T}, o::Circular{T}) where {T}
+function collision(p::MagneticParticle{T}, o::Circular{T}) where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c

@@ -44,7 +44,7 @@ Check if it is on the correct side of the obstacle. If not,
 change the particle position by [`distance`](@ref) along the [`normalvec`](@ref)
 of the obstacle.
 """
-@muladd function relocate!(p::AbstractParticle{T},
+function relocate!(p::AbstractParticle{T},
     o::Obstacle{T}, tmin::T, cp::SV{T}) where {T}
 
     propagate!(p, cp, tmin) # propagate to collision point
@@ -77,7 +77,7 @@ particle should end up at.
 end
 @inline propagate!(p::Particle, newpos::SV, t::Real) = (p.pos = newpos)
 
-@inline @muladd function propagate!(p::MagneticParticle{T}, t::Real) where {T}
+@inline function propagate!(p::MagneticParticle{T}, t::Real) where {T}
     ω = p.omega; r = 1/ω
     φ0 = atan(p.vel[2], p.vel[1])
     sinωtφ, cosωtφ = sincos(ω*t + φ0)
@@ -85,7 +85,7 @@ end
     p.vel = SV{T}(cosωtφ, sinωtφ)
     return
 end
-@inline @muladd function propagate!(
+@inline function propagate!(
         p::MagneticParticle{T}, newpos::SV{T}, t) where {T}
     ω = p.omega; φ0 = atan(p.vel[2], p.vel[1])
     p.pos = newpos
