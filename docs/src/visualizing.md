@@ -73,8 +73,7 @@ The default plotting settings have been chosen for maximum clarity and consisten
 * Ray-splitting obstacles are red with dashed linestyle.
 * Periodicity enforcing obstacles are yellow with dotted linestyle
   (if and when plotted).
-* Doors (`InfiniteWall` with `isdoor=true`) are plotted with alternating black and
-  cyan dashed lines.
+* Doors (`FiniteWall` with `isdoor=true`) are plotted with alternating black and cyan dashed lines.
 
 ## Animating the motion of a particle
 

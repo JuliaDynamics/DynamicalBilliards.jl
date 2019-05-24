@@ -46,7 +46,7 @@ function plot(p::AbstractParticle{T}, cycl::Bool = false; use_cell=true, kwargs.
     kwargs = Dict(kwargs)
     # Set same color for arrow and point:
     if haskey(kwargs, :color)
-        c = kwargs.color
+        c = kwargs[:color]
     else
         c = (0,0,0)
     end

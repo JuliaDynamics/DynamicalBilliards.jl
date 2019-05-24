@@ -248,7 +248,7 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     capbotright = FiniteWall(
     uprightcorn, farright, SV(0, sw), false, "Cap bottom right")
 
-    cap = Semicircle([0.0, sl], cap_radious, [0.0, -1.0], "Mushroom cap")
+    cap = Semicircle([0.0, sl], cr, [0.0, -1.0], "Mushroom cap")
 
     return Billiard(stembot, stemright, capbotright, cap, capbotleft, stemleft)
 end
