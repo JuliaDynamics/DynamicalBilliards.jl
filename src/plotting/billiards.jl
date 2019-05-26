@@ -111,7 +111,7 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
             cellxmin + (div(xmax, dcx)+1)*dcx)
             PyPlot.ylim(cellymin + ll*dcy,
             cellymin + (div(ymax, dcy)+1)*dcy)
-            PyPlot.gca()set_aspect("equal")
+            PyPlot.gca().set_aspect("equal")
         end
     end
     return nothing
@@ -152,7 +152,7 @@ function plot_periodic_hexagon(bd, xmin, ymin, xmax, ymax)
 
     PyPlot.xlim(xmin - space/2, xmax + space/2)
     PyPlot.ylim(ymin, ymax)
-    PyPlot.gca()set_aspect("equal")
+    PyPlot.gca().set_aspect("equal")
 
     # Cell limits:
     cellxmin, cellymin, cellxmax, cellymax = cellsize(bd)

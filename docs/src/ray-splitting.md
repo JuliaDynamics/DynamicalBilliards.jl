@@ -117,6 +117,7 @@ this motion using [`animate_evolution`](@ref)!
 !!! important "Angle of refraction is clamped"
     Internally we clamp the output of the angle of refraction function. Let `c = DynamicalBilliards.CLAMPING_ANGLE` (currently `c = 0.1`). We clamp `θ` to
     `-π/2 + c ≤ θ ≤ π/2 - c`. This is so that the relocating algorithm does not fall into an infinite loop.
+		
 		You can change the value of `c` but very small values can lead to infinite loops in extreme cases.
 
 ## The Ray-Splitting Algorithm
