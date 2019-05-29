@@ -1,7 +1,7 @@
 name = "DynamicalBilliards"
 uuid = "4986ee89-4ee5-5cef-b6b8-e49ba721d7a5"
 repo = "https://github.com/JuliaDynamics/DynamicalBilliards.jl.git"
-version = "3.5.5"
+version = "3.5.6"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
