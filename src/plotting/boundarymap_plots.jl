@@ -97,8 +97,8 @@ and the histogram box size `δ`
 function plot_boundarymap_portion(d, δξ, δφ = δξ;
     ax = (PyPlot.figure(); PyPlot.gca()), cb::Bool = true,
                         transp::Bool = true, kwargs...)
-    ξmax = maximum(map(x->x[1], keys(d))) + 2
-    φmax = maximum(map(x->x[2], keys(d))) + 2
+    ξmax = maximum(x->x[1], keys(d)) + 2
+    φmax = maximum(x->x[2], keys(d)) + 2
 
     data = ones((ξmax, φmax)).* (transp ? NaN : 1)
 
@@ -106,8 +106,8 @@ function plot_boundarymap_portion(d, δξ, δφ = δξ;
         data[key[1] + 1, key[2] + 1] = val
     end
 
-    ξs = repmat(δξ.*(0:ξmax-1), 1, φmax)
-    φs = repmat((δφ.*(0:1:φmax-1) .- 1)',ξmax, 1)
+    ξs = repeat(δξ.*(0:ξmax-1), 1, φmax)
+    φs = repeat((δφ.*(0:1:φmax-1) .- 1)',ξmax, 1)
 
     plot = ax.pcolormesh(ξs, φs, data; kwargs...)
 
