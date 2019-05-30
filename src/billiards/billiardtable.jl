@@ -133,7 +133,7 @@ MagneticParticle(_randominside(bd)..., T(ω))
 
 
 
-@muladd function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
+function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
     #1. position
     xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bd)
 

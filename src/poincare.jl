@@ -105,7 +105,7 @@ psos(bd, plane, t, [randominside(bd, ω) for i=1:n])
 propagate_posvel(pos, p::Particle{T}, t) where {T} =
     (SV{T}(pos[1] + p.vel[1]*t, pos[2] + p.vel[2]*t), p.vel)
 
-@muladd function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
+function propagate_posvel(pos, p::MagneticParticle{T}, t) where {T}
     ω = p.omega
     φ0 = atan(p.vel[2], p.vel[1])
     s0, c0 = sincos(φ0)
