@@ -1,3 +1,6 @@
+# 3.6
+* Keyword `particle_Kwargs` of `animate_evolution` can now conveniently be `nothing`, in which case the particles are not plotted, only their trajectories.
+
 # 3.5
 * New function `visited_obstacles!`.
 * 2D and 3D chaotic phase space volumes now in `MushroomTools`.

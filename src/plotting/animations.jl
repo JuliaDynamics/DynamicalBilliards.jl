@@ -12,27 +12,30 @@ function setup_animation(p::AbstractParticle, bd:: Billiard, t::AbstractFloat,
     x,y,vx,vy = timeseries(p, bd, t, raysplitters, dt = dt)
 
     # initial plot
-    point, arrow = plot_particle(x[1], y[1], vx[1], vy[1]; ax = ax, zorder = 20,
-                                 particle_kwargs...)
+    if particle_kwargs != nothing
+        point, arrow = plot_particle(x[1], y[1], vx[1], vy[1]; ax = ax, zorder = 20,
+                                     particle_kwargs...)
+    end
+
     tail, = ax.plot(x[1:2], y[1:2], zorder = 1, color = tailcolor; tail_kwargs...)
 
     # frame counter
     count = 2
 
     function plot_frame()
-        # replot point
-        point.remove()
-        # replot arrow
-        arrow.remove()
-
-        point, arrow = plot_particle(x[count], y[count], vx[count], vy[count];
-                                     ax = ax, zorder = 20, particle_kwargs...)
+        if particle_kwargs != nothing
+            # replot arrow
+            arrow.remove()
+            # replot point
+            point.remove()
+            point, arrow = plot_particle(x[count], y[count], vx[count], vy[count];
+                                         ax = ax, zorder = 20, particle_kwargs...)
+        end
         # set tail data
         @views tail.set_xdata(x[clamp(count-taillength, 1, count):count])
         @views tail.set_ydata(y[clamp(count-taillength, 1, count):count])
 
-        # increment frame counter
-        count += 1
+        count += 1 # increment frame counter
     end
 
     function skip_frame()
@@ -57,7 +60,7 @@ total time `t` (always considered float). Optionally enable ray-splitting.
   * `tailtime = 1.0` : The length of the "tail" trailing the particle in time
     units.
   * `resetting = reset_billiard!` : function called after evolving each individual
-    particle in the billiard (so that ray-splitting doesn't brake).
+    particle in the billiard (so that ray-splitting doesn't break).
 ### Colors & plotting kwargs
   * `colors` : An array of valid Matplotlib colors for the "tails". If `colors`
     is shorter than `ps`, colors are reused. Defaults to the standard
@@ -122,7 +125,7 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
     for i ∈ 2:maxframe
         if (i-1)%frameskip == 0
             [pf() for pf in plotframes]
-            sleep(0.01)
+            sleep(0.0001) # this updates PyPlot live
             if savename != nothing
                 s = savename*"_$(j).png"
                 PyPlot.savefig(s, dpi = dpi)
@@ -136,8 +139,8 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
     end
 
     if savename != nothing
-        @assert mod(figsize[1]*dpi, 2) == 0
-        @assert mod(figsize[2]*dpi, 2) == 0
+        @assert mod(figsize[1]*dpi, 2) == 0 "figsize must be divisible by 2"
+        @assert mod(figsize[2]*dpi, 2) == 0 "figsize must be divisible by 2"
         anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
         -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
         run(anim)
