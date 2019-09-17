@@ -45,16 +45,10 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 This package does not support finite-sized particles and, as a result, there is also no support for collision between particles.
 
-## How to easily code a Billiard
-
-We have created a [Jupyter notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) that showcases how easy it is to simulate a dynamical billiard using Julia. This [notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) is an educative example of both using Multiple Dispatch and of how the internal code of `DynamicalBilliards` works. It also highlights the extendibility of the core code.
-
-Besides a Jupyter notebook, this tutorial is also available as an interactive article in the new platform NextJournal [here](https://nextjournal.com/julia/billiard).
-
-
 ## Citing
 If you have used this package for research that resulted in a publication, please be
-kind enough to cite the paper associated with `DynamicalBilliards`. The DOI is
+kind enough to cite the software paper associated with `DynamicalBilliards`.
+The DOI is
 https://doi.org/10.21105/joss.00458 and you can cite as:
 
 >G. Datseris, [The Journal of Open Source Software **2**, 458
@@ -76,6 +70,26 @@ or if you use BibTeX:
 }
 ```
 
+In addition, if you are using the functionality to compute Lyapunov exponents
+in billiards, then please cite the following Chaos publication:
+```
+@article{Datseris2019,
+  doi = {10.1063/1.5099446},
+  url = {https://doi.org/10.1063/1.5099446},
+  year = {2019},
+  month = sep,
+  publisher = {{AIP} Publishing},
+  volume = {29},
+  number = {9},
+  pages = {093115},
+  author = {George Datseris and Lukas Hupe and Ragnar Fleischmann},
+  title = {Estimating Lyapunov exponents in billiards},
+  journal = {Chaos: An Interdisciplinary Journal of Nonlinear Science}
+}
+```
+
+---
+
 ## Installation
 
 This package is registered, simply use `]` to get into the package manager mode and then type `add DynamicalBilliards` to install it.
@@ -88,6 +102,14 @@ Plotting is done through the `PyPlot` module. All plotting functions are brought
 
 In addition, for animations using the function [`animate_evolution`](@ref) the
 `ffmpeg` software must be accessible from the command line.
+
+---
+
+## How to easily code a Billiard
+
+We have created a [Jupyter notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) that showcases how easy it is to simulate a dynamical billiard using Julia. This [notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) is an educative example of both using Multiple Dispatch and of how the internal code of `DynamicalBilliards` works. It also highlights the extendibility of the core code.
+
+Besides a Jupyter notebook, this tutorial is also available as an interactive article in the new platform NextJournal [here](https://nextjournal.com/julia/billiard).
 
 
 ---
