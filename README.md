@@ -7,32 +7,10 @@ The goals of the package is to provide a flexible and intuitive framework for fa
 |:--------:|:--------:|:---------------:|:-----:|:-----:|
 |[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/dev), [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable)| [![status](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd/status.svg)](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd) | [![Build Status](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl) | [![Build status](https://ci.appveyor.com/api/projects/status/ksgb8pv5xl0j315y?svg=true)](https://ci.appveyor.com/project/JuliaDynamics/dynamicalbilliards-jl-wt09b) | [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/JuliaDynamics/Lobby)
 
-If you have used this package for research that resulted in a publication, please be
-kind enough to cite the paper associated with DynamicalBilliards.jl. The DOI is
-https://doi.org/10.21105/joss.00458 and you can cite as:
-
->G. Datseris, [The Journal of Open Source Software **2**, 458
-(2017)](https://doi.org/10.21105/joss.00458).
-
-or if you use BibTeX:
-```latex
-@article{Datseris2017,
-  doi = {10.21105/joss.00458},
-  url = {https://doi.org/10.21105/joss.00458},
-  year  = {2017},
-  month = {nov},
-  publisher = {The Open Journal},
-  volume = {2},
-  number = {19},
-  pages = {458},
-  author = {George Datseris},
-  title = {{DynamicalBilliards}.jl: An easy-to-use,  modular and extendable Julia package for Dynamical Billiard systems in two dimensions.},
-  journal = {The Journal of Open Source Software}
-}
-```
+If you have used this package for research that resulted in a publication, please be kind enough to cite the papers listed in the [CITATION.bib](CITATION.bib) file.
 
 ## Features
-Please see the documentation for list of features, tutorials and installation instructions.
+Please see the [documentation](https://JuliaDynamics.github.io/DynamicalBilliards.jl/dev) for list of features, tutorials and installation instructions.
 
 ## Acknowledgements
 This package is mainly developed by George Datseris. However, this development would not have been possible without significant help from other people:
