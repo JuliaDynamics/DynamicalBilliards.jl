@@ -126,6 +126,9 @@ end
 Return a particle with random allowed initial conditions inside the given
 billiard. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
+
+**WARNING** : `randominside` works for any **convex** billiard but it does
+not work for non-convex billiards. (this is because it uses `distance`)
 """
 randominside(bd::Billiard) = Particle(_randominside(bd)...)
 randominside(bd::Billiard{T}, ω) where {T} =
@@ -136,14 +139,12 @@ MagneticParticle(_randominside(bd)..., T(ω))
 function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
     #1. position
     xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bd)
-
     xp = T(rand())*(xmax-xmin) + xmin
     yp = T(rand())*(ymax-ymin) + ymin
     pos = SV{T}(xp, yp)
-
     dist = distance_init(pos, bd)
-    while dist <= sqrt(eps(T))
 
+    while dist <= sqrt(eps(T))
         xp = T(rand())*(xmax-xmin) + xmin
         yp = T(rand())*(ymax-ymin) + ymin
         pos = SV{T}(xp, yp)
@@ -153,9 +154,5 @@ function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
     #2. velocity
     φ = T(2π*rand())
     vel = SV{T}(sincos(φ)...)
-
-    #3. current_cell (does nothing)
-    cc = zero(SV{T})
-
-    return pos, vel, cc
+    return pos, vel, zero(SV{T}) # this zero is the `current_cell`
 end
