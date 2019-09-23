@@ -181,6 +181,7 @@ of escape times.
   billiard). The size of the vector is irrelevant
   since it is internally normalized.
 * `isdoor::Bool` : Flag of whether this `FiniteWall` instance is a "Door".
+  Defaults to `false`.
 * `name::String` : Name of the obstacle, given for user convenience.
   Defaults to "Finite Wall".
 """
@@ -207,6 +208,7 @@ function FiniteWall(sp::AbstractVector, ep::AbstractVector,
     return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
     w, SVector{2,T}(center), isdoor, name)
 end
+FiniteWall(a, b, c, n::String) = FiniteWall(a, b, c, false, n)
 
 isdoor(w) = w.isdoor
 
