@@ -21,6 +21,7 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 
 ## Features
 
+* Particles are evolved by solving *exactly* the geometric equations for intersections between lines, circles, ellipses, and other shapes. There are no approximations done regarding the dynamics.
 * Modular creation of a [billiard](basic/high_level/#billiard) from well defined obstacles. Arbitrary billiard shapes can be made and no shape is "hard coded".
 * Full support for both *straight*  and *magnetic* propagation of a particle in a billiard table.
   * During magnetic propagation the particle orbit is a circle instead of a line!
