@@ -72,6 +72,7 @@ total time `t` (always considered float). Optionally enable ray-splitting.
 ### Exporting and axis kwargs
   * `figsize = (7.2, 7.2))` : Size for new figure (if one is created).
     Must be divisible by 2 if you want to save the animation.
+  * `dpi = 100` : DPI for saving the figures (and thus for also the resulting video).
   * `ax = (figure(figsize = figsize); plot(bd); gca())` : axis to plot on.
   * `savename = nothing` : If given the animation is exported to
     mp4 file (requires ffmpeg). The name can include path.
@@ -79,7 +80,6 @@ total time `t` (always considered float). Optionally enable ray-splitting.
   * `deletefigs = true` : To create the animation a lot of figures are saved in
     the save directory and are deleted after the animation is done. You can choose
     to keep them.
-  * `dpi = 100` : dpi of saved figures.
   * `framerate = 20` : Animation framerate.
 """
 function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
@@ -89,8 +89,9 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            particle_kwargs = NamedTuple(),
                            tail_kwargs = NamedTuple(),
                            figsize = (7.2, 7.2),
-                           ax = (PyPlot.figure(figsize = figsize); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
-                           savename = nothing, dpi = 100, deletefigs = true,
+                           dpi = 100,
+                           ax = (PyPlot.figure(figsize = figsize, dpi = dpi); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
+                           savename = nothing, deletefigs = true,
                            disable_axis = false, framerate = 20,
                            resetting = reset_billiard!
                            ) where {T}
@@ -124,8 +125,8 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
 
     for i ∈ 2:maxframe
         if (i-1)%frameskip == 0
-            [pf() for pf in plotframes]
-            sleep(0.0001) # this updates PyPlot live
+            for pf in plotframes; pf(); end
+            sleep(0.000001) # this updates PyPlot live
             if savename != nothing
                 s = savename*"_$(j).png"
                 PyPlot.savefig(s, dpi = dpi)
@@ -133,17 +134,20 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                 j += 1
             end
         else
-            [sf() for sf in skipframes]
+            for sf in skipframes; sf(); end
         end
 
     end
 
     if savename != nothing
-        @assert mod(figsize[1]*dpi, 2) == 0 "figsize must be divisible by 2"
-        @assert mod(figsize[2]*dpi, 2) == 0 "figsize must be divisible by 2"
-        anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
-        -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
-        run(anim)
+        try
+            anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
+            -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
+            run(anim)
+        catch e
+            println("When attempting to create video through ffmpeg, got error: ")
+            showerror(stdout, e)
+        end
 
         if deletefigs
             for i in colnumbers
