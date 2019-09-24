@@ -248,7 +248,7 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
         else
             if t_to_write ≤ dt
                 # push collision point only
-                push!(ts, t_to_write)
+                push!(ts, t_to_write + t_total)
                 push!(x, p.pos[1] + p.current_cell[1])
                 push!(y, p.pos[2] + p.current_cell[2])
 
