@@ -1,3 +1,5 @@
+# 3.6.3
+* Bugfix of `timeseries` function where if the `dt` was larger than the collision time, the returned timevector was wrong.
 # 3.6
 * Keyword `particle_Kwargs` of `animate_evolution` can now conveniently be `nothing`, in which case the particles are not plotted, only their trajectories.
 

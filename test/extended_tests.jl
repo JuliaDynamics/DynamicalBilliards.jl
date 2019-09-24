@@ -5,10 +5,16 @@ using DynamicalBilliards.Testing
 function test_no_escape(p, bd, N = 1e4)
     xmin, ymin, xmax, ymax = cellsize(bd)
 
-    xt, yt = timeseries(p, bd, Int(N); dt = Inf)
+    xt, yt, vyt, vxt, tvec = timeseries(p, bd, Int(N); dt = Inf)
 
     @test length(xt) == N + 1
-    @test typeof(xt) == typeof(xt) == Vector{eltype(p)}
+    @test typeof(xt) == typeof(tvec) == Vector{eltype(p)}
+
+    @testset "$(tag(p, bd)) correct tvector" begin
+        for i in 2:length(tvec)
+            @test tvec[i] > tvec[i-1]
+        end
+    end
 
     dx1 = minimum(xt) - xmin
     dx2 = xmax - maximum(xt)
@@ -61,13 +67,6 @@ function test_movin_periodic(p, bd, N = 1e3)
 end
 
 billiards_testset("movin periodic", test_movin_periodic; caller = periodic_tests)
-
-
-function timeseries_tests(args...)
-    t = 1000.0
-    bd, ray = billiard_raysplitting_showcase()
-
-end
 
 function test_raysplit_ts_inside(p, bd, ray, N = 1e4)
 
