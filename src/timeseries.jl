@@ -285,7 +285,7 @@ Create the timeseries that connect a `particle`'s previous position and velocity
 provided that the collision time between previous and current state is `ct`.
 
 `dt` is the sampling time and if the `particle` is `MagneticParticle` then
-you should provide `ω`, the angular velocity that governed free flight.
+you should provide `ω`, the angular velocity that governed the free flight.
 
 Here is how this function is used (for example)
 ```julia
