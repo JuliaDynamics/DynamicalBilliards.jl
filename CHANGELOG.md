@@ -1,3 +1,5 @@
+# 3.7.0
+* `extrapolate` is now mentioned in the documentation and has a docstring.
 # 3.6.3
 * Bugfix of `timeseries` function where if the `dt` was larger than the collision time, the returned timevector was wrong.
 # 3.6

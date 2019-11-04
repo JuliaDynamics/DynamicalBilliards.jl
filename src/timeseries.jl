@@ -166,10 +166,15 @@ end
 #####################################################################################
 """
     timeseries!([p::AbstractParticle,] bd::Billiard, t; dt, warning)
-Evolves the given particle `p` inside the billiard `bd`.  If `t` is of type
+Evolve the given particle `p` inside the billiard `bd`.  If `t` is of type
 `AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
 evolve for as many collisions as `t`.
-Returns the time series for position and velocity as well as the time vector.
+Return:
+* x position time-series
+* y position time-series
+* x velocity time-series
+* y velocity time-series
+* time vector
 
 This function mutates the particle, use `timeseries` otherwise. If a particle is
 not given, a random one is picked through [`randominside`](@ref).
@@ -181,14 +186,9 @@ For straight propagation `dt = Inf`, while for magnetic `dt = 0.01`.
 
 For pinned magnetic particles, `timeseries!` issues a warning and returns the
 trajectory of the particle. If `t` is integer, the trajectory is evolved for
-one full circle only
+one full circle only.
 
-Return:
-* x position time-series
-* y position time-series
-* x velocity time-series
-* y velocity time-series
-* time vector
+Internally uses [`DynamicalBilliards.extrapolate`](@ref).
 
 ### Ray-splitting billiards
     timeseries!(p, bd, t, raysplitters; ...)
@@ -277,8 +277,29 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
     return x, y, vx, vy, ts
 end
 
+"""
+    extrapolate(particle, prevpos, prevvel, ct, dt[, ω]) → x, y, vx, vy, t
+
+Create the timeseries that connect a `particle`'s previous position and velocity
+`prevpos, prevvel` with the `particle`'s current position and velocity,
+provided that the collision time between previous and current state is `ct`.
+
+`dt` is the sampling time and if the `particle` is `MagneticParticle` then
+you should provide `ω`, the angular velocity that governed free flight.
+
+Here is how this function is used (for example)
+```julia
+prevpos, prevvel = p.pos + p.current_cell, p.vel
+for _ in 1:5
+    i, ct, pos, vel = bounce!(p, bd)
+    x, y, x, vy, t = extrapolate(p, prevpos, prevvel, ct, 0.1)
+    # append x, y, ... to other vectors or do whatever with them
+    prevpos, prevvel = p.pos + p.current_cell, p.vel
+end
+```
+"""
 function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T, ω::T) where {T <: AbstractFloat}
+                     dt::T, ω::T = p.ω) where {T <: AbstractFloat}
 
     φ0 = atan(prevvel[2], prevvel[1])
     s0, c0 = sincos(φ0)
@@ -307,8 +328,9 @@ function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct:
     return x, y, vx, vy, tvec
 end
 
+extrapolate(p::Particle, a, b, c, d, ω) = extrapolate(p::Particle, a, b, c, d)
 function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T, ω::T) where {T <: AbstractFloat}
+                     dt::T) where {T <: AbstractFloat}
 
     tvec = collect(0:dt:ct)
     x = Vector{T}(undef, length(tvec))
