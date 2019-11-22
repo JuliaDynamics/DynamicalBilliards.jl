@@ -325,7 +325,7 @@ Return a vector to `v = ep - sp`, pointing to the left of `v`.
 function default_normal(sp, ep)
     T = eltype(sp)
     (x, y) = ep .- sp
-    return SV{T}(y, -x)
+    return SV{T}(-y, x)
 end
 
 for WT in (:InfiniteWall, :FiniteWall, :RandomWall, :SplitterWall)
