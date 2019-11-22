@@ -352,3 +352,11 @@ function billiard_iris(a′ = 0.2, b′ = 0.4, w′ = 1.0;
     e = Ellipse([w/2, w/2], a, b, true, "Ellipse")
     return Billiard(e, rec.obstacles...)
 end
+
+
+function polygon_constructor(vertices, type)
+    @assert vertices[end] == vertices[1]
+    for i in 1:length(vertices)-1
+        sp, ep = vertices[i], vertices[i+1]
+    end
+end

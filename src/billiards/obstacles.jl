@@ -128,6 +128,10 @@ print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)\nfacedir: $(w.face
 """
     Wall{T<:AbstractFloat} <: Obstacle{T}
 Wall obstacle supertype.
+
+All `Wall` subtypes (except `PeriodicWall`) can be called as `Wall(sp, ep)`,
+in which case the normal vector is computed automatically to point to the left
+of `v = ep - sp`.
 """
 abstract type Wall{T<:AbstractFloat} <: Obstacle{T} end
 
@@ -314,6 +318,24 @@ SplitterWall(sp, ep, n, true, name)
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
+"""
+    default_normal(sp, ep)
+Return a vector to `v = ep - sp`, pointing to the left of `v`.
+"""
+function default_normal(sp, ep)
+    T = eltype(sp)
+    (x, y) = ep .- sp
+    return SV{T}(y, -x)
+end
+
+for WT in (:InfiniteWall, :FiniteWall, :RandomWall, :SplitterWall)
+    @eval $(WT)(sp, ep) = $(WT)(sp, ep, default_normal(sp, ep))
+end
+
+
+#######################################################################################
+## Others: Ellipses
+#######################################################################################
 
 """
     Ellipse{T<:AbstractFloat}  <: Obstacle{T}
