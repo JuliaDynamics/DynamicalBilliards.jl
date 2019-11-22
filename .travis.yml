@@ -1,11 +1,12 @@
 language: julia
 os:
   - linux
+  - windows
 #  - osx
 
 julia:
-  - 1.1
-  - nightly
+  - 1
+  - 1.2
 
 matrix:
   allow_failures:
@@ -19,7 +20,7 @@ notifications:
 jobs:
   include:
     - stage: "Documentation"
-      julia: 1.1
+      julia: 1.2
       os: linux
       script:
         - julia -e 'using Pkg; ENV["PYTHON"]=""; py="PyCall"; Pkg.add(py); Pkg.build(); Pkg.add("PyPlot"); Pkg.add("StaticArrays")'
