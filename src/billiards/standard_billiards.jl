@@ -2,7 +2,7 @@ using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
-billiard_stadium, billiard_mushroom, billiard_logo
+billiard_stadium, billiard_mushroom, billiard_logo, billiard_vertices
 
 ####################################################
 ## Famous/Standard Billiards
@@ -353,10 +353,22 @@ function billiard_iris(a′ = 0.2, b′ = 0.4, w′ = 1.0;
     return Billiard(e, rec.obstacles...)
 end
 
+"""
+    billiard_vertices(v, type = FiniteWall)
+Construct a polygon billiard that connects the given vertices `v`
+(vector of 2-vectors). The vertices should construct a billiard in a
+counter-clockwise orientation (i.e. the normal vector always points to the
+left of `v[i+1] - v[i]`.).
 
-function polygon_constructor(vertices, type)
+`type` decides what kind of walls to use. Notice that first and last entries
+of `v` must be identical.
+"""
+function billiard_vertices(vertices, type = FiniteWall)
     @assert vertices[end] == vertices[1]
+    obs = type[]
     for i in 1:length(vertices)-1
         sp, ep = vertices[i], vertices[i+1]
+        push!(obs, type(sp, ep))
     end
+    return Billiard(obs)
 end
