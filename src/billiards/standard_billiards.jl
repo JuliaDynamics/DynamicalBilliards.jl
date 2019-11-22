@@ -126,6 +126,7 @@ Note: `R` denotes the so-called outer radius, not the inner one.
 function billiard_polygon(sides′::Int, r′::Real, center′ = [0,0];
     sides::Int = sides′, r = r′, center = center′, setting = "standard")
 
+    S = typeof(convert(AbstractFloat, r))
     bd = Obstacle{S}[]
     verteces = polygon_vertices(r, sides, center)
 
