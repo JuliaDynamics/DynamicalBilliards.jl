@@ -118,3 +118,22 @@ xlim(floor(minimum(xt)), ceil(maximum(xt)))
 savefig("xperiodic.svg"); nothing # hide
 ```
 ![](xperiodic.svg)
+
+## Star billiard
+```@example tut3
+using DynamicalBilliards, PyPlot
+v = DynamicalBilliards.polygon_vertices(0.5, 5, [0,0], 0)
+v2 = DynamicalBilliards.polygon_vertices(0.25, 5, [0,0], π/5)
+vstar = []
+for i in 1:5
+    push!(vstar, v[i], v2[i])
+end
+bd = billiard_vertices(vstar)
+
+plot(bd)
+xt, yt = timeseries(randominside(bd), bd, 10)
+plot(xt, yt)
+axis("off") # hide
+savefig("star.svg"); nothing # hide
+```
+![](star.svg)
