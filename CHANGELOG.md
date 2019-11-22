@@ -1,3 +1,7 @@
+# 3.8.0
+* Walls can have their normal vector automatically calculated, pointing to the left of the endpoint - startpoint.
+* New function `billiard_vertices` that creates a billiard out of vertices.
+
 # 3.7.0
 * `extrapolate` is now mentioned in the documentation and has a docstring.
 # 3.6.3
