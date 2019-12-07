@@ -501,7 +501,7 @@ distance_init(pos::SVector, a::Obstacle) = distance(pos, a)
 function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
 
     n = normalvec(w, pos)
-    posdot = dot(w.sp - pos, n)
+    posdot = dot(w.sp .- pos, n)
     if posdot ≥ 0 # I am behind wall
         intersection = project_to_line(pos, w.center, n)
         dfc = norm(intersection - w.center)
@@ -511,7 +511,7 @@ function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
             return -1.0
         end
     end
-    v1 = pos - w.sp
+    v1 = pos .- w.sp
     dot(v1, n)
 end
 
@@ -543,8 +543,8 @@ function cellsize(a::Antidot{T}) where {T}
         xmin = ymin = T(Inf)
         xmax = ymax = T(-Inf)
     else
-        xmin, ymin = a.c - a.r
-        xmax, ymax = a.c + a.r
+        xmin, ymin = a.c .- a.r
+        xmax, ymax = a.c .+ a.r
     end
     return xmin, ymin, xmax, ymax
 end
@@ -554,15 +554,15 @@ function cellsize(e::Ellipse{T}) where {T}
         xmin = ymin = T(Inf)
         xmax = ymax = T(-Inf)
     else
-        xmin = e.c[1] - e.a; ymin = e.c[2] - e.b
-        xmax = e.c[1] + e.a; ymax = e.c[2] + e.b
+        xmin = e.c[1] .- e.a; ymin = e.c[2] .- e.b
+        xmax = e.c[1] .+ e.a; ymax = e.c[2] .+ e.b
     end
     return xmin, ymin, xmax, ymax
 end
 
 function cellsize(a::Semicircle{T}) where {T}
-    xmin, ymin = a.c - a.r
-    xmax, ymax = a.c + a.r
+    xmin, ymin = a.c .- a.r
+    xmax, ymax = a.c .+ a.r
     return xmin, ymin, xmax, ymax
 end
 
@@ -582,7 +582,7 @@ for T in subtypes(Circular)
 end
 
 for T in subtypes(Wall)
-  @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
+  @eval translate(w::$T, vec) = ($T)(w.sp .+ vec, w.ep .+ vec, w.normal)
 end
 
-translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b)
+translate(e::Ellipse, vec) = Ellipse(e.c .+ vec, e.a, e.b)

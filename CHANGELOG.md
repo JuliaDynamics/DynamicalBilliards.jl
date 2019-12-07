@@ -1,3 +1,6 @@
+# 3.9.0
+* It is now possible to create animations as gifs.
+
 # 3.8.0
 * Walls can have their normal vector automatically calculated, pointing to the left of the endpoint - startpoint.
 * New function `billiard_vertices` that creates a billiard out of vertices.

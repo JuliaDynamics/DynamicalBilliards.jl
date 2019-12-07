@@ -75,7 +75,8 @@ total time `t` (always considered float). Optionally enable ray-splitting.
   * `dpi = 100` : DPI for saving the figures (and thus for also the resulting video).
   * `ax = (figure(figsize = figsize); plot(bd); gca())` : axis to plot on.
   * `savename = nothing` : If given the animation is exported to
-    mp4 file (requires ffmpeg). The name can include path.
+    an `savetype` file (requires ffmpeg). The name can include path.
+  * `savetype = "mp4"` or `"gif"`.
   * `disable_axis = false` : Remove the axis splines.
   * `deletefigs = true` : To create the animation a lot of figures are saved in
     the save directory and are deleted after the animation is done. You can choose
@@ -93,6 +94,7 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            ax = (PyPlot.figure(figsize = figsize, dpi = dpi); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
                            savename = nothing, deletefigs = true,
                            disable_axis = false, framerate = 20,
+                           savetype = "mp4",
                            resetting = reset_billiard!
                            ) where {T}
 
@@ -100,6 +102,15 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
     nps = length(ps)
     taillength = round(Int, tailtime/dt)
     savename != nothing && (colnumbers = Int[])
+    if savename != nothing
+        fig = ax.get_figure()
+        width, height = fig.get_size_inches()
+        if 100width % 2 != 0 || 100height % 2 != 0
+            @warn "100*width or 100*height of figure are not divisible by 2. "*
+            "FFMPEG won't be able to produce the animation... "*
+            "Use `fig.set_size_inches` to ensure correct size."
+        end
+    end
 
     plotframes = Vector{Function}(undef, nps)
     skipframes = Vector{Function}(undef, nps)
@@ -141,9 +152,22 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
 
     if savename != nothing
         try
-            anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
-            -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
-            run(anim)
+            if savetype == "mp4"
+                anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
+                -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
+                run(anim)
+            elseif savetype == "gif"
+                # Code from https://github.com/JuliaPlots/Plots.jl/commit/7f7b543e1802aa85a4bc9c1069d9b9f0a00b5340
+                bas = basename(savename)
+                bas == savename && (bas = "")
+                pal = joinpath(bas, "palette.png")
+                # create a pallete
+                run(`ffmpeg -v 0 -start_number 1 -i $(savename)_%d.png -vf palettegen -y $pal`)
+                # then apply the palette to get better results
+                run(`ffmpeg -v 0 -framerate $framerate -start_number 1 -i $(savename)_%d.png -i $pal -lavfi paletteuse -y $(savename).gif`)
+                rm(pal)
+                println("Done creating $(savename).gif")
+            end
         catch e
             println("When attempting to create video through ffmpeg, got error: ")
             showerror(stdout, e)
