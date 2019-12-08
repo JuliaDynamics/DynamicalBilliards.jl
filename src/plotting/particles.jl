@@ -26,8 +26,8 @@ end
 
 
 """
-    plot(p::AbstractParticle [, cyclotron=false]; use_cell=true, kwargs...)
-Plot given particle on the current `PyPlot` axes. Optionally use `p.current_cell` for
+    plot(p::AbstractParticle [, cyclotron=false]; use_cell=true, ax=gca(), kwargs...)
+Plot given particle on `ax`. Optionally use `p.current_cell` for
 the particle's position. Given `kwargs...` are passed onto `PyPlot.scatter`.
 
 The particle is represented as a small ball (`PyPlot.scatter`) and a small arrow
