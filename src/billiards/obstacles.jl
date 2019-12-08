@@ -578,11 +578,11 @@ translated by `vector`.
 function translate end
 
 for T in subtypes(Circular)
-  @eval translate(d::$T, vec) = ($T)(d.c .+ vec, d.r)
+  @eval translate(d::$T, vec) = ($T)(d.c + vec, d.r)
 end
 
 for T in subtypes(Wall)
-  @eval translate(w::$T, vec) = ($T)(w.sp .+ vec, w.ep .+ vec, w.normal)
+  @eval translate(w::$T, vec) = ($T)(w.sp + vec, w.ep + vec, w.normal)
 end
 
-translate(e::Ellipse, vec) = Ellipse(e.c .+ vec, e.a, e.b)
+translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b)
