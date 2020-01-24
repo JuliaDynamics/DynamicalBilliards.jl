@@ -58,7 +58,7 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = noth
 
     rt = T[0.0]; rpos = [p.pos]; rvel = [p.vel]
     count = zero(t)
-    t_to_write = zero(T)
+    flight = zero(T)
     if typeof(t) == Int
         for zzz in (rt, rpos, rvel)
             sizehint!(zzz, t)
@@ -68,18 +68,18 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = noth
     while count < t
 
         i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
-        t_to_write += tmin
+        flight += tmin
 
         if isperiodic(i, bd)
             continue
         else
             push!(rpos, pos + p.current_cell)
             push!(rvel, vel)
-            push!(rt, t_to_write)
+            push!(rt, flight)
             ismagnetic && isray && push!(omegas, p.ω)
             # set counter
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
+            count += increment_counter(t, flight)
+            flight = zero(T)
         end
     end#time, or collision number, loop
 
@@ -139,7 +139,7 @@ Notice that `timeseries` **always mutates the billiard** if ray-splitting is use
 For more information and instructions on using ray-splitting
 please visit the official documentation.
 """
-function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = nothing;
+function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, f, raysplitters = nothing;
                      dt = typeof(p) <: Particle ? T(Inf) : T(0.01),
                      warning::Bool = true) where {T}
 
@@ -151,9 +151,7 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
     isray = !isa(raysplitters, Nothing)
     isray && acceptable_raysplitter(raysplitters, bd)
     raysidx = raysplit_indices(bd, raysplitters)
-    count = zero(t)
-    t_total = zero(T)
-    t_to_write = zero(T)
+    n, i, t, flight = 0, 0, zero(T), zero(T)
     prevpos = p.pos + p.current_cell
     prevvel = p.vel
 
@@ -162,54 +160,42 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
         #return one cycle if t is a collision number
         t_ret = typeof(t) <: Integer ? 2π/p.ω : T(t)
         nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_ret, dt, p.ω)
-        append!(ts, nts[2:end] .+ t_total)
-        append!(x, nx[2:end])
-        append!(y, ny[2:end])
-        append!(vx, nvx[2:end])
-        append!(vy, nvy[2:end])
+        append!(ts, nts[2:end] .+ t)
+        append!(x, nx[2:end]); append!(vx, nvx[2:end])
+        append!(y, ny[2:end]); append!(vy, nvy[2:end])
         return x, y, vx, vy, ts
     end
 
-    @inbounds while count < t
-
-        ismagnetic && isray && (prevω = p.ω)
+    @inbounds while check_condition(f, n, t, i, p) # count < t
         i, ct = bounce!(p, bd, raysidx, raysplitters)
-        t_to_write += ct
-
-        if isperiodic(i, bd)
-            # do nothing at periodic obstacles
+        flight += ct
+        if isperiodic(i, bd) # do nothing at periodic obstacles
             continue
         else
-            if t_to_write ≤ dt
-                # push collision point only
-                push!(ts, t_to_write + t_total)
+            if flight ≤ dt # push collision point only
+                push!(ts, flight + t)
                 push!(x, p.pos[1] + p.current_cell[1])
                 push!(y, p.pos[2] + p.current_cell[2])
-
-                push!(vx, p.vel[1])
-                push!(vy, p.vel[2])
+                push!(vx, p.vel[1]); push!(vy, p.vel[2])
             else
-                # extrapolate & append
-                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_to_write, dt, prevω)
-
-                append!(ts, nts[2:end] .+ t_total)
-                append!(x, nx[2:end])
-                append!(y, ny[2:end])
-                append!(vx, nvx[2:end])
-                append!(vy, nvy[2:end])
+                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, flight, dt, prevω)
+                append!(ts, nts[2:end] .+ t)
+                append!(x, nx[2:end]); append!(vx, nvx[2:end])
+                append!(y, ny[2:end]); append!(vy, nvy[2:end])
             end
-
             prevpos = p.pos + p.current_cell
             prevvel = p.vel
-
-            t_total += t_to_write
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
-
+            t += flight; n += 1
+            flight = zero(T)
+            ismagnetic && isray && (prevω = p.ω)
         end
     end
     return x, y, vx, vy, ts
 end
+
+check_condition(f::Int, n, t, i, p) = f > n
+check_condition(f::AbstractFloat, n, t, i, p) = f > t
+check_condition(f, n, t, i, p) = !f(n, t, i, p)
 
 """
     extrapolate(particle, prevpos, prevvel, ct, dt[, ω]) → x, y, vx, vy, t
