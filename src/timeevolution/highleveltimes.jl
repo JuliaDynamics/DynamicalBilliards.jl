@@ -1,9 +1,7 @@
 export escapetime, meancollisiontime
 export escapetime!, meancollisiontime!
+export visited_obstacles, visited_obstacles!
 
-#######################################################################################
-## Escape times
-#######################################################################################
 """
     escapetime([p,] bd, t; warning = false)
 Calculate the escape time of a particle `p` in the billiard `bd`, which
@@ -68,9 +66,21 @@ function escapeind(bd)
     return j
 end
 
-#######################################################################################
-## Mean Collision Time
-#######################################################################################
+
+"""
+    meancollisiontime([p,] bd, t) → κ
+Compute the mean collision time `κ` of the particle `p` in the billiard `bd` by
+evolving for total amount `t` (either float for time or integer for collision number).
+
+Collision times are counted only between obstacles that are *not*
+[`PeriodicWall`](@ref).
+
+If a particle is not given, a random one is picked through [`randominside`](@ref).
+See [`parallelize`](@ref) for a parallelized version.
+"""
+meancollisiontime(p, bd, t) = meancollisiontime!(copy(p), bd, t)
+meancollisiontime(bd::Billiard, t) = meancollisiontime(randominside(bd), bd, t)
+
 function meancollisiontime!(p::AbstractParticle{T}, bd::Billiard{T}, t)::T where {T}
 
     ispinned(p, bd) && return Inf
@@ -100,15 +110,60 @@ function meancollisiontime!(p::AbstractParticle{T}, bd::Billiard{T}, t)::T where
 end
 
 """
-    meancollisiontime([p,] bd, t) → κ
-Compute the mean collision time `κ` of the particle `p` in the billiard `bd` by
-evolving for total amount `t` (either float for time or integer for collision number).
-
-Collision times are counted only between obstacles that are *not*
-[`PeriodicWall`](@ref).
-
-If a particle is not given, a random one is picked through [`randominside`](@ref).
-See [`parallelize`](@ref) for a parallelized version.
+    visited_obstacles(p, args...)
+Same as [`visited_obstacles!`](@ref) but copies the particle instead.
 """
-meancollisiontime(p, bd, t) = meancollisiontime!(copy(p), bd, t)
-meancollisiontime(bd::Billiard, t) = meancollisiontime(randominside(bd), bd, t)
+visited_obstacles(p::AbstractParticle, args...) =
+    visited_obstacles!(copy(p), args...)
+visited_obstacles(bd::Billiard, args...; kwargs...) =
+    visited_obstacles!(randominside(bd), bd, args...; kwargs...)
+
+
+"""
+    visited_obstacles!([p::AbstractParticle,] bd::Billiard, t)
+Evolve the given particle `p` inside the billiard `bd` exactly like
+[`evolve!`](@ref). However return only:
+
+* `ts::Vector{T}` : Vector of time points of when each collision occured.
+* `obst::Vector{Int}` : Vector of obstacle indices in `bd` that the particle
+  collided with at the time points in `ts`.
+
+The first entries are `0.0` and `0`.
+Similarly with [`evolve!`](@ref) the function does not
+record collisions with periodic walls.
+
+Currently does not support raysplitting. Returns empty arrays
+for pinned particles.
+"""
+function visited_obstacles!(
+    p::AbstractParticle{T}, bd::Billiard{T}, t) where {T<:AbstractFloat}
+
+    if t ≤ 0
+        throw(ArgumentError("cannot evolve backwards in time."))
+    end
+    if ispinned(p, bd)
+        return T[], Int[]
+    end
+
+    ts = T[0.0]; obst = Int[0]
+
+    count = zero(t); t_to_write = zero(T)
+    if typeof(t) == Int
+        for zzz in (ts, obst)
+            sizehint!(zzz, t)
+        end
+    end
+
+    while count < t
+        i, tmin, pos, vel = bounce!(p, bd)
+        t_to_write += tmin
+        if isperiodic(i, bd)
+            continue
+        else
+            count += increment_counter(t, tmin)
+            push!(ts, t_to_write + ts[end]); push!(obst, i)
+            t_to_write = zero(T)
+        end
+    end#time, or collision number, loop
+    return ts, obst
+end

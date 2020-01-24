@@ -1,7 +1,6 @@
 # This file must be loaded _after_ raysplitting
 
 export evolve!, evolve, timeseries!, timeseries
-export visited_obstacles, visited_obstacles!
 
 """
     evolve!([p::AbstractParticle,] bd::Billiard, t)
@@ -102,65 +101,6 @@ evolve(p::AbstractParticle, args...) = evolve!(copy(p), args...)
 evolve(bd::Billiard, args...; kwargs...) =
     evolve!(randominside(bd), bd, args...; kwargs...)
 
-"""
-    visited_obstacles(p, args...)
-Same as [`visited_obstacles!`](@ref) but copies the particle instead.
-"""
-visited_obstacles(p::AbstractParticle, args...) =
-    visited_obstacles!(copy(p), args...)
-visited_obstacles(bd::Billiard, args...; kwargs...) =
-    visited_obstacles!(randominside(bd), bd, args...; kwargs...)
-
-
-"""
-    visited_obstacles!([p::AbstractParticle,] bd::Billiard, t)
-Evolve the given particle `p` inside the billiard `bd` exactly like
-[`evolve!`](@ref). However return only:
-
-* `ts::Vector{T}` : Vector of time points of when each collision occured.
-* `obst::Vector{Int}` : Vector of obstacle indices in `bd` that the particle
-  collided with at the time points in `ts`.
-
-The first entries are `0.0` and `0`.
-Similarly with [`evolve!`](@ref) the function does not
-record collisions with periodic walls.
-
-Currently does not support raysplitting. Returns empty arrays
-for pinned particles.
-"""
-function visited_obstacles!(
-    p::AbstractParticle{T}, bd::Billiard{T}, t) where {T<:AbstractFloat}
-
-    if t ≤ 0
-        throw(ArgumentError("cannot evolve backwards in time."))
-    end
-    if ispinned(p, bd)
-        return T[], Int[]
-    end
-
-    ts = T[0.0]; obst = Int[0]
-
-    count = zero(t); t_to_write = zero(T)
-    if typeof(t) == Int
-        for zzz in (ts, obst)
-            sizehint!(zzz, t)
-        end
-    end
-
-    while count < t
-        i, tmin, pos, vel = bounce!(p, bd)
-        t_to_write += tmin
-        if isperiodic(i, bd)
-            continue
-        else
-            count += increment_counter(t, tmin)
-            push!(ts, t_to_write + ts[end]); push!(obst, i)
-            t_to_write = zero(T)
-        end
-    end#time, or collision number, loop
-    return ts, obst
-end
-
 #####################################################################################
 # Timeseries
 #####################################################################################
@@ -206,33 +146,27 @@ function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
     ts = [zero(T)]
     x  = [p.pos[1]]; y  = [p.pos[2]]
     vx = [p.vel[1]]; vy = [p.vel[2]]
-
     ismagnetic = p isa MagneticParticle
     prevω = ismagnetic ? p.ω : T(0)
     isray = !isa(raysplitters, Nothing)
     isray && acceptable_raysplitter(raysplitters, bd)
     raysidx = raysplit_indices(bd, raysplitters)
-
     count = zero(t)
     t_total = zero(T)
     t_to_write = zero(T)
-
     prevpos = p.pos + p.current_cell
     prevvel = p.vel
 
     if ispinned(p, bd)
         warning && @warn "Pinned particle detected!"
-
         #return one cycle if t is a collision number
         t_ret = typeof(t) <: Integer ? 2π/p.ω : T(t)
         nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_ret, dt, p.ω)
-
         append!(ts, nts[2:end] .+ t_total)
         append!(x, nx[2:end])
         append!(y, ny[2:end])
         append!(vx, nvx[2:end])
         append!(vy, nvy[2:end])
-
         return x, y, vx, vy, ts
     end
 
