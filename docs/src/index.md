@@ -10,6 +10,8 @@ dynamical billiards in two dimensions.
     Check out the example in the [tutorials](tutorials/examples/#julia-logo-billiard) page to see the code that created and animated the "Julia Billiard", which is
     the logo of our package!
 
+!!! info "Latest news"
+    The [`timeseries!`](@ref) function now supports evolving particles until a certain condition (specified by a function) is met.
 
 ## About Billiards
 

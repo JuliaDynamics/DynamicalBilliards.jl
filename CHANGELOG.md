@@ -1,3 +1,6 @@
+# 3.10.0
+* It is now possible in `timeseries!` to evolve a particle until a certain boolean condition is met.
+
 # 3.9.0
 * It is now possible to create animations as gifs.
 

@@ -47,7 +47,15 @@ function test_visited_obstacles(p, bd, N = 50)
 end
 billiards_testset("Visited obstacles", test_visited_obstacles; caller = ergodic_tests)
 
+function test_predicate_ts(p, bd, N = 1e3)
+    xmin, ymin, xmax, ymax = cellsize(bd[1])
+    f(n, t, i, p) = i == 1
 
+    xt, yt = timeseries(p, bd, Int(N), dt = Inf)
+    @test (xt[end] == xmin || xt[end] == xmax)
+    @test (yt[end] == ymin || yt[end] == ymax)
+end
+billiards_testset("Predicate function", test_visited_obstacles; caller = ergodic_tests)
 
 function test_movin_periodic(p, bd, N = 1e3)
     xmin, ymin, xmax, ymax = cellsize(bd)
