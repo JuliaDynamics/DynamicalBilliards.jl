@@ -106,15 +106,15 @@ evolve(bd::Billiard, args...; kwargs...) =
 #####################################################################################
 """
     timeseries!([p::AbstractParticle,] bd::Billiard, t; dt, warning)
-Evolve the given particle `p` inside the billiard `bd`.  If `t` is of type
-`AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
-evolve for as many collisions as `t`.
-Return:
-* x position time-series
-* y position time-series
-* x velocity time-series
-* y velocity time-series
-* time vector
+Evolve the given particle `p` inside the billiard `bd` for the condition `t`
+and return the x, y, vx, vy timeseries and the time vector.
+If `t` is of type `AbstractFloat`, then evolve for as much time as `t`.
+If however `t` is of type `Int`, evolve for as many collisions as `t`.
+Otherwise, `t` can be any function, that takes as an input `t(n, τ, i, p)`
+and returns `true` when the evolution should terminate. Here `n` is the amount
+of obstacles collided with so far, `τ` the amount time evolved so far, `i`
+the obstacle just collided with and `p` the particle (so you can access e.g.
+`p.pos`).
 
 This function mutates the particle, use `timeseries` otherwise. If a particle is
 not given, a random one is picked through [`randominside`](@ref).
