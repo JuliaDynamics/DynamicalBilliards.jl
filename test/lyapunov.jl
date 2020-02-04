@@ -3,7 +3,7 @@ using DynamicalBilliards
 using DynamicalBilliards.Testing
 
 
-function test_lyapunov_spectrum(p, bd, t = 1e6, error_level = 1e-3)
+function test_lyapunov_spectrum(p, bd, t = 1e6, error_level = 1e-2)
     # calculate spectrum
     exps = lyapunovspectrum!(p, bd, t)
     sumpair = exps[1] + exps[4]

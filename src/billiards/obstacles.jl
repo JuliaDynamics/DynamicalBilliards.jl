@@ -127,6 +127,10 @@ print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)\nfacedir: $(w.face
 """
     Wall{T<:AbstractFloat} <: Obstacle{T}
 Wall obstacle supertype.
+
+All `Wall` subtypes (except `PeriodicWall`) can be called as `Wall(sp, ep)`,
+in which case the normal vector is computed automatically to point to the left
+of `v = ep - sp`.
 """
 abstract type Wall{T<:AbstractFloat} <: Obstacle{T} end
 
@@ -180,6 +184,7 @@ of escape times.
   billiard). The size of the vector is irrelevant
   since it is internally normalized.
 * `isdoor::Bool` : Flag of whether this `FiniteWall` instance is a "Door".
+  Defaults to `false`.
 * `name::String` : Name of the obstacle, given for user convenience.
   Defaults to "Finite Wall".
 """
@@ -206,6 +211,7 @@ function FiniteWall(sp::AbstractVector, ep::AbstractVector,
     return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
     w, SVector{2,T}(center), isdoor, name)
 end
+FiniteWall(a, b, c, n::String) = FiniteWall(a, b, c, false, n)
 
 isdoor(w) = w.isdoor
 
@@ -311,8 +317,28 @@ SplitterWall(sp, ep, n, true, name)
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
 
+"""
+    default_normal(sp, ep)
+Return a vector to `v = ep - sp`, pointing to the left of `v`.
+"""
+function default_normal(sp, ep)
+    T = eltype(sp)
+    (x, y) = ep .- sp
+    return SV{T}(-y, x)
+end
+
 #######################################################################################
 ## Special
+#######################################################################################
+
+
+for WT in (:InfiniteWall, :FiniteWall, :RandomWall, :SplitterWall)
+    @eval $(WT)(sp, ep) = $(WT)(sp, ep, default_normal(sp, ep))
+end
+
+
+#######################################################################################
+## Others: Ellipses
 #######################################################################################
 
 """
@@ -453,8 +479,11 @@ For example, for `Ellipse` the distance is simply the ellipse curve at point
 
     distance(p::AbstractParticle, bd::Billiard)
 Return minimum `distance(p, obst)` for all `obst` in `bd`.
-If the `distance(p, bd)` is negative this means that the particle is outside
-the billiard.
+If the `distance(p, bd)` is negative and `bd` is convex,
+this means that the particle is outside the billiard.
+
+**WARNING** : `distance(p, bd)` may give negative values for non-convex
+billiards, or billiards that are composed of several connected sub-billiards.
 
 All `distance` functions can also be given a position (vector) instead of a particle.
 """
@@ -493,7 +522,6 @@ function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     end
 end
 
-
 function distance(pos::SV, e::Ellipse{T})::T where {T}
     d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
     e.pflag ? d : -d
@@ -513,7 +541,7 @@ distance_init(pos::SVector, a::Obstacle) = distance(pos, a)
 function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
 
     n = normalvec(w, pos)
-    posdot = dot(w.sp - pos, n)
+    posdot = dot(w.sp .- pos, n)
     if posdot ≥ 0 # I am behind wall
         intersection = project_to_line(pos, w.center, n)
         dfc = norm(intersection - w.center)
@@ -523,7 +551,7 @@ function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
             return -1.0
         end
     end
-    v1 = pos - w.sp
+    v1 = pos .- w.sp
     dot(v1, n)
 end
 
@@ -555,8 +583,8 @@ function cellsize(a::Antidot{T}) where {T}
         xmin = ymin = T(Inf)
         xmax = ymax = T(-Inf)
     else
-        xmin, ymin = a.c - a.r
-        xmax, ymax = a.c + a.r
+        xmin, ymin = a.c .- a.r
+        xmax, ymax = a.c .+ a.r
     end
     return xmin, ymin, xmax, ymax
 end
@@ -566,8 +594,8 @@ function cellsize(e::Ellipse{T}) where {T}
         xmin = ymin = T(Inf)
         xmax = ymax = T(-Inf)
     else
-        xmin = e.c[1] - e.a; ymin = e.c[2] - e.b
-        xmax = e.c[1] + e.a; ymax = e.c[2] + e.b
+        xmin = e.c[1] .- e.a; ymin = e.c[2] .- e.b
+        xmax = e.c[1] .+ e.a; ymax = e.c[2] .+ e.b
     end
     return xmin, ymin, xmax, ymax
 end
@@ -606,7 +634,7 @@ translated by `vector`.
 function translate end
 
 for T in subtypes(Circular)
-  @eval translate(d::$T, vec) = ($T)(d.c .+ vec, d.r)
+  @eval translate(d::$T, vec) = ($T)(d.c + vec, d.r)
 end
 
 for T in subtypes(Wall)

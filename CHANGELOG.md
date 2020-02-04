@@ -1,3 +1,20 @@
+# 3.10.0
+* It is now possible in `timeseries!` to evolve a particle until a certain boolean condition is met.
+
+# 3.9.0
+* It is now possible to create animations as gifs.
+
+# 3.8.0
+* Walls can have their normal vector automatically calculated, pointing to the left of the endpoint - startpoint.
+* New function `billiard_vertices` that creates a billiard out of vertices.
+
+# 3.7.0
+* `extrapolate` is now mentioned in the documentation and has a docstring.
+# 3.6.3
+* Bugfix of `timeseries` function where if the `dt` was larger than the collision time, the returned timevector was wrong.
+# 3.6
+* Keyword `particle_Kwargs` of `animate_evolution` can now conveniently be `nothing`, in which case the particles are not plotted, only their trajectories.
+
 # 3.5
 * New function `visited_obstacles!`.
 * 2D and 3D chaotic phase space volumes now in `MushroomTools`.

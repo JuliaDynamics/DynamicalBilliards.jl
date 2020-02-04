@@ -23,7 +23,7 @@ const sixsqrt = 6sqrt(2)
 Find the collision (if any) between given particle and obstacle.
 Return the time until collision and the estimated collision point `cp`.
 
-Returns `Inf, SV(0, 0)` if the collision is not possible *or* if the
+Return `Inf, SV(0, 0)` if the collision is not possible *or* if the
 collision happens backwards in time.
 
 **It is the duty of `collision` to avoid incorrect collisions when the particle is
@@ -36,7 +36,7 @@ function collision(p::Particle{T}, w::Wall{T}) where {T}
         return nocollision(T)
     else
         t = dot(w.sp - p.pos, n)/denom
-        return t, p.pos + t * p.vel
+        return t, p.pos + t*p.vel
     end
 end
 
@@ -73,7 +73,7 @@ function collision(p::Particle{T}, d::Circular{T}) where {T}
 
     # Closest point:
     t = -B - sqrtD
-    return t, p.pos + t * p.vel
+    return t, p.pos + t*p.vel
 end
 
 function collision(p::Particle{T}, d::Antidot{T}) where {T}
@@ -87,7 +87,6 @@ function collision(p::Particle{T}, d::Antidot{T}) where {T}
     B = dot(p.vel, dc)           #velocity towards circle center: B < 0
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
-
     Δ ≤ 0 && return nocollision(T)
     sqrtD = sqrt(Δ)
 
@@ -97,9 +96,7 @@ function collision(p::Particle{T}, d::Antidot{T}) where {T}
     else
         t = -B + sqrtD
     end
-
-    # If collision time is negative, return Inf:
-    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t * p.vel)
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t*p.vel)
 end
 
 function collision(p::Particle{T}, d::Semicircle{T}) where {T}

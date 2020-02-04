@@ -1,4 +1,4 @@
-export bounce!, evolve, ispinned, evolve!, propagate!
+export bounce!, ispinned, propagate!
 
 @inline increment_counter(::Int, t_to_write) = 1
 @inline increment_counter(::T, t_to_write) where {T<:AbstractFloat} = t_to_write
@@ -156,9 +156,6 @@ incidence angle φ, if T(φ) > rand(), ray-splitting occurs.
 
 resolvecollision!(p::MagneticParticle, o::PeriodicWall) = periodicity!(p, o)
 
-#####################################################################################
-# ispinned, Evolve & Construct
-#####################################################################################
 """
     ispinned(p::MagneticParticle, bd::Billiard)
 Return `true` if the particle is pinned with respect to the billiard.

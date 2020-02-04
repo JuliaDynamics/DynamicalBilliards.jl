@@ -5,10 +5,16 @@ using DynamicalBilliards.Testing
 function test_no_escape(p, bd, N = 1e4)
     xmin, ymin, xmax, ymax = cellsize(bd)
 
-    xt, yt = timeseries(p, bd, Int(N); dt = Inf)
+    xt, yt, vyt, vxt, tvec = timeseries(p, bd, Int(N); dt = Inf)
 
     @test length(xt) == N + 1
-    @test typeof(xt) == typeof(xt) == Vector{eltype(p)}
+    @test typeof(xt) == typeof(tvec) == Vector{eltype(p)}
+
+    @testset "$(tag(p, bd)) correct tvector" begin
+        for i in 2:length(tvec)
+            @test tvec[i] > tvec[i-1]
+        end
+    end
 
     dx1 = minimum(xt) - xmin
     dx2 = xmax - maximum(xt)
@@ -41,7 +47,15 @@ function test_visited_obstacles(p, bd, N = 50)
 end
 billiards_testset("Visited obstacles", test_visited_obstacles; caller = ergodic_tests)
 
+function test_predicate_ts(p, bd, N = 1e3)
+    xmin, ymin, xmax, ymax = cellsize(bd[1])
+    f(n, t, i, p) = i == 1
 
+    xt, yt = timeseries(p, bd, Int(N), dt = Inf)
+    @test (xt[end] == xmin || xt[end] == xmax)
+    @test (yt[end] == ymin || yt[end] == ymax)
+end
+billiards_testset("Predicate function", test_visited_obstacles; caller = ergodic_tests)
 
 function test_movin_periodic(p, bd, N = 1e3)
     xmin, ymin, xmax, ymax = cellsize(bd)
@@ -61,13 +75,6 @@ function test_movin_periodic(p, bd, N = 1e3)
 end
 
 billiards_testset("movin periodic", test_movin_periodic; caller = periodic_tests)
-
-
-function timeseries_tests(args...)
-    t = 1000.0
-    bd, ray = billiard_raysplitting_showcase()
-
-end
 
 function test_raysplit_ts_inside(p, bd, ray, N = 1e4)
 

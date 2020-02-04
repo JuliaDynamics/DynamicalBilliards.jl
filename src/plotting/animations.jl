@@ -12,27 +12,30 @@ function setup_animation(p::AbstractParticle, bd:: Billiard, t::AbstractFloat,
     x,y,vx,vy = timeseries(p, bd, t, raysplitters, dt = dt)
 
     # initial plot
-    point, arrow = plot_particle(x[1], y[1], vx[1], vy[1]; ax = ax, zorder = 20,
-                                 particle_kwargs...)
+    if particle_kwargs != nothing
+        point, arrow = plot_particle(x[1], y[1], vx[1], vy[1]; ax = ax, zorder = 20,
+                                     particle_kwargs...)
+    end
+
     tail, = ax.plot(x[1:2], y[1:2], zorder = 1, color = tailcolor; tail_kwargs...)
 
     # frame counter
     count = 2
 
     function plot_frame()
-        # replot point
-        point.remove()
-        # replot arrow
-        arrow.remove()
-
-        point, arrow = plot_particle(x[count], y[count], vx[count], vy[count];
-                                     ax = ax, zorder = 20, particle_kwargs...)
+        if particle_kwargs != nothing
+            # replot arrow
+            arrow.remove()
+            # replot point
+            point.remove()
+            point, arrow = plot_particle(x[count], y[count], vx[count], vy[count];
+                                         ax = ax, zorder = 20, particle_kwargs...)
+        end
         # set tail data
         @views tail.set_xdata(x[clamp(count-taillength, 1, count):count])
         @views tail.set_ydata(y[clamp(count-taillength, 1, count):count])
 
-        # increment frame counter
-        count += 1
+        count += 1 # increment frame counter
     end
 
     function skip_frame()
@@ -57,7 +60,7 @@ total time `t` (always considered float). Optionally enable ray-splitting.
   * `tailtime = 1.0` : The length of the "tail" trailing the particle in time
     units.
   * `resetting = reset_billiard!` : function called after evolving each individual
-    particle in the billiard (so that ray-splitting doesn't brake).
+    particle in the billiard (so that ray-splitting doesn't break).
 ### Colors & plotting kwargs
   * `colors` : An array of valid Matplotlib colors for the "tails". If `colors`
     is shorter than `ps`, colors are reused. Defaults to the standard
@@ -69,14 +72,15 @@ total time `t` (always considered float). Optionally enable ray-splitting.
 ### Exporting and axis kwargs
   * `figsize = (7.2, 7.2))` : Size for new figure (if one is created).
     Must be divisible by 2 if you want to save the animation.
+  * `dpi = 100` : DPI for saving the figures (and thus for also the resulting video).
   * `ax = (figure(figsize = figsize); plot(bd); gca())` : axis to plot on.
   * `savename = nothing` : If given the animation is exported to
-    mp4 file (requires ffmpeg). The name can include path.
+    an `savetype` file (requires ffmpeg). The name can include path.
+  * `savetype = "mp4"` or `"gif"`.
   * `disable_axis = false` : Remove the axis splines.
   * `deletefigs = true` : To create the animation a lot of figures are saved in
     the save directory and are deleted after the animation is done. You can choose
     to keep them.
-  * `dpi = 100` : dpi of saved figures.
   * `framerate = 20` : Animation framerate.
 """
 function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
@@ -86,9 +90,11 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                            particle_kwargs = NamedTuple(),
                            tail_kwargs = NamedTuple(),
                            figsize = (7.2, 7.2),
-                           ax = (PyPlot.figure(figsize = figsize); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
-                           savename = nothing, dpi = 100, deletefigs = true,
+                           dpi = 100,
+                           ax = (PyPlot.figure(figsize = figsize, dpi = dpi); ax = PyPlot.gca(); plot(bd; ax = ax); ax),
+                           savename = nothing, deletefigs = true,
                            disable_axis = false, framerate = 20,
+                           savetype = "mp4",
                            resetting = reset_billiard!
                            ) where {T}
 
@@ -96,6 +102,15 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
     nps = length(ps)
     taillength = round(Int, tailtime/dt)
     savename != nothing && (colnumbers = Int[])
+    if savename != nothing
+        fig = ax.get_figure()
+        width, height = fig.get_size_inches()
+        if 100width % 2 != 0 || 100height % 2 != 0
+            @warn "100*width or 100*height of figure are not divisible by 2. "*
+            "FFMPEG won't be able to produce the animation... "*
+            "Use `fig.set_size_inches` to ensure correct size."
+        end
+    end
 
     plotframes = Vector{Function}(undef, nps)
     skipframes = Vector{Function}(undef, nps)
@@ -121,8 +136,8 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
 
     for i ∈ 2:maxframe
         if (i-1)%frameskip == 0
-            [pf() for pf in plotframes]
-            sleep(0.01)
+            for pf in plotframes; pf(); end
+            sleep(0.000001) # this updates PyPlot live
             if savename != nothing
                 s = savename*"_$(j).png"
                 PyPlot.savefig(s, dpi = dpi)
@@ -130,17 +145,33 @@ function animate_evolution(ps::AbstractVector{<:AbstractParticle{T}},
                 j += 1
             end
         else
-            [sf() for sf in skipframes]
+            for sf in skipframes; sf(); end
         end
 
     end
 
     if savename != nothing
-        @assert mod(figsize[1]*dpi, 2) == 0
-        @assert mod(figsize[2]*dpi, 2) == 0
-        anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
-        -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
-        run(anim)
+        try
+            if savetype == "mp4"
+                anim = `ffmpeg -y -framerate $(framerate) -start_number 1 -i $(savename)_%d.png
+                -c:v libx264 -pix_fmt yuv420p -preset veryslow -profile:v high -level 5.2 $(savename).mp4`
+                run(anim)
+            elseif savetype == "gif"
+                # Code from https://github.com/JuliaPlots/Plots.jl/commit/7f7b543e1802aa85a4bc9c1069d9b9f0a00b5340
+                bas = basename(savename)
+                bas == savename && (bas = "")
+                pal = joinpath(bas, "palette.png")
+                # create a pallete
+                run(`ffmpeg -v 0 -start_number 1 -i $(savename)_%d.png -vf palettegen -y $pal`)
+                # then apply the palette to get better results
+                run(`ffmpeg -v 0 -framerate $framerate -start_number 1 -i $(savename)_%d.png -i $pal -lavfi paletteuse -y $(savename).gif`)
+                rm(pal)
+                println("Done creating $(savename).gif")
+            end
+        catch e
+            println("When attempting to create video through ffmpeg, got error: ")
+            showerror(stdout, e)
+        end
 
         if deletefigs
             for i in colnumbers

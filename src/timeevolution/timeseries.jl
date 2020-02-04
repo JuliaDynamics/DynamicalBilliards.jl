@@ -1,7 +1,6 @@
 # This file must be loaded _after_ raysplitting
 
 export evolve!, evolve, timeseries!, timeseries
-export visited_obstacles, visited_obstacles!
 
 """
     evolve!([p::AbstractParticle,] bd::Billiard, t)
@@ -59,7 +58,7 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = noth
 
     rt = T[0.0]; rpos = [p.pos]; rvel = [p.vel]
     count = zero(t)
-    t_to_write = zero(T)
+    flight = zero(T)
     if typeof(t) == Int
         for zzz in (rt, rpos, rvel)
             sizehint!(zzz, t)
@@ -69,18 +68,18 @@ function evolve!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = noth
     while count < t
 
         i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
-        t_to_write += tmin
+        flight += tmin
 
         if isperiodic(i, bd)
             continue
         else
             push!(rpos, pos + p.current_cell)
             push!(rvel, vel)
-            push!(rt, t_to_write)
+            push!(rt, flight)
             ismagnetic && isray && push!(omegas, p.ω)
             # set counter
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
+            count += increment_counter(t, flight)
+            flight = zero(T)
         end
     end#time, or collision number, loop
 
@@ -102,74 +101,20 @@ evolve(p::AbstractParticle, args...) = evolve!(copy(p), args...)
 evolve(bd::Billiard, args...; kwargs...) =
     evolve!(randominside(bd), bd, args...; kwargs...)
 
-"""
-    visited_obstacles(p, args...)
-Same as [`visited_obstacles!`](@ref) but copies the particle instead.
-"""
-visited_obstacles(p::AbstractParticle, args...) =
-    visited_obstacles!(copy(p), args...)
-visited_obstacles(bd::Billiard, args...; kwargs...) =
-    visited_obstacles!(randominside(bd), bd, args...; kwargs...)
-
-
-"""
-    visited_obstacles!([p::AbstractParticle,] bd::Billiard, t)
-Evolve the given particle `p` inside the billiard `bd` exactly like
-[`evolve!`](@ref). However return only:
-
-* `ts::Vector{T}` : Vector of time points of when each collision occured.
-* `obst::Vector{Int}` : Vector of obstacle indices in `bd` that the particle
-  collided with at the time points in `ts`.
-
-The first entries are `0.0` and `0`.
-Similarly with [`evolve!`](@ref) the function does not
-record collisions with periodic walls.
-
-Currently does not support raysplitting. Returns empty arrays
-for pinned particles.
-"""
-function visited_obstacles!(
-    p::AbstractParticle{T}, bd::Billiard{T}, t) where {T<:AbstractFloat}
-
-    if t ≤ 0
-        throw(ArgumentError("cannot evolve backwards in time."))
-    end
-    if ispinned(p, bd)
-        return T[], Int[]
-    end
-
-    ts = T[0.0]; obst = Int[0]
-
-    count = zero(t); t_to_write = zero(T)
-    if typeof(t) == Int
-        for zzz in (ts, obst)
-            sizehint!(zzz, t)
-        end
-    end
-
-    while count < t
-        i, tmin, pos, vel = bounce!(p, bd)
-        t_to_write += tmin
-        if isperiodic(i, bd)
-            continue
-        else
-            count += increment_counter(t, tmin)
-            push!(ts, t_to_write + ts[end]); push!(obst, i)
-            t_to_write = zero(T)
-        end
-    end#time, or collision number, loop
-    return ts, obst
-end
-
 #####################################################################################
 # Timeseries
 #####################################################################################
 """
     timeseries!([p::AbstractParticle,] bd::Billiard, t; dt, warning)
-Evolves the given particle `p` inside the billiard `bd`.  If `t` is of type
-`AbstractFloat`, evolve for as much time as `t`. If however `t` is of type `Int`,
-evolve for as many collisions as `t`.
-Returns the time series for position and velocity as well as the time vector.
+Evolve the given particle `p` inside the billiard `bd` for the condition `t`
+and return the x, y, vx, vy timeseries and the time vector.
+If `t` is of type `AbstractFloat`, then evolve for as much time as `t`.
+If however `t` is of type `Int`, evolve for as many collisions as `t`.
+Otherwise, `t` can be any function, that takes as an input `t(n, τ, i, p)`
+and returns `true` when the evolution should terminate. Here `n` is the amount
+of obstacles collided with so far, `τ` the amount time evolved so far, `i`
+the obstacle just collided with and `p` the particle (so you can access e.g.
+`p.pos`).
 
 This function mutates the particle, use `timeseries` otherwise. If a particle is
 not given, a random one is picked through [`randominside`](@ref).
@@ -181,14 +126,9 @@ For straight propagation `dt = Inf`, while for magnetic `dt = 0.01`.
 
 For pinned magnetic particles, `timeseries!` issues a warning and returns the
 trajectory of the particle. If `t` is integer, the trajectory is evolved for
-one full circle only
+one full circle only.
 
-Return:
-* x position time-series
-* y position time-series
-* x velocity time-series
-* y velocity time-series
-* time vector
+Internally uses [`DynamicalBilliards.extrapolate`](@ref).
 
 ### Ray-splitting billiards
     timeseries!(p, bd, t, raysplitters; ...)
@@ -199,86 +139,87 @@ Notice that `timeseries` **always mutates the billiard** if ray-splitting is use
 For more information and instructions on using ray-splitting
 please visit the official documentation.
 """
-function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = nothing;
+function timeseries!(p::AbstractParticle{T}, bd::Billiard{T}, f, raysplitters = nothing;
                      dt = typeof(p) <: Particle ? T(Inf) : T(0.01),
                      warning::Bool = true) where {T}
 
     ts = [zero(T)]
     x  = [p.pos[1]]; y  = [p.pos[2]]
     vx = [p.vel[1]]; vy = [p.vel[2]]
-
     ismagnetic = p isa MagneticParticle
     prevω = ismagnetic ? p.ω : T(0)
     isray = !isa(raysplitters, Nothing)
     isray && acceptable_raysplitter(raysplitters, bd)
     raysidx = raysplit_indices(bd, raysplitters)
-
-    count = zero(t)
-    t_total = zero(T)
-    t_to_write = zero(T)
-
+    n, i, t, flight = 0, 0, zero(T), zero(T)
     prevpos = p.pos + p.current_cell
     prevvel = p.vel
 
     if ispinned(p, bd)
         warning && @warn "Pinned particle detected!"
-
         #return one cycle if t is a collision number
         t_ret = typeof(t) <: Integer ? 2π/p.ω : T(t)
         nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_ret, dt, p.ω)
-
-        append!(ts, nts[2:end] .+ t_total)
-        append!(x, nx[2:end])
-        append!(y, ny[2:end])
-        append!(vx, nvx[2:end])
-        append!(vy, nvy[2:end])
-
+        append!(ts, nts[2:end] .+ t)
+        append!(x, nx[2:end]); append!(vx, nvx[2:end])
+        append!(y, ny[2:end]); append!(vy, nvy[2:end])
         return x, y, vx, vy, ts
     end
 
-    @inbounds while count < t
-
-        ismagnetic && isray && (prevω = p.ω)
+    @inbounds while check_condition(f, n, t, i, p) # count < t
         i, ct = bounce!(p, bd, raysidx, raysplitters)
-        t_to_write += ct
-
-        if isperiodic(i, bd)
-            # do nothing at periodic obstacles
+        flight += ct
+        if isperiodic(i, bd) # do nothing at periodic obstacles
             continue
         else
-            if t_to_write ≤ dt
-                # push collision point only
-                push!(ts, t_to_write)
+            if flight ≤ dt # push collision point only
+                push!(ts, flight + t)
                 push!(x, p.pos[1] + p.current_cell[1])
                 push!(y, p.pos[2] + p.current_cell[2])
-
-                push!(vx, p.vel[1])
-                push!(vy, p.vel[2])
+                push!(vx, p.vel[1]); push!(vy, p.vel[2])
             else
-                # extrapolate & append
-                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, t_to_write, dt, prevω)
-
-                append!(ts, nts[2:end] .+ t_total)
-                append!(x, nx[2:end])
-                append!(y, ny[2:end])
-                append!(vx, nvx[2:end])
-                append!(vy, nvy[2:end])
+                nx, ny, nvx, nvy, nts = extrapolate(p, prevpos, prevvel, flight, dt, prevω)
+                append!(ts, nts[2:end] .+ t)
+                append!(x, nx[2:end]); append!(vx, nvx[2:end])
+                append!(y, ny[2:end]); append!(vy, nvy[2:end])
             end
-
             prevpos = p.pos + p.current_cell
             prevvel = p.vel
-
-            t_total += t_to_write
-            count += increment_counter(t, t_to_write)
-            t_to_write = zero(T)
-
+            t += flight; n += 1
+            flight = zero(T)
+            ismagnetic && isray && (prevω = p.ω)
         end
     end
     return x, y, vx, vy, ts
 end
 
+check_condition(f::Int, n, t, i, p) = f > n
+check_condition(f::AbstractFloat, n, t, i, p) = f > t
+check_condition(f, n, t, i, p) = !f(n, t, i, p)
+
+"""
+    extrapolate(particle, prevpos, prevvel, ct, dt[, ω]) → x, y, vx, vy, t
+
+Create the timeseries that connect a `particle`'s previous position and velocity
+`prevpos, prevvel` with the `particle`'s current position and velocity,
+provided that the collision time between previous and current state is `ct`.
+
+`dt` is the sampling time and if the `particle` is `MagneticParticle` then
+you should provide `ω`, the angular velocity that governed the free flight.
+
+Here is how this function is used (for example)
+```julia
+prevpos, prevvel = p.pos + p.current_cell, p.vel
+for _ in 1:5
+    i, ct, pos, vel = bounce!(p, bd)
+    x, y, x, vy, t = extrapolate(p, prevpos, prevvel, ct, 0.1)
+    # append x, y, ... to other vectors or do whatever with them
+    prevpos, prevvel = p.pos + p.current_cell, p.vel
+end
+```
+"""
 function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T, ω::T) where {T <: AbstractFloat}
+                     dt::T, ω::T = p.ω) where {T <: AbstractFloat}
 
     φ0 = atan(prevvel[2], prevvel[1])
     s0, c0 = sincos(φ0)
@@ -307,8 +248,9 @@ function extrapolate(p::MagneticParticle{T}, prevpos::SV{T}, prevvel::SV{T}, ct:
     return x, y, vx, vy, tvec
 end
 
+extrapolate(p::Particle, a, b, c, d, ω) = extrapolate(p::Particle, a, b, c, d)
 function extrapolate(p::Particle{T}, prevpos::SV{T}, prevvel::SV{T}, ct::T,
-                     dt::T, ω::T) where {T <: AbstractFloat}
+                     dt::T) where {T <: AbstractFloat}
 
     tvec = collect(0:dt:ct)
     x = Vector{T}(undef, length(tvec))

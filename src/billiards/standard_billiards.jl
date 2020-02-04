@@ -2,7 +2,8 @@ using StaticArrays
 
 export billiard_rectangle, billiard_sinai, billiard_polygon, billiard_lorentz,
 billiard_raysplitting_showcase, billiard_hexagonal_sinai, billiard_bunimovich,
-billiard_stadium, billiard_mushroom, billiard_logo
+billiard_stadium, billiard_mushroom, billiard_logo, billiard_vertices,
+polygon_vertices
 
 ####################################################
 ## Famous/Standard Billiards
@@ -127,7 +128,7 @@ function billiard_polygon(sides′::Int, r′::Real, center′ = [0,0];
 
     S = typeof(convert(AbstractFloat, r))
     bd = Obstacle{S}[]
-    verteces = [S[r*cos(2π*i/sides), r*sin(2π*i/sides)] .+ center for i in 1:sides]
+    verteces = polygon_vertices(r, sides, center)
 
     if setting == "standard"
         T = InfiniteWall
@@ -160,6 +161,20 @@ function billiard_polygon(sides′::Int, r′::Real, center′ = [0,0];
     end
     return Billiard(bd)
 end
+
+"""
+    polygon_vertices(r, sides, center = [0, 0], θ=0) -> v
+Return the vertices that define a regular polygon with `sides` sides and
+radius `r`, centered at `center`.
+
+Optionally rotate by `θ` degrees.
+"""
+function polygon_vertices(r, sides, center = [0, 0.0], θ = 0)
+    S = typeof(convert(AbstractFloat, r))
+    [S[r*cos(θ + 2π*i/sides), r*sin(θ + 2π*i/sides)] .+ center for i in 1:sides]
+end
+
+
 
 """
     billiard_hexagonal_sinai(r, R, center = [0,0]; setting = "standard")
@@ -351,4 +366,27 @@ function billiard_iris(a′ = 0.2, b′ = 0.4, w′ = 1.0;
     rec = billiard_rectangle(w, w; setting = setting)
     e = Ellipse([w/2, w/2], a, b, true, "Ellipse")
     return Billiard(e, rec.obstacles...)
+end
+
+"""
+    billiard_vertices(v, type = FiniteWall)
+Construct a polygon billiard that connects the given vertices `v`
+(vector of 2-vectors). The vertices should construct a billiard in a
+counter-clockwise orientation (i.e. the normal vector always points to the
+left of `v[i+1] - v[i]`.).
+
+`type` decides what kind of walls to use.
+Ths function assumes that the first entry of `v` should be connected with the
+last.
+"""
+function billiard_vertices(vertices, type = FiniteWall)
+    @assert vertices[end] != vertices[1]
+    obs = type[]
+    for i in 1:length(vertices)-1
+        sp, ep = vertices[i], vertices[i+1]
+        push!(obs, type(sp, ep))
+    end
+    sp, ep = vertices[end], vertices[1]
+    push!(obs, type(sp, ep))
+    return Billiard(obs)
 end

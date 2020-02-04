@@ -268,10 +268,11 @@ billiard_sinai
 billiard_bunimovich
 billiard_mushroom
 billiard_polygon
+billiard_vertices
+billiard_iris
 billiard_hexagonal_sinai
 billiard_raysplitting_showcase
 billiard_logo
-billiard_iris
 ```
 
 ## Particle types

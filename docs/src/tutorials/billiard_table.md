@@ -114,18 +114,29 @@ This is the list of `Obstacle`s you can use when creating your own billiard.
 
 ```@docs
 Obstacle
+```
+
+### Curved
+```@docs
 Disk
 RandomDisk
 Antidot
 Semicircle
+Ellipse
+```
+
+### Lines
+```@docs
+Wall
 InfiniteWall
 RandomWall
 PeriodicWall
 SplitterWall
 FiniteWall
-Ellipse
 ```
+
 ---
+
 In addition, `translate` is a helpful function:
 ```@docs
 translate

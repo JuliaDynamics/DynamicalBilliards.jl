@@ -83,6 +83,13 @@ DynamicalBilliards.specular!
 DynamicalBilliards.periodicity!
 ```
 
+### Timeseries
+```@docs
+DynamicalBilliards.extrapolate
+```
+
+---
+
 !!! warning "Cyclotron center is a field of `MagneticParticle`"
     For almost all operations involving a `MagneticParticle`, the center of
     the cyclotron is required. In order to compute this center only when it
