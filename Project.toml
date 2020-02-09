@@ -13,7 +13,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-Elliptic = "0.5"
+Elliptic = "0.5, 1.0"
 Requires = "0.5, 1.0"
 StaticArrays = "0.12, 1.0"
 julia = "1"
