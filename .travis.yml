@@ -2,21 +2,21 @@ language: julia
 os:
   - linux
   - windows
-#  - osx
+  - osx
 
 julia:
   - 1
+  - 1.0
+  # - nightly
+
+before_script:
+  - git config --global user.name "GitUser"
+  - git config --global user.email "git@us.er"
 
 matrix:
   allow_failures:
-  - julia: nightly
-
-notifications:
-  email:
-    on_success: never
-    on_failure: never
-
-jobs:
+    - julia: nightly
+  fast_finish: true
   include:
     - stage: "Documentation"
       julia: 1
@@ -25,6 +25,6 @@ jobs:
         - julia -e 'using Pkg; ENV["PYTHON"]=""; py="PyCall"; Pkg.add(py); Pkg.build(); Pkg.add("PyPlot"); Pkg.add("StaticArrays")'
 
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
-                                               Pkg.instantiate()'
+                                    Pkg.instantiate();'
         - julia --project=docs/ docs/make.jl
       after_success: skip
