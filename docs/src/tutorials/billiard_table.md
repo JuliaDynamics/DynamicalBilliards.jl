@@ -11,7 +11,7 @@ A `Billiard` is a wrapper of a `Tuple` of `Obstacle`s.
 The abstract Type `Obstacle{T}` is the supertype of all objects that a particle may collide with, with global billiard precision of type `T`.
 
 There are many premade functions that construct well-known billiards, like the periodic Sinai billiard.
-You can find all of them at the [Standard Billiards Library](/basic/high_level/#standard-billiards-library).
+You can find all of them at the [Standard Billiards Library](@ref).
 
 To create a custom billiard from scratch, it is often convenient to start with an empty `Vector{Obstacle{T}}`:
 ```@example tut1
@@ -19,7 +19,7 @@ using DynamicalBilliards
 bd = Obstacle{Float64}[]  # T<: AbstractFloat
 ```
 and then you create your obstacles one by one and add them to it. All obstacles that are already defined in the package
-can be found at the [Obstacles library](/#Obstacle-Library) below.
+can be found at the [Obstacle Library](@ref) below.
 
 For the example of this page, we will create a hexagonal billiard with a disk in the middle step-by-step (the function [`billiard_polygon`](@ref) creates a polygonal billiard table already).
 
@@ -79,8 +79,8 @@ savefig("tut1.svg"); nothing # hide
 
 
 The billiard table now works for straight or magnetic propagation.
-To expand this to ray-splitting you have to use ray-splitting `Obstacle`s ([see the tutorial on Ray-Splitting](/tutorials/ray-splitting)).
-Additional information on how to define your own `Obstacle` sub-type is given in the tutorial on [Defining your own Obstacles](/tutorials/own_obstacle).
+To expand this to ray-splitting you have to use ray-splitting `Obstacle`s (see the tutorial on Ray-Splitting).
+Additional information on how to define your own `Obstacle` sub-type is given in the tutorial on [Defining your own Obstacles](@ref).
 
 If you make *any* billiard system that you think is cool and missing from this package, you are more than welcome to submit a PR extending the Standard Billiards Library with your contribution!
 

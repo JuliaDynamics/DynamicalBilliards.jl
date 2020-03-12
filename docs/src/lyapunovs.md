@@ -1,3 +1,4 @@
+# Lyapunov Exponents
 The Finite Time Lyapunov Spectrum (FTLS) for a 2D billiard system consists of a
 set of 4 numbers $\lambda_i \, , \{ i = 1, ...,4 \}$ that characterize how fast
 the separation of initially close initial conditions grows.

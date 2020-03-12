@@ -66,9 +66,11 @@ animate_evolution(particles, bd, 10.0, (raya,);
 colors = cs, disable_axis = true)
 ```
 
+```@raw html
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/DynamicalBilliards_v3.mp4?raw=true" type="video/mp4">
 </video>
+```
 
 ## Mean Free Path of the Lorentz Gas
 ```@example tut3

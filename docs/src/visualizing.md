@@ -1,3 +1,4 @@
+# Visualizing & Animating
 All plotting functionality of `DynamicalBilliards` lies within a few well-defined functions that use the `PyPlot` package to plot aspects of the system.
 
 All plotting functions are brought into scope when `using PyPlot`. The functions are:
