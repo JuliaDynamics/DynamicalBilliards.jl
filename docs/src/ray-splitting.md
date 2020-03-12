@@ -26,8 +26,6 @@ savefig("raybil.svg"); nothing # hide
 ```
 ![](raybil.svg)
 
-<!-- ![Ray-splitting billiard](https://i.imgur.com/UKsyURY.png) -->
-
 ## 2. The `RaySplitter` structure
 In the second step, you have to define 2+1 functions: transmission probability,
 refraction angle and optionally new angular velocity after transmission. These functions, as well as which obstacles participate in ray-splitting, are bundled into a special structure:
@@ -117,7 +115,7 @@ this motion using [`animate_evolution`](@ref)!
 !!! important "Angle of refraction is clamped"
     Internally we clamp the output of the angle of refraction function. Let `c = DynamicalBilliards.CLAMPING_ANGLE` (currently `c = 0.1`). We clamp `θ` to
     `-π/2 + c ≤ θ ≤ π/2 - c`. This is so that the relocating algorithm does not fall into an infinite loop.
-		
+
 		You can change the value of `c` but very small values can lead to infinite loops in extreme cases.
 
 ## The Ray-Splitting Algorithm
