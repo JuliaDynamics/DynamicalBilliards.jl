@@ -14,13 +14,13 @@ For example, to implement a ray-splitting billiard you only need to define one a
 After reading through this page, you will be able to use almost all aspects of `DynamicalBilliards` with minimal effort.
 
 !!! tip "Visualizations"
-    Visualizing the billiards, particles and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing](/visualizing) page.
+    Visualizing the billiards, particles, and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing & Animating](@ref) page.
 
----
+
 ## Billiard
 A [`Billiard`](@ref) is simply a collection of [`Obstacle`](@ref) subtypes. Particles are propagating inside a `Billiard`, bouncing from obstacle to obstacle while having constant velocity in-between.
 
-There is a [tutorial](/tutorials/billiard_table) on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](#standard-billiards-library) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
+There is a tutorial on how to create your own billiard. In addition, there are many pre-defined billiards that can be found in the [Standard Billiards Library](@ref) section. That is why knowing how to construct a [`Billiard`](@ref) is not important at this point.
 
 In this page we will be using the Bunimovich billiard as an example:
 ```@example 2
@@ -51,12 +51,10 @@ the angular velocity:
 mp = MagneticParticle(x0, y0, φ0, ω)
 ```
 
-
-!!! faq "Why the `{Float64}` ?"
-    When creating a billiard or a particle, the object is printed with `{Float64}` at the end. This shows what type of numbers are used for *all* numerical operations. If you are curious you can learn more about it in the [numerical precision page](/low_level/#numerical-precision).
+When creating a billiard or a particle, the object is printed with `{Float64}` at the end. This shows what type of numbers are used for *all* numerical operations. If you are curious you can learn more about it in the [Numerical Precision](@ref).
 
 !!! danger "Particles must be inside the Billiard!"
-    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [Internals page](low_level).
+    Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [Internals](@ref) page.
 
 ## Random initial conditions
 
@@ -85,7 +83,7 @@ There is a simple function for that, called `evolve!` (or `evolve` if you don't 
 evolve!
 ```
 ---
-Forget the ray-splitting part for now (see [Ray-Splitting](/ray-splitting)).
+Forget the ray-splitting part for now (see [Ray-Splitting](@ref)).
 
 Let's see an example:
 ```@example 2
@@ -194,9 +192,8 @@ It is very easy to create your own function that calculates an "escape time": th
 ```@docs
 escapetime
 ```
-!!! tip "Creating a door"
-    To create a "door" simply visit the [library page](library) to learn more about the individual obstacle types (specifically [`FiniteWall`](@ref)). To be able to
-    combine them into a [`Billiard`](@ref) you should also check out the tutorial on [defining your own billiard](tutorials/billiard_table).
+
+To create a "door" simply use [`FiniteWall`](@ref).
 
 For example, the default implementation of the mushroom billiard has a "door" at the
 bottom of the stem. Thus,

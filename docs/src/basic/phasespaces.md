@@ -50,8 +50,6 @@ savefig("boundarymapmag.svg"); nothing # hide
 ```
 ![](boundarymapmag.svg)
 
-<!-- ![Boundary map with magnetic field](https://i.imgur.com/YoW1FVD.png) -->
-
 ## Phase Space Portions
 It is possible to compute the portion of phase space covered by a particle as it
 is evolved in time. We have two methods, one for the "boundary" coordinates (2D space)

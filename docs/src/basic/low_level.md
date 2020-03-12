@@ -11,7 +11,7 @@ Firstly one defines a [`Billiard`](@ref) and optionally some [`RaySplitter`](@re
 2. Find the collision that happens first (in time), and the obstacle corresponding to that.
 3. [`DynamicalBilliards.relocate!`](@ref) the particle, and ensure that it is **inside** the billiard. This means that [`DynamicalBilliards.distance`](@ref) between particle and obstacle is either positive or close to machine precision.
 4. (Optionally) check if there is transmission for ray-splitting: `T(φ) > rand()`
-  * If yes, perform the ray-splitting algorithm (see the [ray-splitting](ray-splitting) page).
+  * If yes, perform the ray-splitting algorithm (see the [Ray-Splitting](@ref) page).
   * If not, then [`DynamicalBilliards.resolvecollision!`](@ref) of the particle with the obstacle (specular or periodic conditions).
 
 5. Continue this loop for a given amount of time.
@@ -43,7 +43,7 @@ The main concerns during evolution in a billiard table are:
 1. The particle must never leak out of the billiard table. This is simply translated
    to the `distance` function being positive after any collision _and_ that `collision` takes care of extreme cases with very small (but negative) distance.
 2. The collision time is never infinite, besides the cases of
-   [pinned particles](physics/#pinned-particles) in a magnetic billiard.
+   [Pinned Particles](@ref) in a magnetic billiard.
 
 These are solved with two ways:
 1. After the next collision is computed, `relocate!` brings the particle to that point and calculates the `distance` with the colliding obstacle. If it is negative, it translates the particle's position by this distance, _along the normal vector_.

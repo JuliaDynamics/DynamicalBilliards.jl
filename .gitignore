@@ -2,3 +2,5 @@ docs/build/
 docs/site/
 Manifest.toml
 update*
+*.scss
+*.css

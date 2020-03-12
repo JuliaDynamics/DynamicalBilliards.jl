@@ -1,4 +1,4 @@
-# Creating your own `Obstacle` Type
+# Defining your own Obstacles
 
 In this tutorial we will go through the processes of creating a new obstacle type, a `Semicircle`. This type is already used in the [`billiard_bunimovich`](@ref) and [`billiard_mushroom`](@ref) functions.
 
@@ -30,7 +30,7 @@ is which. It is also used when printing a [`Billiard`](@ref). If not used,
 then `string(typeof(obstacle))` is used instead.
 
 Notice that the `struct` **must be** parameterized by `T<:AbstractFloat` (see
-the [numerical precision](/physics/#numerical-precision) page for more).
+the [Numerical Precision](@ref) page for more).
 
 For convenience, we will also define:
 ```julia
@@ -137,7 +137,7 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 ## Optional Methods
 
 1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
-1. [`collision`](@ref) with [`MagneticParticle`](/basic/high_level/#particles) : enables magnetic propagation
+1. [`collision`](@ref) with [`MagneticParticle`](@ref) : enables magnetic propagation
 2. [`plot`](@ref) with `obstacle` : enables plotting
 3. [`DynamicalBilliards.specular!`](@ref) with `offset` : Allows [`lyapunovspectrum`](@ref) to be computed.
 4. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
@@ -155,7 +155,7 @@ end
 ```
 
 
-The [`collision`](@ref) method for [`MagneticParticle`](/basic/high_level/#particles) is also tricky, however it is almost identical with the method for the general `Circular` obstacle:
+The [`collision`](@ref) method for [`MagneticParticle`](@ref) is also tricky, however it is almost identical with the method for the general `Circular` obstacle:
 ```julia
 function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     ω = p.omega

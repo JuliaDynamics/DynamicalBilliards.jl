@@ -18,13 +18,11 @@ vectors have the initial conditions, repeated once.
 [`evolve!`](@ref) can be given an additional `warning` keyword argument in the case
 of magnetic propagation, e.g. `warning = true` that throws a  message whenever a pinned particle is evolved.
 
----
-
 ## Velocity measure
 
 Both `Particle` and `MagneticParticle` are assumed to **always** have a velocity vector of measure 1 during evolution. This simplifies the formulas used internally to a significant amount.
 
-However, during ray-splitting, the a `MagneticParticle` may be in areas with different angular velocities (result of the [ω_new](/tutorials/ray-splitting/#ray-splitting-functions) function). Physically, in such a situation, the velocity measure of the particle could also change. This change depends on the forces acting on the particle (e.g. magnetic field) as well as the relation of the momentum with the velocity (functional type of kinetic energy).
+However, during ray-splitting, the a `MagneticParticle` may be in areas with different angular velocities (result of the `ω_new` function). Physically, in such a situation, the velocity measure of the particle could also change. This change depends on the forces acting on the particle (e.g. magnetic field) as well as the relation of the momentum with the velocity (functional type of kinetic energy).
 
 In any case, such a change is not accounted for internally by `DynamicalBilliards`. However it is very easy to implement this by "re-normalizing" the angular velocities you use. Since the "code" velocity has measure one, the rotation radius is given by
 
