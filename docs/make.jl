@@ -8,6 +8,7 @@ using DynamicalBilliards
 using Documenter, PyPlot, DocumenterTools
 
 # %%
+using DocumenterTools: Themes
 # download the themes
 for file in ("juliadynamics-lightdefs.scss", "juliadynamics-darkdefs.scss", "juliadynamics-style.scss")
     download("https://raw.githubusercontent.com/JuliaDynamics/doctheme/master/$file", joinpath(@__DIR__, file))
