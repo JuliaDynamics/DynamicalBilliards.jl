@@ -90,9 +90,11 @@ p = MagneticParticle(0, -0.5, 0, 1.0)
 animate_evolution(p, bd, 10.0; savename = "penta")
 ```
 
+```@raw html
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/penta.mp4?raw=true" type="video/mp4">
 </video>
+```
 
 The cool thing about [`animate_evolution`](@ref) is that it can animate multiple
 particles simultaneously! For example, here is a beautiful demonstration of chaos
@@ -106,11 +108,11 @@ ps = [Particle(1, 0.6 + 0.0005*i, 0) for i in 1:N]
 animate_evolution(ps, bd, 10.0; colors = cs, tailtime = 1.5, savename = "disperse")
 ```
 
+```@raw html
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/disperse.mp4?raw=true" type="video/mp4">
 </video>
-
-
+```
 
 
 ## Periodic Billiards

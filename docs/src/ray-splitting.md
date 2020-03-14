@@ -32,7 +32,7 @@ refraction angle and optionally new angular velocity after transmission. These f
 ```@docs
 RaySplitter
 ```
----
+
 If you want different type of transmission/refraction functions for
 different obstacles, then you define multiple `RaySplitter`s.
 
@@ -83,6 +83,8 @@ If you have many instances of `RaySplitter` you pass a tuple of them.
 
 For example,
 ```@example ray
+using Random
+Random.seed!(42)
 p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
 xt, yt, vxt, vyt, tt = timeseries(p, bd, 100, raysplitters)
@@ -97,12 +99,13 @@ You can see that at some points the particle crossed the boundaries of the
 red obstacles, which allow for ray splitting. It is even cooler to animate
 this motion using [`animate_evolution`](@ref)!
 
+```@raw html
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/ray.mp4?raw=true" type="video/mp4">
 </video>
+```
 
-
-!!! warning "Resetting the billiard"
+!!! info "Resetting the billiard"
     Notice that evolving a particle inside a billiard always mutates the billiard
     if ray-splitting is used. This means that you should always set the fields
     `pflag` of some obstacles to the values you desire after *each* call
@@ -112,11 +115,10 @@ this motion using [`animate_evolution`](@ref)!
     The function `reset_billiard!(bd)` turns all `pflag`s to `true`.
 
 
-!!! important "Angle of refraction is clamped"
+!!! warning "Angle of refraction is clamped"
     Internally we clamp the output of the angle of refraction function. Let `c = DynamicalBilliards.CLAMPING_ANGLE` (currently `c = 0.1`). We clamp `θ` to
     `-π/2 + c ≤ θ ≤ π/2 - c`. This is so that the relocating algorithm does not fall into an infinite loop.
-
-		You can change the value of `c` but very small values can lead to infinite loops in extreme cases.
+    You can change the value of `c` but very small values can lead to infinite loops in extreme cases.
 
 ## The Ray-Splitting Algorithm
 In this section we describe the algorithm we follow to implement the ray-splitting
@@ -191,12 +193,14 @@ ps = [Particle(0.1, y, 0.0) for y in 0.4:0.05:1.1]
 
 # animate
 animate_evolution(ps, bd, 2.0, rs, colors = ["C0" for i ∈ 1:length(ps)],
-	tailtime=2.5, savename = "lens")
+  tailtime=2.5, savename = "lens")
 ```
+
+```@raw html
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/lens.mp4?raw=true" type="video/mp4">
 </video>
-
+```
 
 
 ## Example of Affecting Multiple Obstacles
@@ -229,6 +233,8 @@ xlim(-1, 2); ylim(-1, 2);
 animate_evolution(p, bd, 10.0, (ray,); ax = gca(), savename = "inverse", tailtime = 3.0)
 ```
 
+```@raw html
 <video width="100%" height="auto" controls>
 <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/inverse.mp4?raw=true" type="video/mp4">
 </video>
+```
