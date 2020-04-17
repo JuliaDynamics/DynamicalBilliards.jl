@@ -44,10 +44,12 @@ Check if it is on the correct side of the obstacle. If not,
 change the particle position by [`distance`](@ref) along the [`normalvec`](@ref)
 of the obstacle.
 """
-function relocate!(p::AbstractParticle{T},
-    o::Obstacle{T}, tmin::T, cp::SV{T}) where {T}
-
+function relocate!(p::AbstractParticle{T}, o::Obstacle{T}, tmin::T, cp::SV{T}) where {T}
     propagate!(p, cp, tmin) # propagate to collision point
+    okay = _correct_pos!(p, o)
+    return okay
+end
+function _correct_pos!(p, o)
     d = distance(p.pos, o)
     okay = _okay(d, o)
     if !okay
