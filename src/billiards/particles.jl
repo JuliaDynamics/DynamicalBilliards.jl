@@ -85,6 +85,9 @@ mutable struct MagneticParticle{T<:AbstractFloat} <: AbstractParticle{T}
     end
 end
 
+ismagnetic(x) = false
+ismagnetic(x::MagneticParticle) = true
+
 function Base.getproperty(p::MagneticParticle, s::Symbol)
     if s == :ω
         return Base.getfield(p, :omega)
