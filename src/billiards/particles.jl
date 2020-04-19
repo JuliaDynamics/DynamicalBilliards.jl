@@ -141,15 +141,17 @@ end
 ## Aux
 ####################################################
 """
-    particlebeam(x0, y0, φ, N, dx, ω = nothing) → ps
+    particlebeam(x0, y0, φ, N, dx, ω = nothing, T = eltype(x0)) → ps
 Make `N` particles, all with direction `φ`, starting at `x0, y0`. The particles
 don't all have the same position, but are instead spread by up to `dx` in the
 direction normal to `φ`.
+
+The particle element type is `T`.
 """
-function particlebeam(x0, y0, φ, N, dx, ω = nothing, T = Float64)
-    n = sincos(φ)
+function particlebeam(x0, y0, φ, N, dx, ω = nothing, T = eltype(x0))
+    n = cossin(φ)
     xyφs = [
-    T.((x0 + i*dx*n[1]/N, y0 + i*dx*n[2]/N, φ)) for i in range(-N/2, N/2; length = N)
+    T.((x0 - i*dx*n[2]/N, y0 + i*dx*n[1]/N, φ)) for i in range(-N/2, N/2; length = N)
     ]
     if isnothing(ω)
         ps = [Particle(z...) for z in xyφs]
