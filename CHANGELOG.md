@@ -1,3 +1,5 @@
+# 3.11.0
+* `particlebeam` and `randominside_xyφ` functions.
 # 3.10.0
 * It is now possible in `timeseries!` to evolve a particle until a certain boolean condition is met.
 

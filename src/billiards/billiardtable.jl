@@ -1,4 +1,4 @@
-export Billiard, randominside
+export Billiard, randominside, randominside_xyφ
 #######################################################################################
 ## Billiard Table
 #######################################################################################
@@ -122,37 +122,40 @@ function cellsize(
 end
 
 """
-    randominside(bd::Billiard [, ω])
-Return a particle with random allowed initial conditions inside the given
+    randominside(bd::Billiard [, ω]) → p
+Return a particle `p` with random allowed initial conditions inside the given
 billiard. If supplied with a second argument the
 type of the returned particle is `MagneticParticle`, with angular velocity `ω`.
 
 **WARNING** : `randominside` works for any **convex** billiard but it does
 not work for non-convex billiards. (this is because it uses `distance`)
 """
-randominside(bd::Billiard) = Particle(_randominside(bd)...)
-randominside(bd::Billiard{T}, ω) where {T} =
+randominside(bd::Billiard, ω::Nothing = nothing) = Particle(_randominside(bd)...)
+randominside(bd::Billiard{T}, ω::Real) where {T} =
 MagneticParticle(_randominside(bd)..., T(ω))
 
-
-
-function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
-    #1. position
+"""
+    randominside_xyφ(bd::Billiard) → x, y, φ
+Same as [`randominside`](@ref) but only returns position and direction.
+"""
+function randominside_xyφ(bd::Billiard{T}) where {T<:AbstractFloat}
     xmin::T, ymin::T, xmax::T, ymax::T = cellsize(bd)
     xp = T(rand())*(xmax-xmin) + xmin
     yp = T(rand())*(ymax-ymin) + ymin
     pos = SV{T}(xp, yp)
     dist = distance_init(pos, bd)
-
     while dist <= sqrt(eps(T))
         xp = T(rand())*(xmax-xmin) + xmin
         yp = T(rand())*(ymax-ymin) + ymin
         pos = SV{T}(xp, yp)
         dist = distance_init(pos, bd)
     end
+    return pos[1], pos[2], T(2π*rand())
+end
 
-    #2. velocity
-    φ = T(2π*rand())
+function _randominside(bd::Billiard{T}) where {T<:AbstractFloat}
+    x, y, φ = randominside_xyφ(bd)
+    pos = SV{T}(x, y)
     vel = SV{T}(sincos(φ)...)
     return pos, vel, zero(SV{T}) # this zero is the `current_cell`
 end

@@ -1,6 +1,6 @@
-export AbstractParticle, Particle, MagneticParticle
+export AbstractParticle, Particle, MagneticParticle, particlebeam
 ####################################################
-## Particles
+## Particle
 ####################################################
 """
     AbstractParticle
@@ -52,7 +52,9 @@ print(io, "Particle{$T}\n",
 "position: $(p.pos+p.current_cell)\nvelocity: $(p.vel)")
 
 
-
+####################################################
+## MagneticParticle
+####################################################
 """
 ```julia
 MagneticParticle(ic::AbstractVector{T}, ω::Real) # where ic = [x0, y0, φ0]
@@ -133,4 +135,25 @@ Return the center of cyclotron motion of the particle.
 function cyclotron(p, use_cell)
     pos = use_cell ? p.pos + p.current_cell : p.pos
     return pos, p.r
+end
+
+####################################################
+## Aux
+####################################################
+"""
+    particlebeam(x0, y0, φ, N, dx, ω = nothing) → ps
+Make `N` particles, all with direction `φ`, starting at `x0, y0`. The particles
+don't all have the same position, but are instead spread by up to `dx` in the
+direction normal to `φ`.
+"""
+function particlebeam(x0, y0, φ, N, dx, ω = nothing, T = Float64)
+    n = sincos(φ)
+    xyφs = [
+    T.((x0 + i*dx*n[1]/N, y0 + i*dx*n[2]/N, φ)) for i in range(-N/2, N/2; length = N)
+    ]
+    if isnothing(ω)
+        ps = [Particle(z...) for z in xyφs]
+    else
+        ps = [MagneticParticle(z..., T(ω)) for z in xyφs]
+    end
 end

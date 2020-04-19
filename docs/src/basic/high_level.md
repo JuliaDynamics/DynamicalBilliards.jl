@@ -36,8 +36,7 @@ Currently there are two types of particles:
 * [`Particle`](@ref), which propagates as a straight line.
 * [`MagneticParticle`](@ref), which propagates as a circle instead of a line (similar to electrons in a perpendicular magnetic field).
 
-There are two ways to create a particle. The first one is to provide the
-constructor with some initial conditions:
+To make a particle, provide the constructor with some initial conditions:
 ```@example 2
 x0 = rand(); y0 = rand();
 φ0 = 2π*rand()
@@ -53,14 +52,20 @@ mp = MagneticParticle(x0, y0, φ0, ω)
 
 When creating a billiard or a particle, the object is printed with `{Float64}` at the end. This shows what type of numbers are used for *all* numerical operations. If you are curious you can learn more about it in the [Numerical Precision](@ref).
 
+You can initialize several particles with the same direction but slightly different position is the following function:
+```@docs
+particlebeam
+```
+
 !!! danger "Particles must be inside the Billiard!"
     Keep in mind that the particle must be initialized **inside a billiard** for any functionality to work properly and make sense. If you are not sure what we mean by that, then you should check out the [Internals](@ref) page.
 
 ## Random initial conditions
 
-If you have a `Billiard` which is not a rectangle, creating many random initial conditions inside it can be a pain. Fortunately, the second way to create a particle is to use the following function:
+If you have a `Billiard` which is not a rectangle, creating many random initial conditions inside it can be a pain. Fortunately, we have the following function:
 ```@docs
 randominside
+randominside_xyφ
 ```
 ---
 
