@@ -150,9 +150,15 @@ The particle element type is `T`.
 """
 function particlebeam(x0, y0, φ, N, dx, ω = nothing, T = eltype(x0))
     n = cossin(φ)
-    xyφs = [
-    T.((x0 - i*dx*n[2]/N, y0 + i*dx*n[1]/N, φ)) for i in range(-N/2, N/2; length = N)
-    ]
+    if N > 1
+        xyφs = [
+        T.((x0 - i*dx*n[2]/N, y0 + i*dx*n[1]/N, φ)) for i in range(-N/2, N/2; length = N)
+        ]
+    elseif N == 1
+        xyφs = [T.((x0, y0, φ))]
+    else
+        error("must be N ≥ 1")
+    end
     if isnothing(ω)
         ps = [Particle(z...) for z in xyφs]
     else

@@ -245,6 +245,8 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
 
     abs(sloc) + sw/2 > cr && error("Stem is outside the mushroom cap!")
 
+    sl, sw, cr, sloc = promote(sl, sw, cr, sloc)
+    T = eltype(sl)
     leftcorn = SV(-sw/2 + sloc, 0)
     rightcorn = SV(sw/2 + sloc, 0)
     upleftcorn = SV(-sw/2 + sloc, sl)
@@ -263,8 +265,7 @@ function billiard_mushroom(stem_length = 1.0, stem_width=0.2, cap_radious=1.0,
     capbotright = FiniteWall(
     uprightcorn, farright, SV(0, sw), false, "Cap bottom right")
 
-    cap = Semicircle([0.0, sl], cr, [0.0, -1.0], "Mushroom cap")
-
+    cap = Semicircle([0, sl], cr, [0, -T(1.0)], "Mushroom cap")
     return Billiard(stembot, stemright, capbotright, cap, capbotleft, stemleft)
 end
 
