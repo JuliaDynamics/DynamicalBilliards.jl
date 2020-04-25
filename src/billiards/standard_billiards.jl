@@ -293,23 +293,24 @@ end
 billiard_stadium = billiard_bunimovich
 
 """
-    billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25) -> bd, ray
+    billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25, T = Float64) -> bd, ray
 Create the billiard used as logo of `DynamicalBilliards` and return it
 along with the tuple of raysplitters.
 """
-function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25)
+function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25, T = Float64)
 
     cos6 = cos(π/6)
     β = (h - cos6*α)/cos6
     t = α + 2β
-    center_of_mass = [0.0, √3*t/6]
-    startloc = [-α/2, 0.0]
+    (α, r, h, off, cos6, β, t) = T.((α, r, h, off, cos6, β, t))
+    center_of_mass = T[0.0, √3*t/6]
+    startloc = T[-α/2, 0.0]
 
     # create directions of the hexagonal 6:
-    hexvert = [(cos(2π*i/6), sin(2π*i/6)) for i in 1:6]
+    hexvert = [T.((cos(2π*i/6), sin(2π*i/6))) for i in 1:6]
     dirs = [SVector{2}(hexvert[i] .- hexvert[mod1(i+1, 6)]) for i in 1:6]
 
-    frame = Obstacle{Float64}[]
+    frame = Obstacle{T}[]
 
     sp = startloc
     ep = startloc + α*dirs[1]
@@ -319,18 +320,18 @@ function billiard_logo(;h=1.0, α=0.8, r=0.18, off=0.25)
 
     for i in 2:6
         s = iseven(i) ? β : α
-        T = InfiniteWall #iseven(i) ? RandomWall : InfiniteWall
+        WT = InfiniteWall #iseven(i) ? RandomWall : InfiniteWall
         sp = frame[i-1].ep
         ep = sp + s*dirs[i]
         normal = (w = ep .- sp; [-w[2], w[1]])
-        push!(frame, T(sp, ep, normal, "frame $(i)"))
+        push!(frame, WT(sp, ep, normal, "frame $(i)"))
     end
 
 
     # Radii of circles that compose the Julia logo
-    offset = [0.0, off]
+    offset = T[0.0, off]
 
-    R = [cos(2π/3) -sin(2π/3);
+    R = T[cos(2π/3) -sin(2π/3);
          sin(2π/3)  cos(2π/3)]
 
 
