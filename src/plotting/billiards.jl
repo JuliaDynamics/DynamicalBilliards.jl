@@ -36,7 +36,7 @@ Works for both periodic and normal billiards.
 function plot(bd::Billiard) end
 
 function plot(bd::Billiard{T};
-    ax = (PyPlot.figure(); PyPlot.gca())) where {T}
+    ax = (PyPlot.figure(); PyPlot.gca())) where {T <: AbstractFloat}
     PyPlot.sca(ax)
     for obst in bd; plot(obst); end
     xmin, ymin, xmax, ymax = cellsize(bd)
@@ -48,7 +48,7 @@ function plot(bd::Billiard{T};
     if !isinf(ymin) && !isinf(ymax)
         PyPlot.ylim(ymin - 0.1dy, ymax + 0.1dy)
     end
-    return nothing
+    return ax
 end
 
 function plot(bd::Billiard, xmin, ymin, xmax, ymax;
@@ -72,7 +72,7 @@ function plot(bd::Billiard, xmin, ymin, xmax, ymax;
 
     PyPlot.xlim(xmin, xmax)
     PyPlot.ylim(ymin, ymax)
-    return nothing
+    return ax
 end
 
 function plot(bd, xt::AbstractVector, yt::AbstractVector;
@@ -114,7 +114,7 @@ function plot(bd, xt::AbstractVector, yt::AbstractVector;
             PyPlot.gca().set_aspect("equal")
         end
     end
-    return nothing
+    return ax
 end
 
 function plot_periodic_rectangle(bd, xmin, ymin, xmax, ymax)
