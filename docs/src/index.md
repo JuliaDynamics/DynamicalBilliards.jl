@@ -47,8 +47,7 @@ kind enough to cite the software paper associated with `DynamicalBilliards`.
 The DOI is
 https://doi.org/10.21105/joss.00458 and you can cite as:
 
->G. Datseris, [The Journal of Open Source Software **2**, 458
-(2017)](https://doi.org/10.21105/joss.00458).
+> G. Datseris, [The Journal of Open Source Software **2**, 458 (2017)](https://doi.org/10.21105/joss.00458).
 
 or if you use BibTeX:
 ```
