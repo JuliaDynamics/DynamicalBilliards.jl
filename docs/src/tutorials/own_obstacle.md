@@ -55,14 +55,11 @@ to define a method for [`DynamicalBilliards.specular!`](@ref). You can however d
 custom methods for [`DynamicalBilliards.specular!`](@ref), which is what we have done e.g.
 for [`RandomDisk`](@ref).
 
-!!! note "Use `import`!"
-    Notice that you have to properly `import` the methods to extend them. For example,
-    do `import DynamicalBilliards: normalvec, distance, collision` time.
 
-The first method is very simple, just do:
+
+The first method is very simple. *(Remember that in Julia to extend a function with a new method you must preface it with the parent module)*
 ```julia
-import DynamicalBilliards: normalvec, distance, collision
-normalvec(d::Semicircle, pos) = normalize(d.c - pos)
+DynamicalBilliards.normalvec(d::Semicircle, pos) = normalize(d.c - pos)
 ```
 Since the function is only used during `distance` and
 [`DynamicalBilliards.resolvecollision!`](@ref) and since we will be writing explicit methods for the first,
@@ -79,7 +76,7 @@ expanded. That is because when the particle is on the "open" half of the
 disk, the distance is not correct. We write:
 ```julia
 SV = SVector{2} #convenience
-function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
+function DynamicalBilliards.distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
     # Check on which half of circle is the particle
     v1 = pos .- s.c
     nn = dot(v1, s.facedir)
@@ -98,14 +95,14 @@ the "other side".
 Finally, the method for [`collision`](@ref) is by far the most *trickiest*. But,
 with pen, paper and a significant amount of patience, one can find a way:
 ```julia
-function collision(p::Particle{T}, d::Semicircle{T})::T where {T}
+function DynamicalBilliards.collision(p::Particle{T}, d::Semicircle{T})::T where {T}
 
     dc = p.pos - d.c
     B = dot(p.vel, dc)         #velocity towards circle center: B > 0
     C = dot(dc, dc) - d.r*d.r    #being outside of circle: C > 0
     Δ = B^2 - C
 
-    Δ ≤ 0 && return nocollision(T)
+    Δ ≤ 0 && return DynamicalBilliards.nocollision(T)
     sqrtD = sqrt(Δ)
 
     nn = dot(dc, d.facedir)
@@ -122,10 +119,10 @@ function collision(p::Particle{T}, d::Semicircle{T})::T where {T}
     # This check is necessary to not collide with the non-existing side
     newpos = p.pos + p.vel * t
     if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
-        return nocollision(T)
+        return DynamicalBilliards.nocollision(T)
     end
     # If collision time is negative, return Inf:
-    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t*p.vel)
+    t ≤ 0.0 ? DynamicalBilliards.nocollision(T) : (t, p.pos + t*p.vel)
 end
 ```
 
@@ -138,16 +135,14 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 
 1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collision`](@ref) with [`MagneticParticle`](@ref) : enables magnetic propagation
-2. [`plot`](@ref) with `obstacle` : enables plotting
+2. [`plot`](@ref) with `obstacle` : enables plotting and animating
 3. [`DynamicalBilliards.specular!`](@ref) with `offset` : Allows [`lyapunovspectrum`](@ref) to be computed.
 4. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 5. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
 
 The [`DynamicalBilliards.cellsize`](@ref) method is kinda trivial:
 ```julia
-import DynamicalBilliards: cellsize, plot, to_bcoords, from_bcoords
-
-function cellsize(a::Semicircle{T}) where {T}
+function DynamicalBilliards.cellsize(a::Semicircle{T}) where {T}
     xmin, ymin = a.c - a.r
     xmax, ymax = a.c + a.r
     return xmin, ymin, xmax, ymax
@@ -157,7 +152,7 @@ end
 
 The [`collision`](@ref) method for [`MagneticParticle`](@ref) is also tricky, however it is almost identical with the method for the general `Circular` obstacle:
 ```julia
-function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+function DynamicalBilliards.collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
     ω = p.omega
     pc, rc = cyclotron(p)
     p1 = o.c
@@ -200,9 +195,9 @@ end
 Then, we add swag by writing a method for [`plot`](@ref):
 
 ```julia
-using PyPlot
+using PyPlot # brings plot(::Obstacle; kwargs...) into scope
 
-function plot(d::Semicircle; kwargs...)
+function DynamicalBilliards.plot(d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
     theta2 = theta1 + 180
     edgecolor = DynamicalBilliards.obcolor(d)
@@ -226,7 +221,7 @@ were already determined by Dellago, Posch and Hoover [1] – we just have to
 implement them.
 
 ```julia
-function specular!(p::Particle{T}, o::Circular{T},
+function DynamicalBilliards.specular!(p::Particle{T}, o::Circular{T},
 	offset::Vector{SVector{4, T}}) where {T<:AbstractFloat}
 
     n = normalvec(o, p.pos)
@@ -258,9 +253,9 @@ Note that calculating Lyapunov exponents for magnetic particles requires a
 separate method, as the formulas are different for magnetic propagation.
 
 Finally, we also add a methods for [`to_bcoords`](@ref) and [`from_bcoords`](@ref).
-For them, see the relevant source file (use `@which`).
+For them, see the relevant source file (use `@edit`).
 
 
 **References**
 
-[1] : Ch. Dellago et al., Phys. Rev. E 53, 1485 (1996).
+[1]: Dellago et al., Phys. Rev. E 53, 1485 (1996).
