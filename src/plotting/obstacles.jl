@@ -60,3 +60,10 @@ function plot(e::Ellipse; kwargs...)
         linestyle = obls(e), lw = 2.0, kwargs...)
     PyPlot.gca().add_artist(ellipse)
 end
+
+function plot(l::PolarCurve, φs = 0:0.01:2π;
+    ax = PyPlot.gca(), kwargs...)
+    ρs = l.ρ.(φs)
+    xs = @. ρs * cos(φs) + l.c[1]; ys = @. ρs * sin(φs) + l.c[2]
+    ax.plot(xs, ys, color = obcolor(l), lw = 2.0, kwargs...)
+end

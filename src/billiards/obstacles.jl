@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-Semicircle, Ellipse
+Semicircle, Ellipse, PolarCurve
 export translate
 
 using InteractiveUtils
@@ -119,7 +119,6 @@ print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)")
 
 show(io::IO, w::Semicircle{T}) where {T} =
 print(io, "$(w.name) {$T}\n", "center: $(w.c)\nradius: $(w.r)\nfacedir: $(w.facedir)")
-
 
 
 #######################################################################################
@@ -328,6 +327,11 @@ function default_normal(sp, ep)
     return SV{T}(-y, x)
 end
 
+#######################################################################################
+## Special
+#######################################################################################
+
+
 for WT in (:InfiniteWall, :FiniteWall, :RandomWall, :SplitterWall)
     @eval $(WT)(sp, ep) = $(WT)(sp, ep, default_normal(sp, ep))
 end
@@ -399,9 +403,23 @@ function Ellipse(c::AbstractVector{T}, a, b, pflag = true,
 end
 Ellipse{T}(args...) where {T} = Ellipse(args...)
 
-#######################################################################################
+struct PolarCurve{T<:AbstractFloat, F, W} <: Obstacle{T}
+    c::SV{T}
+    ρ::F
+    w::W
+    name::String
+end
+function PolarCurve(
+    c::AbstractVector{T}, ρ::F, w::W, name = "PolarCurve") where {T<:Real, F, W}
+    S = T <: Integer ? Float64 : T
+    return PolarCurve{S, F, W}(SV(c), ρ, w, name)
+end
+show(io::IO, w::PolarCurve{T, F}) where {T, F} =
+print(io, "$(w.name) {$T}\n", "center: $(w.c)\ncurve: $(nameof(w.ρ))")
+
+################################################################################
 ## Normal vectors
-#######################################################################################
+################################################################################
 """
     normalvec(obst::Obstacle, position)
 Return the vector normal to the obstacle's boundary at the given position (which is
@@ -424,6 +442,16 @@ assumed to be very close to the obstacle's boundary).
     return s*normalize(SV((x₀-h)/(e.a*e.a), (y₀-k)/(e.b*e.b)))
 end
 
+function normalvec(l::PolarCurve{T}, pos) where {T}
+    # s = l.pflag ? one(T) : -one(T)
+    x₀, y₀ = pos
+    φ = atan(y₀, x₀); ρ = l.ρ(φ)
+    si, co = sincos(φ)
+    e_ρ = SV(co, si); e_φ = SV(-si, co)
+    w = l.w(φ)
+    t = ρ*e_φ + w*e_ρ # tangential vector
+    return SV(-t[2], t[1]) # rotate 90ᵒ. Looks towards inside of curve
+end
 #######################################################################################
 ## Distances
 #######################################################################################
@@ -441,7 +469,13 @@ end
 Return the **signed** distance between particle `p` and obstacle `o`, based on
 `p.pos`. Positive distance corresponds to the particle being on the *allowed* region
 of the `Obstacle`. E.g. for a `Disk`, the distance is positive when the particle is
-outside of the disk, negative otherwise.
+outside of the disk, negative otherwise. Zero distance means that the particle
+is exactly on top of the obstacle border.
+
+Notice that `distance` does not have to be the absolute true distance based
+on the Euclidean norm. Any measure that satisfies the above criteria is fine.
+For example, for `Ellipse` the distance is simply the ellipse curve at point
+`p.pos` minus 1.
 
     distance(p::AbstractParticle, bd::Billiard)
 Return minimum `distance(p, obst)` for all `obst` in `bd`.
@@ -491,6 +525,12 @@ end
 function distance(pos::SV, e::Ellipse{T})::T where {T}
     d = ((pos[1] - e.c[1])/e.a)^2 + ((pos[2]-e.c[2])/e.b)^2 - 1.0
     e.pflag ? d : -d
+end
+
+function distance(pos::SV, l::PolarCurve)
+    z = pos - l.c
+    φ = atan(z[2], z[1])
+    return norm(z) - l.ρ(φ)
 end
 
 # The entire functionality of `distance_init` is necessary only for
@@ -560,9 +600,25 @@ function cellsize(e::Ellipse{T}) where {T}
     return xmin, ymin, xmax, ymax
 end
 
-function cellsize(a::Semicircle{T}) where {T}
-    xmin, ymin = a.c .- a.r
-    xmax, ymax = a.c .+ a.r
+function cellsize(a::Semicircle)
+    xmin, ymin = a.c - a.r
+    xmax, ymax = a.c + a.r
+    return xmin, ymin, xmax, ymax
+end
+
+function cellsize(l::PolarCurve{T}) where {T}
+    xmin = ymin = T(Inf)
+    xmax = ymax = T(-Inf)
+    φs = 0:0.01:2π
+    for φ in φs
+        r = l.ρ(φ); si, co = sincos(φ)
+        xmin > r*co && (xmin = r*co)
+        xmax < r*co && (xmax = r*co)
+        ymin > r*si && (ymin = r*si)
+        ymax < r*si && (ymax = r*si)
+    end
+    xmin += l.c[1]; xmax += l.c[1]
+    ymin += l.c[2]; ymax += l.c[2]
     return xmin, ymin, xmax, ymax
 end
 
@@ -586,3 +642,4 @@ for T in subtypes(Wall)
 end
 
 translate(e::Ellipse, vec) = Ellipse(e.c + vec, e.a, e.b)
+translate(l::PolarCurve, vec) = PolarCurve(l.c + vec, l.ρ, l.w)
