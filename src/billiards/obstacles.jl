@@ -541,11 +541,11 @@ function distance(pos::SV, e::Ellipse{T})::T where {T}
 end
 
 # The entire functionality of `distance_init` is necessary only for
-# FiniteWall !!!
+# FiniteWall and FiniteSplitterWall !!!
 distance_init(p::AbstractParticle, a::Obstacle) = distance_init(p.pos, a)
 distance_init(pos::SVector, a::Obstacle) = distance(pos, a)
 
-function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
+function distance_init(pos::SVector{2,T}, w::Union{FiniteWall{T}, FiniteSplitterWall{T}})::T where {T}
 
     n = normalvec(w, pos)
     posdot = dot(w.sp .- pos, n)
