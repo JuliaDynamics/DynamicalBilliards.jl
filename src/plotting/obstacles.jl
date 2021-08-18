@@ -1,6 +1,6 @@
 obcolor(::Obstacle) = (0,0.6,0)
 obcolor(::Union{RandomWall, RandomDisk}) = (149/255, 88/255, 178/255)
-obcolor(::Union{SplitterWall, Antidot, Ellipse}) = (0.8,0.0,0)
+obcolor(::Union{FiniteSplitterWall, SplitterWall, Antidot, Ellipse}) = (0.8,0.0,0)
 obcolor(::PeriodicWall) = (0.8,0.8,0)
 obalpha(::Obstacle) = 0.5
 obalpha(::Union{Antidot, Ellipse}) = 0.1
