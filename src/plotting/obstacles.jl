@@ -5,7 +5,7 @@ obcolor(::PeriodicWall) = (0.8,0.8,0)
 obalpha(::Obstacle) = 0.5
 obalpha(::Union{Antidot, Ellipse}) = 0.1
 obls(::Obstacle) = "solid"
-obls(::Union{SplitterWall, Antidot, Ellipse}) = "dashed"
+obls(::Union{FiniteSplitterWall, SplitterWall, Antidot, Ellipse}) = "dashed"
 obls(::PeriodicWall) = "dotted"
 
 """
