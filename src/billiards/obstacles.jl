@@ -314,6 +314,52 @@ function SplitterWall(sp::AbstractVector, ep::AbstractVector,
 end
 SplitterWall(sp, ep, n, name::String = "Splitter wall") =
 SplitterWall(sp, ep, n, true, name)
+
+"""
+    FiniteSplitterWall{T<:AbstractFloat} <: Wall{T}
+Finite wall obstacle allowing fow ray-splitting (mutable type).
+### Fields:
+* `sp::SVector{2,T}` : Starting point of the Wall.
+* `ep::SVector{2,T}` : Ending point of the Wall.
+* `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
+  particle *will come from before a collision* (pointing towards the inside of the
+  billiard). The size of the vector is irrelevant
+  since it is internally normalized.
+* `isdoor::Bool` : Flag of whether this `FiniteSplitterWall` instance is a "Door".
+  Defaults to `false`.
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating (`pflag` = propagation flag).
+  `true` is associated with the `normal` vector the wall is
+  instantiated with. Defaults to `true`.
+* `name::String` : Name of the obstacle, given for user convenience.
+  Defaults to "Finite Splitter Wall".
+"""
+struct FiniteSplitterWall{T<:AbstractFloat} <: Wall{T}
+    sp::SVector{2,T}
+    ep::SVector{2,T}
+    normal::SVector{2,T}
+    width::T
+    center::SVector{2,T}
+    isdoor::Bool
+    pflag::Bool
+    name::String
+end
+function FiniteSplitterWall(sp::AbstractVector, ep::AbstractVector,
+    n::AbstractVector, isdoor::Bool = false, pflag::Bool = true, name::String = "Finite Splitter Wall")
+    T = eltype(sp)
+    n = normalize(n)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall: dot = $d")
+    end
+    T = eltype(sp) <: Integer ? Float64 : eltype(sp)
+    w = norm(ep - sp)
+    center = @. (ep+sp)/2
+    return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
+    w, SVector{2,T}(center), isdoor, pflag, name)
+end
+FiniteSplitterWall(a, b, c, n::String) = FiniteSplitterWall(a, b, c, false, true, n)
+
 #pretty print:
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
