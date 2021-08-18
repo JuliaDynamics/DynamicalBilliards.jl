@@ -40,7 +40,7 @@ function collision(p::Particle{T}, w::Wall{T}) where {T}
     end
 end
 
-function collision(p::Particle{T}, w::FiniteWall{T}) where {T}
+function collision(p::Particle{T}, w::Union{FiniteWall{T}, FiniteSplitterWall{T}}) where {T}
     n = normalvec(w, p.pos)
     denom = dot(p.vel, n)
     # case of velocity pointing away of wall:
