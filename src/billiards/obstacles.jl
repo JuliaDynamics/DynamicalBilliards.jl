@@ -334,7 +334,7 @@ Finite wall obstacle allowing fow ray-splitting (mutable type).
 * `name::String` : Name of the obstacle, given for user convenience.
   Defaults to "Finite Splitter Wall".
 """
-struct FiniteSplitterWall{T<:AbstractFloat} <: Wall{T}
+mutable struct FiniteSplitterWall{T<:AbstractFloat} <: Wall{T}
     sp::SVector{2,T}
     ep::SVector{2,T}
     normal::SVector{2,T}
