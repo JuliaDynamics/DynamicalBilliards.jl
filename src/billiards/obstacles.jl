@@ -456,6 +456,7 @@ assumed to be very close to the obstacle's boundary).
 @inline normalvec(wall::Wall, pos) = wall.normal
 @inline normalvec(w::PeriodicWall, pos) = normalize(w.normal)
 @inline normalvec(w::SplitterWall, pos) = w.pflag ? w.normal : -w.normal
+@inline normalvec(w::FiniteSplitterWall, pos) = w.pflag ? w.normal : -w.normal
 @inline normalvec(disk::Circular, pos) = normalize(pos - disk.c)
 @inline normalvec(a::Antidot, pos) =
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
