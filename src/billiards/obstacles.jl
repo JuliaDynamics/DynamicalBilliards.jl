@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-Semicircle, Ellipse
+FiniteSplitterWall, Semicircle, Ellipse
 export translate
 
 using InteractiveUtils
