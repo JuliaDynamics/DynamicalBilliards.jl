@@ -355,7 +355,7 @@ function FiniteSplitterWall(sp::AbstractVector, ep::AbstractVector,
     T = eltype(sp) <: Integer ? Float64 : eltype(sp)
     w = norm(ep - sp)
     center = @. (ep+sp)/2
-    return FiniteWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
+    return FiniteSplitterWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
     w, SVector{2,T}(center), isdoor, pflag, name)
 end
 FiniteSplitterWall(a, b, c, n::String) = FiniteSplitterWall(a, b, c, false, true, n)
