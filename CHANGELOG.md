@@ -1,3 +1,5 @@
+# 3.12.0
+* New `FiniteSplitterWall` structure.
 # 3.11.0
 * `particlebeam` and `randominside_xyφ` functions.
 # 3.10.0
