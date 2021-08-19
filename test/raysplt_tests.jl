@@ -125,3 +125,37 @@ function inside_antidot(args...)
 end
 
 billiards_testset("RAY Stays inside", identity; caller = inside_antidot)
+
+@testset "FiniteSplitterWall" begin
+bdr = billiard_rectangle(1.0, 1.0)
+splitter = FiniteSplitterWall([0.5,0.0], [0.5,1.0], [-1.0,0.0])
+bd = Billiard(splitter, bdr...)
+
+refraction(ϕ, pflag, ω) = pflag ? 0.5ϕ : 2.0ϕ
+transmission(ϕ, pflag, ω) = begin
+    if pflag
+        0.5*exp(-(ϕ)^2/2(π/8)^2)
+    else
+        abs(ϕ) < π/4 ? 0.5*exp(-(ϕ)^2/2(π/4)^2) : 0.0
+    end
+end
+
+N = 500
+rs = (RaySplitter([1], transmission, refraction),)
+ps = particlebeam(0.01, 0.5, 0, N, 0)
+positions = []
+
+for p in ps
+    ct, pos, vel = evolve!(p, bd, 2, rs)
+    push!(positions, pos[end][1])
+    reset_billiard!(bd)
+end
+
+particles_on_left = length(filter(x ->x < 0.4, positions))
+particles_on_right = length(filter(x -> x > 0.6, positions))
+particles_in_middle = length(filter(x -> 0.4 <= x <= 0.6, positions))
+
+@test 0.3N < particles_on_left < 0.7N
+@test 0.3N < particles_on_right < 0.7N
+@test particles_in_middle == 0
+end
