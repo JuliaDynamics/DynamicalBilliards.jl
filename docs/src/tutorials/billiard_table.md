@@ -101,7 +101,7 @@ evolution:
      means that during collision time estimation, if the collision point that was
      calculated lies *outside* of the boundaries of the `FiniteWall`, then the
      returned collision time is `Inf` (no collision). `FiniteWall` is slower
-     than `InfiniteWall` for that reason.
+     than `InfiniteWall` for that reason. [`FiniteSplitterWall`](@ref) behaves like a `FiniteWall` during evolution.
 
 
 If you wish to create a billiard table that you know will be convex, you should
@@ -133,6 +133,7 @@ RandomWall
 PeriodicWall
 SplitterWall
 FiniteWall
+FiniteSplitterWall
 ```
 
 ---

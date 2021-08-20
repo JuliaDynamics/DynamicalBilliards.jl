@@ -1,6 +1,6 @@
 export Obstacle, Disk, Antidot, RandomDisk, Wall, Circular,
 InfiniteWall, PeriodicWall, RandomWall, SplitterWall, FiniteWall,
-Semicircle, Ellipse
+FiniteSplitterWall, Semicircle, Ellipse
 export translate
 
 using InteractiveUtils
@@ -314,6 +314,52 @@ function SplitterWall(sp::AbstractVector, ep::AbstractVector,
 end
 SplitterWall(sp, ep, n, name::String = "Splitter wall") =
 SplitterWall(sp, ep, n, true, name)
+
+"""
+    FiniteSplitterWall{T<:AbstractFloat} <: Wall{T}
+Finite wall obstacle allowing fow ray-splitting (mutable type).
+### Fields:
+* `sp::SVector{2,T}` : Starting point of the Wall.
+* `ep::SVector{2,T}` : Ending point of the Wall.
+* `normal::SVector{2,T}` : Normal vector to the wall, pointing to where the
+  particle *will come from before a collision* (pointing towards the inside of the
+  billiard). The size of the vector is irrelevant
+  since it is internally normalized.
+* `isdoor::Bool` : Flag of whether this `FiniteSplitterWall` instance is a "Door".
+  Defaults to `false`.
+* `pflag::Bool` : Flag that keeps track of where the particle is currently
+  propagating (`pflag` = propagation flag).
+  `true` is associated with the `normal` vector the wall is
+  instantiated with. Defaults to `true`.
+* `name::String` : Name of the obstacle, given for user convenience.
+  Defaults to "Finite Splitter Wall".
+"""
+mutable struct FiniteSplitterWall{T<:AbstractFloat} <: Wall{T}
+    sp::SVector{2,T}
+    ep::SVector{2,T}
+    normal::SVector{2,T}
+    width::T
+    center::SVector{2,T}
+    isdoor::Bool
+    pflag::Bool
+    name::String
+end
+function FiniteSplitterWall(sp::AbstractVector, ep::AbstractVector,
+    n::AbstractVector, isdoor::Bool = false, pflag::Bool = true, name::String = "Finite Splitter Wall")
+    T = eltype(sp)
+    n = normalize(n)
+    d = dot(n, ep-sp)
+    if abs(d) > 10eps(T)
+        error("Normal vector is not actually normal to the wall: dot = $d")
+    end
+    T = eltype(sp) <: Integer ? Float64 : eltype(sp)
+    w = norm(ep - sp)
+    center = @. (ep+sp)/2
+    return FiniteSplitterWall{T}(SVector{2,T}(sp), SVector{2,T}(ep), SVector{2,T}(n),
+    w, SVector{2,T}(center), isdoor, pflag, name)
+end
+FiniteSplitterWall(a, b, c, n::String) = FiniteSplitterWall(a, b, c, false, true, n)
+
 #pretty print:
 show(io::IO, w::Wall{T}) where {T} = print(io, "$(w.name) {$T}\n",
 "start point: $(w.sp)\nend point: $(w.ep)\nnormal vector: $(w.normal)")
@@ -410,6 +456,7 @@ assumed to be very close to the obstacle's boundary).
 @inline normalvec(wall::Wall, pos) = wall.normal
 @inline normalvec(w::PeriodicWall, pos) = normalize(w.normal)
 @inline normalvec(w::SplitterWall, pos) = w.pflag ? w.normal : -w.normal
+@inline normalvec(w::FiniteSplitterWall, pos) = w.pflag ? w.normal : -w.normal
 @inline normalvec(disk::Circular, pos) = normalize(pos - disk.c)
 @inline normalvec(a::Antidot, pos) =
     a.pflag ? normalize(pos - a.c) : -normalize(pos - a.c)
@@ -494,11 +541,11 @@ function distance(pos::SV, e::Ellipse{T})::T where {T}
 end
 
 # The entire functionality of `distance_init` is necessary only for
-# FiniteWall !!!
+# FiniteWall and FiniteSplitterWall !!!
 distance_init(p::AbstractParticle, a::Obstacle) = distance_init(p.pos, a)
 distance_init(pos::SVector, a::Obstacle) = distance(pos, a)
 
-function distance_init(pos::SVector{2,T}, w::FiniteWall{T})::T where {T}
+function distance_init(pos::SVector{2,T}, w::Union{FiniteWall{T}, FiniteSplitterWall{T}})::T where {T}
 
     n = normalvec(w, pos)
     posdot = dot(w.sp .- pos, n)

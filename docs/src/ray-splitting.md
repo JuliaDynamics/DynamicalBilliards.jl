@@ -6,7 +6,7 @@ them using a simple example in this documentation page.
 ## 1. Ray-Splitting Obstacles
 The first step is that an [`Obstacle`](@ref) that supports ray-splitting is required to be present in your billiard table. The only new feature these obstacles have is an additional Boolean field called `pflag` (propagation flag). This field notes on which side of the obstacle the particle is currently propagating.
 
-The normal vector as well as the distance from boundary change sign depending on the value of `pflag`. The obstacles [`Antidot`](@ref) and [`SplitterWall`](@ref) are the equivalents of disk and wall for ray-splitting.
+The normal vector as well as the distance from boundary change sign depending on the value of `pflag`. The obstacles [`Antidot`](@ref), [`SplitterWall`](@ref) and [`FiniteSplitterWall`](@ref) are the equivalents of disk, wall and finite-wall for ray-splitting.
 
 Let's create a billiard with a bunch of ray-splitting obstacles!
 ```@example ray
