@@ -33,7 +33,7 @@ function escapetime!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = 
 
     totalt = zero(T); count = zero(t); t_to_write = zero(T)
     isray = !isa(raysplitters, Nothing)
-    isray && acceptable_raysplitter(raysplitteers, bd)
+    isray && acceptable_raysplitter(raysplitters, bd)
     raysidx = raysplit_indices(bd, raysplitters)
 
     while count < t
