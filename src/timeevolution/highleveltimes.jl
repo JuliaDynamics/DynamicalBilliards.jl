@@ -23,7 +23,7 @@ escapetime(p, bd, t; warning = false) =
 escapetime(bd::Billiard, t; kwargs...) =
     escapetime(randominside(bd), bd, t; kwargs...)
 
-function escapetime!(p::AbstractParticle{T}, bd::Billiard{T}, t;
+function escapetime!(p::AbstractParticle{T}, bd::Billiard{T}, t, raysplitters = nothing;
         warning::Bool=false)::T where {T<:AbstractFloat}
 
     ei = escapeind(bd)
@@ -32,10 +32,13 @@ function escapetime!(p::AbstractParticle{T}, bd::Billiard{T}, t;
     end
 
     totalt = zero(T); count = zero(t); t_to_write = zero(T)
+    isray = !isa(raysplitters, Nothing)
+    isray && acceptable_raysplitter(raysplitters, bd)
+    raysidx = raysplit_indices(bd, raysplitters)
 
     while count < t
 
-        i, tmin, pos, vel = bounce!(p, bd)
+        i, tmin, pos, vel = bounce!(p, bd, raysidx, raysplitters)
         t_to_write += tmin
 
         if isperiodic(i, bd)

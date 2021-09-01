@@ -126,13 +126,8 @@ end
 
 billiards_testset("RAY Stays inside", identity; caller = inside_antidot)
 
-@testset "FiniteSplitterWall" begin
-bdr = billiard_rectangle(1.0, 1.0)
-splitter = FiniteSplitterWall([0.5,0.0], [0.5,1.0], [-1.0,0.0])
-bd = Billiard(splitter, bdr...)
-
-refraction(ϕ, pflag, ω) = pflag ? 0.5ϕ : 2.0ϕ
-transmission(ϕ, pflag, ω) = begin
+test_refraction(ϕ, pflag, ω) = pflag ? 0.5ϕ : 2.0ϕ
+test_transmission(ϕ, pflag, ω) = begin
     if pflag
         0.5*exp(-(ϕ)^2/2(π/8)^2)
     else
@@ -140,22 +135,58 @@ transmission(ϕ, pflag, ω) = begin
     end
 end
 
-N = 500
-rs = (RaySplitter([1], transmission, refraction),)
-ps = particlebeam(0.01, 0.5, 0, N, 0)
-positions = []
+@testset "FiniteSplitterWall" begin
+    bdr = billiard_rectangle(1.0, 1.0)
+    splitter = FiniteSplitterWall([0.5,0.0], [0.5,1.0], [-1.0,0.0])
+    bd = Billiard(splitter, bdr...)
 
-for p in ps
-    ct, pos, vel = evolve!(p, bd, 2, rs)
-    push!(positions, pos[end][1])
-    reset_billiard!(bd)
+    N = 500
+    rs = (RaySplitter([1], test_transmission, test_refraction),)
+    ps = particlebeam(0.01, 0.5, 0, N, 0)
+    positions = []
+
+    for p in ps
+        ct, pos, vel = evolve!(p, bd, 2, rs)
+        push!(positions, pos[end][1])
+        reset_billiard!(bd)
+    end
+
+    particles_on_left = length(filter(x ->x < 0.4, positions))
+    particles_on_right = length(filter(x -> x > 0.6, positions))
+    particles_in_middle = length(filter(x -> 0.4 <= x <= 0.6, positions))
+
+    @test 0.3N < particles_on_left < 0.7N
+    @test 0.3N < particles_on_right < 0.7N
+    @test particles_in_middle == 0
 end
 
-particles_on_left = length(filter(x ->x < 0.4, positions))
-particles_on_right = length(filter(x -> x > 0.6, positions))
-particles_in_middle = length(filter(x -> 0.4 <= x <= 0.6, positions))
+@testset "Ray-splitting escapetime" begin
+    verts = [[0.0,0.0], [0.0,1.0], [1.0,1.0], [1.0,0.0]]
+    bdr = []
 
-@test 0.3N < particles_on_left < 0.7N
-@test 0.3N < particles_on_right < 0.7N
-@test particles_in_middle == 0
+    # create rect billiard where vertical walls are doors
+    for i in eachindex(verts)
+        s = verts[i]
+        e = verts[mod1(i+1, length(verts))]
+        w = s - e
+        n = [-w[2], w[1]]
+        push!(bdr, FiniteWall(s, e, n, mod1(i, 2)==1))
+    end
+
+    splitter = FiniteSplitterWall([0.75,0.0], [0.75,1.0], [-1.0,0.0])
+    bd = Billiard(splitter, bdr...)
+
+    N = 500
+    rs = (RaySplitter([1], test_transmission, test_refraction),)
+    ps = particlebeam(0.01, 0.5, 0, N, 0)
+    ts = []
+
+    for p in ps
+        push!(ts, escapetime!(p, bd, 3, rs))
+        reset_billiard!(bd)
+    end
+
+    mean_t = +(ts...)/N
+    expected_mean_t = 0.5 * 1 + 0.5 * 0.75 * 2
+    @test abs(expected_mean_t - mean_t) < 0.2
 end
