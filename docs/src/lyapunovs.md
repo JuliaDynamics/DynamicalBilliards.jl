@@ -31,8 +31,7 @@ In the following example we compute the change of $\lambda_1\$ versus the
 distance between the disks in a hexagonal periodic billiard.
 
 ```@example lyaps
-using DynamicalBilliards
-using PyPlot
+using DynamicalBilliards, CairoMakie
 
 t = 5000.0
 radius = 1.0
@@ -47,12 +46,10 @@ for (i, space) in enumerate(spaces)
     p = randominside(billiard)
     lyap_time[i] = lyapunovspectrum(p, billiard, t)[1]
 end
-figure()
-plot(spaces, lyap_time, "*-")
-xlabel("\$w\$"); ylabel("\$\\lambda_1\$")
-savefig("lyapos.svg"); nothing # hide
+fig = Figure(); ax = Axis(fig[1,1]; xlabel = L"w" ylabel = L"\lambda_1")
+lines!(ax,spaces, lyap_time)
+fig
 ```
-![](lyapos.svg)
 
 The plot of the maximum exponent can be compared with the results reported by
 [Gaspard et. al](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.51.5332)
@@ -64,19 +61,17 @@ To be able to inspect the dynamics of perturbation growth in more detail, we als
 ```@docs
 perturbationgrowth
 ```
----
+
 For example, lets plot the evolution of the perturbation growth using different colors for collisions with walls and disks in the Sinai billiard:
 ```@example lyaps
-using DynamicalBilliards, PyPlot, LinearAlgebra
+using DynamicalBilliards, CairoMakie, LinearAlgebra
 bd = billiard_sinai()
 
 ts, Rs, is = perturbationgrowth(Particle(0.1, 0.1, 0.1), bd, 10.0)
 Δ = perturbationevolution(Rs)
 
-figure()
-plot(ts, log.(norm.(Δ)), "k-", lw = 0.5)
-scatter(ts, log.(norm.(Δ)), c = [j == 1 ? "C0" : "C1" for j in is])
-xlabel("\$t\$"); ylabel("\$\\log(||\\Delta ||)\$")
-savefig("pertg.svg"); nothing # hide
+fig = Figure(); ax = Axis(fig[1,1]; xlabel = L"t", ylabel = L"\log(||\Delta ||)"))
+lines!(ts, log.(norm.(Δ)))
+scatter!(ts, log.(norm.(Δ)); color = [j == 1 ? :black : :red for j in is])
+fig
 ```
-![](pertg.svg)

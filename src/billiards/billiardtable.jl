@@ -51,7 +51,7 @@ function Billiard(bd::Union{AbstractVector, Tuple})
         numbers. Found $T and $(eltype(bd[i])) instead."
         ))
     end
-    tup = (bd...,)
+    tup = Tuple(bd)
     peridx = findall(x -> typeof(x) <: PeriodicWall, tup)
     if isodd(length(peridx))
         throw(ArgumentError(
@@ -59,7 +59,8 @@ function Billiard(bd::Union{AbstractVector, Tuple})
         "since they have to come in pairs."
         ))
     end
-    if length(peridx) == 0
+
+    if !any(x -> x isa PeriodicWall, bd)
         return Billiard{T, D, typeof(tup), Nothing}(tup, nothing)
     else
         return Billiard{T, D, typeof(tup), Vector{Int}}(tup, peridx)
@@ -67,7 +68,6 @@ function Billiard(bd::Union{AbstractVector, Tuple})
 end
 
 function Billiard(bd::Vararg{Obstacle})
-    T = eltype(bd[1])
     tup = (bd...,)
     return Billiard(tup)
 end

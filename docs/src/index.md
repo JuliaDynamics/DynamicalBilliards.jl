@@ -36,7 +36,7 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 * Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [Phase Spaces](@ref) section.
 * Easy to use low-level interface, described at the [Internals](@ref) page.
 * Specialized tools for mushroom billiards.
-* Full support for [Visualizing & Animating](@ref) billiards and motion in billiards.
+* Full support for [Visualizations and Animations for Billiards](@ref).
 * Brutal tests that confirm the package works and overcomes numerical precision issues.
 
 This package does not support finite-sized particles and, as a result, there is also no support for collision between particles.

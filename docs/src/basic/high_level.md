@@ -67,7 +67,7 @@ If you have a `Billiard` which is not a rectangle, creating many random initial 
 randominside
 randominside_xyφ
 ```
----
+
 
 For example:
 ```@example 2
@@ -87,7 +87,7 @@ There is a simple function for that, called `evolve!` (or `evolve` if you don't 
 ```@docs
 evolve!
 ```
----
+
 Forget the ray-splitting part for now (see [Ray-Splitting](@ref)).
 
 Let's see an example:
@@ -112,7 +112,7 @@ For this, the `timeseries` function is used:
 ```@docs
 timeseries!
 ```
----
+
 For example:
 ```@example 2
 xt, yt, vxt, vyt, t = timeseries(p, bd, 100)
@@ -144,11 +144,11 @@ visited_obstacles!
 ```@docs
 psos
 ```
----
+
 For example, the surface of section in the periodic Sinai billiard with magnetic field
 reveals the mixed nature of the phase-space:
 ```@example psos
-using DynamicalBilliards, PyPlot
+using DynamicalBilliards, CairoMakie
 t = 100; r = 0.15
 bd = billiard_sinai(r, setting = "periodic")
 
@@ -157,9 +157,10 @@ bd = billiard_sinai(r, setting = "periodic")
 plane = InfiniteWall([0.5, 0.0], [0.5, 1.0], [-1.0, 0.0])
 
 posvector, velvector = psos(bd, plane, t, 1000, 2.0)
-c(a) = length(a) == 1 ? "C1" : "C0"
+c(a) = length(a) == 1 ? "#6D44D0" : "#DA5210"
 
-figure()
+fig = Figure(); ax = Axis(fig[1,1]; xlabel = L"y", ylabel=L"v_y")
+
 for i in 1:length(posvector)
     poss = posvector[i] # vector of positions
     vels = velvector[i] # vector of velocities at the section
@@ -168,14 +169,11 @@ for i in 1:length(posvector)
         #plot y vs vy
         y = [a[2] for a in poss]
         vy = [a[2] for a in vels]
-
-        plot(y, vy, ls = "None", color = c(y), ms = 2.0, alpha = 0.75, marker = "o")
+        scatter!(y, vy; color = c(y), markersize = 2)
     end
 end
-xlabel("\$y\$"); ylabel("\$v_y\$")
-savefig("psos.png"); nothing # hide
+fig
 ```
-![](psos.png)
 
 !!! note "`psos` operates on the unit cell"
     The `psos` function always calculates the crossings *within* the unit cell of
@@ -236,7 +234,7 @@ meancollisiontime(randominside(bd), bd, 10000.0)
 ```@docs
 parallelize
 ```
----
+
 Here are some examples
 ```@example 2
 bd = billiard_stadium()
@@ -254,7 +252,7 @@ The main propagation algorithm used by `DynamicalBilliards` is bundled in the fo
 ```@docs
 bounce!
 ```
----
+
 `bounce!` is the function used internally by all high-level functions, like [`evolve!`](@ref), [`boundarymap`](@ref), [`escapetime`](@ref), etc.
 
 This is the function a user should use if they want to calculate other things besides what is already available in the high level API.

@@ -8,7 +8,7 @@ and the angular velocity ω. The function [`ispinned`](@ref) shows you whether a
 ```@docs
 ispinned
 ```
----
+
 
 In such event, the convention followed by `DynamicalBilliards` is the following:
 [`evolve!`](@ref) returns the expected output, however all returned vectors have only 2
