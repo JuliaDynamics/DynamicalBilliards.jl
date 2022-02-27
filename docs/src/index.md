@@ -92,13 +92,6 @@ The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl
 
 To confirm the validity of your installation you can run the tests of `DynamicalBilliards`. This can be done via `] test DynamicalBilliards`.
 
-### Plotting
-Plotting is done through the `PyPlot` module. All plotting functions are brought into scope when `using PyPlot` is done.
-
-In addition, for animations using the function [`animate_evolution`](@ref) the
-`ffmpeg` software must be accessible from the command line.
-
-
 
 ## How to easily code a Billiard
 

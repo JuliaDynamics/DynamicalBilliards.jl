@@ -56,7 +56,6 @@ pages = [
     "Tutorials" => [
         "Defining a Billiard" => "tutorials/billiard_table.md",
         "Defining your own Obstacles" => "tutorials/own_obstacle.md",
-        "Examples" => "tutorials/examples.md",
     ]
 ],
 )
