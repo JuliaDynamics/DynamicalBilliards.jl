@@ -20,11 +20,11 @@ bd = Billiard(a1, a2, sw, bdr...)
 ```
 
 ```@example ray
-using PyPlot
-plot(bd)
-savefig("raybil.svg"); nothing # hide
+using InteractiveDynamics, CairoMakie
+fig, ax = bdplot(bd)
+fig
 ```
-![](raybil.svg)
+(notice also that raysplitting obstacles are by default plotted with a different color and with dotted linestyle)
 
 ## 2. The `RaySplitter` structure
 In the second step, you have to define 2+1 functions: transmission probability,
@@ -78,32 +78,25 @@ billiard `bd`).
 
 ## 3. Evolution with Ray-Splitting
 The third step is trivial. After you have created your `RaySplitter`(s),
-you simply pass them into `evolve` or `animate_evolution` as a fourth argument!
+you simply pass them into `evolve` or `timeseries` as a fourth argument!
 If you have many instances of `RaySplitter` you pass a tuple of them.
 
 For example,
 ```@example ray
-using Random
+using Random, InteractiveDynamics, CairoMakie
 Random.seed!(42)
 p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
 xt, yt, vxt, vyt, tt = timeseries(p, bd, 100, raysplitters)
-plot(bd)
-plot(xt, yt)
-scatter(xt[1], yt[1], color = "black")
-savefig("rayorbit.svg"); nothing # hide
+fig, ax = bdplot(bd)
+lines!(ax, xt, yt)
+scatter!(ax, xt[[1, 100]], yt[[1, 100]]; color = "black")
+fig
 ```
-![](rayorbit.svg)
 
 You can see that at some points the particle crossed the boundaries of the
-red obstacles, which allow for ray splitting. It is even cooler to animate
-this motion using [`animate_evolution`](@ref)!
+red obstacles, which allow for ray splitting.
 
-```@raw html
-<video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/ray.mp4?raw=true" type="video/mp4">
-</video>
-```
 
 !!! info "Resetting the billiard"
     Notice that evolving a particle inside a billiard always mutates the billiard
@@ -173,43 +166,14 @@ To easily simulate these relations in `DynamicalBilliards`, the function
 law_of_refraction
 ```
 
-Using the functions returned by `law_of_refraction`, we can set up a
-`RaySplitter` for a billiard.
-```@example lens
-using DynamicalBilliards, PyPlot
-# Create a circular "lens"
-o = Antidot(SVector(1.0, 0.75), 0.5)
-# in a rectangular box
-bd = Billiard(billiard_rectangle(2.5, 1.5)..., o)
-# create a RaySplitter using law of refraction
-trans, refra = law_of_refraction(1.5)
-rs = (RaySplitter([5], trans, refra),)
-```
-We now animate the evolution of an array of particles on parallel trajectories to
-demonstrate the refractive properties of the spherical lens
-```julia
-# create parallel particles
-ps = [Particle(0.1, y, 0.0) for y in 0.4:0.05:1.1]
 
-# animate
-animate_evolution(ps, bd, 2.0, rs, colors = ["C0" for i ∈ 1:length(ps)],
-  tailtime=2.5, savename = "lens")
-```
-
-```@raw html
-<video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/lens.mp4?raw=true" type="video/mp4">
-</video>
-```
-
-
-## Example of Affecting Multiple Obstacles
+## Animation of Inverse Billiards
 Here we will show an application of *inverse* billiards, where particles go in and out
-of a billiard, while taking advantage of the existence of a magnetic field outside to return.
+of a billiard, while taking advantage of the existence of a strong magnetic field outside of the billiard to return.
 
 As always, we define the ray-splitting functions:
 ```@example ray
-using DynamicalBilliards, PyPlot
+using DynamicalBilliards
 trans(args...) = 1.0 # always perfect transmission
 refra(φ, pflag, ω) = pflag ? 0.8φ : 1.25φ # refraction angle
 neww(ω, pflag) = pflag ? 2.0 : 0.4
@@ -226,15 +190,28 @@ bd = billiard_rectangle(setting = "ray-splitting")
 p = MagneticParticle(0.4, 0.6, 0.0, 0.4)
 ```
 
-and we animate its evolution, by first zooming out of the billiard
-```julia
-plot(bd)
-xlim(-1, 2); ylim(-1, 2);
-animate_evolution(p, bd, 10.0, (ray,); ax = gca(), savename = "inverse", tailtime = 3.0)
+[`bdplot_interactive`](@ref) does not accept ray-splitters yet (but it is easy if you want to do a PR). Nevertheless, doing an animation is still straightforward:
+
+```@example ray
+using InteractiveDynamics, CairoMakie
+
+fig, ax = bdplot(bd)
+xlims!(ax, (-1, 2)); ylims!(ax, (-1, 2)) # zoom out
+xt, yt = timeseries(p, bd, 10.0, (ray,))
+D = 300
+xta = Observable(xt[1:D])
+yta = Observable(yt[1:D])
+lines!(ax, xta, yta; color = :green)
+
+record(fig, "inverse_billiard.mp4", D+1:length(xt); framerate = 30) do i
+    push!(xta[], xt[i]); popfirst!(xta[])
+    push!(yta[], yt[i]); popfirst!(yta[])
+    notify.((xta, yta))
+end
 ```
 
 ```@raw html
-<video width="100%" height="auto" controls>
-<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/inverse.mp4?raw=true" type="video/mp4">
+<video width="auto" controls autoplay loop>
+<source src="../inverse_billiard.mp4" type="video/mp4">
 </video>
 ```
