@@ -48,40 +48,33 @@ include("raysplitting.jl")
 include("parallel.jl")
 include("testing.jl")
 
-####################################################
-# Plotting Routines (loaded when `Using PyPlot`)   #
-####################################################
-using Requires
-function __init__()
-    @require PyPlot="d330b81b-6aea-500a-939a-2ce795aea3ee" begin
-        import .PyPlot: plot
-        dir = joinpath(@__DIR__, "plotting")
-        for f in readdir(dir)
-            include(joinpath(dir, f))
-        end
-    end
-end
-
-
 ###################
 # Update messages #
 ###################
-# if !isfile(joinpath(@__DIR__, "update_v3.0.0"))
-# printstyled(stdout,
-# """
-# \nUpdate message: DynamicalBilliards v3.0
-#
-# The new version v3.0 of DynamicalBilliards has
-# a reworked (and better!) propagation
-# algorithm, a new sexy way to animate billiards
-# (multiple particle support!)
-# the Ellipse obstacle and many other things!
-# Please see the changelog,
-# because there have been a small
-# amount of breaking changes!\n
-# """; color = :light_magenta)
-# touch(joinpath(@__DIR__, "update_v3.0.0"))
-# end
+using Scratch
+display_update = true
+version_number = "4"
+update_name = "update_v$(version_number)"
+
+function __init__()
+if display_update
+    # Get scratch space for this package
+    versions_dir = @get_scratch!("versions")
+    if !isfile(joinpath(versions_dir, update_name))
+        printstyled(
+            stdout,
+            """
+            \nUpdate message: DynamicalBilliards v$(version_number)
+            Plotting & visualizing has moved entirely to the Makie ecosystem.
+            It is now provided by InteractiveDynamics.jl.
+            See the documentation online for the new API.
+            """;
+            color = :light_magenta,
+        )
+        touch(joinpath(versions_dir, update_name))
+    end
+end
+end
 
 
 end#module

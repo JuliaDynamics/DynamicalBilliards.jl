@@ -1,11 +1,12 @@
 cd(@__DIR__)
 using Pkg
-Pkg.activate(@__DIR__)
 CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== nothing
+CI && Pkg.activate(@__DIR__)
 CI && Pkg.instantiate()
 
 using DynamicalBilliards
-using Documenter, PyPlot, DocumenterTools
+using Documenter, DocumenterTools, Literate
+using InteractiveDynamics, CairoMakie
 
 # %%
 using DocumenterTools: Themes
@@ -23,12 +24,14 @@ end
 Themes.compile(joinpath(@__DIR__, "juliadynamics-light.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-light.css"))
 Themes.compile(joinpath(@__DIR__, "juliadynamics-dark.scss"), joinpath(@__DIR__, "src/assets/themes/documenter-dark.css"))
 
-
-ioff()
-
+# %% Build docs
+using Literate
+infile = joinpath(pkgdir(InteractiveDynamics), "docs", "src", "billiards.jl")
+outdir = joinpath(@__DIR__, "src")
+Literate.markdown(infile, outdir; credit = false, name = "billiards_visualizations")
 
 makedocs(
-modules=[DynamicalBilliards],
+modules=[DynamicalBilliards, InteractiveDynamics],
 doctest=false,
 depth = 1,
 sitename= "DynamicalBilliards.jl",
@@ -43,7 +46,7 @@ format = Documenter.HTML(
 pages = [
     "Introduction" => "index.md",
     "High Level API" => "basic/high_level.md",
-    "Visualizing & Animating" => "visualizing.md",
+    "Visualizing & Animating" => "billiards_visualizations.md",
     "Phase Spaces" => "basic/phasespaces.md",
     "Ray-Splitting" => "ray-splitting.md",
     "Lyapunov Exponents" => "lyapunovs.md",
@@ -57,9 +60,6 @@ pages = [
     ]
 ],
 )
-
-close("all")
-ion()
 
 if CI
     deploydocs(
