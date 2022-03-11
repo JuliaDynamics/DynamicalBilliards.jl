@@ -1,0 +1,923 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.">
+      
+      
+      
+        <meta name="author" content="George Datseris">
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.4">
+    
+    
+      
+        <title>Visualizing - DynamicalBilliards.jl</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.451f80e5.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.22915126.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#7e57c2">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
+    
+      <link rel="stylesheet" href="../assets\Documenter.css">
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="deep-purple" data-md-color-accent="cyan">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#examples" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href=".." title="DynamicalBilliards.jl" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                DynamicalBilliards.jl
+              </span>
+              <span class="md-header-nav__topic">
+                Visualizing
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href=".." title="DynamicalBilliards.jl" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    DynamicalBilliards.jl
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Introduction" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../basic/high_level/" title="High Level API" class="md-nav__link">
+      High Level API
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Visualizing
+      </label>
+    
+    <a href="./" title="Visualizing" class="md-nav__link md-nav__link--active">
+      Visualizing
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plotting-obstacles-with-keywords" title="Plotting Obstacles with keywords" class="md-nav__link">
+    Plotting Obstacles with keywords
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting-a-billiard" title="Plotting a Billiard" class="md-nav__link">
+    Plotting a Billiard
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting-particles" title="Plotting particles" class="md-nav__link">
+    Plotting particles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#color-conventions" title="Color conventions" class="md-nav__link">
+    Color conventions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#animating-the-motion-of-a-particle" title="Animating the motion of a particle" class="md-nav__link">
+    Animating the motion of a particle
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#periodic-billiards" title="Periodic Billiards" class="md-nav__link">
+    Periodic Billiards
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundary-map-plots" title="Boundary Map plots" class="md-nav__link">
+    Boundary Map plots
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../basic/phasespaces/" title="Phase Spaces" class="md-nav__link">
+      Phase Spaces
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../ray-splitting/" title="Ray-Splitting" class="md-nav__link">
+      Ray-Splitting
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../lyapunovs/" title="Lyapunov Exponents" class="md-nav__link">
+      Lyapunov Exponents
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../mushroomtools/" title="MushroomTools" class="md-nav__link">
+      MushroomTools
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../physics/" title="Physics" class="md-nav__link">
+      Physics
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../basic/low_level/" title="Internals" class="md-nav__link">
+      Internals
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../tutorials/billiard_table/" title="Defining a Billiard" class="md-nav__link">
+      Defining a Billiard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../tutorials/own_obstacle/" title="Creating your own Obstacle" class="md-nav__link">
+      Creating your own Obstacle
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../tutorials/examples/" title="Examples" class="md-nav__link">
+      Examples
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plotting-obstacles-with-keywords" title="Plotting Obstacles with keywords" class="md-nav__link">
+    Plotting Obstacles with keywords
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting-a-billiard" title="Plotting a Billiard" class="md-nav__link">
+    Plotting a Billiard
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting-particles" title="Plotting particles" class="md-nav__link">
+    Plotting particles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#color-conventions" title="Color conventions" class="md-nav__link">
+    Color conventions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#animating-the-motion-of-a-particle" title="Animating the motion of a particle" class="md-nav__link">
+    Animating the motion of a particle
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#periodic-billiards" title="Periodic Billiards" class="md-nav__link">
+    Periodic Billiards
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundary-map-plots" title="Boundary Map plots" class="md-nav__link">
+    Boundary Map plots
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/edit/master/docs/visualizing.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>Visualizing</h1>
+                
+                <p>All plotting functionality of <code>DynamicalBilliards</code> lies within a few well-defined functions that use the <code>PyPlot</code> package to plot aspects of the system.</p>
+<p>All plotting functions are brought into scope when <code>using PyPlot</code>. The functions are:</p>
+<p><a id='PyPlot.plot-Tuple{Obstacle}' href='#PyPlot.plot-Tuple{Obstacle}'>#</a>
+<strong><code>PyPlot.plot</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">plot</span><span class="o">(</span><span class="nt">obst</span><span class="p">::</span><span class="nd">Obstacle</span><span class="o">;</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Plot given obstacle on the current <code>PyPlot</code> axes.</p>
+<p>The default arguments for each type of obstacle have been chosen for maximum clarity and consistency.</p>
+<p>The <code>kwargs...</code> given by the user are keywords passed directly into PyPlot's constructors. For <code>Wall</code> obstacles, kwargs are passed into <code>PyPlot.plot()</code>. For <code>Circular</code> obstacles, kwargs are passed into <code>matplotlib.patches.Circle</code> or <code>Arc</code>.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/plotting/obstacles.jl#L11-L21' class='documenter-source'>source</a><br></p>
+<p><a id='PyPlot.plot-Tuple{Billiard}' href='#PyPlot.plot-Tuple{Billiard}'>#</a>
+<strong><code>PyPlot.plot</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">plot</span><span class="o">(</span><span class="nt">bd</span><span class="p">::</span><span class="nd">Billiard</span><span class="o">;</span> <span class="nt">ax</span> <span class="o">=</span> <span class="o">(</span><span class="nt">figure</span><span class="o">();</span> <span class="nt">gca</span><span class="o">()))</span>
+</pre></div>
+
+
+<p>Plot all obstacles in <code>bd</code> using the default arguments, set <code>xlim</code> and <code>ylim</code> to be 20% larger than <code>cellsize</code> and set the axis aspect ratio to equal.</p>
+<div class="codehilite"><pre><span></span><span class="nt">plot</span><span class="o">(</span><span class="nt">bd</span><span class="p">::</span><span class="nd">Billiard</span><span class="o">,</span> <span class="nt">xmin</span><span class="o">,</span> <span class="nt">ymin</span><span class="o">,</span> <span class="nt">xmax</span><span class="o">,</span> <span class="nt">ymax</span><span class="o">;</span>
+     <span class="nt">hexagonal</span> <span class="o">=</span> <span class="nt">false</span><span class="o">,</span> <span class="nt">ax</span> <span class="o">=</span> <span class="o">(</span><span class="nt">figure</span><span class="o">();</span> <span class="nt">gca</span><span class="o">()))</span>
+</pre></div>
+
+
+<p>Plot the given <strong>periodic</strong> billiard <code>bd</code>, repeatedly plotting from <code>(xmin, ymin)</code> to <code>(xmax, ymax)</code>. Works for either rectangular periodic billiards, or hexagonal ones. Use keyword <code>hexagonal</code> to denote which one you want.</p>
+<div class="codehilite"><pre><span></span><span class="nt">plot</span><span class="o">(</span><span class="nt">bd</span><span class="p">::</span><span class="nd">Billiard</span><span class="o">,</span> <span class="nt">xt</span><span class="p">::</span><span class="nd">Vector</span><span class="o">,</span> <span class="nt">yt</span><span class="p">::</span><span class="nd">Vector</span><span class="o">;</span> <span class="nt">hexagonal</span> <span class="o">=</span> <span class="nt">false</span><span class="o">,</span>
+     <span class="nt">ax</span> <span class="o">=</span> <span class="o">(</span><span class="nt">figure</span><span class="o">();</span> <span class="nt">gca</span><span class="o">()),</span> <span class="nt">plot_orbit</span> <span class="o">=</span> <span class="nt">true</span><span class="o">,</span> <span class="nt">orbit_color</span> <span class="o">=</span> <span class="s2">&quot;C0&quot;</span><span class="o">)</span>
+</pre></div>
+
+
+<p>Plot the given billiard <code>bd</code> and an acompanying orbit resulting from <a href="../basic/high_level/#DynamicalBilliards.timeseries!"><code>timeseries!</code></a> using the limits defined by <code>xt</code> and <code>yt</code>. Works for both periodic and normal billiards.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/plotting/billiards.jl#L17-L35' class='documenter-source'>source</a><br></p>
+<p><a id='PyPlot.plot-Tuple{AbstractParticle,Bool}' href='#PyPlot.plot-Tuple{AbstractParticle,Bool}'>#</a>
+<strong><code>PyPlot.plot</code></strong> &mdash; <em>Method</em>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">plot</span><span class="o">(</span><span class="nt">p</span><span class="p">::</span><span class="nd">AbstractParticle</span> <span class="cp">[</span><span class="p">,</span> <span class="n">cyclotron</span><span class="o">=</span><span class="kc">false</span><span class="cp">]</span><span class="o">;</span> <span class="nt">use_cell</span><span class="o">=</span><span class="nt">true</span><span class="o">,</span> <span class="nt">kwargs</span><span class="o">...)</span>
+</pre></div>
+
+
+<p>Plot given particle on the current <code>PyPlot</code> axes. Optionally use <code>p.current_cell</code> for the particle's position. Given <code>kwargs...</code> are passed onto <code>PyPlot.scatter</code>.</p>
+<p>The particle is represented as a small ball (<code>PyPlot.scatter</code>) and a small arrow (<code>PyPlot.quiver</code>). All <code>kwargs...</code> are given to <code>scatter</code> but if a keyword argument <code>color</code> is given, it is also passed to <code>quiver</code>.</p>
+<p>Optionally you can plot the cyclotron traced by a <code>MagneticParticle</code> by giving <code>true</code> as second argument.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/plotting/particles.jl#L28-L40' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.animate_evolution' href='#DynamicalBilliards.animate_evolution'>#</a>
+<strong><code>DynamicalBilliards.animate_evolution</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>animate_evolution(ps, bd, colnumber [, raysplitters]; kwargs...)
+</pre></div>
+
+
+<p>Animate the evolution of a vector of particles <code>ps</code> in billiard <code>bd</code> for a total time <code>t</code> (always considered float). Optionally enable ray-splitting.</p>
+<p><strong>Evolution kwargs</strong></p>
+<ul>
+<li><code>dt = 0.01</code> : Time resolution used for production of time series (see <a href="../basic/high_level/#DynamicalBilliards.timeseries!"><code>timeseries!</code></a>. It is not recommended to significantly increase this value, to preserve the smoothness of the orbits.</li>
+<li><code>frameskip = 5</code> : The amount of <code>dt</code>-steps performed each frame. Increasing either <code>frameskip</code> and <code>dt</code> makes the animation progress faster.</li>
+<li><code>tailtime = 1.0</code> : The length of the "tail" trailing the particle in time units.</li>
+<li><code>resetting = reset_billiard!</code> : function called after evolving each individual particle in the billiard (so that ray-splitting doesn't brake).</li>
+</ul>
+<p><strong>Colors &amp; plotting kwargs</strong></p>
+<ul>
+<li><code>colors</code> : An array of valid Matplotlib colors for the "tails". If <code>colors</code> is shorter than <code>ps</code>, colors are reused. Defaults to the standard Matplotlib color sequence.</li>
+<li><code>particle_kwargs::NamedTuple</code> : Additional keyword arguments passed to the <code>plot</code> function for particles.</li>
+<li><code>tail_kwargs::NamedTuple</code>: Additional keyword arguments passed to the <code>plot</code> function for "tails" (line plot).</li>
+</ul>
+<p><strong>Exporting and axis kwargs</strong></p>
+<ul>
+<li><code>figsize = (7.2, 7.2))</code> : Size for new figure (if one is created). Must be divisible by 2 if you want to save the animation.</li>
+<li><code>ax = (figure(figsize = figsize); plot(bd); gca())</code> : axis to plot on.</li>
+<li><code>savename = nothing</code> : If given the animation is exported to mp4 file (requires ffmpeg). The name can include path.</li>
+<li><code>disable_axis = false</code> : Remove the axis splines.</li>
+<li><code>deletefigs = true</code> : To create the animation a lot of figures are saved in the save directory and are deleted after the animation is done. You can choose to keep them.</li>
+<li><code>dpi = 100</code> : dpi of saved figures.</li>
+<li><code>framerate = 20</code> : Animation framerate.</li>
+</ul>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/plotting/animations.jl#L46-L81' class='documenter-source'>source</a><br></p>
+<p><a id='Examples-1'></a></p>
+<h2 id="examples">Examples</h2>
+<p><a id='Plotting-Obstacles-with-keywords-1'></a></p>
+<h3 id="plotting-obstacles-with-keywords">Plotting Obstacles with keywords</h3>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span><span class="p">,</span> <span class="n">PyPlot</span>
+
+<span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_sinai</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&quot;blue&quot;</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">);</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">facecolor</span> <span class="o">=</span> <span class="s">&quot;yellow&quot;</span><span class="p">,</span> <span class="n">edgecolor</span> <span class="o">=</span> <span class="s">&quot;black&quot;</span><span class="p">);</span>
+</pre></div>
+
+
+<p><img alt="" src="../rand_obstacles.svg" /></p>
+<p><a id='Plotting-a-Billiard-1'></a></p>
+<h3 id="plotting-a-billiard">Plotting a Billiard</h3>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">billiard_polygon</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">Antidot</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">Billiard</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">obstacles</span><span class="o">...</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>Billiard{Float64} with 7 obstacles:
+  wall 1
+  wall 2
+  wall 3
+  wall 4
+  wall 5
+  wall 6
+  Antidot
+</pre></div>
+
+
+<p>If you want to quickly plot the entire billiard with default parameters, simply use the function <code>plot(bd)</code>:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">PyPlot</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="" src="../billiard_example.svg" /></p>
+<p><code>plot()</code> also sets up the axis to have equal aspect ratio and sets up the axis limits to be just large enough to contain the entire billiard.</p>
+<p><a id='Plotting-particles-1'></a></p>
+<h3 id="plotting-particles">Plotting particles</h3>
+<p>Following the above example, we create and plot a particle using the function <code>plot</code>:</p>
+<div class="codehilite"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">randominside</span><span class="p">(</span><span class="n">bd</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="c"># Plot one more particle with purple color,</span>
+<span class="c"># pentagon shape and bigger size (default is s=30):</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">randominside</span><span class="p">(</span><span class="n">bd</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p2</span><span class="p">;</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="s">&quot;p&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">60.0</span><span class="p">)</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="n">randominside</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p3</span><span class="p">,</span> <span class="kc">true</span><span class="p">;</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="s">&quot;o&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">60.0</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="" src="../particles_example.svg" /></p>
+<p>(notice that the particle position and direction are random)</p>
+<p><a id='Color-conventions-1'></a></p>
+<h2 id="color-conventions">Color conventions</h2>
+<p>The default plotting settings have been chosen for maximum clarity and consistency. The color conventions followed are:</p>
+<ul>
+<li>Particles are black.</li>
+<li>Particle orbits use matplotlib's color cycle (first one is blue).</li>
+<li>Reflecting obstacles (e.g. <code>Disk</code>, <code>FiniteWall</code> etc.) are green.</li>
+<li>Randomly reflecting obstacles (e.g. <code>RandomDisk</code> or <code>RandomWall</code>) are purple.</li>
+<li>Ray-splitting obstacles are red with dashed linestyle.</li>
+<li>Periodicity enforcing obstacles are yellow with dotted linestyle (if and when plotted).</li>
+<li>Doors (<code>InfiniteWall</code> with <code>isdoor=true</code>) are plotted with alternating black and cyan dashed lines.</li>
+</ul>
+<p><a id='Animating-the-motion-of-a-particle-1'></a></p>
+<h2 id="animating-the-motion-of-a-particle">Animating the motion of a particle</h2>
+<p>The function <a href="./#DynamicalBilliards.animate_evolution"><code>animate_evolution</code></a> is provided to animate the evolution of a particle from collision to collision. Let's animate a particle inside a simple pentagon with magnetic field:</p>
+<div class="codehilite"><pre><span></span><span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_polygon</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">Disk</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],</span> <span class="mf">0.4</span><span class="p">)</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">Billiard</span><span class="p">(</span><span class="n">bd</span><span class="o">.</span><span class="n">obstacles</span><span class="o">...</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">MagneticParticle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">animate_evolution</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">;</span> <span class="n">savename</span> <span class="o">=</span> <span class="s">&quot;penta&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<video width="100%" height="auto" controls> <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/penta.mp4?raw=true" type="video/mp4"> </video>
+
+<p>The cool thing about <a href="./#DynamicalBilliards.animate_evolution"><code>animate_evolution</code></a> is that it can animate multiple particles simultaneously! For example, here is a beautiful demonstration of chaos in non-dispersive billiards:</p>
+<div class="codehilite"><pre><span></span><span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_stadium</span><span class="p">()</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="o">/</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="o">/</span><span class="n">N</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">N</span><span class="p">]</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="p">[</span><span class="n">Particle</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.6</span> <span class="o">+</span> <span class="mf">0.0005</span><span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">N</span><span class="p">]</span>
+
+<span class="n">animate_evolution</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">;</span> <span class="n">colors</span> <span class="o">=</span> <span class="n">cs</span><span class="p">,</span> <span class="n">tailtime</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">savename</span> <span class="o">=</span> <span class="s">&quot;disperse&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<video width="100%" height="auto" controls> <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/disperse.mp4?raw=true" type="video/mp4"> </video>
+
+<p><a id='Periodic-Billiards-1'></a></p>
+<h2 id="periodic-billiards">Periodic Billiards</h2>
+<p>In order to plot periodic billiards, you have need to call a different method of <a href="./#PyPlot.plot-Tuple{Obstacle}"><code>plot</code></a>, since now you also have to specify the limits of plotting. The methods provided are:</p>
+<div class="codehilite"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="n">xt</span><span class="o">::</span><span class="kt">Vector</span><span class="p">{</span><span class="n">T</span><span class="p">},</span> <span class="n">yt</span><span class="o">::</span><span class="kt">Vector</span><span class="p">{</span><span class="n">T</span><span class="p">})</span>
+</pre></div>
+
+
+<p>The last one conveniently plots the combo of particle-trajectory and periodic-billiard taking care of all the details internally. Give the keyword <code>plot_orbit = false</code> if you do not want to plot the orbit defined by <code>(xt, yt)</code>.</p>
+<p>For example, the following code</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span><span class="p">,</span> <span class="n">PyPlot</span>
+<span class="n">r</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_rectangle</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">;</span> <span class="n">setting</span> <span class="o">=</span> <span class="s">&quot;periodic&quot;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">Disk</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">r</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">Ellipse</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">r</span><span class="p">,</span> <span class="mi">2</span><span class="n">r</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">Billiard</span><span class="p">(</span><span class="n">bd</span><span class="o">.</span><span class="n">obstacles</span><span class="o">...</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">Particle</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">,</span> <span class="n">vxt</span><span class="p">,</span> <span class="n">vyt</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">timeseries!</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="" src="../rectperiodic.svg" /></p>
+<p>And, you can also periodically plot billiards with hexagonal periodicity. Only give the keyword argument <code>hexagonal = true</code> to <a href="./#PyPlot.plot-Tuple{Obstacle}"><code>plot</code></a>. As an example:</p>
+<div class="codehilite"><pre><span></span><span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_hexagonal_sinai</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.50</span><span class="p">;</span> <span class="n">setting</span> <span class="o">=</span> <span class="s">&quot;periodic&quot;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">Disk</span><span class="p">([</span><span class="mf">0.7</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">Antidot</span><span class="p">([</span><span class="mf">0.7</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">],</span> <span class="mf">0.35</span><span class="p">)</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">Billiard</span><span class="p">(</span><span class="n">bd</span><span class="o">...</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">MagneticParticle</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="nb">π</span><span class="o">/</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">xt</span><span class="p">,</span> <span class="n">yt</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">;</span> <span class="n">hexagonal</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="" src="../hexperiodic.svg" /></p>
+<p><a id='Boundary-Map-plots-1'></a></p>
+<h2 id="boundary-map-plots">Boundary Map plots</h2>
+<p><a id='DynamicalBilliards.plot_boundarymap' href='#DynamicalBilliards.plot_boundarymap'>#</a>
+<strong><code>DynamicalBilliards.plot_boundarymap</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>plot_boundarymap(bmap, intervals; kwargs...)
+</pre></div>
+
+
+<p>Plots the boundary map. The input arguments are the return values of <a href="../basic/phasespaces/#DynamicalBilliards.boundarymap"><code>boundarymap</code></a> (also applies for the parallelized version, where <code>bmap</code> is a vector of vectors of 2-vectors).</p>
+<p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><code>ax = (figure(); gca())</code> : The axis to plot on.</li>
+<li><code>color = "C0"</code> : The color to use for the plotted points. Can be either a color for <code>PyPlot.plot</code> or a vector of colors of length <code>length(bmap)</code>, in order to give each initial condition a different color (for parallelized version).</li>
+<li><code>ms = 1.0</code> : Marker size of the points.</li>
+<li><code>bordercolor = "C3"</code> : The color of the vertical lines that denote the obstacle borders.</li>
+<li><code>obstacleindices = true</code>: show obstacle indices above plot</li>
+<li>Any other keyword argument is passed to <code>PyPlot.plot</code> which plots the points of the section.</li>
+</ul>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/plotting/boundarymap_plots.jl#L3-L21' class='documenter-source'>source</a><br></p>
+<p>Examples are shown in the <a href="../basic/phasespaces/">phase spaces</a> section.</p>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../basic/high_level/" title="High Level API" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                High Level API
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../basic/phasespaces/" title="Phase Spaces" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Phase Spaces
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    <link rel="stylesheet" href="../assets/fonts/font-awesome.css">
+    
+      <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl" class="md-footer-social__link fa fa-github"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.30f6b8b1.js"></script>
+      
+      <script>app.initialize({version:"0.17.5",url:{base:".."}})</script>
+      
+        <script src="../assets\mathjaxhelper.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+    
+      
+    
+  </body>
+</html>

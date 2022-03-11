@@ -1,0 +1,858 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.">
+      
+      
+      
+        <meta name="author" content="George Datseris">
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.4">
+    
+    
+      
+        <title>Internals - DynamicalBilliards.jl</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application.451f80e5.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.22915126.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#7e57c2">
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
+    
+      <link rel="stylesheet" href="../../assets\Documenter.css">
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="deep-purple" data-md-color-accent="cyan">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#internals" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../.." title="DynamicalBilliards.jl" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                DynamicalBilliards.jl
+              </span>
+              <span class="md-header-nav__topic">
+                Internals
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../.." title="DynamicalBilliards.jl" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    DynamicalBilliards.jl
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Introduction" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../high_level/" title="High Level API" class="md-nav__link">
+      High Level API
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../visualizing/" title="Visualizing" class="md-nav__link">
+      Visualizing
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../phasespaces/" title="Phase Spaces" class="md-nav__link">
+      Phase Spaces
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../ray-splitting/" title="Ray-Splitting" class="md-nav__link">
+      Ray-Splitting
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../lyapunovs/" title="Lyapunov Exponents" class="md-nav__link">
+      Lyapunov Exponents
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../mushroomtools/" title="MushroomTools" class="md-nav__link">
+      MushroomTools
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../physics/" title="Physics" class="md-nav__link">
+      Physics
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Internals
+      </label>
+    
+    <a href="./" title="Internals" class="md-nav__link md-nav__link--active">
+      Internals
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" title="Implementation" class="md-nav__link">
+    Implementation
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-is-inside" title="Where is "inside"?" class="md-nav__link">
+    Where is "inside"?
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#numerical-precision" title="Numerical Precision" class="md-nav__link">
+    Numerical Precision
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collision-times" title="Collision Times" class="md-nav__link">
+    Collision Times
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-exported-internals" title="Non-Exported Internals" class="md-nav__link">
+    Non-Exported Internals
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obstacle-related" title="Obstacle related" class="md-nav__link">
+    Obstacle related
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#propagation" title="Propagation" class="md-nav__link">
+    Propagation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/billiard_table/" title="Defining a Billiard" class="md-nav__link">
+      Defining a Billiard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/own_obstacle/" title="Creating your own Obstacle" class="md-nav__link">
+      Creating your own Obstacle
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/examples/" title="Examples" class="md-nav__link">
+      Examples
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" title="Implementation" class="md-nav__link">
+    Implementation
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-is-inside" title="Where is "inside"?" class="md-nav__link">
+    Where is "inside"?
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#numerical-precision" title="Numerical Precision" class="md-nav__link">
+    Numerical Precision
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collision-times" title="Collision Times" class="md-nav__link">
+    Collision Times
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-exported-internals" title="Non-Exported Internals" class="md-nav__link">
+    Non-Exported Internals
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obstacle-related" title="Obstacle related" class="md-nav__link">
+    Obstacle related
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#propagation" title="Propagation" class="md-nav__link">
+    Propagation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/edit/master/docs/basic/low_level.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <p><a id='Internals-1'></a></p>
+<h1 id="internals">Internals</h1>
+<p>This page is <strong>not</strong> part of the public API defined by <code>DynamicalBilliards</code>. Consider it something like a <em>developer's guide</em>.</p>
+<p><a id='Implementation-1'></a></p>
+<h2 id="implementation">Implementation</h2>
+<p>Before talking about the low level methods that enable everything to work nicely together, let's talk about how this package works.</p>
+<p>Firstly one defines a <a href="../../tutorials/billiard_table/#DynamicalBilliards.Billiard"><code>Billiard</code></a> and optionally some <a href="../../ray-splitting/#DynamicalBilliards.RaySplitter"><code>RaySplitter</code></a> instances. Then one creates a particle inside the defined billiard. The algorithm for the propagation of a particle is the following:</p>
+<ol>
+<li>Calculate the <a href="./#DynamicalBilliards.collision"><code>collision</code></a> of the particle with <strong>all</strong> obstacles in the billiard.</li>
+<li>Find the collision that happens first (in time), and the obstacle corresponding to that.</li>
+<li><a href="./#DynamicalBilliards.relocate!"><code>DynamicalBilliards.relocate!</code></a> the particle, and ensure that it is <strong>inside</strong> the billiard. This means that <a href="./#DynamicalBilliards.distance"><code>DynamicalBilliards.distance</code></a> between particle and obstacle is either positive or close to machine precision.</li>
+<li>
+<p>(Optionally) check if there is transmission for ray-splitting: <code>T(φ) &gt; rand()</code></p>
+</li>
+<li>
+<p>If yes, perform the ray-splitting algorithm (see the <a href="../ray-splitting">ray-splitting</a> page).</p>
+</li>
+<li>
+<p>If not, then <a href="./#DynamicalBilliards.resolvecollision!"><code>DynamicalBilliards.resolvecollision!</code></a> of the particle with the obstacle (specular or periodic conditions).</p>
+</li>
+<li>
+<p>Continue this loop for a given amount of time.</p>
+</li>
+</ol>
+<p>Notice that the <a href="./#DynamicalBilliards.relocate!"><code>DynamicalBilliards.relocate!</code></a> step is <em>very</em> important because it takes care that all particles remain inside the billiard.</p>
+<p>The exposed <a href="../high_level/#DynamicalBilliards.bounce!"><code>bounce!</code></a> function bundles steps 1-4 together.</p>
+<p><a id='Where-is-"inside"?-1'></a></p>
+<h3 id="where-is-inside">Where is "inside"?</h3>
+<p>If for some reason (finite numeric precision) a particle goes outside a billiard, then it will escape to infinity. But what <em>is</em> inside?</p>
+<p>"Inside" is defined on obstacle level by the function <code>distance</code>:</p>
+<p><a id='DynamicalBilliards.distance' href='#DynamicalBilliards.distance'>#</a>
+<strong><code>DynamicalBilliards.distance</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>distance(p::AbstractParticle, o::Obstacle)
+</pre></div>
+
+
+<p>Return the <strong>signed</strong> distance between particle <code>p</code> and obstacle <code>o</code>, based on <code>p.pos</code>. Positive distance corresponds to the particle being on the <em>allowed</em> region of the <code>Obstacle</code>. E.g. for a <code>Disk</code>, the distance is positive when the particle is outside of the disk, negative otherwise.</p>
+<div class="codehilite"><pre><span></span>distance(p::AbstractParticle, bd::Billiard)
+</pre></div>
+
+
+<p>Return minimum <code>distance(p, obst)</code> for all <code>obst</code> in <code>bd</code>. If the <code>distance(p, bd)</code> is negative this means that the particle is outside the billiard.</p>
+<p>All <code>distance</code> functions can also be given a position (vector) instead of a particle.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/billiards/obstacles.jl#L415-L428' class='documenter-source'>source</a><br></p>
+<p>Notice that for very small negative values of distance, <a href="./#DynamicalBilliards.collision"><code>collision</code></a> takes care of finite precision issues and does not return wrong collisions.</p>
+<p><a id='Numerical-Precision-1'></a></p>
+<h2 id="numerical-precision">Numerical Precision</h2>
+<p>All core types of <code>DynamicalBilliards</code> are parametrically constructed, with parameter <code>T &lt;: AbstractFloat</code>. This means that the fields of all particles and obstacles contain numbers strictly of type <code>T</code>. You will understand why this choice happened as you continue reading this paragraph.</p>
+<p>The main concerns during evolution in a billiard table are:</p>
+<ol>
+<li>The particle must never leak out of the billiard table. This is simply translated to the <code>distance</code> function being positive after any collision <em>and</em> that <code>collision</code> takes care of extreme cases with very small (but negative) distance.</li>
+<li>The collision time is never infinite, besides the cases of <a href="../physics/#pinned-particles">pinned particles</a> in a magnetic billiard.</li>
+</ol>
+<p>These are solved with two ways:</p>
+<ol>
+<li>After the next collision is computed, <code>relocate!</code> brings the particle to that point and calculates the <code>distance</code> with the colliding obstacle. If it is negative, it translates the particle's position by this distance, <em>along the normal vector</em>.</li>
+<li><code>collision</code> takes care of cases where the distance between particle and obstacle is less than <code>accuracy(::T)</code>. (This is necessary only for magnetic propagation, as for straight propagation checking the velocity direction with respect to the normal is always enough).</li>
+</ol>
+<p>Adjusting the global precision of <code>DynamicalBilliards</code> is easy and can be done by choosing the floating precision you would like. This is done by initializing your billiard table with parametric type <code>T</code>, e.g. <code>bd = billiard_sinai(Float16(0.3))</code>. This choice will propagate to the entire <code>bd</code>, all particles resulting from <a href="../high_level/#DynamicalBilliards.randominside"><code>randominside</code></a>, <strong>as well as the entire evolution process</strong>.</p>
+<div class="admonition danger">
+<p class="admonition-title">BigFloats</p>
+<p>Evolution with <code>BigFloat</code> in <code>DynamicalBilliards</code> is on average 3 to 4 orders of magnitude slower than with <code>Float64</code>.</p>
+</div>
+<hr />
+<p><a id='Collision-Times-1'></a></p>
+<h2 id="collision-times">Collision Times</h2>
+<p><a id='DynamicalBilliards.collision' href='#DynamicalBilliards.collision'>#</a>
+<strong><code>DynamicalBilliards.collision</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>collision(p::AbstractParticle, o::Obstacle) → t, cp
+</pre></div>
+
+
+<p>Find the collision (if any) between given particle and obstacle. Return the time until collision and the estimated collision point <code>cp</code>.</p>
+<p>Returns <code>Inf, SV(0, 0)</code> if the collision is not possible <em>or</em> if the collision happens backwards in time.</p>
+<p><strong>It is the duty of <code>collision</code> to avoid incorrect collisions when the particle is on top of the obstacle (or very close).</strong></p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/collisions.jl#L21-L31' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.next_collision' href='#DynamicalBilliards.next_collision'>#</a>
+<strong><code>DynamicalBilliards.next_collision</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>next_collision(p::AbstractParticle, bd::Billiard) -&gt; i, tmin, cp
+</pre></div>
+
+
+<p>Compute the <a href="./#DynamicalBilliards.collision"><code>collision</code></a> across all obstacles in <code>bd</code> and find the minimum one. Return the index of colliding obstacle, the time and the collision point.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/collisions.jl#L330-L334' class='documenter-source'>source</a><br></p>
+<p><a id='Non-Exported-Internals-1'></a></p>
+<h2 id="non-exported-internals">Non-Exported Internals</h2>
+<p><a id='Obstacle-related-1'></a></p>
+<h3 id="obstacle-related">Obstacle related</h3>
+<p><a id='DynamicalBilliards.normalvec' href='#DynamicalBilliards.normalvec'>#</a>
+<strong><code>DynamicalBilliards.normalvec</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>normalvec(obst::Obstacle, position)
+</pre></div>
+
+
+<p>Return the vector normal to the obstacle's boundary at the given position (which is assumed to be very close to the obstacle's boundary).</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/billiards/obstacles.jl#L381-L385' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.cellsize' href='#DynamicalBilliards.cellsize'>#</a>
+<strong><code>DynamicalBilliards.cellsize</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>cellsize(bd)
+</pre></div>
+
+
+<p>Return the delimiters <code>xmin, ymin, xmax, ymax</code> of the given obstacle/billiard.</p>
+<p>Used in <code>randominside()</code>, error checking and plotting.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/billiards/obstacles.jl#L495-L500' class='documenter-source'>source</a><br></p>
+<p><a id='Propagation-1'></a></p>
+<h3 id="propagation">Propagation</h3>
+<p><a id='DynamicalBilliards.propagate!' href='#DynamicalBilliards.propagate!'>#</a>
+<strong><code>DynamicalBilliards.propagate!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>propagate!(p::AbstractParticle, t)
+</pre></div>
+
+
+<p>Propagate the particle <code>p</code> for given time <code>t</code>, changing appropriately the the <code>p.pos</code> and <code>p.vel</code> fields.</p>
+<div class="codehilite"><pre><span></span>propagate!(p, position, t)
+</pre></div>
+
+
+<p>Do the same, but take advantage of the already calculated <code>position</code> that the particle should end up at.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/propagation.jl#L66-L74' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.resolvecollision!' href='#DynamicalBilliards.resolvecollision!'>#</a>
+<strong><code>DynamicalBilliards.resolvecollision!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>resolvecollision!(p::AbstractParticle, o::Obstacle)
+</pre></div>
+
+
+<p>Resolve the collision between particle <code>p</code> and obstacle <code>o</code>, depending on the type of <code>o</code> (do <code>specular!</code> or <code>periodicity!</code>).</p>
+<div class="codehilite"><pre><span></span>resolvecollision!(p, o, T::Function, θ::Function, new_ω::Function)
+</pre></div>
+
+
+<p>This is the ray-splitting implementation. The three functions given are drawn from the ray-splitting dictionary that is passed directly to <code>evolve!()</code>. For a calculated incidence angle φ, if T(φ) &gt; rand(), ray-splitting occurs.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/propagation.jl#L143-L152' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.relocate!' href='#DynamicalBilliards.relocate!'>#</a>
+<strong><code>DynamicalBilliards.relocate!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>relocate!(p::AbstractParticle, o::Obstacle, t, cp)
+</pre></div>
+
+
+<p>Propagate the particle to <code>cp</code> and propagate velocities for time <code>t</code>. Check if it is on the correct side of the obstacle. If not, change the particle position by <a href="./#DynamicalBilliards.distance"><code>distance</code></a> along the <a href="./#DynamicalBilliards.normalvec"><code>normalvec</code></a> of the obstacle.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/propagation.jl#L40-L46' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.specular!' href='#DynamicalBilliards.specular!'>#</a>
+<strong><code>DynamicalBilliards.specular!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>specular!(p::AbstractParticle, o::Obstacle)
+</pre></div>
+
+
+<p>Perform specular reflection based on the normal vector of the Obstacle.</p>
+<p>In the case where the given obstacle is a <code>RandomObstacle</code>, the specular reflection randomizes the velocity instead (within -π/2+ε to π/2-ε of the normal vector).</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/propagation.jl#L100-L106' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.periodicity!' href='#DynamicalBilliards.periodicity!'>#</a>
+<strong><code>DynamicalBilliards.periodicity!</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>periodicity!(p::AbstractParticle, w::PeriodicWall)
+</pre></div>
+
+
+<p>Perform periodicity conditions of <code>w</code> on <code>p</code>.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/timeevolution/propagation.jl#L127-L130' class='documenter-source'>source</a><br></p>
+<div class="admonition warning">
+<p class="admonition-title">Cyclotron center is a field of <code>MagneticParticle</code></p>
+<p>For almost all operations involving a <code>MagneticParticle</code>, the center of the cyclotron is required. In order to compute this center only when it physically changes, we have made it a field of the <code>struct</code>.</p>
+<p>This means that after changing the position or velocity of the particle, this center must be changed by doing <code>mp.center = DynamicalBilliards.find_cyclotron(mp)</code>. The <a href="../high_level/#DynamicalBilliards.bounce!"><code>bounce!</code></a> function takes care of that in the most opportune moment, but if you want to write your own specific low level function, do not forget this point!</p>
+</div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../../physics/" title="Physics" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Physics
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../../tutorials/billiard_table/" title="Defining a Billiard" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Defining a Billiard
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    <link rel="stylesheet" href="../../assets/fonts/font-awesome.css">
+    
+      <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl" class="md-footer-social__link fa fa-github"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application.30f6b8b1.js"></script>
+      
+      <script>app.initialize({version:"0.17.5",url:{base:"../.."}})</script>
+      
+        <script src="../../assets\mathjaxhelper.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+    
+      
+    
+  </body>
+</html>

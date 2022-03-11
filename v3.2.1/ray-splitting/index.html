@@ -1,0 +1,944 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.">
+      
+      
+      
+        <meta name="author" content="George Datseris">
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.4">
+    
+    
+      
+        <title>Ray-Splitting - DynamicalBilliards.jl</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.451f80e5.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.22915126.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#7e57c2">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
+    
+      <link rel="stylesheet" href="../assets\Documenter.css">
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="deep-purple" data-md-color-accent="cyan">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#ray-splitting" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href=".." title="DynamicalBilliards.jl" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                DynamicalBilliards.jl
+              </span>
+              <span class="md-header-nav__topic">
+                Ray-Splitting
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href=".." title="DynamicalBilliards.jl" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    DynamicalBilliards.jl
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Introduction" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../basic/high_level/" title="High Level API" class="md-nav__link">
+      High Level API
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../visualizing/" title="Visualizing" class="md-nav__link">
+      Visualizing
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../basic/phasespaces/" title="Phase Spaces" class="md-nav__link">
+      Phase Spaces
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Ray-Splitting
+      </label>
+    
+    <a href="./" title="Ray-Splitting" class="md-nav__link md-nav__link--active">
+      Ray-Splitting
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-ray-splitting-obstacles" title="1. Ray-Splitting Obstacles" class="md-nav__link">
+    1. Ray-Splitting Obstacles
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-raysplitter-structure" title="2. The RaySplitter structure" class="md-nav__link">
+    2. The RaySplitter structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-evolution-with-ray-splitting" title="3. Evolution with Ray-Splitting" class="md-nav__link">
+    3. Evolution with Ray-Splitting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ray-splitting-algorithm" title="The Ray-Splitting Algorithm" class="md-nav__link">
+    The Ray-Splitting Algorithm
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#physics-of-the-ray-splitting-functions" title="Physics of the Ray-Splitting Functions" class="md-nav__link">
+    Physics of the Ray-Splitting Functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snells-law" title="Snell's Law" class="md-nav__link">
+    Snell's Law
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-of-affecting-multiple-obstacles" title="Example of Affecting Multiple Obstacles" class="md-nav__link">
+    Example of Affecting Multiple Obstacles
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../lyapunovs/" title="Lyapunov Exponents" class="md-nav__link">
+      Lyapunov Exponents
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../mushroomtools/" title="MushroomTools" class="md-nav__link">
+      MushroomTools
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../physics/" title="Physics" class="md-nav__link">
+      Physics
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../basic/low_level/" title="Internals" class="md-nav__link">
+      Internals
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../tutorials/billiard_table/" title="Defining a Billiard" class="md-nav__link">
+      Defining a Billiard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../tutorials/own_obstacle/" title="Creating your own Obstacle" class="md-nav__link">
+      Creating your own Obstacle
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../tutorials/examples/" title="Examples" class="md-nav__link">
+      Examples
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-ray-splitting-obstacles" title="1. Ray-Splitting Obstacles" class="md-nav__link">
+    1. Ray-Splitting Obstacles
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-raysplitter-structure" title="2. The RaySplitter structure" class="md-nav__link">
+    2. The RaySplitter structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-evolution-with-ray-splitting" title="3. Evolution with Ray-Splitting" class="md-nav__link">
+    3. Evolution with Ray-Splitting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-ray-splitting-algorithm" title="The Ray-Splitting Algorithm" class="md-nav__link">
+    The Ray-Splitting Algorithm
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#physics-of-the-ray-splitting-functions" title="Physics of the Ray-Splitting Functions" class="md-nav__link">
+    Physics of the Ray-Splitting Functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snells-law" title="Snell's Law" class="md-nav__link">
+    Snell's Law
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-of-affecting-multiple-obstacles" title="Example of Affecting Multiple Obstacles" class="md-nav__link">
+    Example of Affecting Multiple Obstacles
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/edit/master/docs/ray-splitting.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <p><a id='Ray-Splitting-1'></a></p>
+<h1 id="ray-splitting">Ray-Splitting</h1>
+<p>Ray-splitting is a semi-classical approach to the billiard system, giving a wave attribute to the ray traced by the particle. Upon collision a particle may propagate through an obstacle (transmission &amp; refraction) or be reflected. Following the mindset of this package, implementing a ray-splitting billiard requires only three simple steps. We will introduce them and demonstrate them using a simple example in this documentation page.</p>
+<p><a id='.-Ray-Splitting-Obstacles-1'></a></p>
+<h2 id="1-ray-splitting-obstacles">1. Ray-Splitting Obstacles</h2>
+<p>The first step is that an <a href="../tutorials/billiard_table/#DynamicalBilliards.Obstacle"><code>Obstacle</code></a> that supports ray-splitting is required to be present in your billiard table. The only new feature these obstacles have is an additional Boolean field called <code>pflag</code> (propagation flag). This field notes on which side of the obstacle the particle is currently propagating.</p>
+<p>The normal vector as well as the distance from boundary change sign depending on the value of <code>pflag</code>. The obstacles <a href="../tutorials/billiard_table/#DynamicalBilliards.Antidot"><code>Antidot</code></a> and <a href="../tutorials/billiard_table/#DynamicalBilliards.SplitterWall"><code>SplitterWall</code></a> are the equivalents of disk and wall for ray-splitting.</p>
+<p>Let's create a billiard with a bunch of ray-splitting obstacles!</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span>
+<span class="n">bdr</span> <span class="o">=</span>  <span class="n">billiard_rectangle</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">sw</span> <span class="o">=</span> <span class="n">SplitterWall</span><span class="p">([</span><span class="n">x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="n">x</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="kc">true</span><span class="p">)</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="n">Antidot</span><span class="p">([</span><span class="n">x</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">y</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s">&quot;Left Antidot&quot;</span><span class="p">)</span>
+<span class="n">a2</span> <span class="o">=</span> <span class="n">Antidot</span><span class="p">([</span><span class="mi">3</span><span class="n">x</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">y</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.15</span><span class="p">,</span> <span class="s">&quot;Right Antidot&quot;</span><span class="p">)</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">Billiard</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">sw</span><span class="p">,</span> <span class="n">bdr</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>Billiard{Float64} with 7 obstacles:
+  Left Antidot
+  Right Antidot
+  Splitter wall
+  Bottom wall
+  Right wall
+  Top wall
+  Left wall
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">PyPlot</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="" src="../raybil.svg" /></p>
+<!– ![Ray-splitting billiard](https://i.imgur.com/UKsyURY.png) –>
+
+<p><a id='.-The-RaySplitter-structure-1'></a></p>
+<h2 id="2-the-raysplitter-structure">2. The <code>RaySplitter</code> structure</h2>
+<p>In the second step, you have to define 2+1 functions: transmission probability, refraction angle and optionally new angular velocity after transmission. These functions, as well as which obstacles participate in ray-splitting, are bundled into a special structure:</p>
+<p><a id='DynamicalBilliards.RaySplitter' href='#DynamicalBilliards.RaySplitter'>#</a>
+<strong><code>DynamicalBilliards.RaySplitter</code></strong> &mdash; <em>Type</em>.</p>
+<div class="codehilite"><pre><span></span>RaySplitter(idxs, transmission, refraction [, newangular]; affect)
+</pre></div>
+
+
+<p>Return a <code>RaySplitter</code> instance, used to perform raysplitting. <code>idxs</code> is a <code>Vector{Int}</code> with the indices of the obstacles that this <code>RaySplitter</code> corresponds to.</p>
+<p><code>transmission</code>, <code>refraction</code> and <code>newangular</code> are <strong>functions</strong>. Let <code>φ</code> be the angle of incidence and <code>ω</code> be the angular velocity and <code>pflag</code> the propagation flag (before transmission). The functions have the following signatures:</p>
+<ol>
+<li><code>transmission(φ, pflag, ω) -&gt; T</code>, transmission probability.</li>
+<li><code>refraction(φ, pflag, ω) -&gt; θ</code>, refraction angle. This angle is <em>relative</em> to the normal vector.</li>
+<li><code>newangular(ω, pflag) -&gt; newω</code>, new angular velocity after transmission.</li>
+</ol>
+<p>The above three functions use the <strong>same convention</strong>: the argument <code>pflag</code> is the one the obstacle has <strong>before transmission</strong>. For example, if a particle is outside an <a href="../tutorials/billiard_table/#DynamicalBilliards.Antidot"><code>Antidot</code></a> (with <code>pflag = true</code> here) and is transmitted inside the <code>Antidot</code> (<code>pflag</code> becomes <code>false</code> here), then all three functions will be given their second argument (the Boolean one) as <code>true</code>!</p>
+<p><code>affect</code> is a function, and denotes which obstacles of the billiard are affected when transmission occurs at obstacle <code>i</code> (for which obstacles should the field <code>pflag</code> be reversed). Defaults to <code>idxs = (i) -&gt; i</code>, i.e. only the colliding obstacle is affected. If you want many obstacles to be affected you could write <code>idxs = (i) -&gt; SVector(2,3,5)</code>, etc. Keep in mind that the only values of <code>i</code> that can be passed into this function are the ones that are given in the argument <code>idxs</code>!</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/raysplitting.jl#L8-L38' class='documenter-source'>source</a><br></p>
+<hr />
+<p>If you want different type of transmission/refraction functions for different obstacles, then you define multiple <code>RaySplitter</code>s.</p>
+<p>Continuing from the above billiard, let's also create some <code>RaySplitter</code> instances for it.</p>
+<p>First define a refraction function</p>
+<div class="codehilite"><pre><span></span><span class="n">refraction</span><span class="p">(</span><span class="nb">φ</span><span class="p">,</span> <span class="n">pflag</span><span class="p">,</span> <span class="n">ω</span><span class="p">)</span> <span class="o">=</span> <span class="n">pflag</span> <span class="o">?</span> <span class="mf">0.5</span><span class="nb">φ</span> <span class="o">:</span> <span class="mf">2.0</span><span class="nb">φ</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>refraction (generic function with 1 method)
+</pre></div>
+
+
+<p>Then, a transmission probability function. In this example, we want to create a function that given some factor <code>p</code>, it returns a probability weighted with <code>p</code> in one direction of ray-splitting and <code>1-p</code> in another direction.</p>
+<div class="codehilite"><pre><span></span><span class="n">transmission_p</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="nb">φ</span><span class="p">,</span> <span class="n">pflag</span><span class="p">,</span> <span class="n">ω</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">begin</span>
+    <span class="k">if</span> <span class="n">pflag</span>
+        <span class="n">p</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="nb">φ</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">/</span><span class="mi">2</span><span class="p">(</span><span class="nb">π</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span>
+        <span class="n">abs</span><span class="p">(</span><span class="nb">φ</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">π</span><span class="o">/</span><span class="mi">4</span> <span class="o">?</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="nb">φ</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">/</span><span class="mi">2</span><span class="p">(</span><span class="nb">π</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span> <span class="o">:</span> <span class="mf">0.0</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>transmission_p (generic function with 1 method)
+</pre></div>
+
+
+<p>Notice also how we defined the function in such a way that critical refraction is respected, i.e. if <code>θ(φ) ≥ π/2</code> then <code>T(φ) = 0</code>. Although this is necessary from a physical perspective, the code does take care of it by clamping the refraction angle (see below).</p>
+<p>Lastly, for this example we will use magnetic propagation. We define functions such that the antidots also reverse the direction and magnitude of the magnetic field.</p>
+<div class="codehilite"><pre><span></span><span class="n">newoantidot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bool</span><span class="p">)</span> <span class="o">=</span>  <span class="n">bool</span> <span class="o">?</span> <span class="o">-</span><span class="mf">2.0</span><span class="n">x</span> <span class="o">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="n">x</span>
+<span class="n">newowall</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">bool</span><span class="p">)</span> <span class="o">=</span> <span class="n">bool</span> <span class="o">?</span> <span class="mf">0.5</span><span class="n">x</span> <span class="o">:</span> <span class="mf">2.0</span><span class="n">x</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>newowall (generic function with 1 method)
+</pre></div>
+
+
+<p>Now we create the <a href="./#DynamicalBilliards.RaySplitter"><code>RaySplitter</code></a> instances we want</p>
+<div class="codehilite"><pre><span></span><span class="n">raywall</span> <span class="o">=</span> <span class="n">RaySplitter</span><span class="p">([</span><span class="mi">3</span><span class="p">],</span> <span class="n">transmission_p</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">refraction</span><span class="p">,</span> <span class="n">newowall</span><span class="p">)</span>
+<span class="n">raya</span> <span class="o">=</span> <span class="n">RaySplitter</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">transmission_p</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),</span> <span class="n">refraction</span><span class="p">,</span> <span class="n">newoantidot</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>RaySplitter for indices [1, 2]
+ transmission: getfield(Main.ex-ray, Symbol(&quot;##1#2&quot;)){Float64}(0.8)
+ refraction:   Main.ex-ray.refraction
+ new angular:  Main.ex-ray.newoantidot
+ affect:       default
+</pre></div>
+
+
+<p>Because we want to use same functions for both antidots, we gave both indices in <code>raya</code>, <code>[1, 2]</code> (which are the indices of the antidots in the billiard <code>bd</code>).</p>
+<p><a id='.-Evolution-with-Ray-Splitting-1'></a></p>
+<h2 id="3-evolution-with-ray-splitting">3. Evolution with Ray-Splitting</h2>
+<p>The third step is trivial. After you have created your <code>RaySplitter</code>(s), you simply pass them into <code>evolve</code> or <code>animate_evolution</code> as a fourth argument! If you have many instances of <code>RaySplitter</code> you pass a tuple of them.</p>
+<p>For example,</p>
+<div class="codehilite"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">randominside</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">raysplitters</span> <span class="o">=</span> <span class="p">(</span><span class="n">raywall</span><span class="p">,</span> <span class="n">raya</span><span class="p">)</span>
+<span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">,</span> <span class="n">vxt</span><span class="p">,</span> <span class="n">vyt</span><span class="p">,</span> <span class="n">tt</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">raysplitters</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">)</span>
+<span class="n">scatter</span><span class="p">(</span><span class="n">xt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">yt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&quot;black&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="" src="../rayorbit.svg" /></p>
+<p>You can see that at some points the particle crossed the boundaries of the red obstacles, which allow for ray splitting. It is even cooler to animate this motion using <a href="../visualizing/#DynamicalBilliards.animate_evolution"><code>animate_evolution</code></a>!</p>
+<video width="100%" height="auto" controls> <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/ray.mp4?raw=true" type="video/mp4"> </video>
+
+<div class="admonition warning">
+<p class="admonition-title">Resetting the billiard</p>
+<p>Notice that evolving a particle inside a billiard always mutates the billiard if ray-splitting is used. This means that you should always set the fields <code>pflag</code> of some obstacles to the values you desire after <em>each</em> call to <code>evolve</code>. If you use the function <a href="../basic/high_level/#DynamicalBilliards.randominside"><code>randominside</code></a> you must definitely do this!</p>
+<p>The function <code>reset_billiard!(bd)</code> turns all <code>pflag</code>s to <code>true</code>.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Angle of refraction is clamped</p>
+<p>Internally we clamp the output of the angle of refraction function. Let <code>c = DynamicalBilliards.CLAMPING_ANGLE</code> (currently <code>c = 0.1</code>). We clamp <code>θ</code> to <code>-π/2 + 0.1 ≤ θ ≤ π/2 - 0.1</code>. This is so that the relocating algorithm does not fall into an infinite loop.</p>
+</div>
+<div class="codehilite"><pre><span></span>    You can change the value of `c` but very small values can lead to infinite loops in extreme cases.
+</pre></div>
+
+
+<p><a id='The-Ray-Splitting-Algorithm-1'></a></p>
+<h2 id="the-ray-splitting-algorithm">The Ray-Splitting Algorithm</h2>
+<p>In this section we describe the algorithm we follow to implement the ray-splitting process. Let <span><span class="MathJax_Preview">T</span><script type="math/tex">T</script></span> denote the transmission function, <span><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> the refraction function and <span><span class="MathJax_Preview">\omega_{\text{new}}</span><script type="math/tex">\omega_{\text{new}}</script></span> the new angular velocity function. The following describes the process after a particle has reached an obstacle that supports ray-splitting.</p>
+<ol>
+<li>Find the angle of incidence <span><span class="MathJax_Preview">\phi' = \pi - \arccos(\vec{v} \cdot \vec{n}) = \arccos(\vec{v} \cdot (-\vec{n}))</span><script type="math/tex">\phi' = \pi - \arccos(\vec{v} \cdot \vec{n}) = \arccos(\vec{v} \cdot (-\vec{n}))</script></span> with <span><span class="MathJax_Preview">\vec{n}</span><script type="math/tex">\vec{n}</script></span> the normal vector at collision point. Notice that we use here <span><span class="MathJax_Preview">-\vec{n}</span><script type="math/tex">-\vec{n}</script></span> because the velocity is opposing the normal vector before the collision happens. Using <span><span class="MathJax_Preview">-\vec{n}</span><script type="math/tex">-\vec{n}</script></span> gives the angle between 0 and <span><span class="MathJax_Preview">\pi/2</span><script type="math/tex">\pi/2</script></span> instead of <span><span class="MathJax_Preview">\pi/2</span><script type="math/tex">\pi/2</script></span> to <span><span class="MathJax_Preview">\pi</span><script type="math/tex">\pi</script></span>.</li>
+<li>Find the <em>correct</em> sign of the incidence angle, <span><span class="MathJax_Preview">\phi = \pm \phi'</span><script type="math/tex">\phi = \pm \phi'</script></span>. Specifically, use the cross product: if the third entry of <span><span class="MathJax_Preview">\vec{v} \times \vec{n}</span><script type="math/tex">\vec{v} \times \vec{n}</script></span> is negative, then have minus sign. The "correct" sign debates on whether the velocity vector is to the right or to the left of <span><span class="MathJax_Preview">(-\vec{n})</span><script type="math/tex">(-\vec{n})</script></span>. This is important for finding the correct transmission angle and/or probability.</li>
+<li>Check if <span><span class="MathJax_Preview">T(\phi, \verb|pflag|, \omega) &gt; \text{random}()</span><script type="math/tex">T(\phi, \verb|pflag|, \omega) > \text{random}()</script></span>. If not, do standard specular reflection.</li>
+<li>If ray-splitting happens, then relocate the particle so that it is on the <em>other</em> side of the colliding obstacle. This contrasts the main evolution algorithm of this billiard package.</li>
+<li>Re-compute the <em>correct</em> angle of incidence, as the position of the particle generally changes with relocating.</li>
+<li>Find refraction angle <span><span class="MathJax_Preview">\theta(\phi, \verb|pflag|, \omega)</span><script type="math/tex">\theta(\phi, \verb|pflag|, \omega)</script></span>. Notice that this is a relative angle with respect to the normal vector. Also notice that <span><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> may have opposite sign from <span><span class="MathJax_Preview">\phi</span><script type="math/tex">\phi</script></span>. It depends on the user if they want to add anomalous refraction.</li>
+<li>Set <code>obstacle.pflag = !obstacle.pflag</code> for <em>all</em> obstacles affected by the current <code>RaySplitter</code>. This reverses <span><span class="MathJax_Preview">\vec{n}</span><script type="math/tex">\vec{n}</script></span> to <span><span class="MathJax_Preview">-\vec{n}</span><script type="math/tex">-\vec{n}</script></span> as well! So from now on <span><span class="MathJax_Preview">\vec{n}</span><script type="math/tex">\vec{n}</script></span> is the opposite than what it was at the beginning of the algorithm!</li>
+<li>Find the refraction angle in absolute space. First find <span><span class="MathJax_Preview">a = \text{atan}(n_y, n_x)</span><script type="math/tex">a = \text{atan}(n_y, n_x)</script></span> and then set <span><span class="MathJax_Preview">\Theta = a + \theta</span><script type="math/tex">\Theta = a + \theta</script></span>.</li>
+<li>Perform refraction, i.e. set the particle velocity to the direction of <span><span class="MathJax_Preview">\Theta</span><script type="math/tex">\Theta</script></span>.</li>
+<li>Scale the magnetic field, i.e. set <code>p.omega</code> = <span><span class="MathJax_Preview">\omega_{\text{new}}(\omega, \verb|!pflag|)</span><script type="math/tex">\omega_{\text{new}}(\omega, \verb|!pflag|)</script></span>. It is important to note that we use <code>!pflag</code> because we have already changed the <code>pflag</code> field.</li>
+</ol>
+<p><a id='Physics-of-the-Ray-Splitting-Functions-1'></a></p>
+<h2 id="physics-of-the-ray-splitting-functions">Physics of the Ray-Splitting Functions</h2>
+<p>If <code>T</code> is the transmission probability function, then the condition for transmission is simply: <code>T(φ, pflag, ω) &gt; rand()</code>. If it returns <code>true</code>, transmission (i.e. ray-splitting) will happen.</p>
+<p>The functions given to <a href="./#DynamicalBilliards.RaySplitter"><code>RaySplitter</code></a> should have some properties in order to have physical meaning. In order to test if the <code>RaySplitter</code> you have defined has physical meaning, the function <code>isphysical</code> is provided</p>
+<p><a id='DynamicalBilliards.isphysical' href='#DynamicalBilliards.isphysical'>#</a>
+<strong><code>DynamicalBilliards.isphysical</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>isphysical(raysplitter(s))
+</pre></div>
+
+
+<p>Return <code>true</code> if the given <code>raysplitters</code> have physically plausible properties.</p>
+<p>Specifically, check if (φ is the incidence angle, θ the refraction angle):</p>
+<ul>
+<li>Critical angle means total reflection: If θ(φ) ≥ π/2 then Tr(φ) = 0</li>
+<li>Transmission probability is even function: Tr(φ) ≈ Tr(-φ) at ω = 0</li>
+<li>Refraction angle is odd function: θ(φ) ≈ -θ(-φ) at ω = 0</li>
+<li>Ray reversal is true: θ(θ(φ, pflag, ω), !pflag, ω) ≈ φ</li>
+<li>Magnetic conservation is true: (ω<em>new(ω</em>new(ω, pflag), !pflag) ≈ ω</li>
+</ul>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/raysplitting.jl#L327-L339' class='documenter-source'>source</a><br></p>
+<p><a id='Snell's-Law-1'></a></p>
+<h2 id="snells-law">Snell's Law</h2>
+<p>In classical geometric optics, the refraction of a ray of light moving from one medium to another is described by Snell's law. For an angle of incidence of <span><span class="MathJax_Preview">\phi</span><script type="math/tex">\phi</script></span>, the refraction angle <span><span class="MathJax_Preview">\theta</span><script type="math/tex">\theta</script></span> is determined by the equation</p>
+<div>
+<div class="MathJax_Preview">
+\frac{sin(\phi)}{\sin(\theta)} = \frac{n'}{n}
+</div>
+<script type="math/tex; mode=display">
+\frac{sin(\phi)}{\sin(\theta)} = \frac{n'}{n}
+</script>
+</div>
+<p>where <span><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> and <span><span class="MathJax_Preview">n'</span><script type="math/tex">n'</script></span> are the respective refractive indices of the media.</p>
+<p>To easily simulate these relations in <code>DynamicalBilliards</code>, the function <code>law_of_refraction</code> can be used to set up ray-splitting according to this law.</p>
+<p><a id='DynamicalBilliards.law_of_refraction' href='#DynamicalBilliards.law_of_refraction'>#</a>
+<strong><code>DynamicalBilliards.law_of_refraction</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>law_of_refraction(n1, n2 = 1.0) -&gt; t, r
+</pre></div>
+
+
+<p>Create transmission and refraction functions <code>t, r</code> that follow Snell's law, i.e. the transmission probability is set to 1.0 except for the case of total internal reflection. </p>
+<p><code>n1</code> is the index of refraction for the <code>pflag = false</code> side of an obstacle, while <code>n2</code> is the index of refraction for <code>pflag = true</code>.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/41bbb5edb6bc51c56f05c430188091c66e6f5a46/src/raysplitting.jl#L400-L409' class='documenter-source'>source</a><br></p>
+<p>Using the functions returned by <code>law_of_refraction</code>, we can set up a <code>RaySplitter</code> for a billiard.</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span><span class="p">,</span> <span class="n">PyPlot</span>
+<span class="c"># Create a circular &quot;lens&quot;</span>
+<span class="n">o</span> <span class="o">=</span> <span class="n">Antidot</span><span class="p">(</span><span class="n">SVector</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="c"># in a rectangular box</span>
+<span class="n">bd</span> <span class="o">=</span> <span class="n">Billiard</span><span class="p">(</span><span class="n">billiard_rectangle</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span><span class="o">...</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+<span class="c"># create a RaySplitter using law of refraction</span>
+<span class="n">trans</span><span class="p">,</span> <span class="n">refra</span> <span class="o">=</span> <span class="n">law_of_refraction</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">rs</span> <span class="o">=</span> <span class="p">(</span><span class="n">RaySplitter</span><span class="p">([</span><span class="mi">5</span><span class="p">],</span> <span class="n">trans</span><span class="p">,</span> <span class="n">refra</span><span class="p">),)</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>(RaySplitter for indices [5],)
+</pre></div>
+
+
+<p>We now animate the evolution of an array of particles on parallel trajectories to demonstrate the refractive properties of the spherical lens</p>
+<div class="codehilite"><pre><span></span><span class="c"># create parallel particles</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="p">[</span><span class="n">Particle</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="kp">in</span> <span class="mf">0.4</span><span class="o">:</span><span class="mf">0.05</span><span class="o">:</span><span class="mf">1.1</span><span class="p">]</span>
+
+<span class="c"># animate</span>
+<span class="n">animate_evolution</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">rs</span><span class="p">,</span> <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;C0&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="o">∈</span> <span class="mi">1</span><span class="o">:</span><span class="n">length</span><span class="p">(</span><span class="n">ps</span><span class="p">)],</span>
+    <span class="n">tailtime</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">savename</span> <span class="o">=</span> <span class="s">&quot;lens&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<video width="100%" height="auto" controls> <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/lens.mp4?raw=true" type="video/mp4"> </video>
+
+<p><a id='Example-of-Affecting-Multiple-Obstacles-1'></a></p>
+<h2 id="example-of-affecting-multiple-obstacles">Example of Affecting Multiple Obstacles</h2>
+<p>Here we will show an application of <em>inverse</em> billiards, where particles go in and out of a billiard, while taking advantage of the existence of a magnetic field outside to return.</p>
+<p>As always, we define the ray-splitting functions:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span><span class="p">,</span> <span class="n">PyPlot</span>
+<span class="n">trans</span><span class="p">(</span><span class="n">args</span><span class="o">...</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c"># always perfect transmission</span>
+<span class="n">refra</span><span class="p">(</span><span class="nb">φ</span><span class="p">,</span> <span class="n">pflag</span><span class="p">,</span> <span class="n">ω</span><span class="p">)</span> <span class="o">=</span> <span class="n">pflag</span> <span class="o">?</span> <span class="mf">0.8</span><span class="nb">φ</span> <span class="o">:</span> <span class="mf">1.25</span><span class="nb">φ</span> <span class="c"># refraction angle</span>
+<span class="n">neww</span><span class="p">(</span><span class="n">ω</span><span class="p">,</span> <span class="n">pflag</span><span class="p">)</span> <span class="o">=</span> <span class="n">pflag</span> <span class="o">?</span> <span class="mf">2.0</span> <span class="o">:</span> <span class="mf">0.4</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>neww (generic function with 1 method)
+</pre></div>
+
+
+<p>Now, when we define the <a href="./#DynamicalBilliards.RaySplitter"><code>RaySplitter</code></a> instance we will choose a different value for <code>affect</code>:</p>
+<div class="codehilite"><pre><span></span><span class="n">ray</span> <span class="o">=</span> <span class="n">RaySplitter</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">trans</span><span class="p">,</span> <span class="n">refra</span><span class="p">,</span> <span class="n">neww</span><span class="p">,</span> <span class="n">affect</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SVector</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>RaySplitter for indices [1, 2, 3, 4]
+ transmission: Main.ex-ray.trans
+ refraction:   Main.ex-ray.refra
+ new angular:  Main.ex-ray.neww
+ affect:       getfield(Main.ex-ray, Symbol(&quot;##3#4&quot;))()
+</pre></div>
+
+
+<p>We initialize a simple rectangular billiard and a particle</p>
+<div class="codehilite"><pre><span></span><span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_rectangle</span><span class="p">(</span><span class="n">setting</span> <span class="o">=</span> <span class="s">&quot;ray-splitting&quot;</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">MagneticParticle</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>MagneticParticle{Float64}
+position: [0.4, 0.6]
+velocity: [1.0, 0.0]
+ang. velocity: 0.4
+</pre></div>
+
+
+<p>and we animate its evolution, by first zooming out of the billiard</p>
+<div class="codehilite"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">bd</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="n">animate_evolution</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="p">(</span><span class="n">ray</span><span class="p">,);</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">gca</span><span class="p">(),</span> <span class="n">savename</span> <span class="o">=</span> <span class="s">&quot;inverse&quot;</span><span class="p">,</span> <span class="n">tailtime</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">)</span>
+</pre></div>
+
+
+<video width="100%" height="auto" controls> <source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamicsDocumentation.jl/master/animations/billiards/inverse.mp4?raw=true" type="video/mp4"> </video>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../basic/phasespaces/" title="Phase Spaces" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Phase Spaces
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../lyapunovs/" title="Lyapunov Exponents" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Lyapunov Exponents
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    <link rel="stylesheet" href="../assets/fonts/font-awesome.css">
+    
+      <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl" class="md-footer-social__link fa fa-github"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.30f6b8b1.js"></script>
+      
+      <script>app.initialize({version:"0.17.5",url:{base:".."}})</script>
+      
+        <script src="../assets\mathjaxhelper.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+    
+      
+    
+  </body>
+</html>

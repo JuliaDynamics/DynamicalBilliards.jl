@@ -1,0 +1,798 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="An easy-to-use, modular and extendable Julia package for Dynamical Billiard systems in two dimensions.">
+      
+      
+      
+        <meta name="author" content="George Datseris">
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.5, mkdocs-material-2.9.4">
+    
+    
+      
+        <title>Phase Spaces - DynamicalBilliards.jl</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application.451f80e5.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.22915126.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#7e57c2">
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
+    
+      <link rel="stylesheet" href="../../assets\Documenter.css">
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="deep-purple" data-md-color-accent="cyan">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#phase-spaces" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../.." title="DynamicalBilliards.jl" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                DynamicalBilliards.jl
+              </span>
+              <span class="md-header-nav__topic">
+                Phase Spaces
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../.." title="DynamicalBilliards.jl" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    DynamicalBilliards.jl
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Introduction" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../high_level/" title="High Level API" class="md-nav__link">
+      High Level API
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../visualizing/" title="Visualizing" class="md-nav__link">
+      Visualizing
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Phase Spaces
+      </label>
+    
+    <a href="./" title="Phase Spaces" class="md-nav__link md-nav__link--active">
+      Phase Spaces
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#coordinate-systems" title="Coordinate Systems" class="md-nav__link">
+    Coordinate Systems
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundary-maps" title="Boundary Maps" class="md-nav__link">
+    Boundary Maps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-space-portions" title="Phase Space Portions" class="md-nav__link">
+    Phase Space Portions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" title="References" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../ray-splitting/" title="Ray-Splitting" class="md-nav__link">
+      Ray-Splitting
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../lyapunovs/" title="Lyapunov Exponents" class="md-nav__link">
+      Lyapunov Exponents
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../mushroomtools/" title="MushroomTools" class="md-nav__link">
+      MushroomTools
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../physics/" title="Physics" class="md-nav__link">
+      Physics
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../low_level/" title="Internals" class="md-nav__link">
+      Internals
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/billiard_table/" title="Defining a Billiard" class="md-nav__link">
+      Defining a Billiard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/own_obstacle/" title="Creating your own Obstacle" class="md-nav__link">
+      Creating your own Obstacle
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/examples/" title="Examples" class="md-nav__link">
+      Examples
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#coordinate-systems" title="Coordinate Systems" class="md-nav__link">
+    Coordinate Systems
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundary-maps" title="Boundary Maps" class="md-nav__link">
+    Boundary Maps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-space-portions" title="Phase Space Portions" class="md-nav__link">
+    Phase Space Portions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" title="References" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/edit/master/docs/basic/phasespaces.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <p><a id='Phase-Spaces-1'></a></p>
+<h1 id="phase-spaces">Phase Spaces</h1>
+<p><a id='Coordinate-Systems-1'></a></p>
+<h2 id="coordinate-systems">Coordinate Systems</h2>
+<p>Any billiard has two coordinate systems:</p>
+<ol>
+<li>The "real" coordinates, i.e. the coordinates that specify the full, three-dimensional phase space: <span><span class="MathJax_Preview">x, y, \phi</span><script type="math/tex">x, y, \phi</script></span>.</li>
+<li>The "boundary" coordinates, also known as Birkhoff coordinates, which instead reduce the continuous billiard into a map, by only considering the collision points. These coordinates are only two: <span><span class="MathJax_Preview">\xi, \sin(\phi_n)</span><script type="math/tex">\xi, \sin(\phi_n)</script></span>, with <span><span class="MathJax_Preview">\xi</span><script type="math/tex">\xi</script></span> being the parametrization of the arc length and <span><span class="MathJax_Preview">\phi_n</span><script type="math/tex">\phi_n</script></span> being the angle as measured from the normal vector.</li>
+</ol>
+<p>With <code>DynamicalBilliards</code> it is very easy to switch between the two coordinate systems, using:</p>
+<p><a id='DynamicalBilliards.to_bcoords' href='#DynamicalBilliards.to_bcoords'>#</a>
+<strong><code>DynamicalBilliards.to_bcoords</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>to_bcoords(pos, vel, o::Obstacle) -&gt; ξ, sφ
+</pre></div>
+
+
+<p>Convert the real coordinates <code>pos, vel</code> to boundary coordinates (also known as Birkhoff coordinates) <code>ξ, sφ</code>, assuming that <code>pos</code> is on the obstacle.</p>
+<p><code>ξ</code> is the arc-coordinate, i.e. it parameterizes the arclength of the obstacle. <code>sφ</code> is the sine of the angle between the velocity vector and the vector normal to the obstacle.</p>
+<p>The arc-coordinate <code>ξ</code> is measured as:</p>
+<ul>
+<li>the distance from start point to end point in <code>Wall</code>s</li>
+<li>the arc length measured counterclockwise from the open face in <code>Semicircle</code>s</li>
+<li>the arc length measured counterclockwise from the rightmost point in <code>Circular</code>/<code>Ellipse</code>s</li>
+</ul>
+<p>Notice that this function returns the <em>local</em> arclength. To get the global arclength parameterizing an entire billiard, simply do <code>ξ += arcintervals(bd)[i]</code> if the index of obstacle <code>o</code> is <code>i</code>.</p>
+<p>See also <a href="./#DynamicalBilliards.from_bcoords"><code>from_bcoords</code></a>, which is the inverse function.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/boundarymap.jl#L38-L61' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.from_bcoords' href='#DynamicalBilliards.from_bcoords'>#</a>
+<strong><code>DynamicalBilliards.from_bcoords</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>from_bcoords(ξ, sφ, o::Obstacle) -&gt; pos, vel
+</pre></div>
+
+
+<p>Convert the boundary coordinates <code>ξ, sφ</code> on the obstacle to real coordinates <code>pos, vel</code>.</p>
+<p>Note that <code>vel</code> always points away from the obstacle.</p>
+<p>This function is the inverse of <a href="./#DynamicalBilliards.to_bcoords"><code>to_bcoords</code></a>.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/boundarymap.jl#L99-L107' class='documenter-source'>source</a><br></p>
+<div class="codehilite"><pre><span></span>from_bcoords(ξ, sφ, bd::Billiard, intervals = arcintervals(bd))
+</pre></div>
+
+
+<p>Same as above, but now <code>ξ</code> is considered to be the global arclength, parameterizing the entire billiard, instead of a single obstacle.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/boundarymap.jl#L139-L143' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.arcintervals' href='#DynamicalBilliards.arcintervals'>#</a>
+<strong><code>DynamicalBilliards.arcintervals</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>arcintervals(bd::Billiard) -&gt; s
+</pre></div>
+
+
+<p>Generate a vector <code>s</code>, with entries being the delimiters of the arclengths of the obstacles of the billiard. The arclength from <code>s[i]</code> to <code>s[i+1]</code> is the arclength spanned by the <code>i</code>th obstacle.</p>
+<p><code>s</code> is used to transform an arc-coordinate <code>ξ</code> from local to global and vice-versa. A local <code>ξ</code> becomes global by adding <code>s[i]</code> (where <code>i</code> is the index of current obstacle). A global <code>ξ</code> becomes local by subtracting <code>s[i]</code>.</p>
+<p>See also <a href="./#DynamicalBilliards.boundarymap"><code>boundarymap</code></a>, <a href="./#DynamicalBilliards.to_bcoords"><code>to_bcoords</code></a>, <a href="./#DynamicalBilliards.from_bcoords"><code>from_bcoords</code></a>.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/boundarymap.jl#L17-L29' class='documenter-source'>source</a><br></p>
+<p><a id='Boundary-Maps-1'></a></p>
+<h2 id="boundary-maps">Boundary Maps</h2>
+<p>Boundary maps can be obtained with the high level function</p>
+<p><a id='DynamicalBilliards.boundarymap' href='#DynamicalBilliards.boundarymap'>#</a>
+<strong><code>DynamicalBilliards.boundarymap</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>boundarymap(p, bd, t [,intervals]) → bmap, arclengths
+</pre></div>
+
+
+<p>Compute the boundary map of the particle <code>p</code> in the billiard <code>bd</code> by evolving the particle for total amount <code>t</code> (either float for time or integer for collision number).</p>
+<p>Return a vector of 2-vectors <code>bmap</code> and also <code>arclengths(bd)</code>. The first entry of each element of <code>bmap</code> is the arc-coordinate at collisions <span><span class="MathJax_Preview">\xi</span><script type="math/tex">\xi</script></span>, while the second  is the sine of incidence angle <span><span class="MathJax_Preview">\sin(\phi_n)</span><script type="math/tex">\sin(\phi_n)</script></span>.</p>
+<p>The measurement direction of the arclengths of the individual obstacles is dictated by their order in <code>bd</code>. The sine of the angle is computed <em>after</em> specular reflection has taken place.</p>
+<p>The returned values of this function can be used in conjuction with the function <a href="../../visualizing/#DynamicalBilliards.plot_boundarymap"><code>plot_boundarymap</code></a> (requires <code>using PyPlot</code>) to plot the boundary map in an intuitive way.</p>
+<p><em>Notice</em> - this function only works for normal specular reflection. Random reflections or ray-splitting will give unexpected results.</p>
+<p>See also <a href="./#DynamicalBilliards.to_bcoords"><code>to_bcoords</code></a>, <a href="./#DynamicalBilliards.boundarymap_portion"><code>boundarymap_portion</code></a>. See <a href="../high_level/#DynamicalBilliards.parallelize"><code>parallelize</code></a> for a parallelized version.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/boundarymap.jl#L160-L183' class='documenter-source'>source</a><br></p>
+<hr />
+<p>For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span><span class="p">,</span> <span class="n">PyPlot</span>
+
+<span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_mushroom</span><span class="p">()</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">100</span> <span class="c"># how many particles to create</span>
+<span class="n">t</span> <span class="o">=</span> <span class="mi">200</span> <span class="c"># how long to evolve each one</span>
+
+<span class="n">bmap</span><span class="p">,</span> <span class="n">arcs</span> <span class="o">=</span> <span class="n">parallelize</span><span class="p">(</span><span class="n">boundarymap</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+<span class="k">using</span> <span class="n">PyPlot</span> <span class="c"># enables plot_boundarymap function</span>
+
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;C</span><span class="si">$</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="o">:</span><span class="mi">9</span><span class="p">))</span><span class="s">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">n</span><span class="p">]</span> <span class="c"># random colors</span>
+
+<span class="n">plot_boundarymap</span><span class="p">(</span><span class="n">bmap</span><span class="p">,</span> <span class="n">arcs</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">)</span>
+<span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="" src="../boundarymap.svg" /></p>
+<p>And of course similarly for magnetic fields</p>
+<div class="codehilite"><pre><span></span><span class="n">bmap</span><span class="p">,</span> <span class="n">arcs</span> <span class="o">=</span> <span class="n">parallelize</span><span class="p">(</span><span class="n">boundarymap</span><span class="p">,</span> <span class="n">bd</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">plot_boundarymap</span><span class="p">(</span><span class="n">bmap</span><span class="p">,</span> <span class="n">arcs</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">)</span>
+<span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+
+
+<p><img alt="" src="../boundarymapmag.svg" /></p>
+<!– ![Boundary map with magnetic field](https://i.imgur.com/YoW1FVD.png) –>
+
+<p><a id='Phase-Space-Portions-1'></a></p>
+<h2 id="phase-space-portions">Phase Space Portions</h2>
+<p>It is possible to compute the portion of phase space covered by a particle as it is evolved in time. We have two methods, one for the "boundary" coordinates (2D space) and one for the "real" coordinates (3D space):</p>
+<p><a id='DynamicalBilliards.boundarymap_portion' href='#DynamicalBilliards.boundarymap_portion'>#</a>
+<strong><code>DynamicalBilliards.boundarymap_portion</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>boundarymap_portion(bd::Billiard, t, p::AbstractParticle, δξ, δφ = δξ)
+</pre></div>
+
+
+<p>Calculate the portion of the boundary map of the billiard <code>bd</code> covered by the particle <code>p</code> when it is evolved for time <code>t</code> (float or integer). Notice that the</p>
+<p>The boundary map is partitioned into boxes of size <code>(δξ, δφ)</code> and as the particle evolves visited boxes are counted. The returned ratio is this count divided by the total boxes of size <code>(δξ, δφ)</code> needed to cover the boundary map.</p>
+<p><strong>Important:</strong> This portion <strong>does not</strong> equate the portion the particle's orbit covers on the full, three dimensional phase space. Use the function <a href="./#DynamicalBilliards.phasespace_portion"><code>phasespace_portion</code></a> for that!</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/phasespacetools.jl#L12-L24' class='documenter-source'>source</a><br></p>
+<p><a id='DynamicalBilliards.phasespace_portion' href='#DynamicalBilliards.phasespace_portion'>#</a>
+<strong><code>DynamicalBilliards.phasespace_portion</code></strong> &mdash; <em>Function</em>.</p>
+<div class="codehilite"><pre><span></span>phasespace_portion(bd::Billiard, t, p::AbstractParticle, δξ, δφ = δξ)
+</pre></div>
+
+
+<p>Calculate the portion of the phase space of the billiard <code>bd</code> covered by the particle <code>p</code> when it is evolved for time <code>t</code> (float or integer).</p>
+<p>This function extends <a href="./#DynamicalBilliards.boundarymap_portion"><code>boundarymap_portion</code></a> using a novel approach. For each visited box of the boundary map, <a href="../high_level/#DynamicalBilliards.bounce!"><code>bounce!</code></a> attributes a third dimension (the collision time, equal to collision distance) which expands the two dimensions of the boundary map to the three dimensions of the phase space.</p>
+<p>The true phase space portion is then the weighted portion of boxes visited by the particle, divided by the total weighted sum of boxes. The weights of the boxes are the collision times.</p>
+<p><a target='_blank' href='https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/21f0cf40d223975e4e599a9fdfbc552d7d30e2e2/src/boundary/phasespacetools.jl#L64-L77' class='documenter-source'>source</a><br></p>
+<hr />
+<p>For example, for mushroom billiards the ratio of the chaotic-to-total phase space is known <strong>analytically</strong> for both the full 3D [1] space as well as the boundary 2D [2] space:</p>
+<div>
+<div class="MathJax_Preview">
+\begin{aligned}
+  g_\text{c, 3D} &amp;= \frac{2 \, \pi r^{2} - 4 \, r^{2} \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l w + \sqrt{4 \, r^{2} - w^{2}} w}{2 \, {\left(\pi r^{2} + 2 \, l w\right)}}\\
+  g_\text{c, 2D} &amp;= \frac{\pi w + 2 \, w \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l + 4 \, r - 2 \, \sqrt{4 \, r^{2} - w^{2}}}{2 \, {\left(\pi r + 2 \, l + 2 \, r\right)}}
+\end{aligned}
+</div>
+<script type="math/tex; mode=display">
+\begin{aligned}
+  g_\text{c, 3D} &= \frac{2 \, \pi r^{2} - 4 \, r^{2} \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l w + \sqrt{4 \, r^{2} - w^{2}} w}{2 \, {\left(\pi r^{2} + 2 \, l w\right)}}\\
+  g_\text{c, 2D} &= \frac{\pi w + 2 \, w \arccos\left(\frac{w}{2 \, r}\right) + 4 \, l + 4 \, r - 2 \, \sqrt{4 \, r^{2} - w^{2}}}{2 \, {\left(\pi r + 2 \, l + 2 \, r\right)}}
+\end{aligned}
+</script>
+</div>
+<p>We can easily confirm those formulas:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">DynamicalBilliards</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="mf">1000000.0</span>
+<span class="n">l</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span> <span class="n">r</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span> <span class="n">w</span> <span class="o">=</span> <span class="mf">0.4</span>
+
+<span class="n">bd</span> <span class="o">=</span> <span class="n">billiard_mushroom</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">MushroomTools</span><span class="o">.</span><span class="n">randomchaotic</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="n">ratio</span><span class="p">,</span> <span class="n">dic</span> <span class="o">=</span> <span class="n">boundarymap_portion</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="n">trueratio</span> <span class="o">=</span> <span class="n">MushroomTools</span><span class="o">.</span><span class="n">g_c_2D</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;2D numeric - theory: </span><span class="si">$</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="n">trueratio</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+
+<span class="n">ratio</span> <span class="o">=</span> <span class="n">phasespace_portion</span><span class="p">(</span><span class="n">bd</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="n">trueratio</span> <span class="o">=</span> <span class="n">MushroomTools</span><span class="o">.</span><span class="n">g_c_3D</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;3D numeric - theory: </span><span class="si">$</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">ratio</span> <span class="o">-</span> <span class="n">trueratio</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span></span>2D numeric - theory: 4.037536491297011e-5
+3D numeric - theory: 0.001061364841229595
+</pre></div>
+
+
+<p>Of course, increasing evolution time and decreasing boxsize will bring higher accuracy.</p>
+<p><a id='References-1'></a></p>
+<h2 id="references">References</h2>
+<p>[1] : A. H. Barnett &amp; T. Betcke, <em>Quantum mushroom billiards</em>, <a href="https://doi.org/10.1063/1.2816946">Chaos, 17(4) (20017)</a></p>
+<p>[2] : Lukas Hupe, B.Sc. Thesis (2018), <em>to be published</em></p>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../../visualizing/" title="Visualizing" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Visualizing
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../../ray-splitting/" title="Ray-Splitting" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Ray-Splitting
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    <link rel="stylesheet" href="../../assets/fonts/font-awesome.css">
+    
+      <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl" class="md-footer-social__link fa fa-github"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application.30f6b8b1.js"></script>
+      
+      <script>app.initialize({version:"0.17.5",url:{base:"../.."}})</script>
+      
+        <script src="../../assets\mathjaxhelper.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+    
+      
+    
+  </body>
+</html>

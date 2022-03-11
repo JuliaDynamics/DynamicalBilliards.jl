@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · DynamicalBilliards.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/logo.ico" rel="icon" type="image/x-icon"/><link href="https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro&amp;display=swap" rel="stylesheet" type="text/css"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="DynamicalBilliards.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">DynamicalBilliards.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Introduction</a></li><li><a class="tocitem" href="../../basic/high_level/">High Level API</a></li><li><a class="tocitem" href="../../visualizing/">Visualizing &amp; Animating</a></li><li><a class="tocitem" href="../../basic/phasespaces/">Phase Spaces</a></li><li><a class="tocitem" href="../../ray-splitting/">Ray-Splitting</a></li><li><a class="tocitem" href="../../lyapunovs/">Lyapunov Exponents</a></li><li><a class="tocitem" href="../../mushroomtools/">MushroomTools</a></li><li><a class="tocitem" href="../../physics/">Physics</a></li><li><a class="tocitem" href="../../basic/low_level/">Internals</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../billiard_table/">Defining a Billiard</a></li><li><a class="tocitem" href="../own_obstacle/">Defining your own Obstacles</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Julia-logo-Billiard-1"><span>Julia-logo Billiard</span></a></li><li><a class="tocitem" href="#Mean-Free-Path-of-the-Lorentz-Gas-1"><span>Mean Free Path of the Lorentz Gas</span></a></li><li><a class="tocitem" href="#Semi-Periodic-Billiard-1"><span>Semi-Periodic Billiard</span></a></li><li><a class="tocitem" href="#Star-billiard-1"><span>Star billiard</span></a></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/docs/src/tutorials/examples.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><p>This section has some examples of usage of <code>DynamicalBilliards</code>, with some brief comments.</p><h2 id="Julia-logo-Billiard-1"><a class="docs-heading-anchor" href="#Julia-logo-Billiard-1">Julia-logo Billiard</a><a class="docs-heading-anchor-permalink" href="#Julia-logo-Billiard-1" title="Permalink"></a></h2><p>The &quot;Julia-logo-billiard&quot; animation that is the logo of our package was made with the following code. The function <a href="../../basic/high_level/#DynamicalBilliards.billiard_logo"><code>billiard_logo</code></a> also exports the same result.</p><pre><code class="language-julia">using DynamicalBilliards, PyPlot
+
+# %%
+h = 1.0; α = 0.8; r = 0.18; off = 0.25
+
+cos6 = cos(π/6)
+β = (h - cos6*α)/cos6
+t = α + 2β
+center_of_mass = [0.0, √3*t/6]
+startloc = [-α/2, 0.0]
+
+# create directions of the hexagonal 6:
+hexvert = [(cos(2π*i/6), sin(2π*i/6)) for i in 1:6]
+dirs = [SVector{2}(hexvert[i] .- hexvert[mod1(i+1, 6)]) for i in 1:6]
+
+frame = Obstacle{Float64}[]
+sp = startloc
+ep = startloc + α*dirs[1]
+normal = (w = ep .- sp; [-w[2], w[1]])
+push!(frame, InfiniteWall(sp, ep, normal, &quot;frame 1&quot;))
+
+for i in 2:6
+    s = iseven(i) ? β : α
+    T = InfiniteWall #iseven(i) ? RandomWall : InfiniteWall
+    sp = frame[i-1].ep
+    ep = sp + s*dirs[i]
+    normal = (w = ep .- sp; [-w[2], w[1]])
+    push!(frame, T(sp, ep, normal, &quot;frame $(i)&quot;))
+end
+
+# Radii of circles that compose the Julia logo
+offset = [0.0, off]
+R = [cos(2π/3) -sin(2π/3);
+     sin(2π/3)  cos(2π/3)]
+
+green = Disk(center_of_mass .+ offset, r, &quot;green&quot;)
+red = Antidot(center_of_mass .+ R*offset, r, &quot;red&quot;)
+purple = RandomDisk(center_of_mass .+ R*R*offset, r, &quot;purple&quot;)
+
+bd = Billiard(green, red, purple, frame...)
+
+# Raysplitting functions for the red circle:
+refraction = (φ, pflag, ω) -&gt; pflag ? 0.5φ : 2.0φ
+transmission_p = (p) -&gt; (φ, pflag, ω) -&gt; begin
+    if pflag
+        p*exp(-(φ)^2/2(π/8)^2)
+    else
+        abs(φ) &lt; π/4 ? (1-p)*exp(-(φ)^2/2(π/4)^2) : 0.0
+    end
+end
+newoantidot = ((x, bool) -&gt; bool ? -2.0x : -0.5x)
+raya = RaySplitter([2], transmission_p(0.5), refraction, newoantidot)
+
+# Create and animate particles
+N = 5
+particles = [MagneticParticle(-0.3, 0.7 + 0.0005*i, 0.0, -2.0) for i in 1:N]
+cs = [(0, 0, i/N, 0.75) for i in 1:N]
+
+animate_evolution(particles, bd, 10.0, (raya,);
+colors = cs, disable_axis = true)</code></pre><video width="100%" height="auto" controls>
+<source src="https://raw.githubusercontent.com/JuliaDynamics/JuliaDynamics/master/videos/billiards/DynamicalBilliards_v3.mp4?raw=true" type="video/mp4">
+</video><h2 id="Mean-Free-Path-of-the-Lorentz-Gas-1"><a class="docs-heading-anchor" href="#Mean-Free-Path-of-the-Lorentz-Gas-1">Mean Free Path of the Lorentz Gas</a><a class="docs-heading-anchor-permalink" href="#Mean-Free-Path-of-the-Lorentz-Gas-1" title="Permalink"></a></h2><pre><code class="language-julia">using DynamicalBilliards
+bd = billiard_lorentz(0.2) #alias for billiard_sinai(setting = &quot;periodic&quot;)
+mfp = meancollisiontime(randominside(bd), bd, 1000000.0)</code></pre><pre><code class="language-none">2.188390476227696</code></pre><p>The result is very close to the analytic result:</p><p><span>$\text{m.f.p.} =  \frac{1-\pi r^2 }{2r} \stackrel{r=0.2}{=} 2.18584$</span></p><p>which you can find for example <a href="http://www.cmls.polytechnique.fr/perso/golse/Surveys/FGIcmp03.pdf">here</a>.</p><h2 id="Semi-Periodic-Billiard-1"><a class="docs-heading-anchor" href="#Semi-Periodic-Billiard-1">Semi-Periodic Billiard</a><a class="docs-heading-anchor-permalink" href="#Semi-Periodic-Billiard-1" title="Permalink"></a></h2><p><code>DynamicalBilliards</code> allows for your system to be periodic in only some specific directions. For example, the following code produces a billiard that is periodic in only the x-direction:</p><pre><code class="language-julia">using DynamicalBilliards, PyPlot
+o = 0.0; x = 2.0; y=1.0
+
+sp = [o,o]; ep = [o, y]; n = [x,o]
+leftw = PeriodicWall(sp, ep, n, &quot;Left periodic boundary&quot;)
+sp = [x,o]; ep = [x, y]; n = [-x,o]
+rightw = PeriodicWall(sp, ep, n, &quot;Right periodic boundary&quot;)
+
+sp = [o,y]; ep = [x, y]; n = [o,-y]
+topw2 = InfiniteWall(sp, ep, n, &quot;Top wall&quot;)
+sp = [o,o]; ep = [x, o]; n = [o,y]
+botw2 = InfiniteWall(sp, ep, n, &quot;Bottom wall&quot;)
+
+r = 0.25
+d = Disk([0.5, 0.5], r)
+d2 = Disk([1.5, 0.5], r/2)
+
+bd = Billiard(leftw, rightw, topw2, botw2, d, d2)
+
+p = randominside(bd)
+p.pos = [0.311901, 0.740439]
+p.vel = [0.548772, 0.835972]
+xt, yt, t = timeseries(p, bd, 25)
+plot(bd, xt, yt)
+scatter(xt[end], yt[end], color = &quot;black&quot;)
+ylim(0,y)
+xlim(floor(minimum(xt)), ceil(maximum(xt)))</code></pre><p><img src="../xperiodic.svg" alt/></p><h2 id="Star-billiard-1"><a class="docs-heading-anchor" href="#Star-billiard-1">Star billiard</a><a class="docs-heading-anchor-permalink" href="#Star-billiard-1" title="Permalink"></a></h2><pre><code class="language-julia">using DynamicalBilliards, PyPlot
+v = DynamicalBilliards.polygon_vertices(0.5, 5, [0,0], 0)
+v2 = DynamicalBilliards.polygon_vertices(0.25, 5, [0,0], π/5)
+vstar = []
+for i in 1:5
+    push!(vstar, v[i], v2[i])
+end
+bd = billiard_vertices(vstar)
+
+plot(bd)
+xt, yt = timeseries(randominside(bd), bd, 10)
+plot(xt, yt)</code></pre><p><img src="../star.svg" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../own_obstacle/">« Defining your own Obstacles</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 22 April 2020 21:14">Wednesday 22 April 2020</span>. Using Julia version 1.4.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

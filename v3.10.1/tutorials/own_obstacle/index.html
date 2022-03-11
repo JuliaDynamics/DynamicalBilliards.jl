@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Defining your own Obstacles · DynamicalBilliards.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/logo.ico" rel="icon" type="image/x-icon"/><link href="https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro&amp;display=swap" rel="stylesheet" type="text/css"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="DynamicalBilliards.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">DynamicalBilliards.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Introduction</a></li><li><a class="tocitem" href="../../basic/high_level/">High Level API</a></li><li><a class="tocitem" href="../../visualizing/">Visualizing &amp; Animating</a></li><li><a class="tocitem" href="../../basic/phasespaces/">Phase Spaces</a></li><li><a class="tocitem" href="../../ray-splitting/">Ray-Splitting</a></li><li><a class="tocitem" href="../../lyapunovs/">Lyapunov Exponents</a></li><li><a class="tocitem" href="../../mushroomtools/">MushroomTools</a></li><li><a class="tocitem" href="../../physics/">Physics</a></li><li><a class="tocitem" href="../../basic/low_level/">Internals</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../billiard_table/">Defining a Billiard</a></li><li class="is-active"><a class="tocitem" href>Defining your own Obstacles</a><ul class="internal"><li><a class="tocitem" href="#Type-Definition-1"><span>Type Definition</span></a></li><li><a class="tocitem" href="#Necessary-Methods-1"><span>Necessary Methods</span></a></li><li><a class="tocitem" href="#Optional-Methods-1"><span>Optional Methods</span></a></li></ul></li><li><a class="tocitem" href="../examples/">Examples</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Defining your own Obstacles</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Defining your own Obstacles</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/blob/master/docs/src/tutorials/own_obstacle.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Defining-your-own-Obstacles-1"><a class="docs-heading-anchor" href="#Defining-your-own-Obstacles-1">Defining your own Obstacles</a><a class="docs-heading-anchor-permalink" href="#Defining-your-own-Obstacles-1" title="Permalink"></a></h1><p>In this tutorial we will go through the processes of creating a new obstacle type, a <code>Semicircle</code>. This type is already used in the <a href="../../basic/high_level/#DynamicalBilliards.billiard_bunimovich"><code>billiard_bunimovich</code></a> and <a href="../../basic/high_level/#DynamicalBilliards.billiard_mushroom"><code>billiard_mushroom</code></a> functions.</p><div class="admonition is-info"><header class="admonition-header">Everything uses `SVector{2}`</header><div class="admonition-body"><p>Fields of <code>Particle</code>s and <code>Obstacle</code>s contain all their information in 2-dimensional static vectors from module <code>StaticArrays</code>. This is important to keep in mind when extending new methods.</p></div></div><div class="admonition is-info"><header class="admonition-header">Extends internal APIs</header><div class="admonition-body"><p>Notice that implementing your own obstacle requires you to extend methods that <em>do not</em> belong to the public API.</p></div></div><div class="admonition is-info"><header class="admonition-header">See also the `Ellipse` PR</header><div class="admonition-body"><p>Pull Request <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/pull/159">#159</a> implements the <a href="../billiard_table/#DynamicalBilliards.Ellipse"><code>Ellipse</code></a> obstacle, step by step, by following the tutorial of this page. All commits are commented and it can be a second helpful guide on how to implement an obstacle.</p></div></div><h2 id="Type-Definition-1"><a class="docs-heading-anchor" href="#Type-Definition-1">Type Definition</a><a class="docs-heading-anchor-permalink" href="#Type-Definition-1" title="Permalink"></a></h2><p>The first thing you have to do is make your new type a sub-type of <code>Obstacle{T}</code> (or any other abstract sub-type of it). We will do:</p><pre><code class="language-julia">struct Semicircle{T&lt;:AbstractFloat} &lt;: Circular{T} # &lt;: Obstacle{T}
+    c::SVector{2,T} # this MUST be a static vector
+    r::T
+    facedir::SVector{2,T} # this MUST be a static vector
+    name::String # this is an OPTIONAL field
+end</code></pre><p><code>c</code> is the center and <code>r</code> is the radius of the full circle. <code>facedir</code> is the direction which the semicircle is facing, which is also the direction of its &quot;open&quot; face.</p><p><code>name</code> is an optional field, that allows one to easily identify which obstacle is which. It is also used when printing a <a href="../billiard_table/#DynamicalBilliards.Billiard"><code>Billiard</code></a>. If not used, then <code>string(typeof(obstacle))</code> is used instead.</p><p>Notice that the <code>struct</code> <strong>must be</strong> parameterized by <code>T&lt;:AbstractFloat</code> (see the <a href="../../basic/low_level/#Numerical-Precision-1">Numerical Precision</a> page for more).</p><p>For convenience, we will also define:</p><pre><code class="language-julia">function Semicircle(
+    c::AbstractVector{T}, r::Real, facedir, name = &quot;Semicircle&quot;) where {T&lt;:Real}
+    S = T &lt;: Integer ? Float64 : T
+    return Semicircle{S}(SVector{2,S}(c), convert(S, abs(r)), name)
+end</code></pre><p>so that constructing a <code>Semicircle</code> is possible from arbitrary vectors.</p><h2 id="Necessary-Methods-1"><a class="docs-heading-anchor" href="#Necessary-Methods-1">Necessary Methods</a><a class="docs-heading-anchor-permalink" href="#Necessary-Methods-1" title="Permalink"></a></h2><p>The following functions must obtain methods for <code>Semicircle</code> (or any other custom <code>Obstacle</code>) in order for it to work with <code>DynamicalBilliards</code>:</p><ol><li><a href="../../basic/low_level/#DynamicalBilliards.normalvec"><code>DynamicalBilliards.normalvec</code></a></li><li><a href="../../basic/low_level/#DynamicalBilliards.distance"><code>DynamicalBilliards.distance</code></a> (with arguments <code>(position, obstacle)</code>)</li><li><a href="../../basic/low_level/#DynamicalBilliards.collision"><code>DynamicalBilliards.collision</code></a> with <code>Particle</code></li></ol><p>Assuming that upon collision a specular reflection happens, then you don&#39;t need to define a method for <a href="../../basic/low_level/#DynamicalBilliards.specular!"><code>DynamicalBilliards.specular!</code></a>. You can however define custom methods for <a href="../../basic/low_level/#DynamicalBilliards.specular!"><code>DynamicalBilliards.specular!</code></a>, which is what we have done e.g. for <a href="../billiard_table/#DynamicalBilliards.RandomDisk"><code>RandomDisk</code></a>.</p><div class="admonition is-info"><header class="admonition-header">Use `import`!</header><div class="admonition-body"><p>Notice that you have to properly <code>import</code> the methods to extend them. For example, do <code>import DynamicalBilliards: normalvec, distance, collision</code> time.</p></div></div><p>The first method is very simple, just do:</p><pre><code class="language-julia">import DynamicalBilliards: normalvec, distance, collision
+normalvec(d::Semicircle, pos) = normalize(d.c - pos)</code></pre><p>Since the function is only used during <code>distance</code> and <a href="../../basic/low_level/#DynamicalBilliards.resolvecollision!"><code>DynamicalBilliards.resolvecollision!</code></a> and since we will be writing explicit methods for the first, we don&#39;t have to care about what happens when the particle is far away from the boundary.</p><p>The <code>distance</code> method is a bit tricky. Since the type already subtypes <code>Circular</code>, the following definition from <code>DynamicalBilliards</code> applies:</p><pre><code class="language-julia">distance(pos::AbstractVector, d::Circular) = norm(pos - d.c) - d.r</code></pre><p>However, the method must be expanded. That is because when the particle is on the &quot;open&quot; half of the disk, the distance is not correct. We write:</p><pre><code class="language-julia">SV = SVector{2} #convenience
+function distance(pos::AbstractVector{T}, s::Semicircle{T}) where {T}
+    # Check on which half of circle is the particle
+    v1 = pos .- s.c
+    nn = dot(v1, s.facedir)
+    if nn ≤ 0 # I am &quot;inside semicircle&quot;
+        return s.r - norm(pos - s.c)
+    else # I am on the &quot;other side&quot;
+        end1 = SV(s.c[1] + s.r*s.facedir[2], s.c[2] - s.r*s.facedir[1])
+        end2 = SV(s.c[1] - s.r*s.facedir[2], s.c[2] + s.r*s.facedir[1])
+        return min(norm(pos - end1), norm(pos - end2))
+    end
+end</code></pre><p>Notice that this definition always returns positive distance when the particle is on the &quot;other side&quot;.</p><p>Finally, the method for <a href="../../basic/low_level/#DynamicalBilliards.collision"><code>collision</code></a> is by far the most <em>trickiest</em>. But, with pen, paper and a significant amount of patience, one can find a way:</p><pre><code class="language-julia">function collision(p::Particle{T}, d::Semicircle{T})::T where {T}
+
+    dc = p.pos - d.c
+    B = dot(p.vel, dc)         #velocity towards circle center: B &gt; 0
+    C = dot(dc, dc) - d.r*d.r    #being outside of circle: C &gt; 0
+    Δ = B^2 - C
+
+    Δ ≤ 0 &amp;&amp; return nocollision(T)
+    sqrtD = sqrt(Δ)
+
+    nn = dot(dc, d.facedir)
+    if nn ≥ 0 # I am NOT inside semicircle
+        # Return most positive time
+        t = -B + sqrtD
+    else # I am inside semicircle:
+        t = -B - sqrtD
+        # these lines make sure that the code works for ANY starting position:
+        if t ≤ 0 || distance(p, d) ≤ accuracy(T)
+            t = -B + sqrtD
+        end
+    end
+    # This check is necessary to not collide with the non-existing side
+    newpos = p.pos + p.vel * t
+    if dot(newpos - d.c, d.facedir) ≥ 0 # collision point on BAD HALF;
+        return nocollision(T)
+    end
+    # If collision time is negative, return Inf:
+    t ≤ 0.0 ? nocollision(T) : (t, p.pos + t*p.vel)
+end</code></pre><p>And that is all. The obstacle now works perfectly fine for straight propagation.</p><div class="admonition is-info"><header class="admonition-header">Ray-Splitting support</header><div class="admonition-body"><p>Supporting ray-splitting for your custom obstacle is very easy. The first step is to give it a field called <code>pflag</code>, which is a <code>Bool</code>. The second step is to ensure that <code>collisiontime</code> works properly for particles coming from both directions of the obstacle! Both inside or outside! This is implemented for <code>Ellipse</code> in Pull Request <a href="https://github.com/JuliaDynamics/DynamicalBilliards.jl/pull/159">#159</a>.</p></div></div><h2 id="Optional-Methods-1"><a class="docs-heading-anchor" href="#Optional-Methods-1">Optional Methods</a><a class="docs-heading-anchor-permalink" href="#Optional-Methods-1" title="Permalink"></a></h2><ol><li><a href="../../basic/low_level/#DynamicalBilliards.cellsize"><code>DynamicalBilliards.cellsize</code></a> : Enables <a href="../../basic/high_level/#DynamicalBilliards.randominside"><code>randominside</code></a> with this obstacle.</li><li><a href="../../basic/low_level/#DynamicalBilliards.collision"><code>collision</code></a> with <a href="../../basic/high_level/#DynamicalBilliards.MagneticParticle"><code>MagneticParticle</code></a> : enables magnetic propagation</li><li><a href="../../visualizing/#PyPlot.plot-Tuple{Obstacle}"><code>plot</code></a> with <code>obstacle</code> : enables plotting</li><li><a href="../../basic/low_level/#DynamicalBilliards.specular!"><code>DynamicalBilliards.specular!</code></a> with <code>offset</code> : Allows <a href="../../lyapunovs/#DynamicalBilliards.lyapunovspectrum"><code>lyapunovspectrum</code></a> to be computed.</li><li><a href="../../basic/phasespaces/#DynamicalBilliards.to_bcoords"><code>to_bcoords</code></a> : Allows the <a href="../../basic/phasespaces/#DynamicalBilliards.boundarymap"><code>boundarymap</code></a> and <a href="../../basic/phasespaces/#DynamicalBilliards.boundarymap_portion"><code>boundarymap_portion</code></a> to be computed.</li><li><a href="../../basic/phasespaces/#DynamicalBilliards.from_bcoords"><code>from_bcoords</code></a> : Allows <a href="../../basic/phasespaces/#DynamicalBilliards.phasespace_portion"><code>phasespace_portion</code></a> to be computed.</li></ol><p>The <a href="../../basic/low_level/#DynamicalBilliards.cellsize"><code>DynamicalBilliards.cellsize</code></a> method is kinda trivial:</p><pre><code class="language-julia">import DynamicalBilliards: cellsize, plot, to_bcoords, from_bcoords
+
+function cellsize(a::Semicircle{T}) where {T}
+    xmin, ymin = a.c - a.r
+    xmax, ymax = a.c + a.r
+    return xmin, ymin, xmax, ymax
+end</code></pre><p>The <a href="../../basic/low_level/#DynamicalBilliards.collision"><code>collision</code></a> method for <a href="../../basic/high_level/#DynamicalBilliards.MagneticParticle"><code>MagneticParticle</code></a> is also tricky, however it is almost identical with the method for the general <code>Circular</code> obstacle:</p><pre><code class="language-julia">function collision(p::MagneticParticle{T}, o::Semicircle{T})::T where {T}
+    ω = p.omega
+    pc, rc = cyclotron(p)
+    p1 = o.c
+    r1 = o.r
+    d = norm(p1-pc)
+    if (d &gt;= rc + r1) || (d &lt;= abs(rc-r1))
+        return nocollision(T)
+    end
+    # Solve quadratic:
+    a = (rc^2 - r1^2 + d^2)/2d
+    h = sqrt(rc^2 - a^2)
+    # Collision points (always 2):
+    I1 = SVector{2, T}(
+        pc[1] + a*(p1[1] - pc[1])/d + h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d - h*(p1[1] - pc[1])/d
+    )
+    I2 = SVector{2, T}(
+        pc[1] + a*(p1[1] - pc[1])/d - h*(p1[2] - pc[2])/d,
+        pc[2] + a*(p1[2] - pc[2])/d + h*(p1[1] - pc[1])/d
+    )
+    # Only consider intersections on the &quot;correct&quot; side of Semicircle:
+    cond1 = dot(I1-o.c, o.facedir) &lt; 0
+    cond2 = dot(I2-o.c, o.facedir) &lt; 0
+    # Collision time, equiv. to arc-length until collision point:
+    θ, I = nocollision(T)
+    if cond1 || cond2
+        for (Y, cond) in ((I1, cond1), (I2, cond2))
+            if cond
+                φ = realangle(p, o, Y)
+                φ &lt; θ &amp;&amp; (θ = φ; I = Y)
+            end
+        end
+    end
+    # Collision time = arc-length until collision point
+    return θ*rc, I
+end
+</code></pre><p>Then, we add swag by writing a method for <a href="../../visualizing/#PyPlot.plot-Tuple{Obstacle}"><code>plot</code></a>:</p><pre><code class="language-julia">using PyPlot
+
+function plot(d::Semicircle; kwargs...)
+    theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
+    theta2 = theta1 + 180
+    edgecolor = DynamicalBilliards.obcolor(d)
+    s1 = PyPlot.matplotlib.patches.Arc(
+        d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
+        lw = 2.0, kwargs...)
+    PyPlot.gca().add_artist(s1)
+    PyPlot.show()
+end</code></pre><p>To enable computation of Lyapunov exponents in billiards with your obstacle, you have to write another method for <code>specular!</code> that also handles the evolution of perturbation vectors in tangent space. For this, the method has to accept an argument of type <code>Vector{SVector{4, T}}</code>, which contains the four perturbation vectors corresponding to the four Lyapunov exponents.</p><p>Finding a formula for the evolution of the perturbations requires some tricky calculations. Fortunately for us, the results for general circular obstacles were already determined by Dellago, Posch and Hoover [1] – we just have to implement them.</p><pre><code class="language-julia">function specular!(p::Particle{T}, o::Circular{T},
+	offset::Vector{SVector{4, T}}) where {T&lt;:AbstractFloat}
+
+    n = normalvec(o, p.pos)
+    ti = SV{T}(-p.vel[2],p.vel[1])
+
+    cosa = -dot(n, p.vel)
+    p.vel = p.vel + 2*cosa*n
+
+    tf = SV{T}(-p.vel[2], p.vel[1])
+
+    for k in 1:4
+        δqprev = offset[k][δqind]
+        δpprev = offset[k][δpind]
+        # Formulas from Dellago, Posch and Hoover, PRE 53, 2, 1996: 1485-1501 (eq. 27)
+        # with norm(p) = 1
+        δq  = δqprev - 2*dot(δqprev,n)*n
+        δp  = δpprev - 2*dot(δpprev,n)*n - curvature(o)*2/o.r*dot(δqprev,ti)/cosa*tf
+        ###
+        offset[k] = vcat(δq, δp)
+    end
+end
+
+@inline curvature(::Semicircle) = -1
+@inline curvature(::Disk) = +1
+</code></pre><p>Note that calculating Lyapunov exponents for magnetic particles requires a separate method, as the formulas are different for magnetic propagation.</p><p>Finally, we also add a methods for <a href="../../basic/phasespaces/#DynamicalBilliards.to_bcoords"><code>to_bcoords</code></a> and <a href="../../basic/phasespaces/#DynamicalBilliards.from_bcoords"><code>from_bcoords</code></a>. For them, see the relevant source file (use <code>@which</code>).</p><p><strong>References</strong></p><p>[1] : Ch. Dellago et al., Phys. Rev. E 53, 1485 (1996).</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../billiard_table/">« Defining a Billiard</a><a class="docs-footer-nextpage" href="../examples/">Examples »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 12 March 2020 21:12">Thursday 12 March 2020</span>. Using Julia version 1.3.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
