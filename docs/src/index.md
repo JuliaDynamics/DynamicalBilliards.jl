@@ -36,7 +36,7 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 * Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [Phase Spaces](@ref) section.
 * Easy to use low-level interface, described at the [Internals](@ref) page.
 * Specialized tools for mushroom billiards.
-* Full support for [Visualizing & Animating](@ref) billiards and motion in billiards.
+* Full support for [Visualizations and Animations for Billiards](@ref).
 * Brutal tests that confirm the package works and overcomes numerical precision issues.
 
 This package does not support finite-sized particles and, as a result, there is also no support for collision between particles.
@@ -91,13 +91,6 @@ This package is registered, simply use `]` to get into the package manager mode 
 The [stable documentation](https://juliadynamics.github.io/DynamicalBilliards.jl/stable/) accompanies the version installed with `add`.
 
 To confirm the validity of your installation you can run the tests of `DynamicalBilliards`. This can be done via `] test DynamicalBilliards`.
-
-### Plotting
-Plotting is done through the `PyPlot` module. All plotting functions are brought into scope when `using PyPlot` is done.
-
-In addition, for animations using the function [`animate_evolution`](@ref) the
-`ffmpeg` software must be accessible from the command line.
-
 
 
 ## How to easily code a Billiard

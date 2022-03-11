@@ -82,7 +82,7 @@ using LinearAlgebra
 function test_perturbationgrowth(p, bd)
 
     tmax = 100.0
-    error_level = 1e-1
+    error_level = 2e-1
 
     t, R, o = perturbationgrowth(p, bd, tmax)
     λ = lyapunovspectrum(p, bd, tmax)
@@ -99,7 +99,6 @@ function test_perturbationgrowth(p, bd)
     @test abs(λ[1] - λ_estimate) < error_level
 
     nmax = 500
-    error_level = 1e-1
 
     t, R, o = perturbationgrowth(p, bd, nmax)
     λ = lyapunovspectrum(p, bd, nmax)
