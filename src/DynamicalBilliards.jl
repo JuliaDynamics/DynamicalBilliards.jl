@@ -3,9 +3,8 @@ __precompile__()
 """
 A Julia package for dynamical billiard systems in two dimensions.
 
-The goals of the package is to provide a flexible, easy-to-use
-and intuitive framework for
-fast implementation of billiard systems of arbitrary construction.
+It provides a flexible, easy-to-use, and intuitive framework for
+fast implementation of billiards of arbitrary construction.
 """
 module DynamicalBilliards
 
@@ -65,7 +64,7 @@ if display_update
             stdout,
             """
             \nUpdate message: DynamicalBilliards v$(version_number)
-            Plotting & visualizing has moved entirely to the Makie ecosystem.
+            Plotting & animating has moved entirely to the Makie ecosystem.
             It is now provided by InteractiveDynamics.jl.
             See the documentation online for the new API.
             """;
