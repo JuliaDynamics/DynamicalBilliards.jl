@@ -31,6 +31,8 @@ include("timeevolution/propagation.jl")
 include("timeevolution/timeseries.jl")
 include("timeevolution/highleveltimes.jl")
 
+include("plotting_api.jl")
+
 ##########################################
 # Advanced                               #
 ##########################################
@@ -52,7 +54,7 @@ include("testing.jl")
 ###################
 using Scratch
 display_update = true
-version_number = "4"
+version_number = "4.1"
 update_name = "update_v$(version_number)"
 
 function __init__()
@@ -64,9 +66,9 @@ if display_update
             stdout,
             """
             \nUpdate message: DynamicalBilliards v$(version_number)
-            Plotting & animating has moved entirely to the Makie ecosystem.
-            It is now provided by InteractiveDynamics.jl.
-            See the documentation online for the new API.
+            Plotting & animating is now inside DynamicalBilliards.jl again,
+            utilizing Julia Package Extension systems. This means that Julia versions 1.9+
+            are supported only.
             """;
             color = :light_magenta,
         )
