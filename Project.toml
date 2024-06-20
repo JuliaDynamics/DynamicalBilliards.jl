@@ -14,9 +14,10 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 
 [extensions]
-DynamicalBilliardsVisualizations = "Makie"
+DynamicalBilliardsVisualizations = ["Makie", "DataStructures"]
 
 [compat]
 Elliptic = "1"
@@ -25,5 +26,6 @@ StaticArrays = "1"
 InteractiveUtils = "1"
 LinearAlgebra = "1"
 Distributed = "1"
+DataStructures = "0.18"
 Makie = "≥ 0.19"
 julia = "1.9"
