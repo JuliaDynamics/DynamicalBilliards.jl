@@ -10,7 +10,7 @@ Downloads.download(
 include("build_docs_with_style.jl")
 
 using Literate
-infile = joinpath(pkgdir("src", "billiards_visualizations.jl"))
+infile = joinpath(@__DIR__, "src", "billiards_visualizations.jl")
 outdir = joinpath(@__DIR__, "src")
 Literate.markdown(infile, outdir; credit = false)
 
