@@ -1,10 +1,8 @@
 # # Visualizations and Animations for Billiards
 
-# All plotting and animating for
-# [DynamicalBilliards.jl](https://juliadynamics.github.io/DynamicalBilliards.jl/dev/)
-# lies within a few well-defined functions from
-# [InteractiveDynamics.jl](https://juliadynamics.github.io/InteractiveDynamics.jl/dev/)
-# that use the [Makie](https://makie.juliaplots.org/stable/) ecosystem.
+# All plotting and animating for DynamicalBilliards.jl
+# lies within a few well-defined functions
+# that use the [Makie](https://github.com/MakieOrg/Makie.jl) ecosystem.
 
 # - For static plotting, you can use the function [`bdplot`](@ref) and [`bdplot_boundarymap`](@ref).
 # - For interacting/animating, you can use the function [`bdplot_interactive`](@ref).
@@ -17,14 +15,13 @@
 # </video>
 # ```
 
-
 # ## Plotting
 # ```@docs
 # bdplot
 # bdplot_boundarymap
 # ```
 # ### Plotting an obstacle with keywords
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 bd = billiard_sinai()
 
@@ -35,14 +32,14 @@ fig
 
 # ### Plotting a billiard
 # %% #src
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 bd = billiard_logo()[1]
 fig, ax = bdplot(bd)
 fig
 
 # ### Plotting some particle trajectories
 # %% #src
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 bd = billiard_hexagonal_sinai()
 p1 = randominside(bd)
@@ -60,7 +57,7 @@ fig
 # ### Periodic billiard plot
 # Rectangle periodicity:
 # %% #src
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 r = 0.25
 bd = billiard_rectangle(2, 1; setting = "periodic")
@@ -76,7 +73,7 @@ fig
 
 # Hexagonal periodicity:
 # %% #src
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 bd = billiard_hexagonal_sinai(0.3, 1.50; setting = "periodic")
 d = Disk([0.7, 0], 0.2)
@@ -92,7 +89,7 @@ bdplot!(ax, p; velocity_size = 0.1)
 fig
 
 # ### Boundary map plot
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 bd = billiard_mushroom()
 
@@ -120,7 +117,7 @@ fig
 # For example, the animation above was done with:
 
 # ```julia
-# using DynamicalBilliards, InteractiveDynamics, GLMakie
+# using DynamicalBilliards, GLMakie
 # l, w, r = 0.5, 0.75, 1.0
 # bd = billiard_mushroom(l, w, r)
 # N = 20
@@ -143,7 +140,7 @@ fig
 # Following the docstring of [`bdplot_interactive`](@ref) let's add a couple of
 # new plots that animate some properties of the particles.
 # We start with creating the billiard plot and obtaining the observables:
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 bd = billiard_stadium(1, 1)
 N = 100
@@ -198,7 +195,7 @@ fig
 # Here is an example that changes plotting defaults to make an animation in
 # the style of [3Blue1Brown](https://www.3blue1brown.com/).
 # %% #src
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 BLUE = "#7BC3DC"
 BROWN = "#8D6238"
 colors = [BLUE, BROWN]
