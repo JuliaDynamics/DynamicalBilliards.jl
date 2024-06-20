@@ -7,13 +7,47 @@ Billiard = DynamicalBilliards.Billiard
 AbstractParticle = DynamicalBilliards.AbstractParticle
 using Makie: RGBf, RGBAf
 
+JULIADYNAMICS_COLORS = [
+    "#7143E0",
+    "#191E44",
+    "#0A9A84",
+    "#AF9327",
+    "#791457",
+    "#6C768C",
+]
+
+JULIADYNAMICS_CMAP = :darkrainbow
+
+function colors_from_map(cmap, N, α = 1)
+    if cmap isa AbstractVector
+        return collect(cgrad(cmap, N; categorical = true, alpha = α))
+    end
+    N == 1 && return [Makie.categorical_colors(cmap, 2)[1]]
+    return [RGBAf(c.r, c.g, c.b, α) for c in Makie.categorical_colors(cmap, N)]
+end
+
+"""
+    randomcolor(args...) = RGBAf(0.9 .* (rand(), rand(), rand())..., 0.75)
+"""
+randomcolor(args...) = RGBAf(0.9 .* (rand(), rand(), rand())..., 0.75)
+
+"""
+    darken_color(c, f = 1.2)
+Darken given color `c` by a factor `f`.
+If `f` is less than 1, the color is lightened instead.
+"""
+function darken_color(c, f = 1.2)
+    c = to_color(c)
+    return RGBAf(clamp.((c.r/f, c.g/f, c.b/f, c.alpha), 0, 1)...)
+end
+
 obcolor(::Obstacle) = JULIADYNAMICS_COLORS[3]
 obcolor(::Union{DynamicalBilliards.RandomWall, DynamicalBilliards.RandomDisk}) =
     JULIADYNAMICS_COLORS[2]
 obcolor(::Union{DynamicalBilliards.SplitterWall, DynamicalBilliards.Antidot,
     DynamicalBilliards.Ellipse}) = JULIADYNAMICS_COLORS[1]
 obcolor(::DynamicalBilliards.PeriodicWall) = JULIADYNAMICS_COLORS[4]
-obfill(o::DynamicalBilliards.Obstacle) = RGBAf(obcolor(o).r,obcolor(o).g,obcolor(o).b,0.2)
+obfill(o::DynamicalBilliards.Obstacle) = (obcolor(o), 0.2)
 obls(::Obstacle) = nothing
 obls(::Union{DynamicalBilliards.SplitterWall, DynamicalBilliards.Antidot,
     DynamicalBilliards.Ellipse}) = :dot
@@ -73,7 +107,7 @@ function bdplot!(ax, ps::Vector{<:AbstractParticle};
     )
     N = length(ps)
     cs = if !(colors isa Vector) || length(colors) ≠ N
-        InteractiveDynamics.colors_from_map(colors, N, α)
+        colors_from_map(colors, N, α)
     else
         to_color.(colors)
     end
@@ -246,7 +280,7 @@ function obstacle_axis!(figlocation, intervals)
     xlims!(bmapax, 0, intervals[end])
 
     obax = Axis(figlocation; alignmode = Inside())
-    MakieLayout.deactivate_interaction!(obax, :rectanglezoom)
+    Makie.deactivate_interaction!(obax, :rectanglezoom)
     obax.xticks = (obstacle_ticks, obstacle_ticklabels)
     obax.xaxisposition = :top
     obax.xticklabelalign = (:center, :bottom)

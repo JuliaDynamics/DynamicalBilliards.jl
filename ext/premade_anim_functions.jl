@@ -5,11 +5,11 @@ function bdplot_interactive(bd::Billiard, ps::Vector{<:AbstractParticle};
         playback_controls = true,
         dt = 0.001,
         plot_bmap = false,
-        backgroundcolor = DEFAULT_BG,
-        resolution = plot_bmap ? (1200, 600) : (800, 600),
+        size = plot_bmap ? (1200, 600) : (800, 600),
+        figure = NamedTuple(),
         kwargs...
     )
-    fig = Figure(;backgroundcolor, resolution)
+    fig = Figure(; size, figure...)
     primary_layout = fig[:,1] = GridLayout()
     ax = Axis(primary_layout[1,1]; backgroundcolor = RGBAf(1,1,1,0))
     if plot_bmap
