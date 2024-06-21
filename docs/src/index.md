@@ -5,7 +5,9 @@ dynamical billiards in two dimensions.
 It is part of [JuliaDynamics](https://juliadynamics.github.io/JuliaDynamics/), an organization dedicated to creating high quality scientific software.
 
 !!! info "Latest news"
-    The [`timeseries!`](@ref) function now supports evolving particles until a certain condition (specified by a function) is met.
+    DynamicalBilliards.jl v4.1 needs Julia v1.9+.
+    Plotting is now back in this package via Julia package extensions.
+    InteractiveDynamics.jl is obsolete.
 
 ## About Billiards
 
@@ -36,7 +38,7 @@ The [wikipedia page](https://en.wikipedia.org/wiki/Dynamical_billiards) has many
 * Novel algorithms that compute the portion of either the 2D boundary space or the 3D real space that an orbit covers as a particle evolves. See the [Phase Spaces](@ref) section.
 * Easy to use low-level interface, described at the [Internals](@ref) page.
 * Specialized tools for mushroom billiards.
-* Full support for [Visualizations and Animations for Billiards](@ref).
+* Full support for [Visualizations and Animations for Billiards](@ref visualizations).
 * Brutal tests that confirm the package works and overcomes numerical precision issues.
 
 This package does not support finite-sized particles and, as a result, there is also no support for collision between particles.
@@ -96,11 +98,6 @@ To confirm the validity of your installation you can run the tests of `Dynamical
 ## How to easily code a Billiard
 
 We have created a [Jupyter notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) that showcases how easy it is to simulate a dynamical billiard using Julia. This [notebook](https://nbviewer.jupyter.org/github/JuliaDynamics/JuliaDynamics/blob/master/tutorials/Billiards%20Example/billiards_example.ipynb) is an educative example of both using Multiple Dispatch and of how the internal code of `DynamicalBilliards` works. It also highlights the extendibility of the core code.
-
-Besides a Jupyter notebook, this tutorial is also available as an interactive article in the new platform NextJournal [here](https://nextjournal.com/julia/billiard).
-
-
-
 
 ## Support
 If you are having any kind of problems with `DynamicalBilliards` do not hesitate to seek for support! There are numerous ways to do that:

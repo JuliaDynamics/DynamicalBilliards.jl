@@ -21,7 +21,7 @@ boundarymap
 
 For example, take a look at boundary maps of the mushroom billiard, which is known to have a mixed phase space:
 ```@example coords
-using DynamicalBilliards, InteractiveDynamics, CairoMakie
+using DynamicalBilliards, CairoMakie
 
 bd = billiard_mushroom()
 
@@ -30,9 +30,11 @@ t = 200 # how long to evolve each one
 
 bmap, arcs = parallelize(boundarymap, bd, t, n)
 
+randomcolor(args...) = RGBAf(0.9 .* (rand(), rand(), rand())..., 0.75)
+
 colors = [randomcolor() for i in 1:n] # random colors
 
-fig, ax = bdplot_boundarymap(bmap, arcs, color = colors)
+fig, ax = bdplot_boundarymap(bmap, arcs; color = colors)
 fig
 ```
 

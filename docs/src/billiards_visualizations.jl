@@ -1,4 +1,4 @@
-# # Visualizations and Animations for Billiards
+# # [Visualizations and Animations for Billiards](@id visualizations)
 
 # All plotting and animating for DynamicalBilliards.jl
 # lies within a few well-defined functions
@@ -40,6 +40,7 @@ fig
 # ### Plotting some particle trajectories
 # %% #src
 using DynamicalBilliards, CairoMakie
+timeseries! = DynamicalBilliards.timeseries!
 
 bd = billiard_hexagonal_sinai()
 p1 = randominside(bd)
@@ -48,7 +49,7 @@ colors = [:red, :black]
 markers = [:circle, :rect]
 fig, ax = bdplot(bd)
 for (p, c) in zip([p1, p2], colors)
-    x, y = DynamicalBilliards.timeseries!(p, bd, 20)
+    x, y = timeseries!(p, bd, 20)
     lines!(ax, x, y; color = c)
 end
 bdplot!(ax, [p1, p2]; colors, particle_size = 10, marker = markers)
@@ -147,7 +148,8 @@ using DynamicalBilliards, CairoMakie
 bd = billiard_stadium(1, 1)
 N = 100
 ps = particlebeam(1.0, 0.6, 0, N, 0.001)
-fig, phs, chs = bdplot_interactive(bd, ps; playback_controls=false, resolution = (800, 800));
+fig, phs, chs = bdplot_interactive(bd, ps; playback_controls=false, resolution = (800, 800))
+
 # Then, we add some axis
 layout = fig[2,1] = GridLayout()
 axd = Axis(layout[1,1]; ylabel = "log(⟨d⟩)", alignmode = Outside())
@@ -155,6 +157,7 @@ axs = Axis(layout[2,1]; ylabel = "std", xlabel = "time", alignmode = Outside())
 hidexdecorations!(axd; grid = false)
 rowsize!(fig.layout, 1, Auto(2))
 fig
+
 # Our next step is to create new observables to plot in the new axis,
 # by lifting `phs, chs`. Let's plot the distance between two particles and the
 #  std of the particle y position.

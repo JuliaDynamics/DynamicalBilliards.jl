@@ -16,14 +16,10 @@ JULIADYNAMICS_COLORS = [
     "#6C768C",
 ]
 
-JULIADYNAMICS_CMAP = :darkrainbow
+JULIADYNAMICS_CMAP = reverse(cgrad(:dense)[20:end])
 
 function colors_from_map(cmap, N, α = 1)
-    if cmap isa AbstractVector
-        return collect(cgrad(cmap, N; categorical = true, alpha = α))
-    end
-    N == 1 && return [Makie.categorical_colors(cmap, 2)[1]]
-    return [RGBAf(c.r, c.g, c.b, α) for c in Makie.categorical_colors(cmap, N)]
+    return collect(cgrad(cmap, N; categorical = true, alpha = α))
 end
 
 """

@@ -1,6 +1,9 @@
 cd(@__DIR__)
 
 using DynamicalBilliards
+using CairoMakie
+
+timeseries! = DynamicalBilliards.timeseries!
 
 import Downloads
 Downloads.download(
@@ -33,4 +36,5 @@ pages = [
 build_docs_with_style(pages, DynamicalBilliards;
     authors = "George Datseris <datseris.george@gmail.com>",
     expandfirst = ["index.md"],
+    # warnonly = [:doctest, :missing_docs, :cross_references],
 )
