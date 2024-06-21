@@ -1,11 +1,12 @@
 """
     MushroomTools
+
 Module containing many functions helpful in simulating (perfect) mushroom
 billiards, see [`billiard_mushroom`](@ref).
 Contains stuff like initializing efficiently regular or chaotic particles
 and functions that return the corresponding chaotic or regular phase-space volumes
 or portions.
-The functions [`V_3D_tot`](@ref) and [`V_3D_reg`](@results) use equations derived
+The functions `V_3D_tot` and `V_3D_reg` use equations derived
 in ref. [1].
 
 Made by Lukas Hupe.

@@ -172,7 +172,7 @@ is dictated by their order in `bd`. The sine of the angle is computed
 *after* specular reflection has taken place.
 
 The returned values of this function can be used in conjuction with the
-function [`plot_boundarymap`](@ref) (requires `using PyPlot`) to plot the boundary map
+function [`bdplot_boundarymap`](@ref) (requires `using PyPlot`) to plot the boundary map
 in an intuitive way.
 
 *Notice* - this function only works for normal specular reflection. Random reflections

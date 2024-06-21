@@ -135,7 +135,7 @@ And that is all. The obstacle now works perfectly fine for straight propagation.
 
 1. [`DynamicalBilliards.cellsize`](@ref) : Enables [`randominside`](@ref) with this obstacle.
 1. [`collision`](@ref) with [`MagneticParticle`](@ref) : enables magnetic propagation
-2. [`plot`](@ref) with `obstacle` : enables plotting and animating
+2. [`bdplot`](@ref) with `obstacle` : enables plotting and animating
 3. [`DynamicalBilliards.specular!`](@ref) with `offset` : Allows [`lyapunovspectrum`](@ref) to be computed.
 4. [`to_bcoords`](@ref) : Allows the [`boundarymap`](@ref) and [`boundarymap_portion`](@ref) to be computed.
 5. [`from_bcoords`](@ref) : Allows [`phasespace_portion`](@ref) to be computed.
@@ -192,20 +192,14 @@ end
 
 ```
 
-Then, we add swag by writing a method for [`plot`](@ref):
+Then, we add swag by writing a method for [`bdplot`](@ref):
 
 ```julia
 using PyPlot # brings plot(::Obstacle; kwargs...) into scope
 
-function DynamicalBilliards.plot(d::Semicircle; kwargs...)
+function DynamicalBilliards.bdplot!(ax::Axis, d::Semicircle; kwargs...)
     theta1 = atan(d.facedir[2], d.facedir[1])*180/π + 90
-    theta2 = theta1 + 180
-    edgecolor = DynamicalBilliards.obcolor(d)
-    s1 = PyPlot.matplotlib.patches.Arc(
-        d.c, 2d.r, 2d.r, theta1 = theta1, theta2 = theta2, edgecolor = edgecolor,
-        lw = 2.0, kwargs...)
-    PyPlot.gca().add_artist(s1)
-    PyPlot.show()
+    # ...
 end
 ```
 

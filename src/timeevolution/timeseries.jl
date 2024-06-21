@@ -278,7 +278,7 @@ end
 # non-mutating version
 """
     timeseries(p, args...; kwargs...)
-Non-mutating version of [`timeseries!`](@ref)
+Non-mutating version of [`DynamicalBilliards.timeseries!`](@ref)
 """
 @inline timeseries(p::AbstractParticle, args...; kwargs...) =
     timeseries!(copy(p), args...; kwargs...)

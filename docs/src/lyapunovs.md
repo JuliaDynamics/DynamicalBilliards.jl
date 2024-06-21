@@ -46,7 +46,7 @@ for (i, space) in enumerate(spaces)
     p = randominside(billiard)
     lyap_time[i] = lyapunovspectrum(p, billiard, t)[1]
 end
-fig = Figure(); ax = Axis(fig[1,1]; xlabel = L"w" ylabel = L"\lambda_1")
+fig = Figure(); ax = Axis(fig[1,1]; xlabel = L"w", ylabel = L"\lambda_1")
 lines!(ax,spaces, lyap_time)
 fig
 ```
@@ -70,7 +70,8 @@ bd = billiard_sinai()
 ts, Rs, is = perturbationgrowth(Particle(0.1, 0.1, 0.1), bd, 10.0)
 Δ = perturbationevolution(Rs)
 
-fig = Figure(); ax = Axis(fig[1,1]; xlabel = L"t", ylabel = L"\log(||\Delta ||)"))
+fig = Figure()
+ax = Axis(fig[1,1]; xlabel = L"t", ylabel = L"\log(||\Delta ||)")
 lines!(ts, log.(norm.(Δ)))
 scatter!(ts, log.(norm.(Δ)); color = [j == 1 ? :black : :red for j in is])
 fig

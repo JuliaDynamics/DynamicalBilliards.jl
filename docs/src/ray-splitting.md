@@ -20,7 +20,7 @@ bd = Billiard(a1, a2, sw, bdr...)
 ```
 
 ```@example ray
-using InteractiveDynamics, CairoMakie
+using CairoMakie
 fig, ax = bdplot(bd)
 fig
 ```
@@ -83,7 +83,8 @@ If you have many instances of `RaySplitter` you pass a tuple of them.
 
 For example,
 ```@example ray
-using Random, InteractiveDynamics, CairoMakie
+using Random, CairoMakie
+timeseries = DynamicalBilliards.timeseries
 Random.seed!(42)
 p = randominside(bd, 1.0)
 raysplitters = (raywall, raya)
@@ -193,8 +194,8 @@ p = MagneticParticle(0.4, 0.6, 0.0, 0.4)
 [`bdplot_interactive`](@ref) does not accept ray-splitters yet (but it is easy if you want to do a PR). Nevertheless, doing an animation is still straightforward:
 
 ```@example ray
-using InteractiveDynamics, CairoMakie
-
+using CairoMakie
+timeseries = DynamicalBilliards.timeseries
 fig, ax = bdplot(bd)
 xlims!(ax, (-1, 2)); ylims!(ax, (-1, 2)) # zoom out
 xt, yt = timeseries(p, bd, 10.0, (ray,))

@@ -14,7 +14,7 @@ For example, to implement a ray-splitting billiard you only need to define one a
 After reading through this page, you will be able to use almost all aspects of `DynamicalBilliards` with minimal effort.
 
 !!! tip "Visualizations"
-    Visualizing the billiards, particles, and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing & Animating](@ref) page.
+    Visualizing the billiards, particles, and their motion is one of the most important parts of the `DynamicalBilliards`. It is not discussed in this page however, but rather in the [Visualizing & Animating](@ref visualizations) page.
 
 
 ## Billiard
@@ -110,7 +110,7 @@ The above return types are helpful in some applications.
 In other applications however one prefers to have the time series of the individual variables.
 For this, the `timeseries` function is used:
 ```@docs
-timeseries!
+DynamicalBilliards.timeseries!
 ```
 
 For example:

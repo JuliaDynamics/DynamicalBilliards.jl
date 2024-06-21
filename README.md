@@ -3,16 +3,20 @@
 A Julia package for dynamical billiard systems in two dimensions.
 The goals of the package is to provide a flexible and intuitive framework for fast implementation of billiard systems of arbitrary construction.
 
-| **Documentation**   | **Citation** | **Travis**     | **Gitter** |
-|:--------:|:--------:|:---------------:|:-----:|
-|[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/dev), [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable)| [![status](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd/status.svg)](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd) | [![Build Status](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl.svg?branch=master)](https://travis-ci.org/JuliaDynamics/DynamicalBilliards.jl) | [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/JuliaDynamics/Lobby)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/dev)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaDynamics.github.io/DynamicalBilliards.jl/stable)
+[![CI](https://github.com/JuliaDynamics/DynamicalBilliards.jl/workflows/CI/badge.svg)](https://github.com/JuliaDynamics/DynamicalBilliards.jl/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/JuliaDynamics/DynamicalBilliards.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaDynamics/DynamicalBilliards.jl)
+[![citation](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd/status.svg)](http://joss.theoj.org/papers/753469f6b18c9c38127a7727d13c87cd)
 
 If you have used this package for research that resulted in a publication, please be kind enough to cite the papers listed in the [CITATION.bib](CITATION.bib) file.
 
 ## Features
+
 Please see the [documentation](https://JuliaDynamics.github.io/DynamicalBilliards.jl/dev) for list of features, tutorials and installation instructions.
 
 ## Acknowledgements
+
 This package is mainly developed by George Datseris. However, this development would not have been possible without significant help from other people:
 
 1. [Lukas Hupe](https://github.com/lhupe)(@lhupe) Contributed the lyapunov spectrum calculation for magnetic propagation, implemented the boundary map function and did other contributions in bringing this package to version 2.0 (see [here](https://github.com/JuliaDynamics/DynamicalBilliards.jl/projects/1)).
