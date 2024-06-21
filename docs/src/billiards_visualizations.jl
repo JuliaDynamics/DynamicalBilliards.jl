@@ -148,7 +148,7 @@ using DynamicalBilliards, CairoMakie
 bd = billiard_stadium(1, 1)
 N = 100
 ps = particlebeam(1.0, 0.6, 0, N, 0.001)
-fig, phs, chs = bdplot_interactive(bd, ps; playback_controls=false, resolution = (800, 800))
+fig, phs, chs = bdplot_interactive(bd, ps; playback_controls=false)
 
 # Then, we add some axis
 layout = fig[2,1] = GridLayout()
